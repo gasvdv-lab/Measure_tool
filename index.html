@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
   <meta name="theme-color" content="#111111" />
-  <title>Measure AR v0.6.6</title>
+  <title>Measure AR v0.6.7</title>
   <style>
     :root {
       color-scheme: dark;
@@ -113,6 +113,66 @@
     .settingCheck { display:flex; align-items:center; gap:9px; margin-top:12px; font-size:.9rem; color:#ddd; }
     .settingCheck input { width:auto; min-height:0; }
 
+
+    .submenu { display:none; }
+    .submenu.active { display:block; }
+
+    .compactChoice {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:7px;
+      margin-bottom:8px;
+    }
+    .compactChoice button.active {
+      background:#fff !important;
+      color:#111 !important;
+    }
+
+    .inlineFields {
+      display:grid;
+      grid-template-columns:1fr 86px;
+      gap:8px;
+    }
+
+    .dangerBtn {
+      background:rgba(150,40,40,.24) !important;
+      color:#ffd7d7 !important;
+      border:1px solid rgba(255,110,110,.25) !important;
+    }
+
+    .objectList {
+      display:grid;
+      gap:6px;
+    }
+    .objectItem {
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:7px;
+      align-items:center;
+      padding:8px;
+      border-radius:11px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.08);
+    }
+    .objectItem button {
+      margin:0 !important;
+      min-height:34px !important;
+      padding:6px 8px !important;
+      width:auto !important;
+    }
+
+    .miniHelp {
+      margin:6px 2px 0;
+      font-size:.68rem;
+      line-height:1.3;
+      color:#9f9f9f;
+    }
+
+    .menuFooter button {
+      margin:0 !important;
+      min-height:38px !important;
+    }
+
     .lineEditor { display:none; margin-top:9px; padding-top:8px; border-top:1px solid rgba(255,255,255,.12); }
     .lineEditor.open { display:block; }
     .lineEditorTitle { font-size:.78rem; font-weight:700; margin-bottom:4px; }
@@ -192,38 +252,136 @@
 
     #cameraMenuPanel {
       position:absolute;
-      top:calc(max(14px, env(safe-area-inset-top)) + 66px);
-      right:14px;
-      width:min(84vw, 320px);
-      padding:14px;
-      border-radius:18px;
-      background:rgba(10,10,10,.92);
+      top:max(12px, env(safe-area-inset-top));
+      right:12px;
+      width:min(88vw, 360px);
+      height:min(74vh, 690px);
+      border-radius:20px;
+      background:rgba(10,10,10,.95);
       border:1px solid rgba(255,255,255,.16);
-      backdrop-filter:blur(10px);
+      backdrop-filter:blur(12px);
       pointer-events:auto;
       display:none;
+      overflow:hidden;
+      box-shadow:0 16px 50px rgba(0,0,0,.35);
     }
-    #cameraMenuPanel.open { display:block; }
-    #cameraMenuPanel h3 {
-      margin:0 0 10px;
-      font-size:1rem;
-      font-weight:700;
+    #cameraMenuPanel.open {
+      display:grid;
+      grid-template-rows:auto 1fr auto;
     }
-    #cameraMenuPanel .menuStatus {
-      margin:0 0 12px;
-      font-size:.88rem;
-      color:#ccc;
+
+    .menuHeader {
+      display:grid;
+      grid-template-columns:42px 1fr 42px;
+      gap:8px;
+      align-items:center;
+      padding:10px;
+      border-bottom:1px solid rgba(255,255,255,.10);
+      background:rgba(18,18,18,.98);
     }
+    .menuHeader button {
+      width:42px !important;
+      min-height:42px !important;
+      margin:0 !important;
+      padding:0 !important;
+      border-radius:12px !important;
+      font-size:1.05rem !important;
+    }
+    .menuHeaderTitle {
+      min-width:0;
+      text-align:center;
+    }
+    .menuHeaderTitle strong {
+      display:block;
+      font-size:.92rem;
+      line-height:1.2;
+    }
+    .menuHeaderTitle span {
+      display:block;
+      margin-top:2px;
+      font-size:.70rem;
+      color:#aaa;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .menuBody {
+      overflow-y:auto;
+      overscroll-behavior:contain;
+      padding:10px;
+      scrollbar-width:thin;
+    }
+    .menuFooter {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:8px;
+      padding:10px;
+      border-top:1px solid rgba(255,255,255,.10);
+      background:rgba(18,18,18,.98);
+    }
+
+    .menuSectionTitle {
+      margin:4px 2px 7px;
+      font-size:.67rem;
+      color:#999;
+      font-weight:800;
+      letter-spacing:.07em;
+      text-transform:uppercase;
+    }
+
+    .menuCard {
+      margin-bottom:9px;
+      padding:9px;
+      border-radius:14px;
+      background:rgba(255,255,255,.055);
+      border:1px solid rgba(255,255,255,.085);
+    }
+
+    .menuRow {
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:8px;
+      align-items:center;
+      min-height:42px;
+      padding:8px 4px;
+      border-bottom:1px solid rgba(255,255,255,.07);
+    }
+    .menuRow:last-child { border-bottom:0; }
+    .menuRowText {
+      min-width:0;
+    }
+    .menuRowText strong {
+      display:block;
+      font-size:.82rem;
+      line-height:1.15;
+    }
+    .menuRowText span {
+      display:block;
+      margin-top:2px;
+      color:#aaa;
+      font-size:.70rem;
+      line-height:1.2;
+    }
+    .menuChevron {
+      font-size:1.15rem;
+      color:#aaa;
+    }
+
     #cameraMenuPanel button {
       width:100%;
-      margin-top:8px;
+      margin-top:5px;
+      min-height:38px;
+      padding:8px 10px;
+      border-radius:10px;
+      font-size:.78rem;
       background:rgba(255,255,255,.92);
       color:#111;
     }
     #cameraMenuPanel .secondary {
-      background:rgba(255,255,255,.12);
+      background:rgba(255,255,255,.10);
       color:#fff;
-      border:1px solid rgba(255,255,255,.16);
+      border:1px solid rgba(255,255,255,.14);
     }
     #cameraMenuPanel .menuField {
       margin-top:10px;
@@ -438,34 +596,156 @@
     </div>
 
     <div id="cameraMenuPanel" aria-hidden="true">
-      <h3>AR-menu</h3>
-      <div id="cameraModeLabel" class="menuStatus">Modus: Meten</div>
-      <button id="menuModeMeasureBtn" type="button">Meten</button>
-      <button id="menuModeStakeBtn" class="secondary" type="button">Uitzetten</button>
-
-      <div class="menuField"><label for="menuDistanceInput">Afstand</label><input id="menuDistanceInput" type="number" inputmode="decimal" min="0.01" step="0.01" value="2.00"></div>
-      <div class="menuField"><label for="menuUnitSelect">Eenheid</label><select id="menuUnitSelect"><option value="m">m</option><option value="cm">cm</option></select></div>
-      <div class="menuField"><label for="menuDirectionSelect">Richting</label><select id="menuDirectionSelect"><option value="horizontal">Horizontaal</option><option value="surface">Op oppervlak</option><option value="free3d">Vrij 3D</option></select></div>
-
-      <button id="menuNewLineBtn" class="secondary" type="button">Nieuwe lijn</button>
-      <button id="menuUseLastPointBtn" class="secondary" type="button">Vanaf laatste punt</button>
-      <button id="menuStakeFromLastBtn" type="button">Afstand uitzetten vanaf laatste punt</button>
-
-      <button id="menuObjectsBtn" class="secondary" type="button">Objecten</button>
-      <div id="menuObjects"></div>
-
-      <div id="lineEditor" class="lineEditor">
-        <div class="lineEditorTitle">Actieve lijn</div>
-        <div id="lineEditorName" class="menuStatus">—</div>
-        <div class="menuField"><label for="lineLengthInput">Lengte</label><input id="lineLengthInput" type="number" inputmode="decimal" min="0.01" step="0.01"></div>
-        <div class="menuField"><label for="lineThicknessSelect">Dikte</label><select id="lineThicknessSelect"><option value="1">1 · fijn</option><option value="2">2 · normaal</option><option value="3">3 · duidelijk</option><option value="4">4 · zwaar</option></select></div>
-        <button id="applyLineLengthBtn" type="button">Lengte aanpassen vanaf startpunt</button>
+      <div class="menuHeader">
+        <button id="menuNavBackBtn" class="secondary" type="button" aria-label="Terug">‹</button>
+        <div class="menuHeaderTitle">
+          <strong id="menuPageTitle">Measure AR</strong>
+          <span id="cameraModeLabel">Meten · 0p · 0l</span>
+        </div>
+        <button id="menuCloseBtn" class="secondary" type="button" aria-label="Sluiten">✕</button>
       </div>
 
-      <button id="undoBtn" class="secondary" type="button">Ongedaan maken</button>
-      <button id="menuClearAllBtn" class="secondary" type="button">Alles wissen</button>
-      <button id="menuBackBtn" class="secondary" type="button">Terug naar start</button>
-      <button id="menuCloseBtn" class="secondary" type="button">Sluiten</button>
+      <div class="menuBody">
+
+        <!-- HOOFDMENU -->
+        <section id="menuPageHome" class="submenu active">
+          <div class="menuSectionTitle">Werken</div>
+          <div class="menuCard">
+            <div class="menuRow" data-nav="measure">
+              <div class="menuRowText"><strong>Meten</strong><span>Afstand tussen twee punten</span></div>
+              <div class="menuChevron">›</div>
+            </div>
+            <div class="menuRow" data-nav="stake">
+              <div class="menuRowText"><strong>Uitzetten</strong><span>Punt op vaste afstand plaatsen</span></div>
+              <div class="menuChevron">›</div>
+            </div>
+            <div class="menuRow" data-nav="newline">
+              <div class="menuRowText"><strong>Nieuwe lijn</strong><span>Nieuw, bestaand of via vaste afstand</span></div>
+              <div class="menuChevron">›</div>
+            </div>
+          </div>
+
+          <div class="menuSectionTitle">Project</div>
+          <div class="menuCard">
+            <div class="menuRow" data-nav="objects">
+              <div class="menuRowText"><strong>Objecten</strong><span>Punten en lijnen beheren</span></div>
+              <div class="menuChevron">›</div>
+            </div>
+          </div>
+
+          <div class="menuSectionTitle">Bewerken</div>
+          <div class="menuCard">
+            <button id="undoBtn" class="secondary" type="button">Ongedaan maken</button>
+            <div class="menuRow" data-nav="delete">
+              <div class="menuRowText"><strong>Wissen</strong><span>Geselecteerd of alles</span></div>
+              <div class="menuChevron">›</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- METEN -->
+        <section id="menuPageMeasure" class="submenu">
+          <div class="menuSectionTitle">Meten</div>
+          <div class="menuCard">
+            <div class="menuRowText"><strong>Startpunt</strong><span>Kies hoe de nieuwe meting begint</span></div>
+            <div class="compactChoice" style="margin-top:8px">
+              <button id="measureNewPointBtn" type="button">Nieuw punt</button>
+              <button id="measureLastPointBtn" class="secondary" type="button">Laatste punt</button>
+            </div>
+            <button id="measureExistingPointBtn" class="secondary" type="button">Bestaand punt kiezen</button>
+          </div>
+          <p class="miniHelp">Meten gebruikt geen ingegeven afstand. Je plaatst eerst A en daarna B.</p>
+        </section>
+
+        <!-- UITZETTEN -->
+        <section id="menuPageStake" class="submenu">
+          <div class="menuSectionTitle">Uitzetten</div>
+          <div class="menuCard">
+            <label for="menuDistanceInput">Afstand</label>
+            <div class="inlineFields">
+              <input id="menuDistanceInput" type="number" inputmode="decimal" min="0.01" step="0.01" value="2.00">
+              <select id="menuUnitSelect"><option value="m">m</option><option value="cm">cm</option></select>
+            </div>
+
+            <label for="menuDirectionSelect" style="margin-top:9px;">Richting</label>
+            <select id="menuDirectionSelect">
+              <option value="horizontal">Horizontaal</option>
+              <option value="surface">Op oppervlak</option>
+              <option value="free3d">Vrij 3D</option>
+            </select>
+
+            <div class="compactChoice" style="margin-top:9px">
+              <button id="stakeNewPointBtn" type="button">Nieuw startpunt</button>
+              <button id="stakeLastPointBtn" class="secondary" type="button">Laatste punt</button>
+            </div>
+            <button id="stakeExistingPointBtn" class="secondary" type="button">Bestaand punt kiezen</button>
+          </div>
+        </section>
+
+        <!-- NIEUWE LIJN -->
+        <section id="menuPageNewLine" class="submenu">
+          <div class="menuSectionTitle">Nieuwe lijn</div>
+          <div class="menuCard">
+            <button id="menuNewLineBtn" type="button">Nieuw startpunt → nieuw eindpunt</button>
+            <button id="menuUseLastPointBtn" class="secondary" type="button">Vanaf laatste punt → nieuw eindpunt</button>
+            <button id="menuStakeFromLastBtn" class="secondary" type="button">Vanaf laatste punt → vaste afstand</button>
+          </div>
+          <p class="miniHelp">Voor complexere start-/eindpuntkeuzes kun je een bestaand punt via Objecten selecteren.</p>
+        </section>
+
+        <!-- OBJECTEN -->
+        <section id="menuPageObjects" class="submenu">
+          <div class="menuSectionTitle">Objecten</div>
+          <div id="menuObjects" class="objectList"></div>
+        </section>
+
+        <!-- LIJNEDITOR -->
+        <section id="menuPageLine" class="submenu">
+          <div class="menuSectionTitle">Lijn</div>
+          <div class="menuCard">
+            <div id="lineEditorName" class="menuStatus">—</div>
+            <label for="lineLengthInput">Lengte</label>
+            <input id="lineLengthInput" type="number" inputmode="decimal" min="0.01" step="0.01">
+
+            <label for="lineThicknessSelect" style="margin-top:9px;">Dikte</label>
+            <select id="lineThicknessSelect">
+              <option value="1">1 · fijn</option>
+              <option value="2">2 · normaal</option>
+              <option value="3">3 · duidelijk</option>
+              <option value="4">4 · zwaar</option>
+            </select>
+
+            <button id="applyLineLengthBtn" type="button">Lengte aanpassen vanaf startpunt</button>
+            <button id="lineFromStartBtn" class="secondary" type="button">Nieuwe lijn vanaf startpunt</button>
+            <button id="lineFromEndBtn" class="secondary" type="button">Nieuwe lijn vanaf eindpunt</button>
+          </div>
+        </section>
+
+        <!-- PUNTEDITOR -->
+        <section id="menuPagePoint" class="submenu">
+          <div class="menuSectionTitle">Punt</div>
+          <div class="menuCard">
+            <div id="pointEditorName" class="menuStatus">—</div>
+            <button id="pointNewLineBtn" type="button">Nieuwe lijn vanaf dit punt</button>
+            <button id="pointStakeBtn" class="secondary" type="button">Afstand uitzetten vanaf dit punt</button>
+          </div>
+        </section>
+
+        <!-- WISSEN -->
+        <section id="menuPageDelete" class="submenu">
+          <div class="menuSectionTitle">Wissen</div>
+          <div class="menuCard">
+            <button id="deleteSelectedBtn" class="secondary" type="button">Geselecteerd object wissen</button>
+            <button id="menuClearAllBtn" class="dangerBtn" type="button">Alle punten en lijnen wissen</button>
+          </div>
+        </section>
+
+      </div>
+
+      <div class="menuFooter">
+        <button id="menuSettingsBtn" class="secondary" type="button">Instellingen</button>
+        <button id="menuBackBtn" class="secondary" type="button">Startscherm</button>
+      </div>
     </div>
 
     <div id="aim"></div>
@@ -498,23 +778,52 @@
     const cameraMenuBtn = document.getElementById('cameraMenuBtn');
     const cameraMenuPanel = document.getElementById('cameraMenuPanel');
     const cameraModeLabel = document.getElementById('cameraModeLabel');
-    const menuModeMeasureBtn = document.getElementById('menuModeMeasureBtn');
-    const menuModeStakeBtn = document.getElementById('menuModeStakeBtn');
-    const menuNewLineBtn = document.getElementById('menuNewLineBtn');
-    const menuUseLastPointBtn = document.getElementById('menuUseLastPointBtn');
-    const menuClearAllBtn = document.getElementById('menuClearAllBtn');
+    const menuPageTitle = document.getElementById('menuPageTitle');
+    const menuNavBackBtn = document.getElementById('menuNavBackBtn');
+
+    const menuPageHome = document.getElementById('menuPageHome');
+    const menuPageMeasure = document.getElementById('menuPageMeasure');
+    const menuPageStake = document.getElementById('menuPageStake');
+    const menuPageNewLine = document.getElementById('menuPageNewLine');
+    const menuPageObjects = document.getElementById('menuPageObjects');
+    const menuPageLine = document.getElementById('menuPageLine');
+    const menuPagePoint = document.getElementById('menuPagePoint');
+    const menuPageDelete = document.getElementById('menuPageDelete');
+
     const menuDistanceInput = document.getElementById('menuDistanceInput');
     const menuUnitSelect = document.getElementById('menuUnitSelect');
     const menuDirectionSelect = document.getElementById('menuDirectionSelect');
+
+    const measureNewPointBtn = document.getElementById('measureNewPointBtn');
+    const measureLastPointBtn = document.getElementById('measureLastPointBtn');
+    const measureExistingPointBtn = document.getElementById('measureExistingPointBtn');
+
+    const stakeNewPointBtn = document.getElementById('stakeNewPointBtn');
+    const stakeLastPointBtn = document.getElementById('stakeLastPointBtn');
+    const stakeExistingPointBtn = document.getElementById('stakeExistingPointBtn');
+
+    const menuNewLineBtn = document.getElementById('menuNewLineBtn');
+    const menuUseLastPointBtn = document.getElementById('menuUseLastPointBtn');
     const menuStakeFromLastBtn = document.getElementById('menuStakeFromLastBtn');
-    const menuObjectsBtn = document.getElementById('menuObjectsBtn');
     const menuObjects = document.getElementById('menuObjects');
-    const lineEditor = document.getElementById('lineEditor');
+
     const lineEditorName = document.getElementById('lineEditorName');
     const lineLengthInput = document.getElementById('lineLengthInput');
     const lineThicknessSelect = document.getElementById('lineThicknessSelect');
     const applyLineLengthBtn = document.getElementById('applyLineLengthBtn');
+    const lineFromStartBtn = document.getElementById('lineFromStartBtn');
+    const lineFromEndBtn = document.getElementById('lineFromEndBtn');
+
+    const pointEditorName = document.getElementById('pointEditorName');
+    const pointNewLineBtn = document.getElementById('pointNewLineBtn');
+    const pointStakeBtn = document.getElementById('pointStakeBtn');
+
     const undoBtn = document.getElementById('undoBtn');
+    const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
+    const menuClearAllBtn = document.getElementById('menuClearAllBtn');
+    const menuSettingsBtn = document.getElementById('menuSettingsBtn');
+    const menuBackBtn = document.getElementById('menuBackBtn');
+    const menuCloseBtn = document.getElementById('menuCloseBtn');
     const menuBackBtn = document.getElementById('menuBackBtn');
     const menuCloseBtn = document.getElementById('menuCloseBtn');
     const captureBtn = document.getElementById('captureBtn');
@@ -557,6 +866,9 @@
     const lines = [];
     const undoStack = [];
     let selectedLineId = null;
+    let selectedPointId = null;
+
+    const menuStack = ['home'];
     let nextPointIndex = 0;
     let nextLineIndex = 1;
     let activeStartPointId = null;
@@ -580,6 +892,63 @@
     let stabilityClass = 'unknown';
 
 
+
+    const menuPages = {
+      home: menuPageHome,
+      measure: menuPageMeasure,
+      stake: menuPageStake,
+      newline: menuPageNewLine,
+      objects: menuPageObjects,
+      line: menuPageLine,
+      point: menuPagePoint,
+      delete: menuPageDelete
+    };
+
+    const menuTitles = {
+      home: 'Measure AR',
+      measure: 'Meten',
+      stake: 'Uitzetten',
+      newline: 'Nieuwe lijn',
+      objects: 'Objecten',
+      line: 'Lijn',
+      point: 'Punt',
+      delete: 'Wissen'
+    };
+
+    function showMenuPage(name, push = true) {
+      Object.values(menuPages).forEach(el => el?.classList.remove('active'));
+      menuPages[name]?.classList.add('active');
+      menuPageTitle.textContent = menuTitles[name] || 'Measure AR';
+
+      if (push) {
+        const current = menuStack[menuStack.length - 1];
+        if (current !== name) menuStack.push(name);
+      }
+
+      menuNavBackBtn.style.visibility = name === 'home' ? 'hidden' : 'visible';
+
+      if (name === 'objects') updateGeometryUI();
+      if (name === 'line' && selectedLineId) populateLineEditor(selectedLineId);
+      if (name === 'point' && selectedPointId) populatePointEditor(selectedPointId);
+    }
+
+    function menuGoBack() {
+      if (menuStack.length <= 1) {
+        closeCameraMenu();
+        return;
+      }
+
+      menuStack.pop();
+      const prev = menuStack[menuStack.length - 1];
+      showMenuPage(prev, false);
+    }
+
+    function resetMenuNavigation() {
+      menuStack.length = 1;
+      menuStack[0] = 'home';
+      showMenuPage('home', false);
+    }
+
     function updateCameraMenuLabel() {
       if (!cameraModeLabel) return;
       cameraModeLabel.textContent =
@@ -593,6 +962,8 @@
         ? (targetMeters * 100).toFixed(1)
         : targetMeters.toFixed(2);
       menuDirectionSelect.value = directionMode;
+
+      resetMenuNavigation();
       cameraMenuPanel.classList.add('open');
       cameraMenuPanel.setAttribute('aria-hidden', 'false');
       updateCameraMenuLabel();
@@ -601,6 +972,7 @@
     function closeCameraMenu() {
       cameraMenuPanel.classList.remove('open');
       cameraMenuPanel.setAttribute('aria-hidden', 'true');
+      resetMenuNavigation();
     }
 
     async function switchFunctionFromAR() {
@@ -812,7 +1184,7 @@
       lines.splice(idx, 1);
       if (selectedLineId === id) {
         selectedLineId = null;
-        lineEditor.classList.remove('open');
+
       }
       updateGeometryUI();
     }
@@ -848,6 +1220,7 @@
       nextLineIndex = 1;
       activeStartPointId = null;
       selectedLineId = null;
+      selectedPointId = null;
       undoStack.length = 0;
       lineEditor.classList.remove('open');
       clearMeasurement();
@@ -862,18 +1235,23 @@
       menuObjects.innerHTML = '';
 
       if (points.length === 0 && lines.length === 0) {
-        menuObjects.innerHTML = '<div class="menuObjectRow"><span>Nog geen objecten</span></div>';
+        menuObjects.innerHTML = '<div class="objectItem"><span>Nog geen objecten</span></div>';
         return;
       }
 
       for (const line of lines) {
         const row = document.createElement('div');
-        row.className = 'menuObjectRow';
+        row.className = 'objectItem';
 
         const select = document.createElement('button');
         select.type = 'button';
         select.textContent = `${line.name} · ${formatDistance(line.distance)}`;
-        select.addEventListener('click', () => selectLine(line.id));
+        select.addEventListener('click', () => {
+          selectedLineId = line.id;
+          selectedPointId = null;
+          selectLine(line.id);
+          showMenuPage('line');
+        });
 
         const del = document.createElement('button');
         del.type = 'button';
@@ -886,17 +1264,19 @@
 
       for (const point of points) {
         const row = document.createElement('div');
-        row.className = 'menuObjectRow';
+        row.className = 'objectItem';
 
-        const use = document.createElement('button');
-        use.type = 'button';
-        use.textContent = `Punt ${point.name}${activeStartPointId === point.id ? ' · actief' : ''}`;
-        use.addEventListener('click', () => {
-          setActiveStartPoint(point.id);
-          closeCameraMenu();
+        const select = document.createElement('button');
+        select.type = 'button';
+        select.textContent = `Punt ${point.name}${activeStartPointId === point.id ? ' · actief' : ''}`;
+        select.addEventListener('click', () => {
+          selectedPointId = point.id;
+          selectedLineId = null;
+          populatePointEditor(point.id);
+          showMenuPage('point');
         });
 
-        row.appendChild(use);
+        row.appendChild(select);
         menuObjects.appendChild(row);
       }
     }
@@ -917,11 +1297,11 @@
       }
 
       if (!line) {
-        lineEditor.classList.remove('open');
+
         return;
       }
 
-      lineEditor.classList.add('open');
+
       lineEditorName.textContent = `${line.name} · ${formatDistance(line.distance)}`;
       lineLengthInput.value = line.distance.toFixed(3);
       lineThicknessSelect.value = String(line.thickness || 2);
@@ -980,6 +1360,25 @@
       closeCameraMenu();
     }
 
+
+    function deleteSelectedObject() {
+      if (selectedLineId) {
+        deleteLineById(selectedLineId);
+        selectedLineId = null;
+        showMenuPage('objects');
+        return;
+      }
+      if (selectedPointId) {
+        deletePointById(selectedPointId);
+        selectedPointId = null;
+        showMenuPage('objects');
+        return;
+      }
+
+      stageEl.textContent = 'Geen object geselecteerd';
+      closeCameraMenu();
+    }
+
     function undoLastAction() {
       const action = undoStack.pop();
       if (!action) {
@@ -1004,6 +1403,61 @@
       updateGeometryUI();
       stageEl.textContent = 'Ongedaan gemaakt';
       closeCameraMenu();
+    }
+
+
+    function populateLineEditor(id) {
+      const line = getLineById(id);
+      if (!line) return;
+      selectedLineId = id;
+      lineEditorName.textContent = `${line.name} · ${formatDistance(line.distance)}`;
+      lineLengthInput.value = line.distance.toFixed(3);
+      lineThicknessSelect.value = String(line.thickness || 2);
+    }
+
+    function populatePointEditor(id) {
+      const point = getPointById(id);
+      if (!point) return;
+      selectedPointId = id;
+
+      const linked = lines
+        .filter(l => l.startId === id || l.endId === id)
+        .map(l => l.name)
+        .join(', ');
+
+      pointEditorName.textContent =
+        linked ? `Punt ${point.name} · lijnen: ${linked}` : `Punt ${point.name} · geen lijnen`;
+    }
+
+    function startMeasureFromPoint(pointId) {
+      const p = getPointById(pointId);
+      if (!p) return;
+      mode = 'measure';
+      clearMeasurement();
+      setActiveStartPoint(pointId);
+      closeCameraMenu();
+      stageEl.textContent = `Meten vanaf ${p.name}`;
+      hintEl.textContent = 'Richt op het nieuwe eindpunt en druk op de meetknop.';
+    }
+
+    function startStakeFromPoint(pointId) {
+      const p = getPointById(pointId);
+      if (!p) return;
+
+      const raw = Number(menuDistanceInput.value);
+      if (Number.isFinite(raw) && raw > 0) {
+        targetMeters = menuUnitSelect.value === 'cm' ? raw / 100 : raw;
+      }
+      directionMode = menuDirectionSelect.value;
+      mode = 'stake';
+
+      clearMeasurement();
+      setActiveStartPoint(pointId);
+      closeCameraMenu();
+
+      distanceEl.textContent = formatDistance(targetMeters);
+      stageEl.textContent = `Uitzetten vanaf ${p.name}`;
+      hintEl.textContent = 'Richt de gewenste richting aan en druk op de meetknop.';
     }
 
     function setActiveStartPoint(pointId) {
@@ -1840,16 +2294,37 @@
     });
 
     menuCloseBtn.addEventListener('click', closeCameraMenu);
+    menuNavBackBtn.addEventListener('click', menuGoBack);
 
-    menuModeMeasureBtn.addEventListener('click', () => {
-      mode = 'measure';
-      clearMeasurement();
-      stageEl.textContent = 'Meten';
-      hintEl.textContent = 'Plaats punt A en daarna punt B.';
-      closeCameraMenu();
+    document.querySelectorAll('[data-nav]').forEach(row => {
+      row.addEventListener('click', () => {
+        const target = row.getAttribute('data-nav');
+        if (target) showMenuPage(target);
+      });
     });
 
-    menuModeStakeBtn.addEventListener('click', () => {
+    // METEN
+    measureNewPointBtn.addEventListener('click', () => {
+      mode = 'measure';
+      startNewLine(false);
+    });
+
+    measureLastPointBtn.addEventListener('click', () => {
+      if (points.length === 0) {
+        stageEl.textContent = 'Nog geen punt';
+        closeCameraMenu();
+        return;
+      }
+      startMeasureFromPoint(points[points.length - 1].id);
+    });
+
+    measureExistingPointBtn.addEventListener('click', () => {
+      mode = 'measure';
+      showMenuPage('objects');
+    });
+
+    // UITZETTEN
+    stakeNewPointBtn.addEventListener('click', () => {
       const raw = Number(menuDistanceInput.value);
       if (Number.isFinite(raw) && raw > 0) {
         targetMeters = menuUnitSelect.value === 'cm' ? raw / 100 : raw;
@@ -1857,36 +2332,79 @@
       directionMode = menuDirectionSelect.value;
       mode = 'stake';
       clearMeasurement();
-      stageEl.textContent = 'Uitzetten';
-      hintEl.textContent = 'Plaats punt A en kies daarna de richting.';
       closeCameraMenu();
+      stageEl.textContent = 'Uitzetten';
+      hintEl.textContent = 'Plaats eerst het nieuwe startpunt.';
     });
 
+    stakeLastPointBtn.addEventListener('click', () => {
+      if (points.length === 0) {
+        stageEl.textContent = 'Nog geen punt';
+        closeCameraMenu();
+        return;
+      }
+      startStakeFromPoint(points[points.length - 1].id);
+    });
+
+    stakeExistingPointBtn.addEventListener('click', () => {
+      mode = 'stake';
+      showMenuPage('objects');
+    });
+
+    // NIEUWE LIJN
     menuNewLineBtn.addEventListener('click', () => startNewLine(false));
     menuUseLastPointBtn.addEventListener('click', () => startNewLine(true));
     menuStakeFromLastBtn.addEventListener('click', stakeFromLastPointInAR);
 
-    menuObjectsBtn.addEventListener('click', () => {
-      const open = menuObjects.classList.toggle('open');
-      menuObjectsBtn.textContent = open ? 'Objecten verbergen' : 'Objecten';
-      updateGeometryUI();
-    });
-
+    // LIJN
     applyLineLengthBtn.addEventListener('click', applySelectedLineLength);
-
     lineThicknessSelect.addEventListener('change', () => {
       const line = getLineById(selectedLineId);
       if (!line) return;
       line.thickness = Number(lineThicknessSelect.value) || 2;
       refreshLineGeometry(line);
       updateGeometryUI();
+      populateLineEditor(line.id);
     });
 
+    lineFromStartBtn.addEventListener('click', () => {
+      const line = getLineById(selectedLineId);
+      if (!line) return;
+      startMeasureFromPoint(line.startId);
+    });
+
+    lineFromEndBtn.addEventListener('click', () => {
+      const line = getLineById(selectedLineId);
+      if (!line) return;
+      startMeasureFromPoint(line.endId);
+    });
+
+    // PUNT
+    pointNewLineBtn.addEventListener('click', () => {
+      if (selectedPointId) startMeasureFromPoint(selectedPointId);
+    });
+
+    pointStakeBtn.addEventListener('click', () => {
+      if (selectedPointId) {
+        // Eerst uitzetten-instellingen tonen; punt blijft geselecteerd.
+        showMenuPage('stake');
+      }
+    });
+
+    // BEWERKEN
     undoBtn.addEventListener('click', undoLastAction);
+    deleteSelectedBtn.addEventListener('click', deleteSelectedObject);
 
     menuClearAllBtn.addEventListener('click', () => {
-      clearAllGeometry();
+      if (confirm('Alle punten en lijnen wissen?')) {
+        clearAllGeometry();
+        showMenuPage('home');
+      }
+    });
+
+    menuSettingsBtn.addEventListener('click', () => {
       closeCameraMenu();
+      exitAR().then(() => settingsPanel.classList.add('open'));
     });
 
     menuBackBtn.addEventListener('click', async () => {
@@ -1917,6 +2435,13 @@
     window.addEventListener('pageshow', (event) => {
       if (event.persisted && !navigator.xr) {
         cleanupARSession();
+      }
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && cameraMenuPanel.classList.contains('open')) {
+        event.preventDefault();
+        menuGoBack();
       }
     });
 
