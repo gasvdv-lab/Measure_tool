@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#111111">
-<title>Measure AR v0.6.8</title>
+<title>Measure AR v0.7</title>
 <style>
 :root{color-scheme:dark;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 *{box-sizing:border-box}
@@ -77,6 +77,10 @@ canvas{position:fixed;inset:0;width:100%;height:100%}
 .menuCard button{width:100%;font-size:.7rem;margin-top:5px;min-height:36px}
 .objectRow{display:grid;grid-template-columns:1fr auto;gap:5px;align-items:center;padding:5px;border-bottom:1px solid #ffffff10}
 .objectRow:last-child{border-bottom:0}
+
+.shapeBadge{display:inline-block;margin-left:6px;padding:2px 6px;border-radius:999px;background:#ffffff10;color:#aaa;font-size:.58rem}
+.colorRow{display:grid;grid-template-columns:1fr 92px;gap:6px;align-items:end}
+.colorInput{padding:3px!important;min-height:40px!important}
 .objectRow button{margin:0;width:auto}
 </style>
 </head>
@@ -104,7 +108,7 @@ canvas{position:fixed;inset:0;width:100%;height:100%}
       <label class="check"><input id="defaultLabels" type="checkbox" checked> Labels op lijnen tonen</label>
     </div>
 
-    <div class="build">v0.6.8 · rewritten clean core</div>
+    <div class="build">v0.7 · linked geometry + shapes</div>
     <div id="error"></div>
   </div>
 </div>
@@ -123,7 +127,7 @@ canvas{position:fixed;inset:0;width:100%;height:100%}
   <div id="menuPanel">
     <div class="menuHead">
       <button id="menuBackBtn" class="secondary" aria-label="Terug">‹</button>
-      <div class="menuTitle"><strong id="menuTitle">Measure AR</strong><span id="menuMeta">Meten · 0p · 0l · v0.6.8</span></div>
+      <div class="menuTitle"><strong id="menuTitle">Measure AR</strong><span id="menuMeta">Meten · 0p · 0l · v0.7</span></div>
       <button id="menuCloseBtn" class="secondary" aria-label="Sluiten">✕</button>
     </div>
 
@@ -136,7 +140,10 @@ canvas{position:fixed;inset:0;width:100%;height:100%}
           <div class="navRow" data-page="newline"><div><strong>Nieuwe lijn</strong><span>Verder bouwen aan bestaande geometrie</span></div><div class="chev">›</div></div>
         </div>
         <div class="sectionTitle">Project</div>
-        <div class="menuCard"><div class="navRow" data-page="objects"><div><strong>Objecten</strong><span>Punten en lijnen beheren</span></div><div class="chev">›</div></div></div>
+        <div class="menuCard">
+          <div class="navRow" data-page="objects"><div><strong>Objecten</strong><span>Punten en lijnen beheren</span></div><div class="chev">›</div></div>
+          <div class="navRow" data-page="shapes"><div><strong>Vormen</strong><span>Gesloten contouren en vlakken</span></div><div class="chev">›</div></div>
+        </div>
         <div class="sectionTitle">Bewerken</div>
         <div class="menuCard"><button id="undoBtn" class="secondary">Ongedaan maken</button><button id="clearAllBtn" class="danger">Alles wissen</button></div>
       </section>
@@ -187,6 +194,7 @@ canvas{position:fixed;inset:0;width:100%;height:100%}
           <select id="lineThickness"><option value="1">1 · fijn</option><option value="2">2 · normaal</option><option value="3">3 · duidelijk</option><option value="4">4 · zwaar</option></select>
           <button id="applyLineLengthBtn" class="primary">Lengte toepassen</button>
           <div class="choice"><button id="lineFromStartBtn" class="secondary">Vanaf start</button><button id="lineFromEndBtn" class="secondary">Vanaf einde</button></div>
+          <button id="createWallBtn" class="secondary">Maak muur vanaf lijn</button>
           <button id="deleteLineBtn" class="danger">Lijn wissen</button>
         </div>
       </section>
@@ -198,6 +206,46 @@ canvas{position:fixed;inset:0;width:100%;height:100%}
           <button id="pointNewLineBtn" class="primary">Nieuwe lijn vanaf punt</button>
           <button id="pointStakeBtn" class="secondary">Uitzetten vanaf punt</button>
           <button id="deletePointBtn" class="danger">Punt wissen</button>
+        </div>
+      </section>
+
+      <section id="page-shapes" class="page">
+        <div class="sectionTitle">Vormen</div>
+        <div class="menuCard">
+          <button id="detectShapesBtn" class="primary">Zoek gesloten vorm</button>
+          <button id="createShapeFromAllBtn" class="secondary">Maak vorm uit alle verbonden lijnen</button>
+          <div id="shapesList" style="margin-top:7px"></div>
+        </div>
+        <p class="help">Een vorm bestaat uit gekoppelde punten/lijnen. Gesloten contouren kunnen als vlak gevuld worden.</p>
+      </section>
+
+      <section id="page-shape" class="page">
+        <div class="sectionTitle">Vorm</div>
+        <div class="menuCard">
+          <div id="shapeInfo" class="help">—</div>
+          <label>Naam</label>
+          <input id="shapeNameInput" type="text">
+          <div class="colorRow">
+            <div><label>Kleur</label><input id="shapeColorInput" class="colorInput" type="color" value="#5aa9ff"></div>
+            <div><label>Transparantie</label><input id="shapeOpacityInput" type="number" min="0.05" max="1" step="0.05" value="0.35"></div>
+          </div>
+          <button id="toggleShapeFillBtn" class="primary">Vulling aan/uit</button>
+          <button id="applyShapeStyleBtn" class="secondary">Eigenschappen toepassen</button>
+          <button id="deleteShapeBtn" class="danger">Vorm wissen</button>
+        </div>
+      </section>
+
+      <section id="page-wall" class="page">
+        <div class="sectionTitle">Muur vanaf lijn</div>
+        <div class="menuCard">
+          <div id="wallLineInfo" class="help">—</div>
+          <label>Hoogte</label>
+          <div class="fields"><input id="wallHeightInput" type="number" min=".05" step=".05" value="2.40"><select id="wallHeightUnit"><option value="m">m</option><option value="cm">cm</option></select></div>
+          <div class="colorRow">
+            <div><label>Kleur</label><input id="wallColorInput" class="colorInput" type="color" value="#d8d8d8"></div>
+            <div><label>Transparantie</label><input id="wallOpacityInput" type="number" min="0.05" max="1" step="0.05" value="0.35"></div>
+          </div>
+          <button id="applyWallBtn" class="primary">Muur maken</button>
         </div>
       </section>
     </div>
@@ -224,7 +272,9 @@ const defaultUnit=$("defaultUnit"), defaultThickness=$("defaultThickness"), defa
 const stage=$("stage"), distanceEl=$("distance"), detail=$("detail"), stability=$("stability"), hint=$("hint"), aim=$("aim"), captureBtn=$("captureBtn");
 const menuBtn=$("menuBtn"), menuPanel=$("menuPanel"), menuBackBtn=$("menuBackBtn"), menuCloseBtn=$("menuCloseBtn"), menuTitle=$("menuTitle"), menuMeta=$("menuMeta");
 const stakeDistance=$("stakeDistance"), stakeUnit=$("stakeUnit"), stakeDirection=$("stakeDirection"), objectsList=$("objectsList");
-const pages=["home","measure","stake","newline","objects","line","point"];
+const shapesList=$("shapesList"), shapeInfo=$("shapeInfo"), shapeNameInput=$("shapeNameInput"), shapeColorInput=$("shapeColorInput"), shapeOpacityInput=$("shapeOpacityInput");
+const wallLineInfo=$("wallLineInfo"), wallHeightInput=$("wallHeightInput"), wallHeightUnit=$("wallHeightUnit"), wallColorInput=$("wallColorInput"), wallOpacityInput=$("wallOpacityInput");
+const pages=["home","measure","stake","newline","objects","line","point","shapes","shape","wall"];
 
 let THREE=null, Line2=null, LineMaterial=null, LineGeometry=null;
 let renderer=null, scene=null, camera=null, reticle=null, xrSession=null, hitSource=null, hitRequested=false;
@@ -233,8 +283,8 @@ let mode="measure", directionMode="horizontal", targetMeters=2;
 let pointA=null, normalA=null, activeStartId=null, currentTarget=null, targetSource="none", lineFinished=false;
 let temporaryDirectionMarker=null;
 
-const points=[], lines=[], undoStack=[];
-let pointCounter=0, selectedLineId=null, selectedPointId=null, pendingStakePointId=null;
+const points=[], lines=[], shapes=[], walls=[], undoStack=[];
+let pointCounter=0, shapeCounter=1, wallCounter=1, selectedLineId=null, selectedPointId=null, selectedShapeId=null, pendingStakePointId=null;
 let menuStack=["home"];
 
 const samples=[]; const MAX_SAMPLES=16;
@@ -246,16 +296,18 @@ function fmt(m){ return m<1 ? `${(m*100).toFixed(1)} cm` : m<10 ? `${m.toFixed(3
 function pointName(i){ const c=String.fromCharCode(65+(i%26)); const n=Math.floor(i/26); return n?c+n:c; }
 function getPoint(id){ return points.find(p=>p.id===id)||null; }
 function getLine(id){ return lines.find(l=>l.id===id)||null; }
+function getShape(id){ return shapes.find(s=>s.id===id)||null; }
+function getWall(id){ return walls.find(w=>w.id===id)||null; }
 
-function updateMeta(){ menuMeta.textContent=`${mode==="measure"?"Meten":"Uitzetten"} · ${points.length}p · ${lines.length}l · v0.6.8`; }
+function updateMeta(){ menuMeta.textContent=`${mode==="measure"?"Meten":"Uitzetten"} · ${points.length}p · ${lines.length}l · ${shapes.length}v · v0.7`; }
 function showPage(name,push=true){
   pages.forEach(p=>$("page-"+p).classList.remove("active"));
   $("page-"+name).classList.add("active");
-  const titles={home:"Measure AR",measure:"Meten",stake:"Uitzetten",newline:"Nieuwe lijn",objects:"Objecten",line:"Lijn",point:"Punt"};
+  const titles={home:"Measure AR",measure:"Meten",stake:"Uitzetten",newline:"Nieuwe lijn",objects:"Objecten",line:"Lijn",point:"Punt",shapes:"Vormen",shape:"Vorm",wall:"Muur"};
   menuTitle.textContent=titles[name]||"Measure AR";
   if(push && menuStack[menuStack.length-1]!==name) menuStack.push(name);
   menuBackBtn.style.visibility=name==="home"?"hidden":"visible";
-  if(name==="objects") renderObjects();
+  if(name==="objects") renderObjects(); if(name==="shapes") renderShapes();
 }
 function openMenu(){
   menuStack=["home"]; showPage("home",false);
@@ -339,6 +391,93 @@ function technicalLine(a,b,t){
   m.resolution.set(innerWidth,innerHeight);
   const l=new Line2(g,m); l.computeLineDistances(); scene.add(l); return l;
 }
+
+function hexToInt(hex){ return parseInt(hex.replace("#",""),16); }
+function makeFilledShape(pointIds,color=0x5aa9ff,opacity=.35){
+  const pts=pointIds.map(getPoint).filter(Boolean);
+  if(pts.length<3) return null;
+  const positions=[];
+  for(let i=1;i<pts.length-1;i++){
+    [pts[0],pts[i],pts[i+1]].forEach(p=>positions.push(p.position.x,p.position.y,p.position.z));
+  }
+  const g=new THREE.BufferGeometry();
+  g.setAttribute("position",new THREE.Float32BufferAttribute(positions,3));
+  g.computeVertexNormals();
+  const m=new THREE.MeshBasicMaterial({color,transparent:true,opacity,side:THREE.DoubleSide,depthWrite:false});
+  const mesh=new THREE.Mesh(g,m);scene.add(mesh);return mesh;
+}
+function createShape(pointIds,lineIds,name=null){
+  const id="s"+Date.now()+Math.random();
+  const shape={id,name:name||`Vorm ${shapeCounter++}`,pointIds:[...pointIds],lineIds:[...lineIds],fill:true,color:0x5aa9ff,opacity:.35,mesh:null};
+  shape.mesh=makeFilledShape(shape.pointIds,shape.color,shape.opacity);
+  shapes.push(shape);undoStack.push({type:"shapeCreated",shapeId:id});renderShapes();return shape;
+}
+function refreshShape(shape){
+  dispose(shape.mesh);
+  shape.mesh=shape.fill?makeFilledShape(shape.pointIds,shape.color,shape.opacity):null;
+}
+function deleteShape(id){
+  const i=shapes.findIndex(s=>s.id===id);if(i<0)return;
+  dispose(shapes[i].mesh);shapes.splice(i,1);if(selectedShapeId===id)selectedShapeId=null;renderShapes();
+}
+function createWallFromLine(line,height,color=0xd8d8d8,opacity=.35){
+  const a=getPoint(line.startId),b=getPoint(line.endId);if(!a||!b)return null;
+  const upv=new THREE.Vector3(0,height,0);
+  const p1=a.position.clone(),p2=b.position.clone(),p3=b.position.clone().add(upv),p4=a.position.clone().add(upv);
+  const g=new THREE.BufferGeometry();
+  g.setAttribute("position",new THREE.Float32BufferAttribute([
+    p1.x,p1.y,p1.z,p2.x,p2.y,p2.z,p3.x,p3.y,p3.z,
+    p1.x,p1.y,p1.z,p3.x,p3.y,p3.z,p4.x,p4.y,p4.z
+  ],3));
+  const m=new THREE.MeshBasicMaterial({color,transparent:true,opacity,side:THREE.DoubleSide,depthWrite:false});
+  const mesh=new THREE.Mesh(g,m);scene.add(mesh);
+  const wall={id:"w"+Date.now()+Math.random(),name:`Muur ${wallCounter++}`,lineId:line.id,height,color,opacity,mesh};
+  walls.push(wall);undoStack.push({type:"wallCreated",wallId:wall.id});return wall;
+}
+function refreshWallsForLine(lineId){
+  walls.filter(w=>w.lineId===lineId).forEach(w=>{
+    const line=getLine(lineId);if(!line)return;
+    dispose(w.mesh);const nw=createWallFromLine(line,w.height,w.color,w.opacity);if(!nw)return;
+    const idx=walls.findIndex(x=>x.id===nw.id); if(idx>=0) walls.splice(idx,1);
+    w.mesh=nw.mesh;
+  });
+}
+function connectedLoop(){
+  if(lines.length<3)return null;
+  const adjacency=new Map();
+  for(const l of lines){
+    if(!adjacency.has(l.startId))adjacency.set(l.startId,[]);
+    if(!adjacency.has(l.endId))adjacency.set(l.endId,[]);
+    adjacency.get(l.startId).push({point:l.endId,line:l.id});
+    adjacency.get(l.endId).push({point:l.startId,line:l.id});
+  }
+  const candidatePoints=[...adjacency.keys()].filter(id=>adjacency.get(id).length===2);
+  if(candidatePoints.length<3)return null;
+  const start=candidatePoints[0],pointIds=[start],lineIds=[],visitedLines=new Set();
+  let current=start,prev=null;
+  for(let guard=0;guard<lines.length+2;guard++){
+    const options=(adjacency.get(current)||[]).filter(o=>o.point!==prev && !visitedLines.has(o.line));
+    if(!options.length)break;
+    const next=options[0];visitedLines.add(next.line);lineIds.push(next.line);
+    prev=current;current=next.point;
+    if(current===start){return pointIds.length>=3?{pointIds,lineIds}:null}
+    pointIds.push(current);
+  }
+  return null;
+}
+function renderShapes(){
+  if(!shapesList)return;
+  shapesList.innerHTML="";
+  if(!shapes.length){shapesList.innerHTML='<div class="help">Nog geen vormen.</div>';return;}
+  shapes.forEach(s=>{
+    const row=document.createElement("div");row.className="objectRow";
+    const open=document.createElement("button");open.className="secondary";open.textContent=s.name;
+    open.onclick=()=>{selectedShapeId=s.id;shapeInfo.textContent=`${s.name} · ${s.pointIds.length} punten`;shapeNameInput.value=s.name;shapeColorInput.value="#"+s.color.toString(16).padStart(6,"0");shapeOpacityInput.value=s.opacity;showPage("shape")};
+    const del=document.createElement("button");del.className="danger";del.textContent="Wis";del.onclick=()=>deleteShape(s.id);
+    row.append(open,del);shapesList.append(row);
+  });
+}
+
 function createPoint(pos,color=0x69ff9a){
   const p={id:"p"+Date.now()+Math.random(),name:pointName(pointCounter++),position:pos.clone(),marker:makeMarker(color)};
   p.marker.position.copy(pos); points.push(p); renderObjects(); return p;
@@ -363,12 +502,17 @@ function refreshLine(l){
   l.label=textSprite(`${l.name} · ${fmt(l.distance)}`);
   l.label.position.copy(a.position).add(b.position).multiplyScalar(.5); l.label.position.y+=.04;
   dispose(old);
+  shapes.filter(s=>s.lineIds.includes(l.id)).forEach(refreshShape);
+  refreshWallsForLine(l.id);
 }
 function deleteLine(id){
   const i=lines.findIndex(l=>l.id===id); if(i<0) return;
-  dispose(lines[i].object); dispose(lines[i].label); lines.splice(i,1);
+  dispose(lines[i].object); dispose(lines[i].label);
+  shapes.filter(s=>s.lineIds.includes(id)).map(s=>s.id).forEach(deleteShape);
+  walls.filter(w=>w.lineId===id).forEach(w=>{dispose(w.mesh);walls.splice(walls.indexOf(w),1)});
+  lines.splice(i,1);
   if(selectedLineId===id) selectedLineId=null;
-  renderObjects();
+  renderObjects(); renderShapes();
 }
 function deletePoint(id){
   lines.filter(l=>l.startId===id||l.endId===id).map(l=>l.id).forEach(deleteLine);
@@ -379,9 +523,11 @@ function deletePoint(id){
   renderObjects();
 }
 function clearAll(){
+  [...walls].forEach(w=>dispose(w.mesh)); walls.length=0;
+  [...shapes].forEach(s=>dispose(s.mesh)); shapes.length=0;
   [...lines].forEach(l=>deleteLine(l.id));
   [...points].forEach(p=>deletePoint(p.id));
-  pointCounter=0; selectedLineId=null; selectedPointId=null; pendingStakePointId=null; undoStack.length=0;
+  pointCounter=0; shapeCounter=1; wallCounter=1; selectedLineId=null; selectedPointId=null; selectedShapeId=null; pendingStakePointId=null; undoStack.length=0;
   resetCurrent(); renderObjects();
 }
 
@@ -563,6 +709,8 @@ function render(t,frame){
   const xrCam=renderer.xr.getCamera(camera); xrCam.getWorldPosition(camPos);
   points.forEach(p=>{ const d=Math.max(.05,p.position.distanceTo(camPos)); p.marker.scale.setScalar(Math.min(4,Math.max(.55,.48+d*.28))); });
   lines.forEach(l=>{ l.object.material.resolution.set(innerWidth,innerHeight); l.label.visible=defaultLabels.checked; });
+  shapes.forEach(s=>{ if(s.mesh) s.mesh.visible=s.fill; });
+  walls.forEach(w=>{ if(w.mesh) w.mesh.visible=true; });
 
   renderer.render(scene,camera);
 }
@@ -575,8 +723,12 @@ function undoLast(){
     if(l&&p){ p.position.fromArray(a.old); p.marker.position.copy(p.position); refreshLine(l); }
   }else if(a.type==="created"){
     deleteLine(a.lineId); deletePoint(a.endId);
+  }else if(a.type==="shapeCreated"){
+    deleteShape(a.shapeId);
+  }else if(a.type==="wallCreated"){
+    const i=walls.findIndex(w=>w.id===a.wallId);if(i>=0){dispose(walls[i].mesh);walls.splice(i,1)}
   }
-  renderObjects(); closeMenu();
+  renderObjects(); renderShapes(); closeMenu();
 }
 
 startBtn.addEventListener("click",startAR);
@@ -616,6 +768,41 @@ $("deleteLineBtn").addEventListener("click",()=>{ if(selectedLineId) deleteLine(
 $("pointNewLineBtn").addEventListener("click",()=>{ if(selectedPointId) startMeasureFrom(selectedPointId); });
 $("pointStakeBtn").addEventListener("click",()=>{ if(selectedPointId){ pendingStakePointId=selectedPointId; $("stakeSelectedBtn").style.display="block"; showPage("stake"); } });
 $("deletePointBtn").addEventListener("click",()=>{ if(selectedPointId) deletePoint(selectedPointId); showPage("objects"); });
+
+
+$("detectShapesBtn").addEventListener("click",()=>{
+  const loop=connectedLoop();
+  if(!loop){ stage.textContent="Geen gesloten vorm gevonden"; hint.textContent="Zorg dat lijnen via gedeelde punten een gesloten lus vormen."; closeMenu(); return; }
+  createShape(loop.pointIds,loop.lineIds);
+  renderShapes();
+});
+$("createShapeFromAllBtn").addEventListener("click",()=>{
+  const loop=connectedLoop();
+  if(!loop){ stage.textContent="Geen bruikbare gesloten contour"; closeMenu(); return; }
+  createShape(loop.pointIds,loop.lineIds);renderShapes();
+});
+$("toggleShapeFillBtn").addEventListener("click",()=>{
+  const s=getShape(selectedShapeId);if(!s)return;s.fill=!s.fill;refreshShape(s);
+});
+$("applyShapeStyleBtn").addEventListener("click",()=>{
+  const s=getShape(selectedShapeId);if(!s)return;
+  s.name=shapeNameInput.value.trim()||s.name;
+  s.color=hexToInt(shapeColorInput.value);
+  s.opacity=Math.max(.05,Math.min(1,Number(shapeOpacityInput.value)||.35));
+  refreshShape(s);renderShapes();showPage("shape",false);
+});
+$("deleteShapeBtn").addEventListener("click",()=>{if(selectedShapeId)deleteShape(selectedShapeId);showPage("shapes")});
+
+$("createWallBtn").addEventListener("click",()=>{
+  const l=getLine(selectedLineId);if(!l)return;wallLineInfo.textContent=`${l.name} · ${fmt(l.distance)}`;showPage("wall");
+});
+$("applyWallBtn").addEventListener("click",()=>{
+  const l=getLine(selectedLineId);if(!l)return;
+  const raw=Number(wallHeightInput.value);if(!Number.isFinite(raw)||raw<=0)return;
+  const h=wallHeightUnit.value==="cm"?raw/100:raw;
+  createWallFromLine(l,h,hexToInt(wallColorInput.value),Math.max(.05,Math.min(1,Number(wallOpacityInput.value)||.35)));
+  stage.textContent="Muur gemaakt";hint.textContent=`Muur vanaf ${l.name} · hoogte ${fmt(h)}`;closeMenu();
+});
 
 $("undoBtn").addEventListener("click",undoLast);
 $("clearAllBtn").addEventListener("click",()=>{ if(confirm("Alle punten en lijnen wissen?")){ clearAll(); showPage("home"); } });
