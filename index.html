@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
   <meta name="theme-color" content="#111111" />
-  <title>WebXR Measure v0.6</title>
+  <title>WebXR Measure v0.6.5</title>
   <style>
     :root {
       color-scheme: dark;
@@ -206,7 +206,52 @@
       color:#fff;
       border:1px solid rgba(255,255,255,.16);
     }
+    #cameraMenuPanel .menuField {
+      margin-top:10px;
+    }
+    #cameraMenuPanel .menuField label {
+      display:block;
+      margin-bottom:5px;
+      font-size:.78rem;
+      color:#bbb;
+    }
+    #cameraMenuPanel input,
+    #cameraMenuPanel select {
+      width:100%;
+      min-height:44px;
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,.16);
+      background:rgba(255,255,255,.10);
+      color:#fff;
+      padding:9px 10px;
+      font:inherit;
+    }
+    #cameraMenuPanel select option { color:#111; }
+    #menuObjects {
+      display:none;
+      max-height:230px;
+      overflow:auto;
+      margin-top:10px;
+      padding-top:6px;
+      border-top:1px solid rgba(255,255,255,.12);
+    }
+    #menuObjects.open { display:block; }
+    .menuObjectRow {
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:8px;
+      align-items:center;
+      padding:7px 0;
+      font-size:.86rem;
+    }
+    .menuObjectRow button {
+      width:auto !important;
+      min-height:34px !important;
+      margin:0 !important;
+      padding:6px 9px !important;
+    }
     #geometryPanel {
+      display:none !important;
       position:absolute;
       left:14px;
       right:14px;
@@ -398,7 +443,32 @@
       <h3>Cameramenu</h3>
       <div id="cameraModeLabel" class="menuStatus">Functie: —</div>
       <button id="menuNewLineBtn" type="button">Nieuwe lijn</button>
-      <button id="menuUseLastPointBtn" class="secondary" type="button">Start vanaf laatste punt</button>
+      <button id="menuUseLastPointBtn" class="secondary" type="button">Nieuwe lijn vanaf laatste punt</button>
+
+      <div class="menuField">
+        <label for="menuDistanceInput">Afstand voor nieuwe lijn</label>
+        <input id="menuDistanceInput" type="number" inputmode="decimal" min="0.01" step="0.01" value="2.00">
+      </div>
+      <div class="menuField">
+        <label for="menuUnitSelect">Eenheid</label>
+        <select id="menuUnitSelect">
+          <option value="m">meter</option>
+          <option value="cm">centimeter</option>
+        </select>
+      </div>
+      <div class="menuField">
+        <label for="menuDirectionSelect">Richting</label>
+        <select id="menuDirectionSelect">
+          <option value="horizontal">Horizontaal</option>
+          <option value="surface">Op oppervlak</option>
+          <option value="free3d">Vrij 3D</option>
+        </select>
+      </div>
+      <button id="menuStakeFromLastBtn" type="button">Zet afstand uit vanaf laatste punt</button>
+
+      <button id="menuObjectsBtn" class="secondary" type="button">Objecten beheren</button>
+      <div id="menuObjects"></div>
+
       <button id="menuResetBtn" class="secondary" type="button">Huidige lijn annuleren</button>
       <button id="menuClearAllBtn" class="secondary" type="button">Alles wissen</button>
       <button id="menuSwitchBtn" class="secondary" type="button">Andere functie</button>
@@ -432,6 +502,12 @@
     const menuUseLastPointBtn = document.getElementById('menuUseLastPointBtn');
     const menuResetBtn = document.getElementById('menuResetBtn');
     const menuClearAllBtn = document.getElementById('menuClearAllBtn');
+    const menuDistanceInput = document.getElementById('menuDistanceInput');
+    const menuUnitSelect = document.getElementById('menuUnitSelect');
+    const menuDirectionSelect = document.getElementById('menuDirectionSelect');
+    const menuStakeFromLastBtn = document.getElementById('menuStakeFromLastBtn');
+    const menuObjectsBtn = document.getElementById('menuObjectsBtn');
+    const menuObjects = document.getElementById('menuObjects');
     const menuSwitchBtn = document.getElementById('menuSwitchBtn');
     const menuBackBtn = document.getElementById('menuBackBtn');
     const menuCloseBtn = document.getElementById('menuCloseBtn');
@@ -516,6 +592,9 @@
     }
 
     function openCameraMenu() {
+      menuDistanceInput.value = Number.isFinite(targetMeters) ? targetMeters.toFixed(2) : '2.00';
+      menuUnitSelect.value = 'm';
+      menuDirectionSelect.value = directionMode;
       cameraMenuPanel.classList.add('open');
       cameraMenuPanel.setAttribute('aria-hidden', 'false');
       updateCameraMenuLabel();
@@ -620,22 +699,92 @@
       return point;
     }
 
+    function makeTextSprite(text) {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = 512 * dpr;
+      canvas.height = 128 * dpr;
+      ctx.scale(dpr, dpr);
+
+      ctx.font = '700 34px system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      const metrics = ctx.measureText(text);
+      const boxW = Math.min(490, Math.max(190, metrics.width + 54));
+      const x = 256;
+      const y = 64;
+
+      ctx.fillStyle = 'rgba(0,0,0,.76)';
+      ctx.beginPath();
+      const left = x - boxW/2, top = 18, right = x + boxW/2, bottom = 110, r = 18;
+      ctx.moveTo(left+r, top);
+      ctx.lineTo(right-r, top);
+      ctx.quadraticCurveTo(right, top, right, top+r);
+      ctx.lineTo(right, bottom-r);
+      ctx.quadraticCurveTo(right, bottom, right-r, bottom);
+      ctx.lineTo(left+r, bottom);
+      ctx.quadraticCurveTo(left, bottom, left, bottom-r);
+      ctx.lineTo(left, top+r);
+      ctx.quadraticCurveTo(left, top, left+r, top);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(text, x, y);
+
+      const texture = new THREE.CanvasTexture(canvas);
+      texture.minFilter = THREE.LinearFilter;
+      const material = new THREE.SpriteMaterial({
+        map: texture,
+        transparent: true,
+        depthTest: false
+      });
+      const sprite = new THREE.Sprite(material);
+      sprite.userData.labelTexture = texture;
+      sprite.userData.baseScale = new THREE.Vector3(0.72, 0.18, 1);
+      sprite.scale.copy(sprite.userData.baseScale);
+      return sprite;
+    }
+
+    function makeThickLine(start, end) {
+      const delta = end.clone().sub(start);
+      const length = delta.length();
+      const geometry = new THREE.CylinderGeometry(0.008, 0.008, length, 10);
+      const material = new THREE.MeshBasicMaterial({
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0.96
+      });
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.position.copy(start).add(end).multiplyScalar(0.5);
+      mesh.quaternion.setFromUnitVectors(
+        new THREE.Vector3(0, 1, 0),
+        delta.clone().normalize()
+      );
+      mesh.userData.baseRadiusScale = 1;
+      scene.add(mesh);
+      return mesh;
+    }
+
     function createPermanentLine(startPoint, endPoint) {
-      const geometry = new THREE.BufferGeometry().setFromPoints([
-        startPoint.position,
-        endPoint.position
-      ]);
-      const material = new THREE.LineBasicMaterial({ color: 0xffffff });
-      const object = new THREE.Line(geometry, material);
-      scene.add(object);
+      const object = makeThickLine(startPoint.position, endPoint.position);
+      const distance = startPoint.position.distanceTo(endPoint.position);
+      const name = `${startPoint.name}${endPoint.name}`;
+      const label = makeTextSprite(`${name} · ${formatDistance(distance)}`);
+      label.position.copy(startPoint.position).add(endPoint.position).multiplyScalar(0.5);
+      label.position.y += 0.055;
+      scene.add(label);
 
       const line = {
         id: `l${Date.now()}_${Math.random().toString(36).slice(2,7)}`,
-        name: `${startPoint.name}${endPoint.name}`,
+        name,
         startId: startPoint.id,
         endId: endPoint.id,
-        distance: startPoint.position.distanceTo(endPoint.position),
+        distance,
         object,
+        label,
         index: nextLineIndex++
       };
 
@@ -650,6 +799,10 @@
 
       const line = lines[idx];
       disposeObject(line.object);
+      if (line.label) {
+        if (line.label.material?.map) line.label.material.map.dispose();
+        disposeObject(line.label);
+      }
       lines.splice(idx, 1);
       updateGeometryUI();
     }
@@ -671,7 +824,13 @@
     }
 
     function clearAllGeometry() {
-      lines.forEach(l => disposeObject(l.object));
+      lines.forEach(l => {
+        disposeObject(l.object);
+        if (l.label) {
+          if (l.label.material?.map) l.label.material.map.dispose();
+          disposeObject(l.label);
+        }
+      });
       points.forEach(p => disposeObject(p.marker));
       lines.length = 0;
       points.length = 0;
@@ -683,49 +842,50 @@
     }
 
     function updateGeometryUI() {
-      if (!geometrySummary || !geometryList) return;
+      if (geometrySummary) {
+        geometrySummary.textContent = `${points.length} punten · ${lines.length} lijnen`;
+      }
+      if (geometryPanel) geometryPanel.classList.remove('visible');
 
-      geometrySummary.textContent = `${points.length} punten · ${lines.length} lijnen`;
-      geometryPanel.classList.toggle('visible', points.length > 0 || lines.length > 0);
+      updateCameraMenuLabel();
 
-      geometryList.innerHTML = '';
+      if (!menuObjects) return;
+      menuObjects.innerHTML = '';
 
       if (points.length === 0 && lines.length === 0) {
-        geometryList.innerHTML = '<div class="geomRow"><span>Nog geen objecten</span></div>';
+        menuObjects.innerHTML = '<div class="menuObjectRow"><span>Nog geen objecten</span></div>';
         return;
       }
 
       for (const line of lines) {
         const row = document.createElement('div');
-        row.className = 'geomRow';
-
+        row.className = 'menuObjectRow';
         const text = document.createElement('span');
         text.textContent = `${line.name} · ${formatDistance(line.distance)}`;
-
         const del = document.createElement('button');
         del.type = 'button';
-        del.textContent = 'Verwijder';
+        del.textContent = 'Wis';
         del.addEventListener('click', () => deleteLineById(line.id));
-
         row.append(text, del);
-        geometryList.appendChild(row);
+        menuObjects.appendChild(row);
       }
 
       for (const point of points) {
         const row = document.createElement('div');
-        row.className = 'geomRow';
-
+        row.className = 'menuObjectRow';
         const text = document.createElement('span');
-        const role = activeStartPointId === point.id ? ' · startpunt' : '';
-        text.textContent = `Punt ${point.name}${role}`;
+        text.textContent = `Punt ${point.name}${activeStartPointId === point.id ? ' · actief' : ''}`;
 
-        const del = document.createElement('button');
-        del.type = 'button';
-        del.textContent = 'Verwijder';
-        del.addEventListener('click', () => deletePointById(point.id));
+        const use = document.createElement('button');
+        use.type = 'button';
+        use.textContent = 'Gebruik';
+        use.addEventListener('click', () => {
+          setActiveStartPoint(point.id);
+          closeCameraMenu();
+        });
 
-        row.append(text, del);
-        geometryList.appendChild(row);
+        row.append(text, use);
+        menuObjects.appendChild(row);
       }
     }
 
@@ -752,6 +912,43 @@
         ? 'Richt op het volgende punt en druk op de meetknop.'
         : 'Richt in de gewenste richting en druk op de meetknop.';
       updateGeometryUI();
+    }
+
+
+    function stakeFromLastPointInAR() {
+      if (points.length === 0) {
+        stageEl.textContent = 'Nog geen startpunt';
+        hintEl.textContent = 'Teken eerst minstens één punt of lijn.';
+        closeCameraMenu();
+        return;
+      }
+
+      const raw = Number(menuDistanceInput.value);
+      if (!Number.isFinite(raw) || raw <= 0) {
+        stageEl.textContent = 'Ongeldige afstand';
+        hintEl.textContent = 'Geef in het cameramenu een afstand groter dan nul.';
+        return;
+      }
+
+      targetMeters = menuUnitSelect.value === 'cm' ? raw / 100 : raw;
+      directionMode = menuDirectionSelect.value;
+      mode = 'stake';
+
+      measureModeBtn.classList.remove('active');
+      stakeModeBtn.classList.add('active');
+
+      clearMeasurement();
+      setActiveStartPoint(points[points.length - 1].id);
+
+      distanceEl.textContent = formatDistance(targetMeters);
+      detailEl.textContent =
+        directionMode === 'horizontal' ? 'Horizontaal uitzetten' :
+        directionMode === 'surface' ? 'Op oppervlak uitzetten' :
+        'Vrij 3D uitzetten';
+
+      stageEl.textContent = `Nieuwe lijn vanaf ${points[points.length - 1].name}`;
+      hintEl.textContent = `Richt de gewenste richting aan. Berekende afstand: ${formatDistance(targetMeters)}.`;
+      closeCameraMenu();
     }
 
     function startNewLine(useLastPoint = false) {
@@ -883,13 +1080,13 @@
       const group = new THREE.Group();
 
       const sphere = new THREE.Mesh(
-        new THREE.SphereGeometry(0.008 * size, 24, 16),
+        new THREE.SphereGeometry(0.012 * size, 24, 16),
         new THREE.MeshBasicMaterial({ color: colorHex })
       );
       group.add(sphere);
 
       const ring = new THREE.Mesh(
-        new THREE.RingGeometry(0.011 * size, 0.014 * size, 40),
+        new THREE.RingGeometry(0.018 * size, 0.024 * size, 40),
         new THREE.MeshBasicMaterial({ color: colorHex, side: THREE.DoubleSide })
       );
       ring.rotation.x = -Math.PI / 2;
@@ -905,18 +1102,38 @@
 
       const xrCamera = renderer.xr.getCamera(camera);
       xrCamera.getWorldPosition(cameraPos);
-
       const d = Math.max(0.05, marker.position.distanceTo(cameraPos));
 
-      // Kleine, precieze markering dichtbij; geleidelijk groter op afstand.
-      // De schaal blijft begrensd zodat markeringen nooit log worden.
-      const scale = Math.min(2.2, Math.max(0.45, 0.55 + d * 0.18));
+      // Sterkere afstandsafhankelijke schaal: precies dichtbij, opvallend op afstand.
+      const scale = Math.min(5.0, Math.max(0.55, 0.48 + d * 0.34));
       marker.scale.setScalar(scale);
+    }
+
+    function updateLineVisuals() {
+      if (!renderer) return;
+      const xrCamera = renderer.xr.getCamera(camera);
+      xrCamera.getWorldPosition(cameraPos);
+
+      for (const line of lines) {
+        const mid = line.object.position;
+        const d = Math.max(0.2, mid.distanceTo(cameraPos));
+
+        // Cylinder wordt vooral in X/Z dikker, niet in lengte.
+        const thicknessScale = Math.min(4.0, Math.max(0.8, 0.75 + d * 0.16));
+        line.object.scale.set(thicknessScale, 1, thicknessScale);
+
+        if (line.label) {
+          const s = Math.min(2.7, Math.max(0.72, 0.70 + d * 0.11));
+          const base = line.label.userData.baseScale || new THREE.Vector3(0.72, 0.18, 1);
+          line.label.scale.set(base.x * s, base.y * s, 1);
+        }
+      }
     }
 
     function updateAllMarkerScales() {
       for (const p of points) updateMarkerScale(p.marker);
       updateMarkerScale(directionMarker);
+      updateLineVisuals();
     }
 
     function drawLine(a, b) {
@@ -1202,7 +1419,13 @@
 
       // Permanente geometrie is voorlopig alleen geldig binnen dezelfde XR-sessie.
       // Projectopslag/herpositionering komt in een latere fase.
-      lines.forEach(l => disposeObject(l.object));
+      lines.forEach(l => {
+        disposeObject(l.object);
+        if (l.label) {
+          if (l.label.material?.map) l.label.material.map.dispose();
+          disposeObject(l.label);
+        }
+      });
       points.forEach(p => disposeObject(p.marker));
       lines.length = 0;
       points.length = 0;
@@ -1505,6 +1728,13 @@
 
     menuNewLineBtn.addEventListener('click', () => startNewLine(false));
     menuUseLastPointBtn.addEventListener('click', () => startNewLine(true));
+    menuStakeFromLastBtn.addEventListener('click', stakeFromLastPointInAR);
+
+    menuObjectsBtn.addEventListener('click', () => {
+      const open = menuObjects.classList.toggle('open');
+      menuObjectsBtn.textContent = open ? 'Objecten verbergen' : 'Objecten beheren';
+      updateGeometryUI();
+    });
 
     menuResetBtn.addEventListener('click', () => {
       clearMeasurement();
@@ -1524,10 +1754,12 @@
     menuSwitchBtn.addEventListener('click', switchFunctionFromAR);
     captureBtn.addEventListener('click', placeCurrentPoint);
 
-    toggleGeometryListBtn.addEventListener('click', () => {
-      const open = geometryList.classList.toggle('open');
-      toggleGeometryListBtn.textContent = open ? 'Objecten verbergen' : 'Objecten tonen';
-    });
+    if (toggleGeometryListBtn) {
+      toggleGeometryListBtn.addEventListener('click', () => {
+        const open = geometryList.classList.toggle('open');
+        toggleGeometryListBtn.textContent = open ? 'Objecten verbergen' : 'Objecten tonen';
+      });
+    }
 
     window.addEventListener('resize', () => {
       if (renderer) renderer.setSize(window.innerWidth, window.innerHeight);

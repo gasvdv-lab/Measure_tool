@@ -1,53 +1,69 @@
-WEBXR MEASURE v0.6 — MEERDERE PUNTEN EN LIJNEN
+WEBXR MEASURE v0.6.5 — AR-UX & DYNAMISCHE GEOMETRIE
 
-Nieuwe geometrische kern:
+Deze versie focust bewust op gebruiksgemak en zichtbaarheid.
 
-- Meerdere punten A, B, C, D, ... tegelijk in dezelfde AR-sessie.
-- Meerdere lijnen blijven tegelijk zichtbaar.
-- Elke lijn krijgt automatisch een naam zoals AB, BC, CD.
-- Afstand van elke lijn wordt bijgehouden.
-- Objectenpaneel toont hoeveel punten en lijnen aanwezig zijn.
-- Via 'Objecten tonen' kun je de huidige geometrie bekijken.
-- Lijnen en punten kunnen afzonderlijk verwijderd worden.
-- Als een punt verwijderd wordt, verdwijnen ook lijnen die eraan vastzitten.
+1. OBJECTENPANEEL UIT CAMERABEELD
+- Het permanente paneel onderaan is verwijderd uit de actieve AR-weergave.
+- Punten en lijnen beheer je via ☰ > Objecten beheren.
+- Daardoor blijft het camerabeeld rustiger.
 
-Cameramenu:
-- Nieuwe lijn
-  Start een volledig nieuwe lijn vanaf een nieuw punt.
-- Start vanaf laatste punt
-  Handig om kettingen te maken zoals A-B, B-C, C-D...
-- Huidige lijn annuleren
-  Wist alleen de actieve/onvoltooide lijn.
-- Alles wissen
-  Verwijdert alle punten en lijnen uit de huidige AR-sessie.
-- Andere functie
-  Wisselt tussen meten en uitzetten.
-- Terug naar beginscherm
+2. DIKKERE, DYNAMISCHE LIJNEN
+- De oude WebGL 1-pixel lijn is vervangen door echte 3D-cylindergeometrie.
+- Lijnen worden visueel dikker naarmate ze verder van de camera staan.
+- Dichtbij blijven ze relatief precies.
 
-Belangrijk:
-De geometrie blijft in v0.6 alleen bestaan zolang dezelfde WebXR-sessie actief blijft.
-Bij volledig teruggaan naar het beginscherm wordt de AR-sessie beëindigd en worden
-de punten/lijnen gewist. Permanente projectopslag en herpositionering komen later.
+3. DYNAMISCHE PUNTEN
+- Punten schalen sterker mee met de afstand.
+- Dichtbij: klein genoeg voor nauwkeurig plaatsen.
+- Verder weg: duidelijker zichtbaar.
 
-Bestaande functies behouden:
-- simpel A-B meten
-- afstand uitzetten
-- Vrij 3D / Horizontaal / Op oppervlak
-- groter hybride AR-bereik
+4. LABEL OP DE LIJN
+Elke voltooide lijn krijgt automatisch een label in het midden:
+AB · 2,50 m
+BC · 4,08 m
+enzovoort.
+Het label is een billboard/sprite en blijft naar de camera gericht.
+
+5. VERDER BOUWEN ZONDER BEGINMENU
+In het cameramenu kun je nu rechtstreeks:
+- afstand ingeven
+- meter/cm kiezen
+- Horizontaal / Op oppervlak / Vrij 3D kiezen
+- 'Zet afstand uit vanaf laatste punt' gebruiken
+
+Voorbeeld:
+- teken AB
+- open ☰
+- geef 4,08 m
+- kies Horizontaal
+- kies 'Zet afstand uit vanaf laatste punt'
+- B wordt automatisch het startpunt
+- richt alleen de gewenste richting
+- C wordt op exact 4,08 m berekend
+- BC blijft staan met label
+
+6. OBJECTEN BEHEREN
+Via ☰ > Objecten beheren:
+- lijnen bekijken + verwijderen
+- punten bekijken
+- een bestaand punt als actief startpunt gebruiken
+
+Behouden:
+- hybride bereik
 - stabiliteitsfilter
-- kleine dynamische markers
+- meerdere punten/lijnen
+- meten
+- uitzetten
 - cameramenu
-- correcte WebXR cleanup
+- WebXR cleanup
 
-Aanbevolen test:
-1. Meet A-B.
-2. ☰ > Start vanaf laatste punt.
-3. Meet B-C.
-4. Herhaal naar C-D.
-5. Open Objecten tonen.
-6. Verwijder één lijn.
-7. Verwijder één punt en controleer of verbonden lijnen ook verdwijnen.
-8. Test hetzelfde met Afstand uitzetten.
+BELANGRIJKE TEST
+Test vooral:
+A-B tekenen -> ☰ -> 3,00 m -> Horizontaal ->
+Zet afstand uit vanaf laatste punt -> richting kiezen -> BC.
 
-Publiceren:
-Vervang alleen index.html in Measure_tool en commit naar main.
+Controleer:
+- leesbaarheid van AB/BC labels
+- lijnzichtbaarheid op 1, 5 en 10 m
+- puntzichtbaarheid dichtbij en veraf
+- of objectbeheer voldoende uit de weg zit
