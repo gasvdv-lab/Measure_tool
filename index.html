@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
   <meta name="theme-color" content="#111111" />
-  <title>WebXR Measure v0.6.5</title>
+  <title>Measure AR v0.6.6</title>
   <style>
     :root {
       color-scheme: dark;
@@ -98,6 +98,25 @@
       font-weight:700;
       cursor:pointer;
     }
+
+    .launcher { text-align:center; }
+    .launcherIntro { max-width:36ch; margin:8px auto 18px; }
+    .brandMark { position:relative; width:160px; height:58px; margin:0 auto 16px; }
+    .brandMeasure { position:absolute; left:35px; right:35px; top:28px; height:3px; background:#fff; border-radius:2px; }
+    .brandPoint { position:absolute; top:20px; width:19px; height:19px; border-radius:50%; border:3px solid #fff; background:#111; }
+    .brandPoint.left { left:18px; } .brandPoint.right { right:18px; }
+    .brandCross { position:absolute; left:50%; top:0; transform:translateX(-50%); font-size:36px; }
+    .secondaryStart { width:100%; margin-top:10px; background:#252525; color:#fff; border:1px solid rgba(255,255,255,.15); }
+    .settingsPanel { display:none; margin-top:16px; padding:14px; border-radius:16px; background:#191919; border:1px solid rgba(255,255,255,.10); text-align:left; }
+    .settingsPanel.open { display:block; }
+    .settingsGrid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .settingCheck { display:flex; align-items:center; gap:9px; margin-top:12px; font-size:.9rem; color:#ddd; }
+    .settingCheck input { width:auto; min-height:0; }
+
+    .lineEditor { display:none; margin-top:9px; padding-top:8px; border-top:1px solid rgba(255,255,255,.12); }
+    .lineEditor.open { display:block; }
+    .lineEditorTitle { font-size:.78rem; font-weight:700; margin-bottom:4px; }
+
     #startBtn {
       margin-top:18px;
       width:100%;
@@ -387,43 +406,22 @@
 </head>
 <body>
   <div id="app">
-    <div class="panel">
-      <h1>WebXR Measure</h1>
-      <p id="intro">Meet de rechte 3D-afstand tussen twee punten met AR.</p>
-
-      <div class="modes">
-        <button id="measureModeBtn" class="modeBtn active" type="button">Afstand meten</button>
-        <button id="stakeModeBtn" class="modeBtn" type="button">Afstand uitzetten</button>
+    <div class="panel launcher">
+      <div class="brandMark" aria-hidden="true">
+        <span class="brandPoint left"></span><span class="brandMeasure"></span><span class="brandPoint right"></span>
+        <span class="brandCross">＋</span>
       </div>
-
-      <div id="stakeSettings" class="stakeSettings">
-        <div class="row">
-          <div>
-            <label for="targetValue">Gewenste afstand</label>
-            <input id="targetValue" type="number" min="0.01" step="0.01" value="2.00" />
-          </div>
-          <div>
-            <label for="targetUnit">Eenheid</label>
-            <select id="targetUnit">
-              <option value="m">meter</option>
-              <option value="cm">cm</option>
-            </select>
-          </div>
+      <h1>Measure AR</h1>
+      <p class="launcherIntro">AR meten, uitzetten en geometrie bouwen in de echte wereld.</p>
+      <button id="startBtn" type="button">Start AR</button>
+      <button id="settingsBtn" class="secondaryStart" type="button">Instellingen</button>
+      <div id="settingsPanel" class="settingsPanel">
+        <div class="settingsGrid">
+          <div><label for="defaultUnit">Eenheid</label><select id="defaultUnit"><option value="m">meter</option><option value="cm">centimeter</option></select></div>
+          <div><label for="defaultThickness">Lijndikte</label><select id="defaultThickness"><option value="1">1 · fijn</option><option value="2" selected>2 · normaal</option><option value="3">3 · duidelijk</option><option value="4">4 · zwaar</option></select></div>
         </div>
-
-        <label style="margin-top:14px;">Richtingsmodus</label>
-        <div class="dirGrid">
-          <button id="dir3dBtn" class="dirBtn" type="button">Vrij 3D</button>
-          <button id="dirHorizontalBtn" class="dirBtn active" type="button">Horizontaal</button>
-          <button id="dirSurfaceBtn" class="dirBtn" type="button">Op oppervlak</button>
-        </div>
-
-        <p id="dirHelp">B blijft op dezelfde hoogte als A. Ideaal voor uitzetten op terrein of vloer.</p>
+        <label class="settingCheck"><input id="defaultLabels" type="checkbox" checked> Labels op lijnen</label>
       </div>
-
-      <p id="instructions">Start AR, richt het kruis op punt A en druk op de meetknop. Richt daarna op punt B en druk opnieuw.</p>
-      <p style="font-size:.88rem;color:#aaa;">v0.5 filtert AR-jitter. De getoonde stabiliteit is géén absolute nauwkeurigheidsgarantie.</p>
-      <button id="startBtn" type="button">AR starten</button>
       <div id="error"></div>
     </div>
   </div>
@@ -440,40 +438,34 @@
     </div>
 
     <div id="cameraMenuPanel" aria-hidden="true">
-      <h3>Cameramenu</h3>
-      <div id="cameraModeLabel" class="menuStatus">Functie: —</div>
-      <button id="menuNewLineBtn" type="button">Nieuwe lijn</button>
-      <button id="menuUseLastPointBtn" class="secondary" type="button">Nieuwe lijn vanaf laatste punt</button>
+      <h3>AR-menu</h3>
+      <div id="cameraModeLabel" class="menuStatus">Modus: Meten</div>
+      <button id="menuModeMeasureBtn" type="button">Meten</button>
+      <button id="menuModeStakeBtn" class="secondary" type="button">Uitzetten</button>
 
-      <div class="menuField">
-        <label for="menuDistanceInput">Afstand voor nieuwe lijn</label>
-        <input id="menuDistanceInput" type="number" inputmode="decimal" min="0.01" step="0.01" value="2.00">
-      </div>
-      <div class="menuField">
-        <label for="menuUnitSelect">Eenheid</label>
-        <select id="menuUnitSelect">
-          <option value="m">meter</option>
-          <option value="cm">centimeter</option>
-        </select>
-      </div>
-      <div class="menuField">
-        <label for="menuDirectionSelect">Richting</label>
-        <select id="menuDirectionSelect">
-          <option value="horizontal">Horizontaal</option>
-          <option value="surface">Op oppervlak</option>
-          <option value="free3d">Vrij 3D</option>
-        </select>
-      </div>
-      <button id="menuStakeFromLastBtn" type="button">Zet afstand uit vanaf laatste punt</button>
+      <div class="menuField"><label for="menuDistanceInput">Afstand</label><input id="menuDistanceInput" type="number" inputmode="decimal" min="0.01" step="0.01" value="2.00"></div>
+      <div class="menuField"><label for="menuUnitSelect">Eenheid</label><select id="menuUnitSelect"><option value="m">m</option><option value="cm">cm</option></select></div>
+      <div class="menuField"><label for="menuDirectionSelect">Richting</label><select id="menuDirectionSelect"><option value="horizontal">Horizontaal</option><option value="surface">Op oppervlak</option><option value="free3d">Vrij 3D</option></select></div>
 
-      <button id="menuObjectsBtn" class="secondary" type="button">Objecten beheren</button>
+      <button id="menuNewLineBtn" class="secondary" type="button">Nieuwe lijn</button>
+      <button id="menuUseLastPointBtn" class="secondary" type="button">Vanaf laatste punt</button>
+      <button id="menuStakeFromLastBtn" type="button">Afstand uitzetten vanaf laatste punt</button>
+
+      <button id="menuObjectsBtn" class="secondary" type="button">Objecten</button>
       <div id="menuObjects"></div>
 
-      <button id="menuResetBtn" class="secondary" type="button">Huidige lijn annuleren</button>
+      <div id="lineEditor" class="lineEditor">
+        <div class="lineEditorTitle">Actieve lijn</div>
+        <div id="lineEditorName" class="menuStatus">—</div>
+        <div class="menuField"><label for="lineLengthInput">Lengte</label><input id="lineLengthInput" type="number" inputmode="decimal" min="0.01" step="0.01"></div>
+        <div class="menuField"><label for="lineThicknessSelect">Dikte</label><select id="lineThicknessSelect"><option value="1">1 · fijn</option><option value="2">2 · normaal</option><option value="3">3 · duidelijk</option><option value="4">4 · zwaar</option></select></div>
+        <button id="applyLineLengthBtn" type="button">Lengte aanpassen vanaf startpunt</button>
+      </div>
+
+      <button id="undoBtn" class="secondary" type="button">Ongedaan maken</button>
       <button id="menuClearAllBtn" class="secondary" type="button">Alles wissen</button>
-      <button id="menuSwitchBtn" class="secondary" type="button">Andere functie</button>
-      <button id="menuBackBtn" class="secondary" type="button">Terug naar beginscherm</button>
-      <button id="menuCloseBtn" class="secondary" type="button">Menu sluiten</button>
+      <button id="menuBackBtn" class="secondary" type="button">Terug naar start</button>
+      <button id="menuCloseBtn" class="secondary" type="button">Sluiten</button>
     </div>
 
     <div id="aim"></div>
@@ -493,14 +485,23 @@
 
   <script type="module">
     import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.167.1/build/three.module.js';
+    import { Line2 } from 'https://cdn.jsdelivr.net/npm/three@0.167.1/examples/jsm/lines/Line2.js/+esm';
+    import { LineMaterial } from 'https://cdn.jsdelivr.net/npm/three@0.167.1/examples/jsm/lines/LineMaterial.js/+esm';
+    import { LineGeometry } from 'https://cdn.jsdelivr.net/npm/three@0.167.1/examples/jsm/lines/LineGeometry.js/+esm';
 
     const startBtn = document.getElementById('startBtn');
+    const settingsBtn = document.getElementById('settingsBtn');
+    const settingsPanel = document.getElementById('settingsPanel');
+    const defaultUnit = document.getElementById('defaultUnit');
+    const defaultThickness = document.getElementById('defaultThickness');
+    const defaultLabels = document.getElementById('defaultLabels');
     const cameraMenuBtn = document.getElementById('cameraMenuBtn');
     const cameraMenuPanel = document.getElementById('cameraMenuPanel');
     const cameraModeLabel = document.getElementById('cameraModeLabel');
+    const menuModeMeasureBtn = document.getElementById('menuModeMeasureBtn');
+    const menuModeStakeBtn = document.getElementById('menuModeStakeBtn');
     const menuNewLineBtn = document.getElementById('menuNewLineBtn');
     const menuUseLastPointBtn = document.getElementById('menuUseLastPointBtn');
-    const menuResetBtn = document.getElementById('menuResetBtn');
     const menuClearAllBtn = document.getElementById('menuClearAllBtn');
     const menuDistanceInput = document.getElementById('menuDistanceInput');
     const menuUnitSelect = document.getElementById('menuUnitSelect');
@@ -508,23 +509,15 @@
     const menuStakeFromLastBtn = document.getElementById('menuStakeFromLastBtn');
     const menuObjectsBtn = document.getElementById('menuObjectsBtn');
     const menuObjects = document.getElementById('menuObjects');
-    const menuSwitchBtn = document.getElementById('menuSwitchBtn');
+    const lineEditor = document.getElementById('lineEditor');
+    const lineEditorName = document.getElementById('lineEditorName');
+    const lineLengthInput = document.getElementById('lineLengthInput');
+    const lineThicknessSelect = document.getElementById('lineThicknessSelect');
+    const applyLineLengthBtn = document.getElementById('applyLineLengthBtn');
+    const undoBtn = document.getElementById('undoBtn');
     const menuBackBtn = document.getElementById('menuBackBtn');
     const menuCloseBtn = document.getElementById('menuCloseBtn');
     const captureBtn = document.getElementById('captureBtn');
-    const measureModeBtn = document.getElementById('measureModeBtn');
-    const stakeModeBtn = document.getElementById('stakeModeBtn');
-
-    const dir3dBtn = document.getElementById('dir3dBtn');
-    const dirHorizontalBtn = document.getElementById('dirHorizontalBtn');
-    const dirSurfaceBtn = document.getElementById('dirSurfaceBtn');
-    const dirHelp = document.getElementById('dirHelp');
-
-    const stakeSettings = document.getElementById('stakeSettings');
-    const targetValueEl = document.getElementById('targetValue');
-    const targetUnitEl = document.getElementById('targetUnit');
-    const introEl = document.getElementById('intro');
-    const instructionsEl = document.getElementById('instructions');
     const app = document.getElementById('app');
     const overlay = document.getElementById('overlay');
     const errorBox = document.getElementById('error');
@@ -560,8 +553,10 @@
     let measureLine = null;
 
     // Permanente geometrie binnen de huidige AR-sessie
-    const points = []; // { id, name, position, marker }
-    const lines = [];  // { id, name, startId, endId, distance, object }
+    const points = [];
+    const lines = [];
+    const undoStack = [];
+    let selectedLineId = null;
     let nextPointIndex = 0;
     let nextLineIndex = 1;
     let activeStartPointId = null;
@@ -588,12 +583,15 @@
     function updateCameraMenuLabel() {
       if (!cameraModeLabel) return;
       cameraModeLabel.textContent =
-        `${mode === 'measure' ? 'Functie: Afstand meten' : 'Functie: Afstand uitzetten'} · ${points.length} punten · ${lines.length} lijnen`;
+        `${mode === 'measure' ? 'Modus: Meten' : 'Modus: Uitzetten'} · ${points.length}p · ${lines.length}l`;
     }
 
     function openCameraMenu() {
-      menuDistanceInput.value = Number.isFinite(targetMeters) ? targetMeters.toFixed(2) : '2.00';
-      menuUnitSelect.value = 'm';
+      const unit = defaultUnit.value || 'm';
+      menuUnitSelect.value = unit;
+      menuDistanceInput.value = unit === 'cm'
+        ? (targetMeters * 100).toFixed(1)
+        : targetMeters.toFixed(2);
       menuDirectionSelect.value = directionMode;
       cameraMenuPanel.classList.add('open');
       cameraMenuPanel.setAttribute('aria-hidden', 'false');
@@ -611,50 +609,23 @@
       closeCameraMenu();
       await exitAR();
 
-      // Na terugkeer staat de andere functie al geselecteerd op het beginscherm.
-      if (nextMode === 'stake') {
-        stakeSettings.style.display = 'block';
-      }
+
     }
 
     function setMode(nextMode) {
       mode = nextMode;
-      const stake = mode === 'stake';
-
-      measureModeBtn.classList.toggle('active', !stake);
-      stakeModeBtn.classList.toggle('active', stake);
-      stakeSettings.style.display = stake ? 'block' : 'none';
-
       updateCameraMenuLabel();
-
-      if (stake) {
-        introEl.textContent = 'Plaats een punt automatisch op een ingegeven afstand vanaf punt A.';
-        instructionsEl.textContent = 'Geef de afstand en modus in. In AR leg je A vast, daarna wijs je alleen de richting aan. Punt B wordt automatisch berekend.';
-      } else {
-        introEl.textContent = 'Meet de rechte 3D-afstand tussen twee punten met AR.';
-        instructionsEl.textContent = 'Start AR, richt het kruis op punt A en druk op de meetknop. Richt daarna op punt B en druk opnieuw.';
-      }
     }
 
     function setDirectionMode(nextMode) {
       directionMode = nextMode;
-      dir3dBtn.classList.toggle('active', nextMode === 'free3d');
-      dirHorizontalBtn.classList.toggle('active', nextMode === 'horizontal');
-      dirSurfaceBtn.classList.toggle('active', nextMode === 'surface');
-
-      if (nextMode === 'free3d') {
-        dirHelp.textContent = 'B volgt exact de 3D-richting waarin je wijst, inclusief hoogteverschil.';
-      } else if (nextMode === 'horizontal') {
-        dirHelp.textContent = 'B blijft op dezelfde hoogte als A. Ideaal voor uitzetten op terrein of vloer.';
-      } else {
-        dirHelp.textContent = 'B blijft in het lokale vlak van oppervlak A, bijvoorbeeld vloer, helling of wand.';
-      }
+      if (menuDirectionSelect) menuDirectionSelect.value = nextMode;
     }
 
     function readTargetMeters() {
-      const value = Number(targetValueEl.value);
+      const value = Number(menuDistanceInput?.value);
       if (!Number.isFinite(value) || value <= 0) return null;
-      return targetUnitEl.value === 'cm' ? value / 100 : value;
+      return menuUnitSelect?.value === 'cm' ? value / 100 : value;
     }
 
     function showError(message) {
@@ -748,28 +719,60 @@
       return sprite;
     }
 
-    function makeThickLine(start, end) {
-      const delta = end.clone().sub(start);
-      const length = delta.length();
-      const geometry = new THREE.CylinderGeometry(0.008, 0.008, length, 10);
-      const material = new THREE.MeshBasicMaterial({
-        color: 0xffffff,
+    function thicknessToPixels(level) {
+      return ({1:2, 2:4, 3:6, 4:8})[level] || 4;
+    }
+
+    function makeTechnicalLine(start, end, thickness = 2, color = 0xffffff) {
+      const geometry = new LineGeometry();
+      geometry.setPositions([start.x,start.y,start.z,end.x,end.y,end.z]);
+
+      const material = new LineMaterial({
+        color,
+        linewidth: thicknessToPixels(thickness),
+        worldUnits: false,
         transparent: true,
-        opacity: 0.96
+        opacity: .98
       });
-      const mesh = new THREE.Mesh(geometry, material);
-      mesh.position.copy(start).add(end).multiplyScalar(0.5);
-      mesh.quaternion.setFromUnitVectors(
-        new THREE.Vector3(0, 1, 0),
-        delta.clone().normalize()
-      );
-      mesh.userData.baseRadiusScale = 1;
-      scene.add(mesh);
-      return mesh;
+      material.resolution.set(window.innerWidth, window.innerHeight);
+
+      const line = new Line2(geometry, material);
+      line.computeLineDistances();
+      scene.add(line);
+      return line;
+    }
+
+    function refreshLineGeometry(line) {
+      const start = getPointById(line.startId);
+      const end = getPointById(line.endId);
+      if (!start || !end) return;
+
+      line.distance = start.position.distanceTo(end.position);
+      line.object.geometry.setPositions([
+        start.position.x,start.position.y,start.position.z,
+        end.position.x,end.position.y,end.position.z
+      ]);
+      line.object.computeLineDistances();
+      line.object.material.linewidth = thicknessToPixels(line.thickness || 2);
+      line.object.material.resolution.set(window.innerWidth, window.innerHeight);
+      line.object.material.needsUpdate = true;
+
+      if (line.label) {
+        line.label.position.copy(start.position).add(end.position).multiplyScalar(.5);
+        line.label.position.y += .04;
+
+        const fresh = makeTextSprite(`${line.name} · ${formatDistance(line.distance)}`);
+        if (line.label.material?.map) line.label.material.map.dispose();
+        line.label.material.dispose();
+        line.label.material = fresh.material;
+        line.label.userData.baseScale = fresh.userData.baseScale;
+        line.label.visible = defaultLabels.checked && line.visible !== false;
+      }
     }
 
     function createPermanentLine(startPoint, endPoint) {
-      const object = makeThickLine(startPoint.position, endPoint.position);
+      const thickness = Number(defaultThickness.value) || 2;
+      const object = makeTechnicalLine(startPoint.position, endPoint.position, thickness, 0xffffff);
       const distance = startPoint.position.distanceTo(endPoint.position);
       const name = `${startPoint.name}${endPoint.name}`;
       const label = makeTextSprite(`${name} · ${formatDistance(distance)}`);
@@ -785,6 +788,9 @@
         distance,
         object,
         label,
+        thickness,
+        color: 0xffffff,
+        visible: true,
         index: nextLineIndex++
       };
 
@@ -804,6 +810,10 @@
         disposeObject(line.label);
       }
       lines.splice(idx, 1);
+      if (selectedLineId === id) {
+        selectedLineId = null;
+        lineEditor.classList.remove('open');
+      }
       updateGeometryUI();
     }
 
@@ -837,16 +847,15 @@
       nextPointIndex = 0;
       nextLineIndex = 1;
       activeStartPointId = null;
+      selectedLineId = null;
+      undoStack.length = 0;
+      lineEditor.classList.remove('open');
       clearMeasurement();
       updateGeometryUI();
     }
 
     function updateGeometryUI() {
-      if (geometrySummary) {
-        geometrySummary.textContent = `${points.length} punten · ${lines.length} lijnen`;
-      }
       if (geometryPanel) geometryPanel.classList.remove('visible');
-
       updateCameraMenuLabel();
 
       if (!menuObjects) return;
@@ -860,33 +869,141 @@
       for (const line of lines) {
         const row = document.createElement('div');
         row.className = 'menuObjectRow';
-        const text = document.createElement('span');
-        text.textContent = `${line.name} · ${formatDistance(line.distance)}`;
+
+        const select = document.createElement('button');
+        select.type = 'button';
+        select.textContent = `${line.name} · ${formatDistance(line.distance)}`;
+        select.addEventListener('click', () => selectLine(line.id));
+
         const del = document.createElement('button');
         del.type = 'button';
         del.textContent = 'Wis';
         del.addEventListener('click', () => deleteLineById(line.id));
-        row.append(text, del);
+
+        row.append(select, del);
         menuObjects.appendChild(row);
       }
 
       for (const point of points) {
         const row = document.createElement('div');
         row.className = 'menuObjectRow';
-        const text = document.createElement('span');
-        text.textContent = `Punt ${point.name}${activeStartPointId === point.id ? ' · actief' : ''}`;
 
         const use = document.createElement('button');
         use.type = 'button';
-        use.textContent = 'Gebruik';
+        use.textContent = `Punt ${point.name}${activeStartPointId === point.id ? ' · actief' : ''}`;
         use.addEventListener('click', () => {
           setActiveStartPoint(point.id);
           closeCameraMenu();
         });
 
-        row.append(text, use);
+        row.appendChild(use);
         menuObjects.appendChild(row);
       }
+    }
+
+    function getLineById(id) {
+      return lines.find(l => l.id === id) || null;
+    }
+
+    function selectLine(id) {
+      const line = getLineById(id);
+      selectedLineId = line ? id : null;
+
+      for (const l of lines) {
+        if (l.object?.material) {
+          l.object.material.opacity = l.id === id ? 1 : .55;
+          l.object.material.needsUpdate = true;
+        }
+      }
+
+      if (!line) {
+        lineEditor.classList.remove('open');
+        return;
+      }
+
+      lineEditor.classList.add('open');
+      lineEditorName.textContent = `${line.name} · ${formatDistance(line.distance)}`;
+      lineLengthInput.value = line.distance.toFixed(3);
+      lineThicknessSelect.value = String(line.thickness || 2);
+    }
+
+    function endpointHasOtherConnections(pointId, excludingLineId) {
+      return lines.some(l =>
+        l.id !== excludingLineId &&
+        (l.startId === pointId || l.endId === pointId)
+      );
+    }
+
+    function pushUndo(action) {
+      undoStack.push(action);
+      if (undoStack.length > 20) undoStack.shift();
+    }
+
+    function applySelectedLineLength() {
+      const line = getLineById(selectedLineId);
+      if (!line) return;
+
+      const newLength = Number(lineLengthInput.value);
+      if (!Number.isFinite(newLength) || newLength <= 0) return;
+
+      const start = getPointById(line.startId);
+      const end = getPointById(line.endId);
+      if (!start || !end) return;
+
+      if (endpointHasOtherConnections(end.id, line.id)) {
+        stageEl.textContent = 'Wijziging geblokkeerd';
+        hintEl.textContent = `Punt ${end.name} is verbonden met andere geometrie.`;
+        closeCameraMenu();
+        return;
+      }
+
+      const oldEnd = end.position.clone();
+      const dir = end.position.clone().sub(start.position);
+      if (dir.lengthSq() < 1e-8) return;
+      dir.normalize();
+
+      end.position.copy(start.position).add(dir.multiplyScalar(newLength));
+      end.marker.position.copy(end.position);
+
+      pushUndo({
+        type:'lineLength',
+        lineId:line.id,
+        endPointId:end.id,
+        oldEnd:oldEnd.toArray()
+      });
+
+      refreshLineGeometry(line);
+      selectLine(line.id);
+      updateGeometryUI();
+      stageEl.textContent = 'Lijn aangepast';
+      hintEl.textContent = `${line.name} = ${formatDistance(line.distance)} vanaf ${start.name}.`;
+      closeCameraMenu();
+    }
+
+    function undoLastAction() {
+      const action = undoStack.pop();
+      if (!action) {
+        stageEl.textContent = 'Niets om ongedaan te maken';
+        closeCameraMenu();
+        return;
+      }
+
+      if (action.type === 'lineLength') {
+        const line = getLineById(action.lineId);
+        const end = getPointById(action.endPointId);
+        if (line && end) {
+          end.position.fromArray(action.oldEnd);
+          end.marker.position.copy(end.position);
+          refreshLineGeometry(line);
+        }
+      } else if (action.type === 'createdLine') {
+        deleteLineById(action.lineId);
+        if (action.endPointId) deletePointById(action.endPointId);
+      }
+
+      updateGeometryUI();
+      stageEl.textContent = 'Ongedaan gemaakt';
+      closeCameraMenu();
     }
 
     function setActiveStartPoint(pointId) {
@@ -933,9 +1050,6 @@
       targetMeters = menuUnitSelect.value === 'cm' ? raw / 100 : raw;
       directionMode = menuDirectionSelect.value;
       mode = 'stake';
-
-      measureModeBtn.classList.remove('active');
-      stakeModeBtn.classList.add('active');
 
       clearMeasurement();
       setActiveStartPoint(points[points.length - 1].id);
@@ -1110,22 +1224,25 @@
     }
 
     function updateLineVisuals() {
-      if (!renderer) return;
-      const xrCamera = renderer.xr.getCamera(camera);
-      xrCamera.getWorldPosition(cameraPos);
-
       for (const line of lines) {
-        const mid = line.object.position;
-        const d = Math.max(0.2, mid.distanceTo(cameraPos));
-
-        // Cylinder wordt vooral in X/Z dikker, niet in lengte.
-        const thicknessScale = Math.min(4.0, Math.max(0.8, 0.75 + d * 0.16));
-        line.object.scale.set(thicknessScale, 1, thicknessScale);
+        if (line.object?.material?.resolution) {
+          line.object.material.resolution.set(window.innerWidth, window.innerHeight);
+        }
 
         if (line.label) {
-          const s = Math.min(2.7, Math.max(0.72, 0.70 + d * 0.11));
-          const base = line.label.userData.baseScale || new THREE.Vector3(0.72, 0.18, 1);
-          line.label.scale.set(base.x * s, base.y * s, 1);
+          line.label.visible = defaultLabels.checked && line.visible !== false;
+
+          const start = getPointById(line.startId);
+          const end = getPointById(line.endId);
+          if (!start || !end) continue;
+
+          const mid = start.position.clone().add(end.position).multiplyScalar(.5);
+          const xrCamera = renderer.xr.getCamera(camera);
+          xrCamera.getWorldPosition(cameraPos);
+          const d = Math.max(.2, mid.distanceTo(cameraPos));
+          const s = Math.min(2.2, Math.max(.7, .72 + d * .09));
+          const base = line.label.userData.baseScale || new THREE.Vector3(.72,.18,1);
+          line.label.scale.set(base.x*s, base.y*s, 1);
         }
       }
     }
@@ -1306,6 +1423,7 @@
           markerB = endPoint.marker;
 
           const line = createPermanentLine(startPoint, endPoint);
+          pushUndo({type:'createdLine', lineId:line.id, endPointId:endPoint.id});
 
           distanceEl.textContent = formatDistance(line.distance);
           detailEl.textContent = `Lijn ${line.name} opgeslagen`;
@@ -1355,6 +1473,7 @@
         directionMarker.position.copy(directionPoint);
 
         const line = createPermanentLine(startPoint, endPoint);
+        pushUndo({type:'createdLine', lineId:line.id, endPointId:endPoint.id});
 
         distanceEl.textContent = formatDistance(line.distance);
         detailEl.textContent =
@@ -1476,6 +1595,8 @@
 
     async function startAR() {
       errorBox.style.display = 'none';
+      mode = 'measure';
+      directionMode = 'horizontal';
 
       if (mode === 'stake') {
         const parsed = readTargetMeters();
@@ -1708,23 +1829,38 @@
       renderer.render(scene, camera);
     }
 
-    measureModeBtn.addEventListener('click', () => setMode('measure'));
-    stakeModeBtn.addEventListener('click', () => setMode('stake'));
-
-    dir3dBtn.addEventListener('click', () => setDirectionMode('free3d'));
-    dirHorizontalBtn.addEventListener('click', () => setDirectionMode('horizontal'));
-    dirSurfaceBtn.addEventListener('click', () => setDirectionMode('surface'));
-
     startBtn.addEventListener('click', startAR);
+
+    settingsBtn.addEventListener('click', () => {
+      settingsPanel.classList.toggle('open');
+    });
+
     cameraMenuBtn.addEventListener('click', () => {
-      if (cameraMenuPanel.classList.contains('open')) {
-        closeCameraMenu();
-      } else {
-        openCameraMenu();
-      }
+      cameraMenuPanel.classList.contains('open') ? closeCameraMenu() : openCameraMenu();
     });
 
     menuCloseBtn.addEventListener('click', closeCameraMenu);
+
+    menuModeMeasureBtn.addEventListener('click', () => {
+      mode = 'measure';
+      clearMeasurement();
+      stageEl.textContent = 'Meten';
+      hintEl.textContent = 'Plaats punt A en daarna punt B.';
+      closeCameraMenu();
+    });
+
+    menuModeStakeBtn.addEventListener('click', () => {
+      const raw = Number(menuDistanceInput.value);
+      if (Number.isFinite(raw) && raw > 0) {
+        targetMeters = menuUnitSelect.value === 'cm' ? raw / 100 : raw;
+      }
+      directionMode = menuDirectionSelect.value;
+      mode = 'stake';
+      clearMeasurement();
+      stageEl.textContent = 'Uitzetten';
+      hintEl.textContent = 'Plaats punt A en kies daarna de richting.';
+      closeCameraMenu();
+    });
 
     menuNewLineBtn.addEventListener('click', () => startNewLine(false));
     menuUseLastPointBtn.addEventListener('click', () => startNewLine(true));
@@ -1732,14 +1868,21 @@
 
     menuObjectsBtn.addEventListener('click', () => {
       const open = menuObjects.classList.toggle('open');
-      menuObjectsBtn.textContent = open ? 'Objecten verbergen' : 'Objecten beheren';
+      menuObjectsBtn.textContent = open ? 'Objecten verbergen' : 'Objecten';
       updateGeometryUI();
     });
 
-    menuResetBtn.addEventListener('click', () => {
-      clearMeasurement();
-      closeCameraMenu();
+    applyLineLengthBtn.addEventListener('click', applySelectedLineLength);
+
+    lineThicknessSelect.addEventListener('change', () => {
+      const line = getLineById(selectedLineId);
+      if (!line) return;
+      line.thickness = Number(lineThicknessSelect.value) || 2;
+      refreshLineGeometry(line);
+      updateGeometryUI();
     });
+
+    undoBtn.addEventListener('click', undoLastAction);
 
     menuClearAllBtn.addEventListener('click', () => {
       clearAllGeometry();
@@ -1751,7 +1894,6 @@
       await exitAR();
     });
 
-    menuSwitchBtn.addEventListener('click', switchFunctionFromAR);
     captureBtn.addEventListener('click', placeCurrentPoint);
 
     if (toggleGeometryListBtn) {
@@ -1763,6 +1905,11 @@
 
     window.addEventListener('resize', () => {
       if (renderer) renderer.setSize(window.innerWidth, window.innerHeight);
+      for (const line of lines) {
+        if (line.object?.material?.resolution) {
+          line.object.material.resolution.set(window.innerWidth, window.innerHeight);
+        }
+      }
     });
 
     // Android/Chrome kan een pagina via de back/recents-flow herstellen.
@@ -1779,8 +1926,11 @@
       }
     });
 
-    setMode('measure');
-    setDirectionMode('horizontal');
+    mode = 'measure';
+    directionMode = 'horizontal';
+    defaultUnit.value = 'm';
+    defaultThickness.value = '2';
+    defaultLabels.checked = true;
     updateGeometryUI();
     checkSupport();
   </script>
