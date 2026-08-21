@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="theme-color" content="#111111" />
+  <title>WebXR Measure</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #111;
+      color: #fff;
+    }
+    #app {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle at 50% 35%, rgba(255,255,255,.05), transparent 45%),
+        #111;
+    }
+    .panel {
+      width: min(92vw, 520px);
+      padding: 24px;
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 22px;
+      background: rgba(25,25,25,.92);
+      text-align: center;
+    }
+    h1 { margin: 0 0 10px; font-size: 1.7rem; }
+    p { margin: 8px 0; color: #d0d0d0; line-height: 1.45; }
+    button {
+      appearance: none;
+      border: 0;
+      border-radius: 14px;
+      padding: 14px 18px;
+      min-height: 52px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    #startBtn {
+      margin-top: 18px;
+      width: 100%;
+      background: #fff;
+      color: #111;
+    }
+    #startBtn:disabled { opacity: .45; cursor: default; }
+
+    #overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      pointer-events: none;
+      display: none;
+    }
+    #topbar {
+      position: absolute;
+      top: max(14px, env(safe-area-inset-top));
+      left: 14px;
+      right: 14px;
+      display: flex;
+      gap: 10px;
+      align-items: stretch;
+    }
+    .statusbox {
+      flex: 1;
+      border-radius: 16px;
+      padding: 11px 14px;
+      background: rgba(0,0,0,.62);
+      backdrop-filter: blur(8px);
+    }
+    #stage {
+      font-size: .82rem;
+      color: #cfcfcf;
+      margin-bottom: 2px;
+    }
+    #distance {
+      font-size: 1.45rem;
+      font-weight: 800;
+      letter-spacing: .01em;
+    }
+    #resetBtn {
+      pointer-events: auto;
+      background: rgba(255,255,255,.92);
+      color: #111;
+      min-width: 92px;
+      padding-inline: 14px;
+    }
+    #hint {
+      position: absolute;
+      left: 50%;
+      bottom: max(24px, env(safe-area-inset-bottom));
+      transform: translateX(-50%);
+      width: min(88vw, 520px);
+      text-align: center;
+      padding: 10px 14px;
+      border-radius: 14px;
+      background: rgba(0,0,0,.60);
+      color: #eee;
+      font-size: .95rem;
+      backdrop-filter: blur(8px);
+    }
+    #aim {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 54px;
+      height: 54px;
+      transform: translate(-50%, -50%);
+      opacity: .92;
+    }
+    #aim::before, #aim::after {
+      content: "";
+      position: absolute;
+      background: rgba(255,255,255,.95);
+      border-radius: 2px;
+    }
+    #aim::before {
+      width: 26px; height: 2px;
+      left: 14px; top: 26px;
+    }
+    #aim::after {
+      width: 2px; height: 26px;
+      left: 26px; top: 14px;
+    }
+    #aim.ready::before, #aim.ready::after { background: #69ff9a; }
+
+    #error {
+      margin-top: 14px;
+      padding: 12px;
+      border-radius: 12px;
+      background: #341818;
+      color: #ffd1d1;
+      display: none;
+      text-align: left;
+      white-space: pre-wrap;
+    }
+    canvas { position: fixed; inset: 0; width: 100%; height: 100%; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="panel">
+      <h1>WebXR Measure</h1>
+      <p>Meet de rechte 3D-afstand tussen twee punten met AR.</p>
+      <p>Start AR, richt het kruis op punt A en tik. Richt daarna op punt B en tik opnieuw.</p>
+      <button id="startBtn" type="button">AR starten</button>
+      <div id="error"></div>
+    </div>
+  </div>
+
+  <div id="overlay">
+    <div id="topbar">
+      <div class="statusbox">
+        <div id="stage">Zoek een oppervlak</div>
+        <div id="distance">—</div>
+      </div>
+      <button id="resetBtn" type="button">Reset</button>
+    </div>
+    <div id="aim"></div>
+    <div id="hint">Beweeg rustig zodat ARCore het oppervlak kan herkennen.</div>
+  </div>
+
+  <script type="module">
+    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.167.1/build/three.module.js';
+
+    const startBtn = document.getElementById('startBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const app = document.getElementById('app');
+    const overlay = document.getElementById('overlay');
+    const errorBox = document.getElementById('error');
+    const stageEl = document.getElementById('stage');
+    const distanceEl = document.getElementById('distance');
+    const hintEl = document.getElementById('hint');
+    const aimEl = document.getElementById('aim');
+
+    let renderer, scene, camera, reticle;
+    let hitTestSource = null;
+    let hitTestSourceRequested = false;
+    let xrSession = null;
+
+    let pointA = null;
+    let pointB = null;
+    let markerA = null;
+    let markerB = null;
+    let measureLine = null;
+
+    const tmpMatrix = new THREE.Matrix4();
+    const tmpPos = new THREE.Vector3();
+
+    function showError(message) {
+      errorBox.style.display = 'block';
+      errorBox.textContent = message;
+    }
+
+    function formatDistance(meters) {
+      if (meters < 1) return `${(meters * 100).toFixed(1)} cm`;
+      if (meters < 10) return `${meters.toFixed(3)} m`;
+      return `${meters.toFixed(2)} m`;
+    }
+
+    function makeMarker(colorHex) {
+      const group = new THREE.Group();
+
+      const sphere = new THREE.Mesh(
+        new THREE.SphereGeometry(0.018, 24, 16),
+        new THREE.MeshBasicMaterial({ color: colorHex })
+      );
+      group.add(sphere);
+
+      const ring = new THREE.Mesh(
+        new THREE.RingGeometry(0.025, 0.032, 40),
+        new THREE.MeshBasicMaterial({ color: colorHex, side: THREE.DoubleSide })
+      );
+      ring.rotation.x = -Math.PI / 2;
+      group.add(ring);
+
+      scene.add(group);
+      return group;
+    }
+
+    function updateLine() {
+      if (measureLine) {
+        scene.remove(measureLine);
+        measureLine.geometry.dispose();
+        measureLine.material.dispose();
+        measureLine = null;
+      }
+
+      if (!pointA || !pointB) return;
+
+      const geometry = new THREE.BufferGeometry().setFromPoints([pointA, pointB]);
+      const material = new THREE.LineBasicMaterial({ color: 0xffffff });
+      measureLine = new THREE.Line(geometry, material);
+      scene.add(measureLine);
+
+      const d = pointA.distanceTo(pointB);
+      distanceEl.textContent = formatDistance(d);
+      stageEl.textContent = 'Meting voltooid';
+      hintEl.textContent = 'Reset om opnieuw te meten.';
+    }
+
+    function clearMeasurement() {
+      pointA = null;
+      pointB = null;
+
+      if (markerA) {
+        scene.remove(markerA);
+        markerA = null;
+      }
+      if (markerB) {
+        scene.remove(markerB);
+        markerB = null;
+      }
+      if (measureLine) {
+        scene.remove(measureLine);
+        measureLine.geometry.dispose();
+        measureLine.material.dispose();
+        measureLine = null;
+      }
+
+      distanceEl.textContent = '—';
+      stageEl.textContent = 'Punt A';
+      hintEl.textContent = 'Richt het kruis op punt A en tik op het scherm.';
+    }
+
+    function initThree() {
+      scene = new THREE.Scene();
+      camera = new THREE.PerspectiveCamera();
+
+      renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.xr.enabled = true;
+      renderer.xr.setReferenceSpaceType('local');
+      document.body.appendChild(renderer.domElement);
+
+      reticle = new THREE.Mesh(
+        new THREE.RingGeometry(0.035, 0.045, 40).rotateX(-Math.PI / 2),
+        new THREE.MeshBasicMaterial({ color: 0x69ff9a })
+      );
+      reticle.matrixAutoUpdate = false;
+      reticle.visible = false;
+      scene.add(reticle);
+    }
+
+    async function checkSupport() {
+      if (!navigator.xr) {
+        startBtn.disabled = true;
+        showError('Deze browser biedt geen WebXR. Open deze pagina in Chrome op een ARCore-compatibele Android-telefoon.');
+        return;
+      }
+
+      try {
+        const ok = await navigator.xr.isSessionSupported('immersive-ar');
+        if (!ok) {
+          startBtn.disabled = true;
+          showError('Immersive AR is niet beschikbaar op dit toestel of in deze browser.');
+        }
+      } catch (err) {
+        startBtn.disabled = true;
+        showError(`WebXR-test mislukt: ${err.message}`);
+      }
+    }
+
+    async function startAR() {
+      errorBox.style.display = 'none';
+
+      try {
+        if (!renderer) initThree();
+
+        const sessionInit = {
+          requiredFeatures: ['hit-test'],
+          optionalFeatures: ['dom-overlay'],
+          domOverlay: { root: document.body }
+        };
+
+        xrSession = await navigator.xr.requestSession('immersive-ar', sessionInit);
+        await renderer.xr.setSession(xrSession);
+
+        app.style.display = 'none';
+        overlay.style.display = 'block';
+
+        xrSession.addEventListener('end', () => {
+          overlay.style.display = 'none';
+          app.style.display = 'grid';
+          hitTestSource = null;
+          hitTestSourceRequested = false;
+          xrSession = null;
+          clearMeasurement();
+        });
+
+        const controller = renderer.xr.getController(0);
+        controller.addEventListener('select', () => {
+          if (!reticle.visible) return;
+
+          tmpPos.setFromMatrixPosition(reticle.matrix);
+
+          if (!pointA) {
+            pointA = tmpPos.clone();
+            markerA = makeMarker(0x69ff9a);
+            markerA.position.copy(pointA);
+            stageEl.textContent = 'Punt B';
+            hintEl.textContent = 'Richt het kruis op punt B en tik opnieuw.';
+          } else if (!pointB) {
+            pointB = tmpPos.clone();
+            markerB = makeMarker(0xffd166);
+            markerB.position.copy(pointB);
+            updateLine();
+          }
+        });
+        scene.add(controller);
+
+        clearMeasurement();
+        renderer.setAnimationLoop(render);
+      } catch (err) {
+        showError(`AR kon niet starten: ${err.message}\n\nControleer of Chrome cameratoegang heeft en Google Play-services voor AR geïnstalleerd zijn.`);
+      }
+    }
+
+    function render(timestamp, frame) {
+      if (!frame) return;
+
+      const referenceSpace = renderer.xr.getReferenceSpace();
+      const session = renderer.xr.getSession();
+
+      if (!hitTestSourceRequested) {
+        session.requestReferenceSpace('viewer').then((viewerSpace) => {
+          session.requestHitTestSource({ space: viewerSpace }).then((source) => {
+            hitTestSource = source;
+          });
+        });
+
+        session.addEventListener('end', () => {
+          hitTestSourceRequested = false;
+          hitTestSource = null;
+        });
+
+        hitTestSourceRequested = true;
+      }
+
+      if (hitTestSource) {
+        const results = frame.getHitTestResults(hitTestSource);
+
+        if (results.length > 0) {
+          const hit = results[0];
+          const pose = hit.getPose(referenceSpace);
+
+          if (pose) {
+            reticle.visible = true;
+            reticle.matrix.fromArray(pose.transform.matrix);
+            aimEl.classList.add('ready');
+
+            if (!pointA) {
+              stageEl.textContent = 'Punt A';
+            } else if (!pointB) {
+              stageEl.textContent = 'Punt B';
+            }
+          }
+        } else {
+          reticle.visible = false;
+          aimEl.classList.remove('ready');
+          if (!pointA) stageEl.textContent = 'Zoek een oppervlak';
+        }
+      }
+
+      renderer.render(scene, camera);
+    }
+
+    startBtn.addEventListener('click', startAR);
+    resetBtn.addEventListener('click', clearMeasurement);
+    window.addEventListener('resize', () => {
+      if (renderer) renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    checkSupport();
+  </script>
+</body>
+</html>
