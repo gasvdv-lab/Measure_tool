@@ -4,218 +4,632 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#111111">
-<title>Measure AR v0.6.7.2</title>
+<title>Measure AR v0.6.8</title>
 <style>
 :root{color-scheme:dark;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#111;color:#fff}
-button,input,select{font:inherit}.hidden{display:none!important}
-#app{position:fixed;inset:0;overflow:auto;padding:24px 0;display:grid;place-items:center;background:radial-gradient(circle at 50% 35%,rgba(255,255,255,.05),transparent 45%),#111}
-.panel{width:min(92vw,560px);padding:24px;border:1px solid #ffffff24;border-radius:22px;background:#191919f0}
-.launcher{text-align:center}.launcher h1{margin:4px 0 8px;font-size:1.7rem}.launcher p{color:#ccc}
-.brand{font-size:42px;line-height:1;margin-bottom:8px}.version{font-size:.75rem;color:#888;margin-top:14px}
-button{appearance:none;border:1px solid #ffffff20;border-radius:12px;padding:10px 12px;min-height:42px;font-weight:700;cursor:pointer;background:#f3f3f3;color:#111}
-button.secondary{background:#ffffff12;color:#fff}.wide{width:100%}
-#startBtn{width:100%;margin-top:14px}.settings{display:none;text-align:left;margin-top:14px;padding:12px;background:#ffffff08;border-radius:14px}.settings.open{display:block}
-.settingsGrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}label{display:block;color:#bbb;font-size:.78rem;margin:8px 0 5px}
-input,select{width:100%;min-height:42px;padding:8px 10px;border-radius:10px;border:1px solid #ffffff24;background:#202020;color:#fff}
-.check{display:flex;gap:8px;align-items:center;margin-top:10px;font-size:.8rem}.check input{width:auto;min-height:0}
-#error{display:none;margin-top:12px;padding:10px;border-radius:10px;background:#401d1d;color:#ffd4d4;text-align:left}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#111;color:#fff}
+button,input,select{font:inherit}
+button{appearance:none;border:1px solid #ffffff22;border-radius:11px;min-height:40px;padding:8px 10px;font-weight:700;cursor:pointer}
+button.primary{background:#f5f5f5;color:#111}
+button.secondary{background:#ffffff12;color:#fff}
+button.danger{background:#5a2424;color:#ffe2e2;border-color:#ff8a8a40}
+button:disabled{opacity:.42}
+input,select{width:100%;min-height:40px;border-radius:10px;border:1px solid #ffffff24;background:#202020;color:#fff;padding:7px 9px}
+label{display:block;color:#aaa;font-size:.72rem;margin:8px 0 4px}
+
+#app{position:fixed;inset:0;overflow:auto;padding:24px 0;display:grid;place-items:center;background:radial-gradient(circle at 50% 35%,#ffffff0d,transparent 45%),#111}
+.cardStart{width:min(92vw,560px);padding:24px;border:1px solid #ffffff22;border-radius:22px;background:#191919f2;text-align:center}
+.logo{font-size:48px;line-height:1;margin-bottom:8px}
+h1{margin:4px 0 8px;font-size:1.8rem}
+.intro{margin:0 0 18px;color:#c9c9c9;line-height:1.45}
+#startBtn,#settingsBtn{width:100%;margin-top:9px}
+#settingsPanel{display:none;text-align:left;margin-top:14px;padding:12px;border-radius:14px;background:#ffffff08}
+#settingsPanel.open{display:block}
+.settingsGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.check{display:flex;align-items:center;gap:8px;margin-top:10px;color:#ccc;font-size:.78rem}
+.check input{width:auto;min-height:0}
+.build{margin-top:13px;color:#777;font-size:.7rem}
+#error{display:none;margin-top:12px;padding:10px;border-radius:10px;background:#421d1d;color:#ffd9d9;text-align:left;white-space:pre-wrap}
+
 canvas{position:fixed;inset:0;width:100%;height:100%}
 #overlay{position:fixed;inset:0;z-index:10;pointer-events:none;display:none}
 #topbar{position:absolute;top:max(12px,env(safe-area-inset-top));left:12px;right:12px;display:flex;gap:8px}
-.status{flex:1;min-width:0;padding:10px 12px;border-radius:15px;background:#000a;backdrop-filter:blur(8px)}
-#stage{font-size:.76rem;color:#ccc}#distance{font-size:1.25rem;font-weight:800}#detail{font-size:.72rem;color:#bbb;margin-top:2px}#stability{font-size:.66rem;color:#aaa;margin-top:3px}
-#menuBtn{pointer-events:auto;width:50px;height:50px;min-height:50px;padding:0;border-radius:15px;background:#000b;color:#fff;font-size:1.45rem}
-#menu{position:absolute;top:max(10px,env(safe-area-inset-top));right:10px;width:min(88vw,350px);height:min(76vh,650px);display:none;overflow:hidden;border:1px solid #ffffff24;border-radius:18px;background:#0b0b0bf5;pointer-events:auto;box-shadow:0 18px 50px #0008}
-#menu.open{display:grid;grid-template-rows:auto 1fr auto}
+.status{flex:1;min-width:0;padding:9px 11px;border-radius:14px;background:#000a;backdrop-filter:blur(8px)}
+#stage{font-size:.73rem;color:#ccc}
+#distance{font-size:1.2rem;font-weight:800}
+#detail{font-size:.68rem;color:#aaa;margin-top:1px}
+#stability{font-size:.62rem;color:#888;margin-top:3px}
+#menuBtn{pointer-events:auto;width:48px;height:48px;min-height:48px;padding:0;border-radius:14px;background:#000b;color:#fff;font-size:1.35rem}
+
+#aim{position:absolute;left:50%;top:50%;width:44px;height:44px;transform:translate(-50%,-50%)}
+#aim:before,#aim:after{content:"";position:absolute;background:#fff;border-radius:2px}
+#aim:before{width:22px;height:2px;left:11px;top:21px}
+#aim:after{width:2px;height:22px;left:21px;top:11px}
+#aim.hit:before,#aim.hit:after{background:#69ff9a}
+#aim.virtual:before,#aim.virtual:after{background:#ffd166}
+
+#captureBtn{position:absolute;left:50%;bottom:max(72px,calc(env(safe-area-inset-bottom) + 72px));transform:translateX(-50%);width:70px;height:70px;min-height:0;padding:0;border:4px solid #fff;border-radius:50%;background:#ffffff26;pointer-events:auto;box-shadow:0 0 0 4px #0005}
+#captureBtn:after{content:"";position:absolute;inset:7px;border-radius:50%;background:#fff}
+#hint{position:absolute;left:50%;bottom:max(14px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(92vw,560px);padding:8px 11px;border-radius:11px;background:#000b;text-align:center;color:#ddd;font-size:.75rem}
+
+#menuPanel{position:absolute;top:max(10px,env(safe-area-inset-top));right:10px;width:min(88vw,350px);height:min(76vh,650px);display:none;overflow:hidden;border:1px solid #ffffff24;border-radius:18px;background:#0b0b0bf5;pointer-events:auto;box-shadow:0 18px 50px #0008}
+#menuPanel.open{display:grid;grid-template-rows:auto 1fr auto}
 .menuHead{display:grid;grid-template-columns:38px 1fr 38px;align-items:center;gap:7px;padding:8px;border-bottom:1px solid #ffffff15}
-.menuHead button{width:38px;height:38px;min-height:38px;padding:0}.menuTitle{text-align:center}.menuTitle strong{display:block;font-size:.86rem}.menuTitle span{display:block;font-size:.62rem;color:#888;margin-top:1px}
-.menuBody{overflow-y:auto;padding:8px;overscroll-behavior:contain}.page{display:none}.page.active{display:block}
-.sectionTitle{margin:5px 3px 6px;color:#888;font-size:.61rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
-.card{padding:6px;border:1px solid #ffffff12;border-radius:12px;background:#ffffff08;margin-bottom:8px}
-.navRow{display:grid;grid-template-columns:1fr auto;gap:6px;align-items:center;padding:8px 6px;min-height:46px;border-bottom:1px solid #ffffff10;cursor:pointer}.navRow:last-child{border-bottom:0}
-.navRow strong{display:block;font-size:.78rem}.navRow span{display:block;color:#999;font-size:.64rem;margin-top:2px}.chev{color:#888;font-size:1rem}
-#menu button{min-height:36px;padding:7px 9px;border-radius:9px;font-size:.72rem;margin-top:5px}
-.choice{display:grid;grid-template-columns:1fr 1fr;gap:6px}.fields{display:grid;grid-template-columns:1fr 76px;gap:6px}
-#menu input,#menu select{min-height:39px;padding:7px 8px;font-size:.76rem}
-.help{font-size:.63rem;line-height:1.3;color:#888;margin:6px 3px}
-.objectRow{display:grid;grid-template-columns:1fr auto;gap:5px;align-items:center;padding:5px;border-bottom:1px solid #ffffff10}.objectRow:last-child{border:0}.objectRow button{margin:0!important}
-.danger{background:#572222!important;color:#ffdede!important}.menuFoot{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:8px;border-top:1px solid #ffffff15}.menuFoot button{margin:0!important}
-#aim{position:absolute;left:50%;top:50%;width:46px;height:46px;transform:translate(-50%,-50%)}#aim:before,#aim:after{content:"";position:absolute;background:#fff;border-radius:2px}#aim:before{width:24px;height:2px;left:11px;top:22px}#aim:after{width:2px;height:24px;left:22px;top:11px}#aim.ready:before,#aim.ready:after{background:#69ff9a}#aim.virtual:before,#aim.virtual:after{background:#ffd166}
-#capture{position:absolute;left:50%;bottom:max(76px,calc(env(safe-area-inset-bottom) + 76px));transform:translateX(-50%);width:72px;height:72px;min-height:0;padding:0;border:4px solid #fff;border-radius:50%;background:#ffffff25;pointer-events:auto;box-shadow:0 0 0 4px #0005}#capture:after{content:"";position:absolute;inset:7px;border-radius:50%;background:#fff}#capture:disabled{opacity:.35}
-#hint{position:absolute;left:50%;bottom:max(14px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(92vw,560px);padding:8px 12px;text-align:center;border-radius:12px;background:#000b;font-size:.78rem;color:#ddd}
+.menuHead button{width:38px;height:38px;min-height:38px;padding:0}
+.menuTitle{text-align:center}
+.menuTitle strong{display:block;font-size:.85rem}
+.menuTitle span{display:block;font-size:.61rem;color:#888;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.menuBody{overflow-y:auto;padding:8px;overscroll-behavior:contain}
+.menuFoot{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:8px;border-top:1px solid #ffffff15}
+.menuFoot button{margin:0}
+.page{display:none}.page.active{display:block}
+.sectionTitle{margin:5px 3px 6px;color:#888;font-size:.6rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.menuCard{padding:6px;border:1px solid #ffffff12;border-radius:12px;background:#ffffff08;margin-bottom:8px}
+.navRow{display:grid;grid-template-columns:1fr auto;gap:6px;align-items:center;padding:8px 6px;min-height:45px;border-bottom:1px solid #ffffff10;cursor:pointer}
+.navRow:last-child{border-bottom:0}
+.navRow strong{display:block;font-size:.77rem}
+.navRow span{display:block;color:#999;font-size:.63rem;margin-top:2px}
+.chev{color:#888;font-size:1rem}
+.choice{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.fields{display:grid;grid-template-columns:1fr 76px;gap:6px}
+.help{font-size:.62rem;line-height:1.35;color:#888;margin:6px 3px}
+.menuCard button{width:100%;font-size:.7rem;margin-top:5px;min-height:36px}
+.objectRow{display:grid;grid-template-columns:1fr auto;gap:5px;align-items:center;padding:5px;border-bottom:1px solid #ffffff10}
+.objectRow:last-child{border-bottom:0}
+.objectRow button{margin:0;width:auto}
 </style>
 </head>
 <body>
-<div id="app"><div class="panel launcher"><div class="brand">⌖</div><h1>Measure AR</h1><p>Meten, uitzetten en geometrie bouwen in de echte wereld.</p><button id="startBtn">Start AR</button><button id="settingsBtn" class="secondary wide">Instellingen</button><div id="settings" class="settings"><div class="settingsGrid"><div><label>Eenheid</label><select id="unitDefault"><option value="m">meter</option><option value="cm">centimeter</option></select></div><div><label>Lijndikte</label><select id="thicknessDefault"><option value="1">1 · fijn</option><option value="2" selected>2 · normaal</option><option value="3">3 · duidelijk</option><option value="4">4 · zwaar</option></select></div></div><label class="check"><input id="labelsDefault" type="checkbox" checked> Labels op lijnen</label></div><div class="version">v0.6.7.2 checked rebuild</div><div id="error"></div></div></div>
+
+<div id="app">
+  <div class="cardStart">
+    <div class="logo">⌖</div>
+    <h1>Measure AR</h1>
+    <p class="intro">AR meten, uitzetten en geometrie bouwen in de echte wereld.</p>
+    <button id="startBtn" class="primary">Start AR</button>
+    <button id="settingsBtn" class="secondary">Instellingen</button>
+
+    <div id="settingsPanel">
+      <div class="settingsGrid">
+        <div>
+          <label for="defaultUnit">Eenheid</label>
+          <select id="defaultUnit"><option value="m">meter</option><option value="cm">centimeter</option></select>
+        </div>
+        <div>
+          <label for="defaultThickness">Lijndikte</label>
+          <select id="defaultThickness"><option value="1">1 · fijn</option><option value="2" selected>2 · normaal</option><option value="3">3 · duidelijk</option><option value="4">4 · zwaar</option></select>
+        </div>
+      </div>
+      <label class="check"><input id="defaultLabels" type="checkbox" checked> Labels op lijnen tonen</label>
+    </div>
+
+    <div class="build">v0.6.8 · rewritten clean core</div>
+    <div id="error"></div>
+  </div>
+</div>
 
 <div id="overlay">
-<div id="topbar"><div class="status"><div id="stage">Zoek een oppervlak</div><div id="distance">—</div><div id="detail"></div><div id="stability">Stabiliteit: —</div></div><button id="menuBtn">☰</button></div>
-<div id="menu">
-<div class="menuHead"><button id="navBack" class="secondary">‹</button><div class="menuTitle"><strong id="pageTitle">Measure AR</strong><span id="modeLabel">Meten · 0p · 0l · v0.6.7.2</span></div><button id="closeMenu" class="secondary">✕</button></div>
-<div class="menuBody">
-<section id="p-home" class="page active">
-<div class="sectionTitle">Werken</div><div class="card">
-<div class="navRow" data-nav="measure"><div><strong>Meten</strong><span>Afstand tussen twee punten</span></div><div class="chev">›</div></div>
-<div class="navRow" data-nav="stake"><div><strong>Uitzetten</strong><span>Punt op vaste afstand</span></div><div class="chev">›</div></div>
-<div class="navRow" data-nav="newline"><div><strong>Nieuwe lijn</strong><span>Verder bouwen aan geometrie</span></div><div class="chev">›</div></div></div>
-<div class="sectionTitle">Project</div><div class="card"><div class="navRow" data-nav="objects"><div><strong>Objecten</strong><span>Punten en lijnen beheren</span></div><div class="chev">›</div></div></div>
-<div class="sectionTitle">Bewerken</div><div class="card"><button id="undo" class="secondary wide">Ongedaan maken</button><button id="clearAll" class="danger wide">Alles wissen</button></div>
-</section>
-<section id="p-measure" class="page"><div class="sectionTitle">Meten</div><div class="card"><div class="choice"><button id="measureNew">Nieuw punt</button><button id="measureLast" class="secondary">Laatste punt</button></div><button id="measureExisting" class="secondary wide">Bestaand punt kiezen</button></div><p class="help">Plaats A en daarna B. De afstand wordt op de lijn weergegeven.</p></section>
-<section id="p-stake" class="page"><div class="sectionTitle">Uitzetten</div><div class="card"><label>Afstand</label><div class="fields"><input id="targetDistance" type="number" min=".01" step=".01" value="2.00"><select id="targetUnit"><option value="m">m</option><option value="cm">cm</option></select></div><label>Richting</label><select id="direction"><option value="horizontal">Horizontaal</option><option value="surface">Op oppervlak</option><option value="free3d">Vrij 3D</option></select><div class="choice"><button id="stakeNew">Nieuw startpunt</button><button id="stakeLast" class="secondary">Laatste punt</button></div><button id="stakeExisting" class="secondary wide">Bestaand punt kiezen</button><button id="stakeSelected" class="secondary wide hidden">Vanaf geselecteerd punt</button></div></section>
-<section id="p-newline" class="page"><div class="sectionTitle">Nieuwe lijn</div><div class="card"><button id="newLine" class="wide">Nieuw → nieuw</button><button id="fromLast" class="secondary wide">Vanaf laatste punt</button><button id="stakeFromLast" class="secondary wide">Vaste afstand vanaf laatste punt</button></div></section>
-<section id="p-objects" class="page"><div class="sectionTitle">Objecten</div><div id="objects" class="card"></div></section>
-<section id="p-line" class="page"><div class="sectionTitle">Lijn bewerken</div><div class="card"><div id="lineName" class="help">—</div><label>Lengte vanaf startpunt</label><input id="lineLength" type="number" min=".01" step=".01"><label>Dikte</label><select id="lineThickness"><option value="1">1 · fijn</option><option value="2">2 · normaal</option><option value="3">3 · duidelijk</option><option value="4">4 · zwaar</option></select><button id="applyLength" class="wide">Lengte toepassen</button><div class="choice"><button id="lineStart" class="secondary">Vanaf start</button><button id="lineEnd" class="secondary">Vanaf einde</button></div><button id="deleteLine" class="danger wide">Lijn wissen</button></div></section>
-<section id="p-point" class="page"><div class="sectionTitle">Punt</div><div class="card"><div id="pointName" class="help">—</div><button id="pointLine" class="wide">Nieuwe lijn vanaf punt</button><button id="pointStake" class="secondary wide">Uitzetten vanaf punt</button><button id="deletePoint" class="danger wide">Punt wissen</button></div></section>
-</div>
-<div class="menuFoot"><button id="arSettings" class="secondary">Instellingen</button><button id="exitAR" class="secondary">Startscherm</button></div>
-</div>
-<div id="aim"></div><button id="capture" disabled aria-label="Punt vastleggen"></button><div id="hint">Beweeg rustig zodat ARCore een oppervlak kan herkennen.</div>
-</div>
+  <div id="topbar">
+    <div class="status">
+      <div id="stage">Zoek een oppervlak</div>
+      <div id="distance">—</div>
+      <div id="detail"></div>
+      <div id="stability">Stabiliteit: —</div>
+    </div>
+    <button id="menuBtn" class="secondary" aria-label="Menu">☰</button>
+  </div>
 
+  <div id="menuPanel">
+    <div class="menuHead">
+      <button id="menuBackBtn" class="secondary" aria-label="Terug">‹</button>
+      <div class="menuTitle"><strong id="menuTitle">Measure AR</strong><span id="menuMeta">Meten · 0p · 0l · v0.6.8</span></div>
+      <button id="menuCloseBtn" class="secondary" aria-label="Sluiten">✕</button>
+    </div>
+
+    <div class="menuBody">
+      <section id="page-home" class="page active">
+        <div class="sectionTitle">Werken</div>
+        <div class="menuCard">
+          <div class="navRow" data-page="measure"><div><strong>Meten</strong><span>Afstand tussen twee punten</span></div><div class="chev">›</div></div>
+          <div class="navRow" data-page="stake"><div><strong>Uitzetten</strong><span>Punt op vaste afstand plaatsen</span></div><div class="chev">›</div></div>
+          <div class="navRow" data-page="newline"><div><strong>Nieuwe lijn</strong><span>Verder bouwen aan bestaande geometrie</span></div><div class="chev">›</div></div>
+        </div>
+        <div class="sectionTitle">Project</div>
+        <div class="menuCard"><div class="navRow" data-page="objects"><div><strong>Objecten</strong><span>Punten en lijnen beheren</span></div><div class="chev">›</div></div></div>
+        <div class="sectionTitle">Bewerken</div>
+        <div class="menuCard"><button id="undoBtn" class="secondary">Ongedaan maken</button><button id="clearAllBtn" class="danger">Alles wissen</button></div>
+      </section>
+
+      <section id="page-measure" class="page">
+        <div class="sectionTitle">Meten</div>
+        <div class="menuCard">
+          <div class="choice"><button id="measureNewBtn" class="primary">Nieuw punt</button><button id="measureLastBtn" class="secondary">Laatste punt</button></div>
+          <button id="measureExistingBtn" class="secondary">Bestaand punt kiezen</button>
+        </div>
+        <p class="help">Plaats een startpunt en daarna het eindpunt. De gemeten afstand verschijnt op de lijn.</p>
+      </section>
+
+      <section id="page-stake" class="page">
+        <div class="sectionTitle">Uitzetten</div>
+        <div class="menuCard">
+          <label for="stakeDistance">Afstand</label>
+          <div class="fields"><input id="stakeDistance" type="number" min=".01" step=".01" value="2.00"><select id="stakeUnit"><option value="m">m</option><option value="cm">cm</option></select></div>
+          <label for="stakeDirection">Richting</label>
+          <select id="stakeDirection"><option value="horizontal">Horizontaal</option><option value="surface">Op oppervlak</option><option value="free3d">Vrij 3D</option></select>
+          <div class="choice"><button id="stakeNewBtn" class="primary">Nieuw startpunt</button><button id="stakeLastBtn" class="secondary">Laatste punt</button></div>
+          <button id="stakeExistingBtn" class="secondary">Bestaand punt kiezen</button>
+          <button id="stakeSelectedBtn" class="secondary" style="display:none">Vanaf geselecteerd punt</button>
+        </div>
+      </section>
+
+      <section id="page-newline" class="page">
+        <div class="sectionTitle">Nieuwe lijn</div>
+        <div class="menuCard">
+          <button id="newIndependentBtn" class="primary">Nieuw → nieuw</button>
+          <button id="newFromLastBtn" class="secondary">Vanaf laatste punt</button>
+          <button id="stakeFromLastBtn" class="secondary">Vaste afstand vanaf laatste punt</button>
+        </div>
+      </section>
+
+      <section id="page-objects" class="page">
+        <div class="sectionTitle">Objecten</div>
+        <div id="objectsList" class="menuCard"></div>
+      </section>
+
+      <section id="page-line" class="page">
+        <div class="sectionTitle">Lijn</div>
+        <div class="menuCard">
+          <div id="lineInfo" class="help">—</div>
+          <label for="lineLength">Lengte vanaf startpunt</label>
+          <input id="lineLength" type="number" min=".01" step=".01">
+          <label for="lineThickness">Dikte</label>
+          <select id="lineThickness"><option value="1">1 · fijn</option><option value="2">2 · normaal</option><option value="3">3 · duidelijk</option><option value="4">4 · zwaar</option></select>
+          <button id="applyLineLengthBtn" class="primary">Lengte toepassen</button>
+          <div class="choice"><button id="lineFromStartBtn" class="secondary">Vanaf start</button><button id="lineFromEndBtn" class="secondary">Vanaf einde</button></div>
+          <button id="deleteLineBtn" class="danger">Lijn wissen</button>
+        </div>
+      </section>
+
+      <section id="page-point" class="page">
+        <div class="sectionTitle">Punt</div>
+        <div class="menuCard">
+          <div id="pointInfo" class="help">—</div>
+          <button id="pointNewLineBtn" class="primary">Nieuwe lijn vanaf punt</button>
+          <button id="pointStakeBtn" class="secondary">Uitzetten vanaf punt</button>
+          <button id="deletePointBtn" class="danger">Punt wissen</button>
+        </div>
+      </section>
+    </div>
+
+    <div class="menuFoot">
+      <button id="menuSettingsBtn" class="secondary">Instellingen</button>
+      <button id="exitArBtn" class="secondary">Startscherm</button>
+    </div>
+  </div>
+
+  <div id="aim"></div>
+  <button id="captureBtn" disabled aria-label="Punt vastleggen"></button>
+  <div id="hint">Beweeg rustig zodat ARCore een oppervlak kan herkennen.</div>
+</div>
 
 <script>
-window.__measureModuleBooted = false;
-window.addEventListener('error', function(e) {
-  const box = document.getElementById('error');
-  if (!box) return;
-  box.style.display = 'block';
-  box.textContent = 'JavaScript-fout: ' + (e.message || 'onbekende fout');
-});
-setTimeout(function() {
-  if (!window.__measureModuleBooted) {
-    const box = document.getElementById('error');
-    if (box) {
-      box.style.display = 'block';
-      box.textContent = 'De app-module kon niet laden. Controleer internet/CDN en herlaad de pagina.';
-    }
-  }
-}, 3500);
-</script>
+(function(){
+"use strict";
 
-<script type="importmap">
-{
-  "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.167.1/build/three.module.js",
-    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.167.1/examples/jsm/"
-  }
-}
-</script>
+const $ = id => document.getElementById(id);
 
-<script type="module">
-import * as THREE from 'three';
-import { Line2 } from 'three/addons/lines/Line2.js';
-import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
-import { LineGeometry } from 'three/addons/lines/LineGeometry.js';
+const app=$("app"), overlay=$("overlay"), startBtn=$("startBtn"), settingsBtn=$("settingsBtn"), settingsPanel=$("settingsPanel"), errorBox=$("error");
+const defaultUnit=$("defaultUnit"), defaultThickness=$("defaultThickness"), defaultLabels=$("defaultLabels");
+const stage=$("stage"), distanceEl=$("distance"), detail=$("detail"), stability=$("stability"), hint=$("hint"), aim=$("aim"), captureBtn=$("captureBtn");
+const menuBtn=$("menuBtn"), menuPanel=$("menuPanel"), menuBackBtn=$("menuBackBtn"), menuCloseBtn=$("menuCloseBtn"), menuTitle=$("menuTitle"), menuMeta=$("menuMeta");
+const stakeDistance=$("stakeDistance"), stakeUnit=$("stakeUnit"), stakeDirection=$("stakeDirection"), objectsList=$("objectsList");
+const pages=["home","measure","stake","newline","objects","line","point"];
 
-window.__measureModuleBooted = true;
-const bootErrorBox = document.getElementById('error');
-if (bootErrorBox && bootErrorBox.textContent.startsWith('De app-module')) {
-  bootErrorBox.style.display = 'none';
-  bootErrorBox.textContent = '';
-}
+let THREE=null, Line2=null, LineMaterial=null, LineGeometry=null;
+let renderer=null, scene=null, camera=null, reticle=null, xrSession=null, hitSource=null, hitRequested=false;
 
-const $=id=>document.getElementById(id);
-const app=$('app'),overlay=$('overlay'),startBtn=$('startBtn'),settingsBtn=$('settingsBtn'),settings=$('settings'),error=$('error');
-const unitDefault=$('unitDefault'),thicknessDefault=$('thicknessDefault'),labelsDefault=$('labelsDefault');
-const menu=$('menu'),menuBtn=$('menuBtn'),closeMenuBtn=$('closeMenu'),navBack=$('navBack'),pageTitle=$('pageTitle'),modeLabel=$('modeLabel');
-const stage=$('stage'),distance=$('distance'),detail=$('detail'),stability=$('stability'),hint=$('hint'),aim=$('aim'),capture=$('capture'),objects=$('objects');
-const targetDistance=$('targetDistance'),targetUnit=$('targetUnit'),directionSelect=$('direction');
-const pages=['home','measure','stake','newline','objects','line','point']; let menuStack=['home'];
-const points=[],lines=[],undo=[]; let pointCounter=0,selectedPoint=null,selectedLine=null,activeStart=null,pendingStakePoint=null;
-let mode='measure',directionMode='horizontal',targetMeters=2;
-let renderer,scene,camera,reticle,xrSession=null,hitSource=null,hitRequested=false;
-let pointA=null,normalA=null,currentTarget=null,targetSource='none',temporaryDirectionMarker=null,currentFinished=false;
-const tmp=new THREE.Vector3(),quat=new THREE.Quaternion(),up=new THREE.Vector3(0,1,0),camPos=new THREE.Vector3(),camQuat=new THREE.Quaternion(),forward=new THREE.Vector3();
+let mode="measure", directionMode="horizontal", targetMeters=2;
+let pointA=null, normalA=null, activeStartId=null, currentTarget=null, targetSource="none", lineFinished=false;
+let temporaryDirectionMarker=null;
+
+const points=[], lines=[], undoStack=[];
+let pointCounter=0, selectedLineId=null, selectedPointId=null, pendingStakePointId=null;
+let menuStack=["home"];
+
 const samples=[]; const MAX_SAMPLES=16;
+let tmp=null, tmpQuat=null, up=null, camPos=null, camQuat=null, forward=null;
 
-function fmt(m){return m<1?`${(m*100).toFixed(1)} cm`:m<10?`${m.toFixed(3)} m`:`${m.toFixed(2)} m`}
-function pointName(i){const c=String.fromCharCode(65+i%26),n=Math.floor(i/26);return n?c+n:c}
-function gp(id){return points.find(p=>p.id===id)||null} function gl(id){return lines.find(l=>l.id===id)||null}
-function showError(t){error.style.display='block';error.textContent=t}
-function updateLabel(){modeLabel.textContent=`${mode==='measure'?'Meten':'Uitzetten'} · ${points.length}p · ${lines.length}l · v0.6.7.2`}
-function showPage(name,push=true){pages.forEach(n=>$(`p-${n}`).classList.remove('active'));$(`p-${name}`).classList.add('active');pageTitle.textContent={home:'Measure AR',measure:'Meten',stake:'Uitzetten',newline:'Nieuwe lijn',objects:'Objecten',line:'Lijn',point:'Punt'}[name];if(push&&menuStack.at(-1)!==name)menuStack.push(name);navBack.style.visibility=name==='home'?'hidden':'visible';if(name==='objects')updateObjects()}
-function openMenu(){menuStack=['home'];showPage('home',false);targetUnit.value=unitDefault.value;targetDistance.value=targetUnit.value==='cm'?(targetMeters*100).toFixed(1):targetMeters.toFixed(2);directionSelect.value=directionMode;menu.classList.add('open');updateLabel()}
-function closeMenu(){menu.classList.remove('open')}
-function goBack(){if(menuStack.length<=1){closeMenu();return}menuStack.pop();showPage(menuStack.at(-1),false)}
-function readTarget(){const n=Number(targetDistance.value);if(!Number.isFinite(n)||n<=0)return null;return targetUnit.value==='cm'?n/100:n}
+function showError(msg){ errorBox.style.display="block"; errorBox.textContent=msg; }
+function hideError(){ errorBox.style.display="none"; errorBox.textContent=""; }
+function fmt(m){ return m<1 ? `${(m*100).toFixed(1)} cm` : m<10 ? `${m.toFixed(3)} m` : `${m.toFixed(2)} m`; }
+function pointName(i){ const c=String.fromCharCode(65+(i%26)); const n=Math.floor(i/26); return n?c+n:c; }
+function getPoint(id){ return points.find(p=>p.id===id)||null; }
+function getLine(id){ return lines.find(l=>l.id===id)||null; }
+
+function updateMeta(){ menuMeta.textContent=`${mode==="measure"?"Meten":"Uitzetten"} · ${points.length}p · ${lines.length}l · v0.6.8`; }
+function showPage(name,push=true){
+  pages.forEach(p=>$("page-"+p).classList.remove("active"));
+  $("page-"+name).classList.add("active");
+  const titles={home:"Measure AR",measure:"Meten",stake:"Uitzetten",newline:"Nieuwe lijn",objects:"Objecten",line:"Lijn",point:"Punt"};
+  menuTitle.textContent=titles[name]||"Measure AR";
+  if(push && menuStack[menuStack.length-1]!==name) menuStack.push(name);
+  menuBackBtn.style.visibility=name==="home"?"hidden":"visible";
+  if(name==="objects") renderObjects();
+}
+function openMenu(){
+  menuStack=["home"]; showPage("home",false);
+  stakeUnit.value=defaultUnit.value;
+  stakeDistance.value=stakeUnit.value==="cm" ? (targetMeters*100).toFixed(1) : targetMeters.toFixed(2);
+  stakeDirection.value=directionMode;
+  menuPanel.classList.add("open");
+  updateMeta();
+}
+function closeMenu(){ menuPanel.classList.remove("open"); }
+function menuBack(){ if(menuStack.length<=1){ closeMenu(); return; } menuStack.pop(); showPage(menuStack[menuStack.length-1],false); }
+
+async function loadThree(){
+  if(THREE) return;
+  try{
+    const threeMod = await import("https://esm.sh/three@0.167.1");
+    const [l2,lm,lg] = await Promise.all([
+      import("https://esm.sh/three@0.167.1/examples/jsm/lines/Line2.js"),
+      import("https://esm.sh/three@0.167.1/examples/jsm/lines/LineMaterial.js"),
+      import("https://esm.sh/three@0.167.1/examples/jsm/lines/LineGeometry.js")
+    ]);
+    THREE=threeMod; Line2=l2.Line2; LineMaterial=lm.LineMaterial; LineGeometry=lg.LineGeometry;
+    tmp=new THREE.Vector3(); tmpQuat=new THREE.Quaternion(); up=new THREE.Vector3(0,1,0); camPos=new THREE.Vector3(); camQuat=new THREE.Quaternion(); forward=new THREE.Vector3();
+  }catch(err){
+    throw new Error("Three.js kon niet laden. Controleer internetverbinding en herlaad.\n"+err.message);
+  }
+}
 
 function initThree(){
- scene=new THREE.Scene();camera=new THREE.PerspectiveCamera();
- renderer=new THREE.WebGLRenderer({alpha:true,antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);renderer.xr.enabled=true;renderer.xr.setReferenceSpaceType('local');renderer.domElement.style.display='none';renderer.domElement.style.pointerEvents='none';document.body.appendChild(renderer.domElement);
- reticle=new THREE.Mesh(new THREE.RingGeometry(.035,.045,40).rotateX(-Math.PI/2),new THREE.MeshBasicMaterial({color:0x69ff9a}));reticle.matrixAutoUpdate=false;reticle.visible=false;scene.add(reticle);
+  scene=new THREE.Scene();
+  camera=new THREE.PerspectiveCamera();
+  renderer=new THREE.WebGLRenderer({alpha:true,antialias:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+  renderer.setSize(innerWidth,innerHeight);
+  renderer.xr.enabled=true;
+  renderer.xr.setReferenceSpaceType("local");
+  renderer.domElement.style.display="none";
+  renderer.domElement.style.pointerEvents="none";
+  document.body.appendChild(renderer.domElement);
+
+  reticle=new THREE.Mesh(
+    new THREE.RingGeometry(.035,.045,40).rotateX(-Math.PI/2),
+    new THREE.MeshBasicMaterial({color:0x69ff9a})
+  );
+  reticle.matrixAutoUpdate=false;
+  reticle.visible=false;
+  scene.add(reticle);
 }
-function dispose(o){if(!o)return;scene.remove(o);o.traverse?.(c=>{c.geometry?.dispose?.();if(c.material?.map)c.material.map.dispose?.();c.material?.dispose?.()})}
-function marker(color){const g=new THREE.Group();const s=new THREE.Mesh(new THREE.SphereGeometry(.011,18,12),new THREE.MeshBasicMaterial({color}));const r=new THREE.Mesh(new THREE.RingGeometry(.017,.022,32),new THREE.MeshBasicMaterial({color,side:THREE.DoubleSide}));r.rotation.x=-Math.PI/2;g.add(s,r);scene.add(g);return g}
-function textSprite(text){const c=document.createElement('canvas');c.width=512;c.height=128;const x=c.getContext('2d');x.font='700 34px system-ui';x.textAlign='center';x.textBaseline='middle';x.fillStyle='#000c';x.fillRect(25,17,462,94);x.fillStyle='#fff';x.fillText(text,256,64);const tex=new THREE.CanvasTexture(c),mat=new THREE.SpriteMaterial({map:tex,transparent:true,depthTest:false});const s=new THREE.Sprite(mat);s.scale.set(.72,.18,1);s.userData.base=.72;return s}
-function px(t){return({1:2,2:4,3:6,4:8})[t]||4}
-function makeLine(a,b,t){const g=new LineGeometry();g.setPositions([a.x,a.y,a.z,b.x,b.y,b.z]);const m=new LineMaterial({color:0xffffff,linewidth:px(t),worldUnits:false,transparent:true,opacity:.98});m.resolution.set(innerWidth,innerHeight);const l=new Line2(g,m);l.computeLineDistances();scene.add(l);return l}
-function createPoint(pos,color=0x69ff9a){const p={id:`p${Date.now()}${Math.random()}`,name:pointName(pointCounter++),position:pos.clone(),marker:marker(color)};p.marker.position.copy(pos);points.push(p);updateObjects();return p}
-function createLine(a,b){const t=Number(thicknessDefault.value)||2,d=a.position.distanceTo(b.position),name=a.name+b.name,obj=makeLine(a.position,b.position,t),label=textSprite(`${name} · ${fmt(d)}`);label.position.copy(a.position).add(b.position).multiplyScalar(.5);label.position.y+=.04;scene.add(label);const l={id:`l${Date.now()}${Math.random()}`,name,startId:a.id,endId:b.id,distance:d,object:obj,label,thickness:t};lines.push(l);undo.push({type:'created',lineId:l.id,endId:b.id});updateObjects();return l}
-function refreshLine(l){const a=gp(l.startId),b=gp(l.endId);if(!a||!b)return;l.distance=a.position.distanceTo(b.position);l.object.geometry.setPositions([a.position.x,a.position.y,a.position.z,b.position.x,b.position.y,b.position.z]);l.object.computeLineDistances();l.object.material.linewidth=px(l.thickness);l.object.material.resolution.set(innerWidth,innerHeight);const old=l.label;l.label=textSprite(`${l.name} · ${fmt(l.distance)}`);l.label.position.copy(a.position).add(b.position).multiplyScalar(.5);l.label.position.y+=.04;scene.add(l.label);dispose(old);l.label.visible=labelsDefault.checked}
-function deleteLine(id){const i=lines.findIndex(l=>l.id===id);if(i<0)return;dispose(lines[i].object);dispose(lines[i].label);lines.splice(i,1);if(selectedLine===id)selectedLine=null;updateObjects()}
-function deletePoint(id){lines.filter(l=>l.startId===id||l.endId===id).map(l=>l.id).forEach(deleteLine);const i=points.findIndex(p=>p.id===id);if(i>=0){dispose(points[i].marker);points.splice(i,1)}if(activeStart===id)activeStart=null;if(selectedPoint===id)selectedPoint=null;updateObjects()}
-function clearGeometry(){[...lines].forEach(l=>deleteLine(l.id));[...points].forEach(p=>deletePoint(p.id));pointCounter=0;activeStart=selectedLine=selectedPoint=null;undo.length=0;resetCurrent();updateObjects()}
-function updateObjects(){updateLabel();objects.innerHTML='';if(!points.length&&!lines.length){objects.innerHTML='<div class="help">Nog geen objecten.</div>';return}lines.forEach(l=>{const r=document.createElement('div');r.className='objectRow';const b=document.createElement('button');b.className='secondary';b.textContent=`${l.name} · ${fmt(l.distance)}`;b.onclick=()=>{selectedLine=l.id;selectedPoint=null;$('lineName').textContent=`${l.name} · ${fmt(l.distance)}`;$('lineLength').value=l.distance.toFixed(3);$('lineThickness').value=l.thickness;showPage('line')};const d=document.createElement('button');d.className='danger';d.textContent='Wis';d.onclick=()=>deleteLine(l.id);r.append(b,d);objects.append(r)});points.forEach(p=>{const r=document.createElement('div');r.className='objectRow';const b=document.createElement('button');b.className='secondary';b.textContent=`Punt ${p.name}`;b.onclick=()=>{selectedPoint=p.id;selectedLine=null;$('pointName').textContent=`Punt ${p.name}`;showPage('point')};r.append(b);objects.append(r)})}
-function resetSamples(){samples.length=0;stability.textContent='Stabiliteit: meten…'}
-function addSample(p,src){if(samples.length&&samples.at(-1).src!==src)samples.length=0;samples.push({p:p.clone(),src});if(samples.length>MAX_SAMPLES)samples.shift();if(samples.length>2){const m=new THREE.Vector3();samples.forEach(s=>m.add(s.p));m.multiplyScalar(1/samples.length);let q=0;samples.forEach(s=>q+=s.p.distanceToSquared(m));const cm=Math.sqrt(q/samples.length)*100;stability.textContent=`Stabiliteit · jitter ±${cm.toFixed(1)} cm`}}
-function filtered(){if(!currentTarget)return null;if(samples.length<5)return currentTarget.clone();const m=new THREE.Vector3();samples.forEach(s=>m.add(s.p));return m.multiplyScalar(1/samples.length)}
-function resetCurrent(){pointA=null;normalA=null;activeStart=null;currentTarget=null;targetSource='none';currentFinished=false;if(temporaryDirectionMarker){dispose(temporaryDirectionMarker);temporaryDirectionMarker=null}distance.textContent='—';detail.textContent='';resetSamples()}
-function setStart(id){const p=gp(id);if(!p)return;resetCurrent();activeStart=id;pointA=p.position.clone();normalA=up.clone();stage.textContent=`Vanaf ${p.name}`;hint.textContent=mode==='measure'?'Richt op het eindpunt en druk op de meetknop.':'Richt in de gewenste richting en druk op de meetknop.';closeMenu()}
-function newLine(last=false){mode='measure';resetCurrent();if(last&&points.length)setStart(points.at(-1).id);else{stage.textContent='Nieuw startpunt';hint.textContent='Plaats het startpunt van de nieuwe lijn.';closeMenu()}}
-function startStake(id=null){const t=readTarget();if(t===null){stage.textContent='Ongeldige afstand';return}targetMeters=t;directionMode=directionSelect.value;mode='stake';resetCurrent();if(id)setStart(id);else{stage.textContent='Uitzetten';hint.textContent='Plaats eerst het startpunt.';closeMenu()}}
+function dispose(obj){
+  if(!obj||!scene) return;
+  scene.remove(obj);
+  obj.traverse?.(child=>{
+    child.geometry?.dispose?.();
+    if(child.material?.map) child.material.map.dispose?.();
+    child.material?.dispose?.();
+  });
+}
+function makeMarker(color){
+  const g=new THREE.Group();
+  const s=new THREE.Mesh(new THREE.SphereGeometry(.011,18,12),new THREE.MeshBasicMaterial({color}));
+  const r=new THREE.Mesh(new THREE.RingGeometry(.017,.022,32),new THREE.MeshBasicMaterial({color,side:THREE.DoubleSide}));
+  r.rotation.x=-Math.PI/2;
+  g.add(s,r); scene.add(g); return g;
+}
+function textSprite(text){
+  const c=document.createElement("canvas"); c.width=512; c.height=128;
+  const x=c.getContext("2d");
+  x.font="700 34px system-ui"; x.textAlign="center"; x.textBaseline="middle";
+  const w=Math.max(210,Math.min(480,x.measureText(text).width+70));
+  x.fillStyle="rgba(0,0,0,.78)"; x.fillRect(256-w/2,18,w,92);
+  x.fillStyle="#fff"; x.fillText(text,256,64);
+  const tex=new THREE.CanvasTexture(c);
+  const mat=new THREE.SpriteMaterial({map:tex,transparent:true,depthTest:false});
+  const s=new THREE.Sprite(mat); s.scale.set(.72,.18,1); scene.add(s); return s;
+}
+function thicknessPx(v){ return ({1:2,2:4,3:6,4:8})[v]||4; }
+function technicalLine(a,b,t){
+  const g=new LineGeometry();
+  g.setPositions([a.x,a.y,a.z,b.x,b.y,b.z]);
+  const m=new LineMaterial({color:0xffffff,linewidth:thicknessPx(t),worldUnits:false,transparent:true,opacity:.98});
+  m.resolution.set(innerWidth,innerHeight);
+  const l=new Line2(g,m); l.computeLineDistances(); scene.add(l); return l;
+}
+function createPoint(pos,color=0x69ff9a){
+  const p={id:"p"+Date.now()+Math.random(),name:pointName(pointCounter++),position:pos.clone(),marker:makeMarker(color)};
+  p.marker.position.copy(pos); points.push(p); renderObjects(); return p;
+}
+function createLine(a,b){
+  const thickness=Number(defaultThickness.value)||2;
+  const d=a.position.distanceTo(b.position), name=a.name+b.name;
+  const object=technicalLine(a.position,b.position,thickness);
+  const label=textSprite(`${name} · ${fmt(d)}`);
+  label.position.copy(a.position).add(b.position).multiplyScalar(.5); label.position.y+=.04;
+  const l={id:"l"+Date.now()+Math.random(),name,startId:a.id,endId:b.id,distance:d,object,label,thickness};
+  lines.push(l); undoStack.push({type:"created",lineId:l.id,endId:b.id}); renderObjects(); return l;
+}
+function refreshLine(l){
+  const a=getPoint(l.startId), b=getPoint(l.endId); if(!a||!b) return;
+  l.distance=a.position.distanceTo(b.position);
+  l.object.geometry.setPositions([a.position.x,a.position.y,a.position.z,b.position.x,b.position.y,b.position.z]);
+  l.object.computeLineDistances();
+  l.object.material.linewidth=thicknessPx(l.thickness);
+  l.object.material.resolution.set(innerWidth,innerHeight);
+  const old=l.label;
+  l.label=textSprite(`${l.name} · ${fmt(l.distance)}`);
+  l.label.position.copy(a.position).add(b.position).multiplyScalar(.5); l.label.position.y+=.04;
+  dispose(old);
+}
+function deleteLine(id){
+  const i=lines.findIndex(l=>l.id===id); if(i<0) return;
+  dispose(lines[i].object); dispose(lines[i].label); lines.splice(i,1);
+  if(selectedLineId===id) selectedLineId=null;
+  renderObjects();
+}
+function deletePoint(id){
+  lines.filter(l=>l.startId===id||l.endId===id).map(l=>l.id).forEach(deleteLine);
+  const i=points.findIndex(p=>p.id===id);
+  if(i>=0){ dispose(points[i].marker); points.splice(i,1); }
+  if(activeStartId===id) activeStartId=null;
+  if(selectedPointId===id) selectedPointId=null;
+  renderObjects();
+}
+function clearAll(){
+  [...lines].forEach(l=>deleteLine(l.id));
+  [...points].forEach(p=>deletePoint(p.id));
+  pointCounter=0; selectedLineId=null; selectedPointId=null; pendingStakePointId=null; undoStack.length=0;
+  resetCurrent(); renderObjects();
+}
 
-function reticlePos(){tmp.setFromMatrixPosition(reticle.matrix);return tmp.clone()}
-function reticleNormal(){quat.setFromRotationMatrix(reticle.matrix);return up.clone().applyQuaternion(quat).normalize()}
-function cameraRay(){const c=renderer.xr.getCamera(camera);c.getWorldPosition(camPos);c.getWorldQuaternion(camQuat);forward.set(0,0,-1).applyQuaternion(camQuat).normalize();return{origin:camPos.clone(),dir:forward.clone()}}
-function planeHit(o,d,p,n){const den=n.dot(d);if(Math.abs(den)<.015)return null;const t=n.dot(p.clone().sub(o))/den;if(t<=0||t>40)return null;return o.clone().add(d.clone().multiplyScalar(t))}
-function virtualTarget(){if(!pointA)return null;const r=cameraRay();if(mode==='stake'){let d=r.dir.clone();if(directionMode==='horizontal')d.y=0;else if(directionMode==='surface'){const n=(normalA||up).clone().normalize();d.sub(n.multiplyScalar(d.dot(n)))}if(d.lengthSq()<1e-6)return null;return pointA.clone().add(d.normalize().multiplyScalar(Math.min(Math.max(targetMeters,2),8)))}return planeHit(r.origin,r.dir,pointA,(normalA||up).clone().normalize())}
-function autoB(dirPoint){let d=dirPoint.clone().sub(pointA);if(directionMode==='horizontal')d.y=0;else if(directionMode==='surface'){const n=(normalA||up).clone().normalize();d.sub(n.multiplyScalar(d.dot(n)))}if(d.lengthSq()<1e-6)return null;return pointA.clone().add(d.normalize().multiplyScalar(targetMeters))}
-function aimState(s){aim.className=s==='hit'?'ready':s==='virtual'?'virtual':''}
+function renderObjects(){
+  updateMeta();
+  objectsList.innerHTML="";
+  if(!points.length&&!lines.length){ objectsList.innerHTML='<div class="help">Nog geen objecten.</div>'; return; }
 
-function place(){
- const p=filtered();if(!p)return;
- if(!pointA){const a=createPoint(p);activeStart=a.id;pointA=a.position.clone();normalA=targetSource==='hit'?reticleNormal():up.clone();resetSamples();stage.textContent=`Punt ${a.name} geplaatst`;distance.textContent=mode==='stake'?fmt(targetMeters):'—';hint.textContent=mode==='measure'?'Richt op punt B en druk opnieuw.':'Richt in de gewenste richting en druk opnieuw.';return}
- const a=gp(activeStart);if(!a)return;
- if(mode==='measure'){const b=createPoint(p,0xffd166),l=createLine(a,b);distance.textContent=fmt(l.distance);detail.textContent=`Lijn ${l.name}`;stage.textContent='Lijn voltooid';hint.textContent='Open ☰ om verder te bouwen.';currentFinished=true;capture.disabled=true}
- else{const bp=autoB(p);if(!bp)return;const b=createPoint(bp,0xffd166),l=createLine(a,b);temporaryDirectionMarker=marker(0x7ab7ff);temporaryDirectionMarker.position.copy(p);distance.textContent=fmt(l.distance);detail.textContent=`${l.name} · ${directionMode}`;stage.textContent='Punt automatisch geplaatst';hint.textContent='Open ☰ om verder te bouwen.';currentFinished=true;capture.disabled=true}
+  lines.forEach(l=>{
+    const row=document.createElement("div"); row.className="objectRow";
+    const open=document.createElement("button"); open.className="secondary"; open.textContent=`${l.name} · ${fmt(l.distance)}`;
+    open.onclick=()=>{ selectedLineId=l.id; selectedPointId=null; $("lineInfo").textContent=`${l.name} · ${fmt(l.distance)}`; $("lineLength").value=l.distance.toFixed(3); $("lineThickness").value=l.thickness; showPage("line"); };
+    const del=document.createElement("button"); del.className="danger"; del.textContent="Wis"; del.onclick=()=>deleteLine(l.id);
+    row.append(open,del); objectsList.append(row);
+  });
+
+  points.forEach(p=>{
+    const row=document.createElement("div"); row.className="objectRow";
+    const open=document.createElement("button"); open.className="secondary"; open.textContent=`Punt ${p.name}`;
+    open.onclick=()=>{ selectedPointId=p.id; selectedLineId=null; const linked=lines.filter(l=>l.startId===p.id||l.endId===p.id).map(l=>l.name).join(", "); $("pointInfo").textContent=linked?`Punt ${p.name} · ${linked}`:`Punt ${p.name}`; showPage("point"); };
+    row.append(open); objectsList.append(row);
+  });
+}
+
+function resetSamples(){ samples.length=0; stability.textContent="Stabiliteit: meten…"; }
+function addSample(p,src){
+  if(samples.length&&samples[samples.length-1].src!==src) samples.length=0;
+  samples.push({p:p.clone(),src}); if(samples.length>MAX_SAMPLES) samples.shift();
+  if(samples.length>2){
+    const mean=new THREE.Vector3(); samples.forEach(s=>mean.add(s.p)); mean.multiplyScalar(1/samples.length);
+    let q=0; samples.forEach(s=>q+=s.p.distanceToSquared(mean));
+    stability.textContent=`Stabiliteit · jitter ±${(Math.sqrt(q/samples.length)*100).toFixed(1)} cm`;
+  }
+}
+function filteredTarget(){
+  if(!currentTarget) return null;
+  if(samples.length<5) return currentTarget.clone();
+  const mean=new THREE.Vector3(); samples.forEach(s=>mean.add(s.p)); return mean.multiplyScalar(1/samples.length);
+}
+function resetCurrent(){
+  pointA=null; normalA=null; activeStartId=null; currentTarget=null; targetSource="none"; lineFinished=false;
+  if(temporaryDirectionMarker){ dispose(temporaryDirectionMarker); temporaryDirectionMarker=null; }
+  distanceEl.textContent="—"; detail.textContent=""; resetSamples();
+}
+function setStart(id){
+  const p=getPoint(id); if(!p) return;
+  resetCurrent(); activeStartId=id; pointA=p.position.clone(); normalA=up.clone();
+  stage.textContent=`Vanaf ${p.name}`;
+  hint.textContent=mode==="measure"?"Richt op het eindpunt en druk op de meetknop.":"Richt in de gewenste richting en druk op de meetknop.";
+  closeMenu();
+}
+function startMeasureNew(){ mode="measure"; resetCurrent(); stage.textContent="Nieuw startpunt"; hint.textContent="Plaats het startpunt van de nieuwe lijn."; closeMenu(); }
+function startMeasureFrom(id){ mode="measure"; setStart(id); }
+function readStake(){ const n=Number(stakeDistance.value); if(!Number.isFinite(n)||n<=0) return null; return stakeUnit.value==="cm"?n/100:n; }
+function startStake(id=null){
+  const t=readStake(); if(t===null){ stage.textContent="Ongeldige afstand"; return; }
+  targetMeters=t; directionMode=stakeDirection.value; mode="stake"; resetCurrent();
+  if(id) setStart(id); else{ stage.textContent="Uitzetten"; hint.textContent="Plaats eerst het startpunt."; closeMenu(); }
+}
+
+function reticlePosition(){ tmp.setFromMatrixPosition(reticle.matrix); return tmp.clone(); }
+function reticleNormal(){ tmpQuat.setFromRotationMatrix(reticle.matrix); return up.clone().applyQuaternion(tmpQuat).normalize(); }
+function cameraRay(){ const c=renderer.xr.getCamera(camera); c.getWorldPosition(camPos); c.getWorldQuaternion(camQuat); forward.set(0,0,-1).applyQuaternion(camQuat).normalize(); return {origin:camPos.clone(),dir:forward.clone()}; }
+function planeIntersection(o,d,p,n){ const den=n.dot(d); if(Math.abs(den)<.015) return null; const t=n.dot(p.clone().sub(o))/den; if(t<=0||t>40) return null; return o.clone().add(d.clone().multiplyScalar(t)); }
+function virtualTarget(){
+  if(!pointA) return null;
+  const ray=cameraRay();
+  if(mode==="stake"){
+    let d=ray.dir.clone();
+    if(directionMode==="horizontal") d.y=0;
+    else if(directionMode==="surface"){ const n=(normalA||up).clone().normalize(); d.sub(n.multiplyScalar(d.dot(n))); }
+    if(d.lengthSq()<1e-6) return null;
+    return pointA.clone().add(d.normalize().multiplyScalar(Math.min(Math.max(targetMeters,2),8)));
+  }
+  return planeIntersection(ray.origin,ray.dir,pointA,(normalA||up).clone().normalize());
+}
+function automaticB(directionPoint){
+  let d=directionPoint.clone().sub(pointA);
+  if(directionMode==="horizontal") d.y=0;
+  else if(directionMode==="surface"){ const n=(normalA||up).clone().normalize(); d.sub(n.multiplyScalar(d.dot(n))); }
+  if(d.lengthSq()<1e-6) return null;
+  return pointA.clone().add(d.normalize().multiplyScalar(targetMeters));
+}
+function setAim(src){ aim.className=src==="hit"?"hit":src==="virtual"?"virtual":""; }
+
+function placePoint(){
+  if(lineFinished) return;
+  const p=filteredTarget(); if(!p) return;
+
+  if(!pointA){
+    const a=createPoint(p); activeStartId=a.id; pointA=a.position.clone(); normalA=targetSource==="hit"?reticleNormal():up.clone();
+    resetSamples(); stage.textContent=`Punt ${a.name} geplaatst`; distanceEl.textContent=mode==="stake"?fmt(targetMeters):"—";
+    hint.textContent=mode==="measure"?"Richt op het eindpunt en druk opnieuw.":"Richt in de gewenste richting en druk opnieuw.";
+    return;
+  }
+
+  const a=getPoint(activeStartId); if(!a) return;
+
+  if(mode==="measure"){
+    const b=createPoint(p,0xffd166), l=createLine(a,b);
+    distanceEl.textContent=fmt(l.distance); detail.textContent=`Lijn ${l.name}`; stage.textContent="Lijn voltooid"; hint.textContent="Open ☰ om verder te bouwen."; lineFinished=true; captureBtn.disabled=true;
+  }else{
+    const bp=automaticB(p); if(!bp) return;
+    const b=createPoint(bp,0xffd166), l=createLine(a,b);
+    temporaryDirectionMarker=makeMarker(0x7ab7ff); temporaryDirectionMarker.position.copy(p);
+    distanceEl.textContent=fmt(l.distance); detail.textContent=`${l.name} · ${directionMode}`; stage.textContent="Punt automatisch geplaatst"; hint.textContent="Open ☰ om verder te bouwen."; lineFinished=true; captureBtn.disabled=true;
+  }
 }
 
 async function startAR(){
- error.style.display='none';mode='measure';directionMode='horizontal';
- try{if(!renderer)initThree();renderer.domElement.style.display='block';renderer.domElement.style.pointerEvents='auto';xrSession=await navigator.xr.requestSession('immersive-ar',{requiredFeatures:['hit-test'],optionalFeatures:['dom-overlay'],domOverlay:{root:document.body}});await renderer.xr.setSession(xrSession);app.style.display='none';overlay.style.display='block';xrSession.addEventListener('end',cleanup,{once:true});resetCurrent();updateObjects();renderer.setAnimationLoop(render)}
- catch(e){if(renderer?.domElement){renderer.domElement.style.display='none';renderer.domElement.style.pointerEvents='none'}showError(`AR kon niet starten: ${e.message}`)}
-}
-function cleanup(){startBtn.disabled=false;startBtn.textContent='Start AR';try{renderer?.setAnimationLoop(null);if(renderer?.domElement){renderer.domElement.style.display='none';renderer.domElement.style.pointerEvents='none'}}catch{}hitSource=null;hitRequested=false;xrSession=null;clearGeometry();closeMenu();overlay.style.display='none';app.style.display='grid'}
-async function leaveAR(){const s=xrSession||renderer?.xr?.getSession?.();if(s){try{await s.end();return}catch{}}cleanup()}
-function render(t,frame){
- if(!frame)return;const ref=renderer.xr.getReferenceSpace(),session=renderer.xr.getSession();
- if(!hitRequested){session.requestReferenceSpace('viewer').then(v=>session.requestHitTestSource({space:v}).then(s=>hitSource=s));hitRequested=true}
- let hit=null,pose=null;if(hitSource){const rs=frame.getHitTestResults(hitSource);if(rs.length){pose=rs[0].getPose(ref);if(pose)hit=new THREE.Vector3(pose.transform.position.x,pose.transform.position.y,pose.transform.position.z)}}
- if(hit&&pose){reticle.visible=true;reticle.matrix.fromArray(pose.transform.matrix);currentTarget=hit;targetSource='hit';addSample(hit,'hit');aimState('hit');capture.disabled=currentFinished}
- else if(pointA){const v=virtualTarget();if(v){reticle.visible=true;reticle.matrix.identity();reticle.matrix.setPosition(v);currentTarget=v;targetSource='virtual';addSample(v,'virtual');aimState('virtual');capture.disabled=currentFinished}else{reticle.visible=false;currentTarget=null;targetSource='none';aimState('');capture.disabled=true}}
- else{reticle.visible=false;currentTarget=null;targetSource='none';aimState('');capture.disabled=true;stage.textContent='Zoek een oppervlak';hint.textContent='Beweeg rustig zodat ARCore een oppervlak kan herkennen.'}
- points.forEach(p=>{const c=renderer.xr.getCamera(camera);c.getWorldPosition(camPos);const d=Math.max(.05,p.position.distanceTo(camPos));p.marker.scale.setScalar(Math.min(4,Math.max(.55,.48+d*.28)))});
- lines.forEach(l=>{l.object.material.resolution.set(innerWidth,innerHeight);l.label.visible=labelsDefault.checked});
- renderer.render(scene,camera)
-}
-async function support(){if(!navigator.xr){startBtn.disabled=true;startBtn.textContent='AR niet beschikbaar';showError('WebXR is niet beschikbaar. Gebruik Chrome op een ARCore-compatibele Android-telefoon.');return}try{if(!await navigator.xr.isSessionSupported('immersive-ar')){startBtn.disabled=true;startBtn.textContent='AR niet beschikbaar';showError('Immersive AR is niet beschikbaar op dit toestel.')}}catch(e){showError(e.message)}}
+  hideError();
+  startBtn.disabled=true; startBtn.textContent="AR starten…";
+  try{
+    if(!navigator.xr) throw new Error("Deze browser ondersteunt geen WebXR.");
+    const supported=await navigator.xr.isSessionSupported("immersive-ar");
+    if(!supported) throw new Error("Immersive AR is niet beschikbaar op dit toestel.");
 
-startBtn.onclick=async()=>{startBtn.disabled=true;startBtn.textContent='AR starten…';try{await startAR()}finally{if(!xrSession){startBtn.disabled=false;startBtn.textContent='Start AR'}}};settingsBtn.onclick=()=>settings.classList.toggle('open');menuBtn.onclick=()=>menu.classList.contains('open')?closeMenu():openMenu();closeMenuBtn.onclick=closeMenu;navBack.onclick=goBack;
-document.querySelectorAll('[data-nav]').forEach(r=>r.onclick=()=>showPage(r.dataset.nav));
-$('measureNew').onclick=()=>newLine(false);$('measureLast').onclick=()=>points.length?setStart(points.at(-1).id):closeMenu();$('measureExisting').onclick=()=>{mode='measure';showPage('objects')};
-$('stakeNew').onclick=()=>{pendingStakePoint=null;$('stakeSelected').classList.add('hidden');startStake()};$('stakeLast').onclick=()=>{pendingStakePoint=null;$('stakeSelected').classList.add('hidden');points.length?startStake(points.at(-1).id):closeMenu()};$('stakeExisting').onclick=()=>{mode='stake';pendingStakePoint=null;$('stakeSelected').classList.add('hidden');showPage('objects')};
-$('newLine').onclick=()=>newLine(false);$('fromLast').onclick=()=>newLine(true);$('stakeFromLast').onclick=()=>points.length?startStake(points.at(-1).id):closeMenu();
-$('applyLength').onclick=()=>{const l=gl(selectedLine);if(!l)return;const n=Number($('lineLength').value),a=gp(l.startId),b=gp(l.endId);if(!Number.isFinite(n)||n<=0||!a||!b)return;if(lines.some(x=>x.id!==l.id&&(x.startId===b.id||x.endId===b.id))){stage.textContent='Eindpunt is verbonden';closeMenu();return}const old=b.position.clone(),d=b.position.clone().sub(a.position);if(d.lengthSq()<1e-8)return;undo.push({type:'length',lineId:l.id,endId:b.id,old:old.toArray()});b.position.copy(a.position).add(d.normalize().multiplyScalar(n));b.marker.position.copy(b.position);refreshLine(l);updateObjects();closeMenu()};
-$('lineThickness').onchange=()=>{const l=gl(selectedLine);if(l){l.thickness=Number($('lineThickness').value);refreshLine(l)}};
-$('lineStart').onclick=()=>{const l=gl(selectedLine);if(l){mode='measure';setStart(l.startId)}};$('lineEnd').onclick=()=>{const l=gl(selectedLine);if(l){mode='measure';setStart(l.endId)}};$('deleteLine').onclick=()=>{if(selectedLine)deleteLine(selectedLine);showPage('objects')};
-$('pointLine').onclick=()=>{if(selectedPoint){mode='measure';setStart(selectedPoint)}};$('pointStake').onclick=()=>{if(selectedPoint){pendingStakePoint=selectedPoint;$('stakeSelected').classList.remove('hidden');showPage('stake')}};
-$('stakeSelected').onclick=()=>{if(pendingStakePoint)startStake(pendingStakePoint)};$('deletePoint').onclick=()=>{if(selectedPoint)deletePoint(selectedPoint);showPage('objects')};
-$('undo').onclick=()=>{const a=undo.pop();if(!a){stage.textContent='Niets om ongedaan te maken';closeMenu();return}if(a.type==='length'){const l=gl(a.lineId),p=gp(a.endId);if(l&&p){p.position.fromArray(a.old);p.marker.position.copy(p.position);refreshLine(l)}}else if(a.type==='created'){deleteLine(a.lineId);deletePoint(a.endId)}updateObjects();closeMenu()};
-$('clearAll').onclick=()=>{if(confirm('Alle punten en lijnen wissen?')){clearGeometry();showPage('home')}};$('arSettings').onclick=async()=>{closeMenu();await leaveAR();settings.classList.add('open')};$('exitAR').onclick=leaveAR;capture.onclick=place;
-window.addEventListener('resize',()=>{renderer?.setSize(innerWidth,innerHeight);lines.forEach(l=>l.object.material.resolution.set(innerWidth,innerHeight))});
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&!renderer?.xr?.getSession?.()&&overlay.style.display==='block')cleanup()});
-updateObjects();support();
+    await loadThree();
+    if(!renderer) initThree();
+
+    renderer.domElement.style.display="block";
+    renderer.domElement.style.pointerEvents="auto";
+
+    xrSession=await navigator.xr.requestSession("immersive-ar",{
+      requiredFeatures:["hit-test"],
+      optionalFeatures:["dom-overlay"],
+      domOverlay:{root:document.body}
+    });
+    await renderer.xr.setSession(xrSession);
+
+    mode="measure"; directionMode="horizontal"; resetCurrent(); renderObjects();
+    app.style.display="none"; overlay.style.display="block";
+    xrSession.addEventListener("end",cleanup,{once:true});
+    renderer.setAnimationLoop(render);
+  }catch(err){
+    if(renderer?.domElement){ renderer.domElement.style.display="none"; renderer.domElement.style.pointerEvents="none"; }
+    showError("AR kon niet starten:\n"+err.message);
+  }finally{
+    if(!xrSession){ startBtn.disabled=false; startBtn.textContent="Start AR"; }
+  }
+}
+function cleanup(){
+  try{ renderer?.setAnimationLoop(null); if(renderer?.domElement){ renderer.domElement.style.display="none"; renderer.domElement.style.pointerEvents="none"; } }catch{}
+  hitSource=null; hitRequested=false; xrSession=null;
+  clearAll(); closeMenu(); overlay.style.display="none"; app.style.display="grid";
+  startBtn.disabled=false; startBtn.textContent="Start AR";
+}
+async function leaveAR(){ const s=xrSession||renderer?.xr?.getSession?.(); if(s){ try{ await s.end(); return; }catch{} } cleanup(); }
+
+function render(t,frame){
+  if(!frame) return;
+  const ref=renderer.xr.getReferenceSpace();
+  const session=renderer.xr.getSession();
+
+  if(!hitRequested){
+    session.requestReferenceSpace("viewer").then(v=>session.requestHitTestSource({space:v}).then(s=>hitSource=s)).catch(()=>{});
+    hitRequested=true;
+  }
+
+  let hit=null,pose=null;
+  if(hitSource){
+    const results=frame.getHitTestResults(hitSource);
+    if(results.length){ pose=results[0].getPose(ref); if(pose) hit=new THREE.Vector3(pose.transform.position.x,pose.transform.position.y,pose.transform.position.z); }
+  }
+
+  if(hit&&pose){
+    reticle.visible=true; reticle.matrix.fromArray(pose.transform.matrix);
+    currentTarget=hit; targetSource="hit"; addSample(hit,"hit"); setAim("hit");
+    captureBtn.disabled=lineFinished;
+  }else if(pointA){
+    const v=virtualTarget();
+    if(v){ reticle.visible=true; reticle.matrix.identity(); reticle.matrix.setPosition(v); currentTarget=v; targetSource="virtual"; addSample(v,"virtual"); setAim("virtual"); captureBtn.disabled=lineFinished; }
+    else{ reticle.visible=false; currentTarget=null; targetSource="none"; setAim(""); captureBtn.disabled=true; }
+  }else{
+    reticle.visible=false; currentTarget=null; targetSource="none"; setAim(""); captureBtn.disabled=true;
+    stage.textContent="Zoek een oppervlak"; hint.textContent="Beweeg rustig zodat ARCore een oppervlak kan herkennen.";
+  }
+
+  const xrCam=renderer.xr.getCamera(camera); xrCam.getWorldPosition(camPos);
+  points.forEach(p=>{ const d=Math.max(.05,p.position.distanceTo(camPos)); p.marker.scale.setScalar(Math.min(4,Math.max(.55,.48+d*.28))); });
+  lines.forEach(l=>{ l.object.material.resolution.set(innerWidth,innerHeight); l.label.visible=defaultLabels.checked; });
+
+  renderer.render(scene,camera);
+}
+
+function undoLast(){
+  const a=undoStack.pop();
+  if(!a){ stage.textContent="Niets om ongedaan te maken"; closeMenu(); return; }
+  if(a.type==="length"){
+    const l=getLine(a.lineId), p=getPoint(a.endId);
+    if(l&&p){ p.position.fromArray(a.old); p.marker.position.copy(p.position); refreshLine(l); }
+  }else if(a.type==="created"){
+    deleteLine(a.lineId); deletePoint(a.endId);
+  }
+  renderObjects(); closeMenu();
+}
+
+startBtn.addEventListener("click",startAR);
+settingsBtn.addEventListener("click",()=>settingsPanel.classList.toggle("open"));
+menuBtn.addEventListener("click",()=>menuPanel.classList.contains("open")?closeMenu():openMenu());
+menuCloseBtn.addEventListener("click",closeMenu);
+menuBackBtn.addEventListener("click",menuBack);
+document.querySelectorAll("[data-page]").forEach(row=>row.addEventListener("click",()=>showPage(row.dataset.page)));
+
+$("measureNewBtn").addEventListener("click",startMeasureNew);
+$("measureLastBtn").addEventListener("click",()=>points.length?startMeasureFrom(points[points.length-1].id):closeMenu());
+$("measureExistingBtn").addEventListener("click",()=>{ mode="measure"; showPage("objects"); });
+
+$("stakeNewBtn").addEventListener("click",()=>{ pendingStakePointId=null; $("stakeSelectedBtn").style.display="none"; startStake(); });
+$("stakeLastBtn").addEventListener("click",()=>{ pendingStakePointId=null; $("stakeSelectedBtn").style.display="none"; points.length?startStake(points[points.length-1].id):closeMenu(); });
+$("stakeExistingBtn").addEventListener("click",()=>{ mode="stake"; pendingStakePointId=null; $("stakeSelectedBtn").style.display="none"; showPage("objects"); });
+$("stakeSelectedBtn").addEventListener("click",()=>{ if(pendingStakePointId) startStake(pendingStakePointId); });
+
+$("newIndependentBtn").addEventListener("click",startMeasureNew);
+$("newFromLastBtn").addEventListener("click",()=>points.length?startMeasureFrom(points[points.length-1].id):closeMenu());
+$("stakeFromLastBtn").addEventListener("click",()=>points.length?startStake(points[points.length-1].id):closeMenu());
+
+$("applyLineLengthBtn").addEventListener("click",()=>{
+  const l=getLine(selectedLineId); if(!l) return;
+  const n=Number($("lineLength").value), a=getPoint(l.startId), b=getPoint(l.endId);
+  if(!Number.isFinite(n)||n<=0||!a||!b) return;
+  if(lines.some(x=>x.id!==l.id&&(x.startId===b.id||x.endId===b.id))){ stage.textContent="Eindpunt is verbonden"; hint.textContent="Deze wijziging is voorlopig geblokkeerd om andere geometrie te beschermen."; closeMenu(); return; }
+  const old=b.position.clone(), d=b.position.clone().sub(a.position); if(d.lengthSq()<1e-8) return;
+  undoStack.push({type:"length",lineId:l.id,endId:b.id,old:old.toArray()});
+  b.position.copy(a.position).add(d.normalize().multiplyScalar(n)); b.marker.position.copy(b.position); refreshLine(l); renderObjects(); closeMenu();
+});
+$("lineThickness").addEventListener("change",()=>{ const l=getLine(selectedLineId); if(l){ l.thickness=Number($("lineThickness").value)||2; refreshLine(l); } });
+$("lineFromStartBtn").addEventListener("click",()=>{ const l=getLine(selectedLineId); if(l) startMeasureFrom(l.startId); });
+$("lineFromEndBtn").addEventListener("click",()=>{ const l=getLine(selectedLineId); if(l) startMeasureFrom(l.endId); });
+$("deleteLineBtn").addEventListener("click",()=>{ if(selectedLineId) deleteLine(selectedLineId); showPage("objects"); });
+
+$("pointNewLineBtn").addEventListener("click",()=>{ if(selectedPointId) startMeasureFrom(selectedPointId); });
+$("pointStakeBtn").addEventListener("click",()=>{ if(selectedPointId){ pendingStakePointId=selectedPointId; $("stakeSelectedBtn").style.display="block"; showPage("stake"); } });
+$("deletePointBtn").addEventListener("click",()=>{ if(selectedPointId) deletePoint(selectedPointId); showPage("objects"); });
+
+$("undoBtn").addEventListener("click",undoLast);
+$("clearAllBtn").addEventListener("click",()=>{ if(confirm("Alle punten en lijnen wissen?")){ clearAll(); showPage("home"); } });
+$("menuSettingsBtn").addEventListener("click",async()=>{ closeMenu(); await leaveAR(); settingsPanel.classList.add("open"); });
+$("exitArBtn").addEventListener("click",leaveAR);
+captureBtn.addEventListener("click",placePoint);
+
+window.addEventListener("resize",()=>{ renderer?.setSize(innerWidth,innerHeight); lines.forEach(l=>l.object.material.resolution.set(innerWidth,innerHeight)); });
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible"&&!renderer?.xr?.getSession?.()&&overlay.style.display==="block") cleanup(); });
+
+if(!navigator.xr){ showError("WebXR lijkt niet beschikbaar in deze browser. Gebruik Chrome op een ARCore-compatibele Android-telefoon."); }
+
+renderObjects();
+})();
 </script>
-</body></html>
+</body>
+</html>
