@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#111111">
-<title>Measure AR v0.6.7.1</title>
+<title>Measure AR v0.6.7.2</title>
 <style>
 :root{color-scheme:dark;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#111;color:#fff}
@@ -47,12 +47,12 @@ canvas{position:fixed;inset:0;width:100%;height:100%}
 </style>
 </head>
 <body>
-<div id="app"><div class="panel launcher"><div class="brand">⌖</div><h1>Measure AR</h1><p>Meten, uitzetten en geometrie bouwen in de echte wereld.</p><button id="startBtn">Start AR</button><button id="settingsBtn" class="secondary wide">Instellingen</button><div id="settings" class="settings"><div class="settingsGrid"><div><label>Eenheid</label><select id="unitDefault"><option value="m">meter</option><option value="cm">centimeter</option></select></div><div><label>Lijndikte</label><select id="thicknessDefault"><option value="1">1 · fijn</option><option value="2" selected>2 · normaal</option><option value="3">3 · duidelijk</option><option value="4">4 · zwaar</option></select></div></div><label class="check"><input id="labelsDefault" type="checkbox" checked> Labels op lijnen</label></div><div class="version">v0.6.7.1 clean rebuild</div><div id="error"></div></div></div>
+<div id="app"><div class="panel launcher"><div class="brand">⌖</div><h1>Measure AR</h1><p>Meten, uitzetten en geometrie bouwen in de echte wereld.</p><button id="startBtn">Start AR</button><button id="settingsBtn" class="secondary wide">Instellingen</button><div id="settings" class="settings"><div class="settingsGrid"><div><label>Eenheid</label><select id="unitDefault"><option value="m">meter</option><option value="cm">centimeter</option></select></div><div><label>Lijndikte</label><select id="thicknessDefault"><option value="1">1 · fijn</option><option value="2" selected>2 · normaal</option><option value="3">3 · duidelijk</option><option value="4">4 · zwaar</option></select></div></div><label class="check"><input id="labelsDefault" type="checkbox" checked> Labels op lijnen</label></div><div class="version">v0.6.7.2 checked rebuild</div><div id="error"></div></div></div>
 
 <div id="overlay">
 <div id="topbar"><div class="status"><div id="stage">Zoek een oppervlak</div><div id="distance">—</div><div id="detail"></div><div id="stability">Stabiliteit: —</div></div><button id="menuBtn">☰</button></div>
 <div id="menu">
-<div class="menuHead"><button id="navBack" class="secondary">‹</button><div class="menuTitle"><strong id="pageTitle">Measure AR</strong><span id="modeLabel">Meten · 0p · 0l · v0.6.7.1</span></div><button id="closeMenu" class="secondary">✕</button></div>
+<div class="menuHead"><button id="navBack" class="secondary">‹</button><div class="menuTitle"><strong id="pageTitle">Measure AR</strong><span id="modeLabel">Meten · 0p · 0l · v0.6.7.2</span></div><button id="closeMenu" class="secondary">✕</button></div>
 <div class="menuBody">
 <section id="p-home" class="page active">
 <div class="sectionTitle">Werken</div><div class="card">
@@ -63,7 +63,7 @@ canvas{position:fixed;inset:0;width:100%;height:100%}
 <div class="sectionTitle">Bewerken</div><div class="card"><button id="undo" class="secondary wide">Ongedaan maken</button><button id="clearAll" class="danger wide">Alles wissen</button></div>
 </section>
 <section id="p-measure" class="page"><div class="sectionTitle">Meten</div><div class="card"><div class="choice"><button id="measureNew">Nieuw punt</button><button id="measureLast" class="secondary">Laatste punt</button></div><button id="measureExisting" class="secondary wide">Bestaand punt kiezen</button></div><p class="help">Plaats A en daarna B. De afstand wordt op de lijn weergegeven.</p></section>
-<section id="p-stake" class="page"><div class="sectionTitle">Uitzetten</div><div class="card"><label>Afstand</label><div class="fields"><input id="targetDistance" type="number" min=".01" step=".01" value="2.00"><select id="targetUnit"><option value="m">m</option><option value="cm">cm</option></select></div><label>Richting</label><select id="direction"><option value="horizontal">Horizontaal</option><option value="surface">Op oppervlak</option><option value="free3d">Vrij 3D</option></select><div class="choice"><button id="stakeNew">Nieuw startpunt</button><button id="stakeLast" class="secondary">Laatste punt</button></div><button id="stakeExisting" class="secondary wide">Bestaand punt kiezen</button></div></section>
+<section id="p-stake" class="page"><div class="sectionTitle">Uitzetten</div><div class="card"><label>Afstand</label><div class="fields"><input id="targetDistance" type="number" min=".01" step=".01" value="2.00"><select id="targetUnit"><option value="m">m</option><option value="cm">cm</option></select></div><label>Richting</label><select id="direction"><option value="horizontal">Horizontaal</option><option value="surface">Op oppervlak</option><option value="free3d">Vrij 3D</option></select><div class="choice"><button id="stakeNew">Nieuw startpunt</button><button id="stakeLast" class="secondary">Laatste punt</button></div><button id="stakeExisting" class="secondary wide">Bestaand punt kiezen</button><button id="stakeSelected" class="secondary wide hidden">Vanaf geselecteerd punt</button></div></section>
 <section id="p-newline" class="page"><div class="sectionTitle">Nieuwe lijn</div><div class="card"><button id="newLine" class="wide">Nieuw → nieuw</button><button id="fromLast" class="secondary wide">Vanaf laatste punt</button><button id="stakeFromLast" class="secondary wide">Vaste afstand vanaf laatste punt</button></div></section>
 <section id="p-objects" class="page"><div class="sectionTitle">Objecten</div><div id="objects" class="card"></div></section>
 <section id="p-line" class="page"><div class="sectionTitle">Lijn bewerken</div><div class="card"><div id="lineName" class="help">—</div><label>Lengte vanaf startpunt</label><input id="lineLength" type="number" min=".01" step=".01"><label>Dikte</label><select id="lineThickness"><option value="1">1 · fijn</option><option value="2">2 · normaal</option><option value="3">3 · duidelijk</option><option value="4">4 · zwaar</option></select><button id="applyLength" class="wide">Lengte toepassen</button><div class="choice"><button id="lineStart" class="secondary">Vanaf start</button><button id="lineEnd" class="secondary">Vanaf einde</button></div><button id="deleteLine" class="danger wide">Lijn wissen</button></div></section>
@@ -74,11 +74,47 @@ canvas{position:fixed;inset:0;width:100%;height:100%}
 <div id="aim"></div><button id="capture" disabled aria-label="Punt vastleggen"></button><div id="hint">Beweeg rustig zodat ARCore een oppervlak kan herkennen.</div>
 </div>
 
+
+<script>
+window.__measureModuleBooted = false;
+window.addEventListener('error', function(e) {
+  const box = document.getElementById('error');
+  if (!box) return;
+  box.style.display = 'block';
+  box.textContent = 'JavaScript-fout: ' + (e.message || 'onbekende fout');
+});
+setTimeout(function() {
+  if (!window.__measureModuleBooted) {
+    const box = document.getElementById('error');
+    if (box) {
+      box.style.display = 'block';
+      box.textContent = 'De app-module kon niet laden. Controleer internet/CDN en herlaad de pagina.';
+    }
+  }
+}, 3500);
+</script>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.167.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.167.1/examples/jsm/"
+  }
+}
+</script>
+
 <script type="module">
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.167.1/build/three.module.js';
-import {Line2} from 'https://cdn.jsdelivr.net/npm/three@0.167.1/examples/jsm/lines/Line2.js/+esm';
-import {LineMaterial} from 'https://cdn.jsdelivr.net/npm/three@0.167.1/examples/jsm/lines/LineMaterial.js/+esm';
-import {LineGeometry} from 'https://cdn.jsdelivr.net/npm/three@0.167.1/examples/jsm/lines/LineGeometry.js/+esm';
+import * as THREE from 'three';
+import { Line2 } from 'three/addons/lines/Line2.js';
+import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
+import { LineGeometry } from 'three/addons/lines/LineGeometry.js';
+
+window.__measureModuleBooted = true;
+const bootErrorBox = document.getElementById('error');
+if (bootErrorBox && bootErrorBox.textContent.startsWith('De app-module')) {
+  bootErrorBox.style.display = 'none';
+  bootErrorBox.textContent = '';
+}
 
 const $=id=>document.getElementById(id);
 const app=$('app'),overlay=$('overlay'),startBtn=$('startBtn'),settingsBtn=$('settingsBtn'),settings=$('settings'),error=$('error');
@@ -87,10 +123,10 @@ const menu=$('menu'),menuBtn=$('menuBtn'),closeMenuBtn=$('closeMenu'),navBack=$(
 const stage=$('stage'),distance=$('distance'),detail=$('detail'),stability=$('stability'),hint=$('hint'),aim=$('aim'),capture=$('capture'),objects=$('objects');
 const targetDistance=$('targetDistance'),targetUnit=$('targetUnit'),directionSelect=$('direction');
 const pages=['home','measure','stake','newline','objects','line','point']; let menuStack=['home'];
-const points=[],lines=[],undo=[]; let pointCounter=0,selectedPoint=null,selectedLine=null,activeStart=null;
+const points=[],lines=[],undo=[]; let pointCounter=0,selectedPoint=null,selectedLine=null,activeStart=null,pendingStakePoint=null;
 let mode='measure',directionMode='horizontal',targetMeters=2;
 let renderer,scene,camera,reticle,xrSession=null,hitSource=null,hitRequested=false;
-let pointA=null,normalA=null,currentTarget=null,targetSource='none',temporaryDirectionMarker=null;
+let pointA=null,normalA=null,currentTarget=null,targetSource='none',temporaryDirectionMarker=null,currentFinished=false;
 const tmp=new THREE.Vector3(),quat=new THREE.Quaternion(),up=new THREE.Vector3(0,1,0),camPos=new THREE.Vector3(),camQuat=new THREE.Quaternion(),forward=new THREE.Vector3();
 const samples=[]; const MAX_SAMPLES=16;
 
@@ -98,7 +134,7 @@ function fmt(m){return m<1?`${(m*100).toFixed(1)} cm`:m<10?`${m.toFixed(3)} m`:`
 function pointName(i){const c=String.fromCharCode(65+i%26),n=Math.floor(i/26);return n?c+n:c}
 function gp(id){return points.find(p=>p.id===id)||null} function gl(id){return lines.find(l=>l.id===id)||null}
 function showError(t){error.style.display='block';error.textContent=t}
-function updateLabel(){modeLabel.textContent=`${mode==='measure'?'Meten':'Uitzetten'} · ${points.length}p · ${lines.length}l · v0.6.7.1`}
+function updateLabel(){modeLabel.textContent=`${mode==='measure'?'Meten':'Uitzetten'} · ${points.length}p · ${lines.length}l · v0.6.7.2`}
 function showPage(name,push=true){pages.forEach(n=>$(`p-${n}`).classList.remove('active'));$(`p-${name}`).classList.add('active');pageTitle.textContent={home:'Measure AR',measure:'Meten',stake:'Uitzetten',newline:'Nieuwe lijn',objects:'Objecten',line:'Lijn',point:'Punt'}[name];if(push&&menuStack.at(-1)!==name)menuStack.push(name);navBack.style.visibility=name==='home'?'hidden':'visible';if(name==='objects')updateObjects()}
 function openMenu(){menuStack=['home'];showPage('home',false);targetUnit.value=unitDefault.value;targetDistance.value=targetUnit.value==='cm'?(targetMeters*100).toFixed(1):targetMeters.toFixed(2);directionSelect.value=directionMode;menu.classList.add('open');updateLabel()}
 function closeMenu(){menu.classList.remove('open')}
@@ -125,7 +161,7 @@ function updateObjects(){updateLabel();objects.innerHTML='';if(!points.length&&!
 function resetSamples(){samples.length=0;stability.textContent='Stabiliteit: meten…'}
 function addSample(p,src){if(samples.length&&samples.at(-1).src!==src)samples.length=0;samples.push({p:p.clone(),src});if(samples.length>MAX_SAMPLES)samples.shift();if(samples.length>2){const m=new THREE.Vector3();samples.forEach(s=>m.add(s.p));m.multiplyScalar(1/samples.length);let q=0;samples.forEach(s=>q+=s.p.distanceToSquared(m));const cm=Math.sqrt(q/samples.length)*100;stability.textContent=`Stabiliteit · jitter ±${cm.toFixed(1)} cm`}}
 function filtered(){if(!currentTarget)return null;if(samples.length<5)return currentTarget.clone();const m=new THREE.Vector3();samples.forEach(s=>m.add(s.p));return m.multiplyScalar(1/samples.length)}
-function resetCurrent(){pointA=null;normalA=null;activeStart=null;currentTarget=null;targetSource='none';if(temporaryDirectionMarker){dispose(temporaryDirectionMarker);temporaryDirectionMarker=null}distance.textContent='—';detail.textContent='';resetSamples()}
+function resetCurrent(){pointA=null;normalA=null;activeStart=null;currentTarget=null;targetSource='none';currentFinished=false;if(temporaryDirectionMarker){dispose(temporaryDirectionMarker);temporaryDirectionMarker=null}distance.textContent='—';detail.textContent='';resetSamples()}
 function setStart(id){const p=gp(id);if(!p)return;resetCurrent();activeStart=id;pointA=p.position.clone();normalA=up.clone();stage.textContent=`Vanaf ${p.name}`;hint.textContent=mode==='measure'?'Richt op het eindpunt en druk op de meetknop.':'Richt in de gewenste richting en druk op de meetknop.';closeMenu()}
 function newLine(last=false){mode='measure';resetCurrent();if(last&&points.length)setStart(points.at(-1).id);else{stage.textContent='Nieuw startpunt';hint.textContent='Plaats het startpunt van de nieuwe lijn.';closeMenu()}}
 function startStake(id=null){const t=readTarget();if(t===null){stage.textContent='Ongeldige afstand';return}targetMeters=t;directionMode=directionSelect.value;mode='stake';resetCurrent();if(id)setStart(id);else{stage.textContent='Uitzetten';hint.textContent='Plaats eerst het startpunt.';closeMenu()}}
@@ -142,8 +178,8 @@ function place(){
  const p=filtered();if(!p)return;
  if(!pointA){const a=createPoint(p);activeStart=a.id;pointA=a.position.clone();normalA=targetSource==='hit'?reticleNormal():up.clone();resetSamples();stage.textContent=`Punt ${a.name} geplaatst`;distance.textContent=mode==='stake'?fmt(targetMeters):'—';hint.textContent=mode==='measure'?'Richt op punt B en druk opnieuw.':'Richt in de gewenste richting en druk opnieuw.';return}
  const a=gp(activeStart);if(!a)return;
- if(mode==='measure'){const b=createPoint(p,0xffd166),l=createLine(a,b);distance.textContent=fmt(l.distance);detail.textContent=`Lijn ${l.name}`;stage.textContent='Lijn voltooid';hint.textContent='Open ☰ om verder te bouwen.';capture.disabled=true}
- else{const bp=autoB(p);if(!bp)return;const b=createPoint(bp,0xffd166),l=createLine(a,b);temporaryDirectionMarker=marker(0x7ab7ff);temporaryDirectionMarker.position.copy(p);distance.textContent=fmt(l.distance);detail.textContent=`${l.name} · ${directionMode}`;stage.textContent='Punt automatisch geplaatst';hint.textContent='Open ☰ om verder te bouwen.';capture.disabled=true}
+ if(mode==='measure'){const b=createPoint(p,0xffd166),l=createLine(a,b);distance.textContent=fmt(l.distance);detail.textContent=`Lijn ${l.name}`;stage.textContent='Lijn voltooid';hint.textContent='Open ☰ om verder te bouwen.';currentFinished=true;capture.disabled=true}
+ else{const bp=autoB(p);if(!bp)return;const b=createPoint(bp,0xffd166),l=createLine(a,b);temporaryDirectionMarker=marker(0x7ab7ff);temporaryDirectionMarker.position.copy(p);distance.textContent=fmt(l.distance);detail.textContent=`${l.name} · ${directionMode}`;stage.textContent='Punt automatisch geplaatst';hint.textContent='Open ☰ om verder te bouwen.';currentFinished=true;capture.disabled=true}
 }
 
 async function startAR(){
@@ -151,30 +187,31 @@ async function startAR(){
  try{if(!renderer)initThree();renderer.domElement.style.display='block';renderer.domElement.style.pointerEvents='auto';xrSession=await navigator.xr.requestSession('immersive-ar',{requiredFeatures:['hit-test'],optionalFeatures:['dom-overlay'],domOverlay:{root:document.body}});await renderer.xr.setSession(xrSession);app.style.display='none';overlay.style.display='block';xrSession.addEventListener('end',cleanup,{once:true});resetCurrent();updateObjects();renderer.setAnimationLoop(render)}
  catch(e){if(renderer?.domElement){renderer.domElement.style.display='none';renderer.domElement.style.pointerEvents='none'}showError(`AR kon niet starten: ${e.message}`)}
 }
-function cleanup(){try{renderer?.setAnimationLoop(null);if(renderer?.domElement){renderer.domElement.style.display='none';renderer.domElement.style.pointerEvents='none'}}catch{}hitSource=null;hitRequested=false;xrSession=null;clearGeometry();closeMenu();overlay.style.display='none';app.style.display='grid'}
+function cleanup(){startBtn.disabled=false;startBtn.textContent='Start AR';try{renderer?.setAnimationLoop(null);if(renderer?.domElement){renderer.domElement.style.display='none';renderer.domElement.style.pointerEvents='none'}}catch{}hitSource=null;hitRequested=false;xrSession=null;clearGeometry();closeMenu();overlay.style.display='none';app.style.display='grid'}
 async function leaveAR(){const s=xrSession||renderer?.xr?.getSession?.();if(s){try{await s.end();return}catch{}}cleanup()}
 function render(t,frame){
  if(!frame)return;const ref=renderer.xr.getReferenceSpace(),session=renderer.xr.getSession();
  if(!hitRequested){session.requestReferenceSpace('viewer').then(v=>session.requestHitTestSource({space:v}).then(s=>hitSource=s));hitRequested=true}
  let hit=null,pose=null;if(hitSource){const rs=frame.getHitTestResults(hitSource);if(rs.length){pose=rs[0].getPose(ref);if(pose)hit=new THREE.Vector3(pose.transform.position.x,pose.transform.position.y,pose.transform.position.z)}}
- if(hit&&pose){reticle.visible=true;reticle.matrix.fromArray(pose.transform.matrix);currentTarget=hit;targetSource='hit';addSample(hit,'hit');aimState('hit');capture.disabled=false}
- else if(pointA){const v=virtualTarget();if(v){reticle.visible=true;reticle.matrix.identity();reticle.matrix.setPosition(v);currentTarget=v;targetSource='virtual';addSample(v,'virtual');aimState('virtual');capture.disabled=false}else{reticle.visible=false;currentTarget=null;targetSource='none';aimState('');capture.disabled=true}}
+ if(hit&&pose){reticle.visible=true;reticle.matrix.fromArray(pose.transform.matrix);currentTarget=hit;targetSource='hit';addSample(hit,'hit');aimState('hit');capture.disabled=currentFinished}
+ else if(pointA){const v=virtualTarget();if(v){reticle.visible=true;reticle.matrix.identity();reticle.matrix.setPosition(v);currentTarget=v;targetSource='virtual';addSample(v,'virtual');aimState('virtual');capture.disabled=currentFinished}else{reticle.visible=false;currentTarget=null;targetSource='none';aimState('');capture.disabled=true}}
  else{reticle.visible=false;currentTarget=null;targetSource='none';aimState('');capture.disabled=true;stage.textContent='Zoek een oppervlak';hint.textContent='Beweeg rustig zodat ARCore een oppervlak kan herkennen.'}
  points.forEach(p=>{const c=renderer.xr.getCamera(camera);c.getWorldPosition(camPos);const d=Math.max(.05,p.position.distanceTo(camPos));p.marker.scale.setScalar(Math.min(4,Math.max(.55,.48+d*.28)))});
  lines.forEach(l=>{l.object.material.resolution.set(innerWidth,innerHeight);l.label.visible=labelsDefault.checked});
  renderer.render(scene,camera)
 }
-async function support(){if(!navigator.xr){startBtn.disabled=true;showError('WebXR is niet beschikbaar. Gebruik Chrome op een ARCore-compatibele Android-telefoon.');return}try{if(!await navigator.xr.isSessionSupported('immersive-ar')){startBtn.disabled=true;showError('Immersive AR is niet beschikbaar op dit toestel.')}}catch(e){showError(e.message)}}
+async function support(){if(!navigator.xr){startBtn.disabled=true;startBtn.textContent='AR niet beschikbaar';showError('WebXR is niet beschikbaar. Gebruik Chrome op een ARCore-compatibele Android-telefoon.');return}try{if(!await navigator.xr.isSessionSupported('immersive-ar')){startBtn.disabled=true;startBtn.textContent='AR niet beschikbaar';showError('Immersive AR is niet beschikbaar op dit toestel.')}}catch(e){showError(e.message)}}
 
-startBtn.onclick=startAR;settingsBtn.onclick=()=>settings.classList.toggle('open');menuBtn.onclick=()=>menu.classList.contains('open')?closeMenu():openMenu();closeMenuBtn.onclick=closeMenu;navBack.onclick=goBack;
+startBtn.onclick=async()=>{startBtn.disabled=true;startBtn.textContent='AR starten…';try{await startAR()}finally{if(!xrSession){startBtn.disabled=false;startBtn.textContent='Start AR'}}};settingsBtn.onclick=()=>settings.classList.toggle('open');menuBtn.onclick=()=>menu.classList.contains('open')?closeMenu():openMenu();closeMenuBtn.onclick=closeMenu;navBack.onclick=goBack;
 document.querySelectorAll('[data-nav]').forEach(r=>r.onclick=()=>showPage(r.dataset.nav));
 $('measureNew').onclick=()=>newLine(false);$('measureLast').onclick=()=>points.length?setStart(points.at(-1).id):closeMenu();$('measureExisting').onclick=()=>{mode='measure';showPage('objects')};
-$('stakeNew').onclick=()=>startStake();$('stakeLast').onclick=()=>points.length?startStake(points.at(-1).id):closeMenu();$('stakeExisting').onclick=()=>{mode='stake';showPage('objects')};
+$('stakeNew').onclick=()=>{pendingStakePoint=null;$('stakeSelected').classList.add('hidden');startStake()};$('stakeLast').onclick=()=>{pendingStakePoint=null;$('stakeSelected').classList.add('hidden');points.length?startStake(points.at(-1).id):closeMenu()};$('stakeExisting').onclick=()=>{mode='stake';pendingStakePoint=null;$('stakeSelected').classList.add('hidden');showPage('objects')};
 $('newLine').onclick=()=>newLine(false);$('fromLast').onclick=()=>newLine(true);$('stakeFromLast').onclick=()=>points.length?startStake(points.at(-1).id):closeMenu();
 $('applyLength').onclick=()=>{const l=gl(selectedLine);if(!l)return;const n=Number($('lineLength').value),a=gp(l.startId),b=gp(l.endId);if(!Number.isFinite(n)||n<=0||!a||!b)return;if(lines.some(x=>x.id!==l.id&&(x.startId===b.id||x.endId===b.id))){stage.textContent='Eindpunt is verbonden';closeMenu();return}const old=b.position.clone(),d=b.position.clone().sub(a.position);if(d.lengthSq()<1e-8)return;undo.push({type:'length',lineId:l.id,endId:b.id,old:old.toArray()});b.position.copy(a.position).add(d.normalize().multiplyScalar(n));b.marker.position.copy(b.position);refreshLine(l);updateObjects();closeMenu()};
 $('lineThickness').onchange=()=>{const l=gl(selectedLine);if(l){l.thickness=Number($('lineThickness').value);refreshLine(l)}};
 $('lineStart').onclick=()=>{const l=gl(selectedLine);if(l){mode='measure';setStart(l.startId)}};$('lineEnd').onclick=()=>{const l=gl(selectedLine);if(l){mode='measure';setStart(l.endId)}};$('deleteLine').onclick=()=>{if(selectedLine)deleteLine(selectedLine);showPage('objects')};
-$('pointLine').onclick=()=>{if(selectedPoint){mode='measure';setStart(selectedPoint)}};$('pointStake').onclick=()=>{if(selectedPoint){showPage('stake');const id=selectedPoint;$('stakeNew').onclick=()=>startStake(id)}};$('deletePoint').onclick=()=>{if(selectedPoint)deletePoint(selectedPoint);showPage('objects')};
+$('pointLine').onclick=()=>{if(selectedPoint){mode='measure';setStart(selectedPoint)}};$('pointStake').onclick=()=>{if(selectedPoint){pendingStakePoint=selectedPoint;$('stakeSelected').classList.remove('hidden');showPage('stake')}};
+$('stakeSelected').onclick=()=>{if(pendingStakePoint)startStake(pendingStakePoint)};$('deletePoint').onclick=()=>{if(selectedPoint)deletePoint(selectedPoint);showPage('objects')};
 $('undo').onclick=()=>{const a=undo.pop();if(!a){stage.textContent='Niets om ongedaan te maken';closeMenu();return}if(a.type==='length'){const l=gl(a.lineId),p=gp(a.endId);if(l&&p){p.position.fromArray(a.old);p.marker.position.copy(p.position);refreshLine(l)}}else if(a.type==='created'){deleteLine(a.lineId);deletePoint(a.endId)}updateObjects();closeMenu()};
 $('clearAll').onclick=()=>{if(confirm('Alle punten en lijnen wissen?')){clearGeometry();showPage('home')}};$('arSettings').onclick=async()=>{closeMenu();await leaveAR();settings.classList.add('open')};$('exitAR').onclick=leaveAR;capture.onclick=place;
 window.addEventListener('resize',()=>{renderer?.setSize(innerWidth,innerHeight);lines.forEach(l=>l.object.material.resolution.set(innerWidth,innerHeight))});
