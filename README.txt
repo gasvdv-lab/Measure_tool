@@ -1,48 +1,53 @@
-WEBXR MEASURE v0.5 — BEREIK + STABILITEIT / PRECISIEFILTER
+WEBXR MEASURE v0.6 — MEERDERE PUNTEN EN LIJNEN
 
-Bevat ook alle fixes uit v0.4.1:
-- nette Terug-knop uit AR
-- correcte cleanup van WebXR
-- kleinere, dynamisch schalende A/B-markeringen
+Nieuwe geometrische kern:
 
-Nieuwe fase: precisie & stabiliteit
+- Meerdere punten A, B, C, D, ... tegelijk in dezelfde AR-sessie.
+- Meerdere lijnen blijven tegelijk zichtbaar.
+- Elke lijn krijgt automatisch een naam zoals AB, BC, CD.
+- Afstand van elke lijn wordt bijgehouden.
+- Objectenpaneel toont hoeveel punten en lijnen aanwezig zijn.
+- Via 'Objecten tonen' kun je de huidige geometrie bekijken.
+- Lijnen en punten kunnen afzonderlijk verwijderd worden.
+- Als een punt verwijderd wordt, verdwijnen ook lijnen die eraan vastzitten.
 
-1. Korte samplebuffer
-De app bewaart continu de laatste AR-richtpunten.
+Cameramenu:
+- Nieuwe lijn
+  Start een volledig nieuwe lijn vanaf een nieuw punt.
+- Start vanaf laatste punt
+  Handig om kettingen te maken zoals A-B, B-C, C-D...
+- Huidige lijn annuleren
+  Wist alleen de actieve/onvoltooide lijn.
+- Alles wissen
+  Verwijdert alle punten en lijnen uit de huidige AR-sessie.
+- Andere functie
+  Wisselt tussen meten en uitzetten.
+- Terug naar beginscherm
 
-2. Jitter-indicator
-Bovenaan verschijnt:
-- Stabiliteit: goed
-- Stabiliteit: redelijk
-- Stabiliteit: onrustig
-plus de gemeten spreiding in cm.
+Belangrijk:
+De geometrie blijft in v0.6 alleen bestaan zolang dezelfde WebXR-sessie actief blijft.
+Bij volledig teruggaan naar het beginscherm wordt de AR-sessie beëindigd en worden
+de punten/lijnen gewist. Permanente projectopslag en herpositionering komen later.
 
-Dit is nadrukkelijk GEEN absolute meetnauwkeurigheid.
-Het is alleen de korte-termijn spreiding van het AR-richtpunt.
+Bestaande functies behouden:
+- simpel A-B meten
+- afstand uitzetten
+- Vrij 3D / Horizontaal / Op oppervlak
+- groter hybride AR-bereik
+- stabiliteitsfilter
+- kleine dynamische markers
+- cameramenu
+- correcte WebXR cleanup
 
-3. Gefilterde puntplaatsing
-Wanneer je de ronde knop indrukt, gebruikt de app niet blind één frame.
-Hij combineert recente richtpunten en verwijdert ongeveer de 20% grootste uitschieters.
-Daarmee worden A, B en richtingen minder gevoelig voor één schok/frame.
+Aanbevolen test:
+1. Meet A-B.
+2. ☰ > Start vanaf laatste punt.
+3. Meet B-C.
+4. Herhaal naar C-D.
+5. Open Objecten tonen.
+6. Verwijder één lijn.
+7. Verwijder één punt en controleer of verbonden lijnen ook verdwijnen.
+8. Test hetzelfde met Afstand uitzetten.
 
-4. Nieuwe samplecyclus
-Na het plaatsen van A begint de stabiliteitsmeting voor B/richting opnieuw.
-
-Aanbevolen veldtest:
-- echte 0,50 m: 5 herhalingen
-- echte 1,00 m: 5 herhalingen
-- echte 2,00 m: 5 herhalingen
-- echte 5,00 m: 5 herhalingen
-- echte 10,00 m: 5 herhalingen
-
-Noteer per afstand:
-- gemeten waarden
-- of kruis groen/geel was
-- gemelde stabiliteit
-- licht/terreincondities
-
-Daarmee kunnen we in de volgende iteratie echte statistiek opbouwen:
-gemiddelde fout, spreiding en fout versus afstand.
-
-PUBLICEREN
+Publiceren:
 Vervang alleen index.html in Measure_tool en commit naar main.

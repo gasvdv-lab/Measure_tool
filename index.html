@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
   <meta name="theme-color" content="#111111" />
-  <title>WebXR Measure v0.5</title>
+  <title>WebXR Measure v0.6</title>
   <style>
     :root {
       color-scheme: dark;
@@ -156,17 +156,111 @@
     #stability.good { background:rgba(64,190,110,.28); }
     #stability.medium { background:rgba(220,170,40,.28); }
     #stability.poor { background:rgba(210,70,70,.28); }
-    #resetBtn, #backBtn {
+    #cameraMenuBtn {
       pointer-events:auto;
-      background:rgba(255,255,255,.92);
-      color:#111;
-      min-width:78px;
-      padding-inline:12px;
-    }
-    #backBtn {
+      width:54px;
+      min-width:54px;
+      height:54px;
+      min-height:54px;
+      padding:0;
+      border-radius:16px;
       background:rgba(0,0,0,.70);
       color:#fff;
       border:1px solid rgba(255,255,255,.22);
+      font-size:1.55rem;
+      line-height:1;
+    }
+
+    #cameraMenuPanel {
+      position:absolute;
+      top:calc(max(14px, env(safe-area-inset-top)) + 66px);
+      right:14px;
+      width:min(84vw, 320px);
+      padding:14px;
+      border-radius:18px;
+      background:rgba(10,10,10,.92);
+      border:1px solid rgba(255,255,255,.16);
+      backdrop-filter:blur(10px);
+      pointer-events:auto;
+      display:none;
+    }
+    #cameraMenuPanel.open { display:block; }
+    #cameraMenuPanel h3 {
+      margin:0 0 10px;
+      font-size:1rem;
+      font-weight:700;
+    }
+    #cameraMenuPanel .menuStatus {
+      margin:0 0 12px;
+      font-size:.88rem;
+      color:#ccc;
+    }
+    #cameraMenuPanel button {
+      width:100%;
+      margin-top:8px;
+      background:rgba(255,255,255,.92);
+      color:#111;
+    }
+    #cameraMenuPanel .secondary {
+      background:rgba(255,255,255,.12);
+      color:#fff;
+      border:1px solid rgba(255,255,255,.16);
+    }
+    #geometryPanel {
+      position:absolute;
+      left:14px;
+      right:14px;
+      bottom:max(176px, calc(env(safe-area-inset-bottom) + 176px));
+      padding:10px 12px;
+      border-radius:16px;
+      background:rgba(0,0,0,.58);
+      backdrop-filter:blur(8px);
+      pointer-events:none;
+      display:none;
+    }
+    #geometryPanel.visible { display:block; }
+    #geometrySummary {
+      font-size:.88rem;
+      color:#eee;
+      text-align:center;
+    }
+    #geometryList {
+      max-height:220px;
+      overflow-y:auto;
+      margin-top:10px;
+      display:none;
+      pointer-events:auto;
+    }
+    #geometryList.open { display:block; }
+    .geomRow {
+      display:grid;
+      grid-template-columns: 1fr auto;
+      gap:8px;
+      align-items:center;
+      padding:8px 0;
+      border-top:1px solid rgba(255,255,255,.10);
+      font-size:.9rem;
+    }
+    .geomRow:first-child { border-top:0; }
+    .geomRow button {
+      min-height:38px;
+      padding:8px 10px;
+      border-radius:10px;
+      background:rgba(255,255,255,.12);
+      color:#fff;
+      border:1px solid rgba(255,255,255,.14);
+      pointer-events:auto;
+    }
+    #toggleGeometryListBtn {
+      width:100%;
+      min-height:40px;
+      margin-top:8px;
+      padding:8px 12px;
+      border-radius:10px;
+      background:rgba(255,255,255,.10);
+      color:#fff;
+      border:1px solid rgba(255,255,255,.14);
+      pointer-events:auto;
     }
     #aim {
       position:absolute;
@@ -297,11 +391,28 @@
         <div id="detail"></div>
         <div id="stability">Stabiliteit: —</div>
       </div>
-      <button id="backBtn" type="button">Terug</button>
-      <button id="resetBtn" type="button">Reset</button>
+      <button id="cameraMenuBtn" type="button" aria-label="Cameramenu openen">☰</button>
+    </div>
+
+    <div id="cameraMenuPanel" aria-hidden="true">
+      <h3>Cameramenu</h3>
+      <div id="cameraModeLabel" class="menuStatus">Functie: —</div>
+      <button id="menuNewLineBtn" type="button">Nieuwe lijn</button>
+      <button id="menuUseLastPointBtn" class="secondary" type="button">Start vanaf laatste punt</button>
+      <button id="menuResetBtn" class="secondary" type="button">Huidige lijn annuleren</button>
+      <button id="menuClearAllBtn" class="secondary" type="button">Alles wissen</button>
+      <button id="menuSwitchBtn" class="secondary" type="button">Andere functie</button>
+      <button id="menuBackBtn" class="secondary" type="button">Terug naar beginscherm</button>
+      <button id="menuCloseBtn" class="secondary" type="button">Menu sluiten</button>
     </div>
 
     <div id="aim"></div>
+
+    <div id="geometryPanel">
+      <div id="geometrySummary">0 punten · 0 lijnen</div>
+      <button id="toggleGeometryListBtn" type="button">Objecten tonen</button>
+      <div id="geometryList"></div>
+    </div>
 
     <div id="captureWrap">
       <button id="captureBtn" type="button" aria-label="Punt vastleggen" disabled></button>
@@ -314,8 +425,16 @@
     import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.167.1/build/three.module.js';
 
     const startBtn = document.getElementById('startBtn');
-    const resetBtn = document.getElementById('resetBtn');
-    const backBtn = document.getElementById('backBtn');
+    const cameraMenuBtn = document.getElementById('cameraMenuBtn');
+    const cameraMenuPanel = document.getElementById('cameraMenuPanel');
+    const cameraModeLabel = document.getElementById('cameraModeLabel');
+    const menuNewLineBtn = document.getElementById('menuNewLineBtn');
+    const menuUseLastPointBtn = document.getElementById('menuUseLastPointBtn');
+    const menuResetBtn = document.getElementById('menuResetBtn');
+    const menuClearAllBtn = document.getElementById('menuClearAllBtn');
+    const menuSwitchBtn = document.getElementById('menuSwitchBtn');
+    const menuBackBtn = document.getElementById('menuBackBtn');
+    const menuCloseBtn = document.getElementById('menuCloseBtn');
     const captureBtn = document.getElementById('captureBtn');
     const measureModeBtn = document.getElementById('measureModeBtn');
     const stakeModeBtn = document.getElementById('stakeModeBtn');
@@ -339,6 +458,10 @@
     const stabilityEl = document.getElementById('stability');
     const hintEl = document.getElementById('hint');
     const aimEl = document.getElementById('aim');
+    const geometryPanel = document.getElementById('geometryPanel');
+    const geometrySummary = document.getElementById('geometrySummary');
+    const geometryList = document.getElementById('geometryList');
+    const toggleGeometryListBtn = document.getElementById('toggleGeometryListBtn');
 
     let mode = 'measure';
     let directionMode = 'horizontal';
@@ -349,6 +472,7 @@
     let hitTestSourceRequested = false;
     let xrSession = null;
 
+    // Huidige actieve lijn
     let pointA = null;
     let pointB = null;
     let directionPoint = null;
@@ -358,6 +482,13 @@
     let markerB = null;
     let directionMarker = null;
     let measureLine = null;
+
+    // Permanente geometrie binnen de huidige AR-sessie
+    const points = []; // { id, name, position, marker }
+    const lines = [];  // { id, name, startId, endId, distance, object }
+    let nextPointIndex = 0;
+    let nextLineIndex = 1;
+    let activeStartPointId = null;
 
     const tmpPos = new THREE.Vector3();
     const tmpQuat = new THREE.Quaternion();
@@ -377,6 +508,36 @@
     let stabilityMeters = null;
     let stabilityClass = 'unknown';
 
+
+    function updateCameraMenuLabel() {
+      if (!cameraModeLabel) return;
+      cameraModeLabel.textContent =
+        `${mode === 'measure' ? 'Functie: Afstand meten' : 'Functie: Afstand uitzetten'} · ${points.length} punten · ${lines.length} lijnen`;
+    }
+
+    function openCameraMenu() {
+      cameraMenuPanel.classList.add('open');
+      cameraMenuPanel.setAttribute('aria-hidden', 'false');
+      updateCameraMenuLabel();
+    }
+
+    function closeCameraMenu() {
+      cameraMenuPanel.classList.remove('open');
+      cameraMenuPanel.setAttribute('aria-hidden', 'true');
+    }
+
+    async function switchFunctionFromAR() {
+      const nextMode = mode === 'measure' ? 'stake' : 'measure';
+      setMode(nextMode);
+      closeCameraMenu();
+      await exitAR();
+
+      // Na terugkeer staat de andere functie al geselecteerd op het beginscherm.
+      if (nextMode === 'stake') {
+        stakeSettings.style.display = 'block';
+      }
+    }
+
     function setMode(nextMode) {
       mode = nextMode;
       const stake = mode === 'stake';
@@ -384,6 +545,8 @@
       measureModeBtn.classList.toggle('active', !stake);
       stakeModeBtn.classList.toggle('active', stake);
       stakeSettings.style.display = stake ? 'block' : 'none';
+
+      updateCameraMenuLabel();
 
       if (stake) {
         introEl.textContent = 'Plaats een punt automatisch op een ingegeven afstand vanaf punt A.';
@@ -426,6 +589,184 @@
       return `${meters.toFixed(2)} m`;
     }
 
+
+
+    function pointNameFromIndex(index) {
+      // A..Z, daarna A1..Z1
+      const letter = String.fromCharCode(65 + (index % 26));
+      const cycle = Math.floor(index / 26);
+      return cycle === 0 ? letter : `${letter}${cycle}`;
+    }
+
+    function getPointById(id) {
+      return points.find(p => p.id === id) || null;
+    }
+
+    function createPermanentPoint(position, color = 0x69ff9a) {
+      const id = `p${Date.now()}_${Math.random().toString(36).slice(2,7)}`;
+      const name = pointNameFromIndex(nextPointIndex++);
+      const marker = makeMarker(color, 1);
+      marker.position.copy(position);
+
+      const point = {
+        id,
+        name,
+        position: position.clone(),
+        marker
+      };
+
+      points.push(point);
+      updateGeometryUI();
+      return point;
+    }
+
+    function createPermanentLine(startPoint, endPoint) {
+      const geometry = new THREE.BufferGeometry().setFromPoints([
+        startPoint.position,
+        endPoint.position
+      ]);
+      const material = new THREE.LineBasicMaterial({ color: 0xffffff });
+      const object = new THREE.Line(geometry, material);
+      scene.add(object);
+
+      const line = {
+        id: `l${Date.now()}_${Math.random().toString(36).slice(2,7)}`,
+        name: `${startPoint.name}${endPoint.name}`,
+        startId: startPoint.id,
+        endId: endPoint.id,
+        distance: startPoint.position.distanceTo(endPoint.position),
+        object,
+        index: nextLineIndex++
+      };
+
+      lines.push(line);
+      updateGeometryUI();
+      return line;
+    }
+
+    function deleteLineById(id) {
+      const idx = lines.findIndex(l => l.id === id);
+      if (idx < 0) return;
+
+      const line = lines[idx];
+      disposeObject(line.object);
+      lines.splice(idx, 1);
+      updateGeometryUI();
+    }
+
+    function deletePointById(id) {
+      // Verwijder eerst alle lijnen die aan dit punt hangen
+      const linked = lines.filter(l => l.startId === id || l.endId === id).map(l => l.id);
+      linked.forEach(deleteLineById);
+
+      const idx = points.findIndex(p => p.id === id);
+      if (idx < 0) return;
+
+      const point = points[idx];
+      disposeObject(point.marker);
+      points.splice(idx, 1);
+
+      if (activeStartPointId === id) activeStartPointId = null;
+      updateGeometryUI();
+    }
+
+    function clearAllGeometry() {
+      lines.forEach(l => disposeObject(l.object));
+      points.forEach(p => disposeObject(p.marker));
+      lines.length = 0;
+      points.length = 0;
+      nextPointIndex = 0;
+      nextLineIndex = 1;
+      activeStartPointId = null;
+      clearMeasurement();
+      updateGeometryUI();
+    }
+
+    function updateGeometryUI() {
+      if (!geometrySummary || !geometryList) return;
+
+      geometrySummary.textContent = `${points.length} punten · ${lines.length} lijnen`;
+      geometryPanel.classList.toggle('visible', points.length > 0 || lines.length > 0);
+
+      geometryList.innerHTML = '';
+
+      if (points.length === 0 && lines.length === 0) {
+        geometryList.innerHTML = '<div class="geomRow"><span>Nog geen objecten</span></div>';
+        return;
+      }
+
+      for (const line of lines) {
+        const row = document.createElement('div');
+        row.className = 'geomRow';
+
+        const text = document.createElement('span');
+        text.textContent = `${line.name} · ${formatDistance(line.distance)}`;
+
+        const del = document.createElement('button');
+        del.type = 'button';
+        del.textContent = 'Verwijder';
+        del.addEventListener('click', () => deleteLineById(line.id));
+
+        row.append(text, del);
+        geometryList.appendChild(row);
+      }
+
+      for (const point of points) {
+        const row = document.createElement('div');
+        row.className = 'geomRow';
+
+        const text = document.createElement('span');
+        const role = activeStartPointId === point.id ? ' · startpunt' : '';
+        text.textContent = `Punt ${point.name}${role}`;
+
+        const del = document.createElement('button');
+        del.type = 'button';
+        del.textContent = 'Verwijder';
+        del.addEventListener('click', () => deletePointById(point.id));
+
+        row.append(text, del);
+        geometryList.appendChild(row);
+      }
+    }
+
+    function setActiveStartPoint(pointId) {
+      activeStartPointId = pointId;
+      const p = getPointById(pointId);
+
+      if (!p) {
+        activeStartPointId = null;
+        return;
+      }
+
+      pointA = p.position.clone();
+      markerA = p.marker;
+      pointB = null;
+      markerB = null;
+      directionPoint = null;
+      measureLine = null;
+      normalAtA = upAxis.clone();
+
+      resetStabilitySamples();
+      stageEl.textContent = mode === 'measure' ? `Vanaf ${p.name}: kies eindpunt` : `Vanaf ${p.name}: kies richting`;
+      hintEl.textContent = mode === 'measure'
+        ? 'Richt op het volgende punt en druk op de meetknop.'
+        : 'Richt in de gewenste richting en druk op de meetknop.';
+      updateGeometryUI();
+    }
+
+    function startNewLine(useLastPoint = false) {
+      clearMeasurement();
+
+      if (useLastPoint && points.length > 0) {
+        setActiveStartPoint(points[points.length - 1].id);
+      } else {
+        activeStartPointId = null;
+        stageEl.textContent = reticle?.visible ? 'Nieuw startpunt' : 'Zoek een oppervlak';
+        hintEl.textContent = 'Plaats het startpunt van de nieuwe lijn.';
+      }
+
+      closeCameraMenu();
+    }
 
     function resetStabilitySamples() {
       sampleHistory.length = 0;
@@ -574,8 +915,7 @@
     }
 
     function updateAllMarkerScales() {
-      updateMarkerScale(markerA);
-      updateMarkerScale(markerB);
+      for (const p of points) updateMarkerScale(p.marker);
       updateMarkerScale(directionMarker);
     }
 
@@ -592,11 +932,20 @@
       pointB = null;
       directionPoint = null;
       normalAtA = null;
+      activeStartPointId = null;
 
-      disposeObject(markerA); markerA = null;
-      disposeObject(markerB); markerB = null;
-      disposeObject(directionMarker); directionMarker = null;
-      disposeObject(measureLine); measureLine = null;
+      // Alleen tijdelijke objecten opruimen.
+      if (directionMarker) {
+        disposeObject(directionMarker);
+        directionMarker = null;
+      }
+      if (measureLine) {
+        disposeObject(measureLine);
+        measureLine = null;
+      }
+
+      markerA = null;
+      markerB = null;
 
       distanceEl.textContent = '—';
       detailEl.textContent = '';
@@ -608,6 +957,7 @@
       targetSource = reticle?.visible ? 'hit' : 'none';
       currentTargetPoint = reticle?.visible ? getReticlePosition() : null;
       resetStabilitySamples();
+      updateGeometryUI();
     }
 
     function getReticlePosition() {
@@ -719,73 +1069,87 @@
 
       if (mode === 'measure') {
         if (!pointA) {
-          pointA = current;
-          normalAtA = targetSource === 'hit' ? getReticleNormal() : upAxis.clone();
-          markerA = makeMarker(0x69ff9a);
-          markerA.position.copy(pointA);
-          resetStabilitySamples();
-          stageEl.textContent = 'Punt B';
-          hintEl.textContent = 'Richt het kruis op punt B en houd even stil. Druk daarna opnieuw.';
-        } else if (!pointB) {
-          pointB = current;
-          markerB = makeMarker(0xffd166);
-          markerB.position.copy(pointB);
-          drawLine(pointA, pointB);
+          const startPoint = createPermanentPoint(current, 0x69ff9a);
+          activeStartPointId = startPoint.id;
 
-          const d = pointA.distanceTo(pointB);
-          distanceEl.textContent = formatDistance(d);
-          detailEl.textContent = 'Rechte 3D-afstand A → B';
-          stageEl.textContent = 'Meting voltooid';
-          hintEl.textContent = 'Reset om opnieuw te meten.';
+          pointA = startPoint.position.clone();
+          markerA = startPoint.marker;
+          normalAtA = targetSource === 'hit' ? getReticleNormal() : upAxis.clone();
+
+          resetStabilitySamples();
+          stageEl.textContent = `Vanaf ${startPoint.name}: kies eindpunt`;
+          hintEl.textContent = 'Richt op het volgende punt en druk opnieuw.';
+          updateGeometryUI();
+        } else if (!pointB) {
+          const startPoint = getPointById(activeStartPointId);
+          if (!startPoint) return;
+
+          const endPoint = createPermanentPoint(current, 0xffd166);
+          pointB = endPoint.position.clone();
+          markerB = endPoint.marker;
+
+          const line = createPermanentLine(startPoint, endPoint);
+
+          distanceEl.textContent = formatDistance(line.distance);
+          detailEl.textContent = `Lijn ${line.name} opgeslagen`;
+          stageEl.textContent = 'Lijn voltooid';
+          hintEl.textContent = 'Open ☰ voor een nieuwe lijn of start vanaf het laatste punt.';
           captureBtn.disabled = true;
           stabilityEl.textContent = 'Punten gefilterd uit recente AR-samples';
+          updateGeometryUI();
         }
         return;
       }
 
       // Uitzetten
       if (!pointA) {
-        pointA = current;
+        const startPoint = createPermanentPoint(current, 0x69ff9a);
+        activeStartPointId = startPoint.id;
+
+        pointA = startPoint.position.clone();
+        markerA = startPoint.marker;
         normalAtA = targetSource === 'hit' ? getReticleNormal() : upAxis.clone();
-        markerA = makeMarker(0x69ff9a);
-        markerA.position.copy(pointA);
 
         resetStabilitySamples();
         stageEl.textContent = 'Kies richting';
         distanceEl.textContent = formatDistance(targetMeters);
-        detailEl.textContent = 'Doelafstand';
-        hintEl.textContent = 'Richt nu ergens in de gewenste richting vanaf A en druk opnieuw. De afstand tot dit richtpunt maakt niet uit.';
+        detailEl.textContent = `Vanaf ${startPoint.name} · doelafstand`;
+        hintEl.textContent = 'Richt nu in de gewenste richting en druk opnieuw. De afstand tot het richtpunt maakt niet uit.';
+        updateGeometryUI();
       } else if (!directionPoint && !pointB) {
+        const startPoint = getPointById(activeStartPointId);
+        if (!startPoint) return;
+
         directionPoint = current;
 
         const b = computeAutomaticB();
         if (!b) {
           directionPoint = null;
           stageEl.textContent = 'Richting ongeldig';
-          hintEl.textContent = 'Richt duidelijk weg van A en probeer opnieuw.';
+          hintEl.textContent = 'Richt duidelijk weg van het startpunt en probeer opnieuw.';
           return;
         }
 
-        pointB = b;
-        markerB = makeMarker(0xffd166, 1.35);
-        markerB.position.copy(pointB);
+        const endPoint = createPermanentPoint(b, 0xffd166);
+        pointB = endPoint.position.clone();
+        markerB = endPoint.marker;
 
-        // Kleine tijdelijke richting-marker, alleen om te tonen waar de richting vandaan kwam.
         directionMarker = makeMarker(0x7ab7ff, 0.65);
         directionMarker.position.copy(directionPoint);
 
-        drawLine(pointA, pointB);
+        const line = createPermanentLine(startPoint, endPoint);
 
-        distanceEl.textContent = formatDistance(pointA.distanceTo(pointB));
+        distanceEl.textContent = formatDistance(line.distance);
         detailEl.textContent =
-          directionMode === 'free3d' ? 'B automatisch · Vrij 3D' :
-          directionMode === 'horizontal' ? 'B automatisch · Horizontaal' :
-          'B automatisch · Op oppervlak';
+          directionMode === 'free3d' ? `${line.name} · Vrij 3D` :
+          directionMode === 'horizontal' ? `${line.name} · Horizontaal` :
+          `${line.name} · Op oppervlak`;
 
-        stageEl.textContent = 'Punt B berekend';
-        hintEl.textContent = 'B staat nu virtueel op de ingegeven afstand. Beweeg rond om het punt fysiek terug te vinden.';
+        stageEl.textContent = 'Punt automatisch geplaatst';
+        hintEl.textContent = 'De lijn blijft staan. Open ☰ voor de volgende lijn.';
         captureBtn.disabled = true;
         stabilityEl.textContent = 'Richting gefilterd uit recente AR-samples';
+        updateGeometryUI();
       }
     }
 
@@ -798,6 +1162,8 @@
       renderer.setSize(window.innerWidth, window.innerHeight);
       renderer.xr.enabled = true;
       renderer.xr.setReferenceSpaceType('local');
+      renderer.domElement.style.display = 'none';
+      renderer.domElement.style.pointerEvents = 'none';
       document.body.appendChild(renderer.domElement);
 
       reticle = new THREE.Mesh(
@@ -814,6 +1180,13 @@
       try {
         if (renderer) {
           renderer.setAnimationLoop(null);
+
+          // Belangrijk: de WebGL-canvas blijft anders als een onzichtbare,
+          // full-screen laag boven het beginscherm liggen en blokkeert klikken.
+          if (renderer.domElement) {
+            renderer.domElement.style.display = 'none';
+            renderer.domElement.style.pointerEvents = 'none';
+          }
         }
       } catch (_) {}
 
@@ -827,6 +1200,18 @@
       updateAimState('none');
       clearMeasurement();
 
+      // Permanente geometrie is voorlopig alleen geldig binnen dezelfde XR-sessie.
+      // Projectopslag/herpositionering komt in een latere fase.
+      lines.forEach(l => disposeObject(l.object));
+      points.forEach(p => disposeObject(p.marker));
+      lines.length = 0;
+      points.length = 0;
+      nextPointIndex = 0;
+      nextLineIndex = 1;
+      activeStartPointId = null;
+      updateGeometryUI();
+
+      closeCameraMenu();
       overlay.style.display = 'none';
       app.style.display = 'grid';
     }
@@ -881,6 +1266,13 @@
       try {
         if (!renderer) initThree();
 
+        // De canvas wordt bij het verlaten van AR verborgen zodat hij het
+        // beginscherm niet blokkeert. Voor een nieuwe sessie zetten we hem terug aan.
+        if (renderer.domElement) {
+          renderer.domElement.style.display = 'block';
+          renderer.domElement.style.pointerEvents = 'auto';
+        }
+
         const sessionInit = {
           requiredFeatures: ['hit-test'],
           optionalFeatures: ['dom-overlay'],
@@ -892,6 +1284,8 @@
 
         app.style.display = 'none';
         overlay.style.display = 'block';
+        closeCameraMenu();
+        updateCameraMenuLabel();
 
         xrSession.addEventListener('end', () => {
           cleanupARSession();
@@ -900,6 +1294,10 @@
         clearMeasurement();
         renderer.setAnimationLoop(render);
       } catch (err) {
+        if (renderer?.domElement) {
+          renderer.domElement.style.display = 'none';
+          renderer.domElement.style.pointerEvents = 'none';
+        }
         showError(`AR kon niet starten: ${err.message}\n\nControleer of Chrome cameratoegang heeft en Google Play-services voor AR geïnstalleerd zijn.`);
       }
     }
@@ -1095,9 +1493,41 @@
     dirSurfaceBtn.addEventListener('click', () => setDirectionMode('surface'));
 
     startBtn.addEventListener('click', startAR);
-    resetBtn.addEventListener('click', clearMeasurement);
-    backBtn.addEventListener('click', exitAR);
+    cameraMenuBtn.addEventListener('click', () => {
+      if (cameraMenuPanel.classList.contains('open')) {
+        closeCameraMenu();
+      } else {
+        openCameraMenu();
+      }
+    });
+
+    menuCloseBtn.addEventListener('click', closeCameraMenu);
+
+    menuNewLineBtn.addEventListener('click', () => startNewLine(false));
+    menuUseLastPointBtn.addEventListener('click', () => startNewLine(true));
+
+    menuResetBtn.addEventListener('click', () => {
+      clearMeasurement();
+      closeCameraMenu();
+    });
+
+    menuClearAllBtn.addEventListener('click', () => {
+      clearAllGeometry();
+      closeCameraMenu();
+    });
+
+    menuBackBtn.addEventListener('click', async () => {
+      closeCameraMenu();
+      await exitAR();
+    });
+
+    menuSwitchBtn.addEventListener('click', switchFunctionFromAR);
     captureBtn.addEventListener('click', placeCurrentPoint);
+
+    toggleGeometryListBtn.addEventListener('click', () => {
+      const open = geometryList.classList.toggle('open');
+      toggleGeometryListBtn.textContent = open ? 'Objecten verbergen' : 'Objecten tonen';
+    });
 
     window.addEventListener('resize', () => {
       if (renderer) renderer.setSize(window.innerWidth, window.innerHeight);
@@ -1119,6 +1549,7 @@
 
     setMode('measure');
     setDirectionMode('horizontal');
+    updateGeometryUI();
     checkSupport();
   </script>
 </body>
