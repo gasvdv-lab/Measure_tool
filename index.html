@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
   <meta name="theme-color" content="#111111" />
-  <title>WebXR Measure v0.4</title>
+  <title>WebXR Measure v0.5</title>
   <style>
     :root {
       color-scheme: dark;
@@ -144,12 +144,29 @@
       font-size:.88rem;
       color:#ddd;
     }
-    #resetBtn {
+    #stability {
+      display:inline-block;
+      margin-top:6px;
+      padding:4px 8px;
+      border-radius:999px;
+      font-size:.78rem;
+      background:rgba(255,255,255,.12);
+      color:#fff;
+    }
+    #stability.good { background:rgba(64,190,110,.28); }
+    #stability.medium { background:rgba(220,170,40,.28); }
+    #stability.poor { background:rgba(210,70,70,.28); }
+    #resetBtn, #backBtn {
       pointer-events:auto;
       background:rgba(255,255,255,.92);
       color:#111;
-      min-width:92px;
-      padding-inline:14px;
+      min-width:78px;
+      padding-inline:12px;
+    }
+    #backBtn {
+      background:rgba(0,0,0,.70);
+      color:#fff;
+      border:1px solid rgba(255,255,255,.22);
     }
     #aim {
       position:absolute;
@@ -266,6 +283,7 @@
       </div>
 
       <p id="instructions">Start AR, richt het kruis op punt A en druk op de meetknop. Richt daarna op punt B en druk opnieuw.</p>
+      <p style="font-size:.88rem;color:#aaa;">v0.5 filtert AR-jitter. De getoonde stabiliteit is géén absolute nauwkeurigheidsgarantie.</p>
       <button id="startBtn" type="button">AR starten</button>
       <div id="error"></div>
     </div>
@@ -277,7 +295,9 @@
         <div id="stage">Zoek een oppervlak</div>
         <div id="distance">—</div>
         <div id="detail"></div>
+        <div id="stability">Stabiliteit: —</div>
       </div>
+      <button id="backBtn" type="button">Terug</button>
       <button id="resetBtn" type="button">Reset</button>
     </div>
 
@@ -295,6 +315,7 @@
 
     const startBtn = document.getElementById('startBtn');
     const resetBtn = document.getElementById('resetBtn');
+    const backBtn = document.getElementById('backBtn');
     const captureBtn = document.getElementById('captureBtn');
     const measureModeBtn = document.getElementById('measureModeBtn');
     const stakeModeBtn = document.getElementById('stakeModeBtn');
@@ -315,6 +336,7 @@
     const stageEl = document.getElementById('stage');
     const distanceEl = document.getElementById('distance');
     const detailEl = document.getElementById('detail');
+    const stabilityEl = document.getElementById('stability');
     const hintEl = document.getElementById('hint');
     const aimEl = document.getElementById('aim');
 
@@ -347,6 +369,13 @@
 
     let targetSource = 'none';
     let currentTargetPoint = null;
+
+    // Stabiliteitsfilter: we bewaren een korte geschiedenis van richtpunten.
+    const sampleHistory = [];
+    const MAX_SAMPLES = 18;
+    const MIN_CAPTURE_SAMPLES = 6;
+    let stabilityMeters = null;
+    let stabilityClass = 'unknown';
 
     function setMode(nextMode) {
       mode = nextMode;
@@ -397,6 +426,109 @@
       return `${meters.toFixed(2)} m`;
     }
 
+
+    function resetStabilitySamples() {
+      sampleHistory.length = 0;
+      stabilityMeters = null;
+      stabilityClass = 'unknown';
+      updateStabilityUI();
+    }
+
+    function addTargetSample(point, source) {
+      if (!point) return;
+
+      // Meng geen fysieke en virtuele samples door elkaar.
+      const last = sampleHistory[sampleHistory.length - 1];
+      if (last && last.source !== source) {
+        sampleHistory.length = 0;
+      }
+
+      sampleHistory.push({
+        point: point.clone(),
+        source,
+        time: performance.now()
+      });
+
+      if (sampleHistory.length > MAX_SAMPLES) {
+        sampleHistory.shift();
+      }
+
+      calculateStability();
+    }
+
+    function calculateStability() {
+      if (sampleHistory.length < 2) {
+        stabilityMeters = null;
+        stabilityClass = 'unknown';
+        updateStabilityUI();
+        return;
+      }
+
+      const mean = new THREE.Vector3();
+      for (const s of sampleHistory) mean.add(s.point);
+      mean.multiplyScalar(1 / sampleHistory.length);
+
+      let sumSq = 0;
+      for (const s of sampleHistory) {
+        sumSq += s.point.distanceToSquared(mean);
+      }
+
+      stabilityMeters = Math.sqrt(sumSq / sampleHistory.length);
+
+      if (stabilityMeters <= 0.008) {
+        stabilityClass = 'good';
+      } else if (stabilityMeters <= 0.025) {
+        stabilityClass = 'medium';
+      } else {
+        stabilityClass = 'poor';
+      }
+
+      updateStabilityUI();
+    }
+
+    function updateStabilityUI() {
+      stabilityEl.classList.remove('good', 'medium', 'poor');
+
+      if (stabilityMeters === null) {
+        stabilityEl.textContent = 'Stabiliteit: meten…';
+        return;
+      }
+
+      const cm = stabilityMeters * 100;
+      const label =
+        stabilityClass === 'good' ? 'goed' :
+        stabilityClass === 'medium' ? 'redelijk' :
+        'onrustig';
+
+      stabilityEl.textContent = `Stabiliteit: ${label} · jitter ±${cm.toFixed(1)} cm`;
+      stabilityEl.classList.add(stabilityClass);
+    }
+
+    function getFilteredTargetPoint() {
+      if (!currentTargetPoint) return null;
+
+      if (sampleHistory.length < MIN_CAPTURE_SAMPLES) {
+        return currentTargetPoint.clone();
+      }
+
+      // Robuust gemiddelde: verwijder de 20% verste samples t.o.v. het eerste gemiddelde.
+      const mean = new THREE.Vector3();
+      for (const s of sampleHistory) mean.add(s.point);
+      mean.multiplyScalar(1 / sampleHistory.length);
+
+      const sorted = sampleHistory
+        .map(s => ({ point: s.point, d: s.point.distanceTo(mean) }))
+        .sort((a, b) => a.d - b.d);
+
+      const keepCount = Math.max(MIN_CAPTURE_SAMPLES, Math.ceil(sorted.length * 0.8));
+      const filtered = new THREE.Vector3();
+
+      for (let i = 0; i < keepCount; i++) filtered.add(sorted[i].point);
+      filtered.multiplyScalar(1 / keepCount);
+
+      return filtered;
+    }
+
     function disposeObject(obj) {
       if (!obj) return;
       scene.remove(obj);
@@ -410,20 +542,41 @@
       const group = new THREE.Group();
 
       const sphere = new THREE.Mesh(
-        new THREE.SphereGeometry(0.02 * size, 24, 16),
+        new THREE.SphereGeometry(0.008 * size, 24, 16),
         new THREE.MeshBasicMaterial({ color: colorHex })
       );
       group.add(sphere);
 
       const ring = new THREE.Mesh(
-        new THREE.RingGeometry(0.028 * size, 0.038 * size, 40),
+        new THREE.RingGeometry(0.011 * size, 0.014 * size, 40),
         new THREE.MeshBasicMaterial({ color: colorHex, side: THREE.DoubleSide })
       );
       ring.rotation.x = -Math.PI / 2;
       group.add(ring);
 
+      group.userData.baseSize = size;
       scene.add(group);
       return group;
+    }
+
+    function updateMarkerScale(marker) {
+      if (!marker || !renderer) return;
+
+      const xrCamera = renderer.xr.getCamera(camera);
+      xrCamera.getWorldPosition(cameraPos);
+
+      const d = Math.max(0.05, marker.position.distanceTo(cameraPos));
+
+      // Kleine, precieze markering dichtbij; geleidelijk groter op afstand.
+      // De schaal blijft begrensd zodat markeringen nooit log worden.
+      const scale = Math.min(2.2, Math.max(0.45, 0.55 + d * 0.18));
+      marker.scale.setScalar(scale);
+    }
+
+    function updateAllMarkerScales() {
+      updateMarkerScale(markerA);
+      updateMarkerScale(markerB);
+      updateMarkerScale(directionMarker);
     }
 
     function drawLine(a, b) {
@@ -454,6 +607,7 @@
       captureBtn.disabled = !reticle?.visible;
       targetSource = reticle?.visible ? 'hit' : 'none';
       currentTargetPoint = reticle?.visible ? getReticlePosition() : null;
+      resetStabilitySamples();
     }
 
     function getReticlePosition() {
@@ -559,7 +713,9 @@
 
     function placeCurrentPoint() {
       if (!currentTargetPoint) return;
-      const current = currentTargetPoint.clone();
+
+      const current = getFilteredTargetPoint();
+      if (!current) return;
 
       if (mode === 'measure') {
         if (!pointA) {
@@ -567,8 +723,9 @@
           normalAtA = targetSource === 'hit' ? getReticleNormal() : upAxis.clone();
           markerA = makeMarker(0x69ff9a);
           markerA.position.copy(pointA);
+          resetStabilitySamples();
           stageEl.textContent = 'Punt B';
-          hintEl.textContent = 'Richt het kruis op punt B en druk opnieuw.';
+          hintEl.textContent = 'Richt het kruis op punt B en houd even stil. Druk daarna opnieuw.';
         } else if (!pointB) {
           pointB = current;
           markerB = makeMarker(0xffd166);
@@ -581,6 +738,7 @@
           stageEl.textContent = 'Meting voltooid';
           hintEl.textContent = 'Reset om opnieuw te meten.';
           captureBtn.disabled = true;
+          stabilityEl.textContent = 'Punten gefilterd uit recente AR-samples';
         }
         return;
       }
@@ -592,6 +750,7 @@
         markerA = makeMarker(0x69ff9a);
         markerA.position.copy(pointA);
 
+        resetStabilitySamples();
         stageEl.textContent = 'Kies richting';
         distanceEl.textContent = formatDistance(targetMeters);
         detailEl.textContent = 'Doelafstand';
@@ -626,6 +785,7 @@
         stageEl.textContent = 'Punt B berekend';
         hintEl.textContent = 'B staat nu virtueel op de ingegeven afstand. Beweeg rond om het punt fysiek terug te vinden.';
         captureBtn.disabled = true;
+        stabilityEl.textContent = 'Richting gefilterd uit recente AR-samples';
       }
     }
 
@@ -647,6 +807,44 @@
       reticle.matrixAutoUpdate = false;
       reticle.visible = false;
       scene.add(reticle);
+    }
+
+
+    function cleanupARSession() {
+      try {
+        if (renderer) {
+          renderer.setAnimationLoop(null);
+        }
+      } catch (_) {}
+
+      hitTestSource = null;
+      hitTestSourceRequested = false;
+      xrSession = null;
+      currentTargetPoint = null;
+      targetSource = 'none';
+
+      if (reticle) reticle.visible = false;
+      updateAimState('none');
+      clearMeasurement();
+
+      overlay.style.display = 'none';
+      app.style.display = 'grid';
+    }
+
+    async function exitAR() {
+      const session = xrSession || renderer?.xr?.getSession?.();
+
+      if (session) {
+        try {
+          await session.end();
+          return; // cleanup gebeurt via het 'end'-event
+        } catch (_) {
+          cleanupARSession();
+          return;
+        }
+      }
+
+      cleanupARSession();
     }
 
     async function checkSupport() {
@@ -696,13 +894,8 @@
         overlay.style.display = 'block';
 
         xrSession.addEventListener('end', () => {
-          overlay.style.display = 'none';
-          app.style.display = 'grid';
-          hitTestSource = null;
-          hitTestSourceRequested = false;
-          xrSession = null;
-          clearMeasurement();
-        });
+          cleanupARSession();
+        }, { once: true });
 
         clearMeasurement();
         renderer.setAnimationLoop(render);
@@ -760,14 +953,16 @@
           reticle.matrix.fromArray(physicalPose.transform.matrix);
           targetSource = 'hit';
           currentTargetPoint = physicalHitPoint;
+          addTargetSample(currentTargetPoint, 'hit');
           updateAimState('hit');
           captureBtn.disabled = false;
 
           stageEl.textContent = 'Punt A';
           detailEl.textContent = 'Groen = echt AR-oppervlak';
-          hintEl.textContent = 'Richt het groene kruis op punt A en druk op de meetknop.';
+          hintEl.textContent = stabilityClass === 'poor' ? 'Houd de telefoon even stiller voor een stabieler punt A.' : 'Richt het groene kruis op punt A en druk op de meetknop.';
         } else {
           reticle.visible = false;
+          if (targetSource !== 'none') resetStabilitySamples();
           targetSource = 'none';
           currentTargetPoint = null;
           updateAimState('none');
@@ -778,6 +973,8 @@
           hintEl.textContent = 'Beweeg rustig zodat ARCore rond punt A een oppervlak kan herkennen.';
         }
 
+        updateAllMarkerScales();
+        updateAllMarkerScales();
         renderer.render(scene, camera);
         return;
       }
@@ -788,13 +985,14 @@
           reticle.matrix.fromArray(physicalPose.transform.matrix);
           targetSource = 'hit';
           currentTargetPoint = physicalHitPoint;
+          addTargetSample(currentTargetPoint, 'hit');
           updateAimState('hit');
           captureBtn.disabled = false;
 
           if (mode === 'measure') {
             stageEl.textContent = 'Punt B';
             detailEl.textContent = 'Groen = echt AR-oppervlak';
-            hintEl.textContent = 'Richt op punt B en druk op de meetknop.';
+            hintEl.textContent = stabilityClass === 'poor' ? 'Houd even stil zodat punt B stabiliseert.' : 'Richt op punt B en druk op de meetknop.';
           } else {
             stageEl.textContent = 'Kies richting';
             detailEl.textContent = 'Groen = richting via echt oppervlak';
@@ -807,6 +1005,7 @@
             setReticleToVirtualPoint(fallback);
             targetSource = 'virtual';
             currentTargetPoint = fallback.clone();
+            addTargetSample(currentTargetPoint, 'virtual');
             updateAimState('virtual');
             captureBtn.disabled = false;
 
@@ -832,6 +1031,8 @@
           }
         }
 
+        updateAllMarkerScales();
+        updateAllMarkerScales();
         renderer.render(scene, camera);
         return;
       }
@@ -882,6 +1083,7 @@
         captureBtn.disabled = true;
       }
 
+      updateAllMarkerScales();
       renderer.render(scene, camera);
     }
 
@@ -894,10 +1096,25 @@
 
     startBtn.addEventListener('click', startAR);
     resetBtn.addEventListener('click', clearMeasurement);
+    backBtn.addEventListener('click', exitAR);
     captureBtn.addEventListener('click', placeCurrentPoint);
 
     window.addEventListener('resize', () => {
       if (renderer) renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // Android/Chrome kan een pagina via de back/recents-flow herstellen.
+    // Zorg dat een achtergebleven XR-loop de startpagina niet blokkeert.
+    window.addEventListener('pageshow', (event) => {
+      if (event.persisted && !navigator.xr) {
+        cleanupARSession();
+      }
+    });
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && !renderer?.xr?.getSession?.() && overlay.style.display === 'block') {
+        cleanupARSession();
+      }
     });
 
     setMode('measure');
