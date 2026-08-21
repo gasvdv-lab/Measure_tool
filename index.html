@@ -22,138 +22,249 @@
     #app {
       position: fixed;
       inset: 0;
+      overflow-y: auto;
+      padding: 24px 0;
       display: grid;
       place-items: center;
-      background:
-        radial-gradient(circle at 50% 35%, rgba(255,255,255,.05), transparent 45%),
-        #111;
+      background: radial-gradient(circle at 50% 35%, rgba(255,255,255,.05), transparent 45%), #111;
     }
     .panel {
-      width: min(92vw, 520px);
+      width: min(92vw, 560px);
       padding: 24px;
       border: 1px solid rgba(255,255,255,.14);
       border-radius: 22px;
-      background: rgba(25,25,25,.92);
-      text-align: center;
+      background: rgba(25,25,25,.94);
     }
-    h1 { margin: 0 0 10px; font-size: 1.7rem; }
+    h1 { margin: 0 0 8px; font-size: 1.7rem; text-align:center; }
     p { margin: 8px 0; color: #d0d0d0; line-height: 1.45; }
+    .modes {
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+      margin:18px 0;
+    }
+    .modeBtn, .dirBtn {
+      background:#242424;
+      color:#fff;
+      border:1px solid rgba(255,255,255,.15);
+    }
+    .modeBtn.active, .dirBtn.active {
+      background:#fff;
+      color:#111;
+    }
+    .stakeSettings {
+      display:none;
+      margin: 14px 0 4px;
+      padding:14px;
+      border-radius:16px;
+      background:#1c1c1c;
+      border:1px solid rgba(255,255,255,.10);
+    }
+    .row {
+      display:grid;
+      grid-template-columns: 1fr 120px;
+      gap:10px;
+      align-items:end;
+    }
+    .dirGrid {
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:8px;
+      margin-top:10px;
+    }
+    label {
+      display:block;
+      color:#ddd;
+      font-size:.9rem;
+      margin-bottom:6px;
+    }
+    input, select {
+      width:100%;
+      min-height:48px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.18);
+      background:#101010;
+      color:#fff;
+      padding:10px 12px;
+      font:inherit;
+    }
     button {
-      appearance: none;
-      border: 0;
-      border-radius: 14px;
-      padding: 14px 18px;
-      min-height: 52px;
-      font: inherit;
-      font-weight: 700;
-      cursor: pointer;
+      appearance:none;
+      border:0;
+      border-radius:14px;
+      padding:14px 18px;
+      min-height:52px;
+      font:inherit;
+      font-weight:700;
+      cursor:pointer;
     }
     #startBtn {
-      margin-top: 18px;
-      width: 100%;
-      background: #fff;
-      color: #111;
+      margin-top:18px;
+      width:100%;
+      background:#fff;
+      color:#111;
     }
-    #startBtn:disabled { opacity: .45; cursor: default; }
+    #startBtn:disabled { opacity:.45; cursor:default; }
 
     #overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 10;
-      pointer-events: none;
-      display: none;
+      position:fixed;
+      inset:0;
+      z-index:10;
+      pointer-events:none;
+      display:none;
     }
     #topbar {
-      position: absolute;
-      top: max(14px, env(safe-area-inset-top));
-      left: 14px;
-      right: 14px;
-      display: flex;
-      gap: 10px;
-      align-items: stretch;
+      position:absolute;
+      top:max(14px, env(safe-area-inset-top));
+      left:14px;
+      right:14px;
+      display:flex;
+      gap:10px;
+      align-items:stretch;
     }
     .statusbox {
-      flex: 1;
-      border-radius: 16px;
-      padding: 11px 14px;
-      background: rgba(0,0,0,.62);
-      backdrop-filter: blur(8px);
+      flex:1;
+      border-radius:16px;
+      padding:11px 14px;
+      background:rgba(0,0,0,.64);
+      backdrop-filter:blur(8px);
     }
     #stage {
-      font-size: .82rem;
-      color: #cfcfcf;
-      margin-bottom: 2px;
+      font-size:.82rem;
+      color:#cfcfcf;
+      margin-bottom:2px;
     }
     #distance {
-      font-size: 1.45rem;
-      font-weight: 800;
-      letter-spacing: .01em;
+      font-size:1.45rem;
+      font-weight:800;
+      letter-spacing:.01em;
+    }
+    #detail {
+      margin-top:2px;
+      font-size:.88rem;
+      color:#ddd;
     }
     #resetBtn {
-      pointer-events: auto;
-      background: rgba(255,255,255,.92);
-      color: #111;
-      min-width: 92px;
-      padding-inline: 14px;
-    }
-    #hint {
-      position: absolute;
-      left: 50%;
-      bottom: max(24px, env(safe-area-inset-bottom));
-      transform: translateX(-50%);
-      width: min(88vw, 520px);
-      text-align: center;
-      padding: 10px 14px;
-      border-radius: 14px;
-      background: rgba(0,0,0,.60);
-      color: #eee;
-      font-size: .95rem;
-      backdrop-filter: blur(8px);
+      pointer-events:auto;
+      background:rgba(255,255,255,.92);
+      color:#111;
+      min-width:92px;
+      padding-inline:14px;
     }
     #aim {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      width: 54px;
-      height: 54px;
-      transform: translate(-50%, -50%);
-      opacity: .92;
+      position:absolute;
+      left:50%;
+      top:50%;
+      width:54px;
+      height:54px;
+      transform:translate(-50%,-50%);
+      opacity:.92;
     }
     #aim::before, #aim::after {
-      content: "";
-      position: absolute;
-      background: rgba(255,255,255,.95);
-      border-radius: 2px;
+      content:"";
+      position:absolute;
+      background:rgba(255,255,255,.95);
+      border-radius:2px;
     }
-    #aim::before {
-      width: 26px; height: 2px;
-      left: 14px; top: 26px;
-    }
-    #aim::after {
-      width: 2px; height: 26px;
-      left: 26px; top: 14px;
-    }
-    #aim.ready::before, #aim.ready::after { background: #69ff9a; }
+    #aim::before { width:26px; height:2px; left:14px; top:26px; }
+    #aim::after { width:2px; height:26px; left:26px; top:14px; }
+    #aim.ready::before, #aim.ready::after { background:#69ff9a; }
 
-    #error {
-      margin-top: 14px;
-      padding: 12px;
-      border-radius: 12px;
-      background: #341818;
-      color: #ffd1d1;
-      display: none;
-      text-align: left;
-      white-space: pre-wrap;
+    #captureWrap {
+      position:absolute;
+      left:50%;
+      bottom:max(86px, calc(env(safe-area-inset-bottom) + 86px));
+      transform:translateX(-50%);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      pointer-events:auto;
     }
-    canvas { position: fixed; inset: 0; width: 100%; height: 100%; }
+    #captureBtn {
+      width:84px;
+      height:84px;
+      min-height:0;
+      padding:0;
+      border-radius:50%;
+      border:5px solid rgba(255,255,255,.98);
+      background:rgba(255,255,255,.18);
+      box-shadow:0 0 0 4px rgba(0,0,0,.28);
+      position:relative;
+    }
+    #captureBtn::after {
+      content:"";
+      position:absolute;
+      inset:8px;
+      border-radius:50%;
+      background:rgba(255,255,255,.98);
+      transition:transform .08s ease, opacity .08s ease;
+    }
+    #captureBtn:active::after { transform:scale(.9); opacity:.8; }
+    #captureBtn:disabled { opacity:.35; cursor:default; }
+
+    #hint {
+      position:absolute;
+      left:50%;
+      bottom:max(20px, env(safe-area-inset-bottom));
+      transform:translateX(-50%);
+      width:min(90vw, 560px);
+      text-align:center;
+      padding:10px 14px;
+      border-radius:14px;
+      background:rgba(0,0,0,.62);
+      color:#eee;
+      font-size:.95rem;
+      backdrop-filter:blur(8px);
+    }
+    #error {
+      margin-top:14px;
+      padding:12px;
+      border-radius:12px;
+      background:#341818;
+      color:#ffd1d1;
+      display:none;
+      white-space:pre-wrap;
+    }
+    canvas { position:fixed; inset:0; width:100%; height:100%; }
   </style>
 </head>
 <body>
   <div id="app">
     <div class="panel">
       <h1>WebXR Measure</h1>
-      <p>Meet de rechte 3D-afstand tussen twee punten met AR.</p>
-      <p>Start AR, richt het kruis op punt A en tik. Richt daarna op punt B en tik opnieuw.</p>
+      <p id="intro">Meet de rechte 3D-afstand tussen twee punten met AR.</p>
+
+      <div class="modes">
+        <button id="measureModeBtn" class="modeBtn active" type="button">Afstand meten</button>
+        <button id="stakeModeBtn" class="modeBtn" type="button">Afstand uitzetten</button>
+      </div>
+
+      <div id="stakeSettings" class="stakeSettings">
+        <div class="row">
+          <div>
+            <label for="targetValue">Gewenste afstand</label>
+            <input id="targetValue" type="number" min="0.01" step="0.01" value="2.00" />
+          </div>
+          <div>
+            <label for="targetUnit">Eenheid</label>
+            <select id="targetUnit">
+              <option value="m">meter</option>
+              <option value="cm">cm</option>
+            </select>
+          </div>
+        </div>
+
+        <label style="margin-top:14px;">Richtingsmodus</label>
+        <div class="dirGrid">
+          <button id="dir3dBtn" class="dirBtn" type="button">Vrij 3D</button>
+          <button id="dirHorizontalBtn" class="dirBtn active" type="button">Horizontaal</button>
+          <button id="dirSurfaceBtn" class="dirBtn" type="button">Op oppervlak</button>
+        </div>
+
+        <p id="dirHelp">B blijft op dezelfde hoogte als A. Ideaal voor uitzetten op terrein of vloer.</p>
+      </div>
+
+      <p id="instructions">Start AR, richt het kruis op punt A en druk op de meetknop. Richt daarna op punt B en druk opnieuw.</p>
       <button id="startBtn" type="button">AR starten</button>
       <div id="error"></div>
     </div>
@@ -164,10 +275,17 @@
       <div class="statusbox">
         <div id="stage">Zoek een oppervlak</div>
         <div id="distance">—</div>
+        <div id="detail"></div>
       </div>
       <button id="resetBtn" type="button">Reset</button>
     </div>
+
     <div id="aim"></div>
+
+    <div id="captureWrap">
+      <button id="captureBtn" type="button" aria-label="Punt vastleggen" disabled></button>
+    </div>
+
     <div id="hint">Beweeg rustig zodat ARCore het oppervlak kan herkennen.</div>
   </div>
 
@@ -176,13 +294,32 @@
 
     const startBtn = document.getElementById('startBtn');
     const resetBtn = document.getElementById('resetBtn');
+    const captureBtn = document.getElementById('captureBtn');
+    const measureModeBtn = document.getElementById('measureModeBtn');
+    const stakeModeBtn = document.getElementById('stakeModeBtn');
+
+    const dir3dBtn = document.getElementById('dir3dBtn');
+    const dirHorizontalBtn = document.getElementById('dirHorizontalBtn');
+    const dirSurfaceBtn = document.getElementById('dirSurfaceBtn');
+    const dirHelp = document.getElementById('dirHelp');
+
+    const stakeSettings = document.getElementById('stakeSettings');
+    const targetValueEl = document.getElementById('targetValue');
+    const targetUnitEl = document.getElementById('targetUnit');
+    const introEl = document.getElementById('intro');
+    const instructionsEl = document.getElementById('instructions');
     const app = document.getElementById('app');
     const overlay = document.getElementById('overlay');
     const errorBox = document.getElementById('error');
     const stageEl = document.getElementById('stage');
     const distanceEl = document.getElementById('distance');
+    const detailEl = document.getElementById('detail');
     const hintEl = document.getElementById('hint');
     const aimEl = document.getElementById('aim');
+
+    let mode = 'measure';
+    let directionMode = 'horizontal';
+    let targetMeters = 2.0;
 
     let renderer, scene, camera, reticle;
     let hitTestSource = null;
@@ -191,12 +328,55 @@
 
     let pointA = null;
     let pointB = null;
+    let directionPoint = null;
+    let normalAtA = null;
+
     let markerA = null;
     let markerB = null;
+    let directionMarker = null;
     let measureLine = null;
 
-    const tmpMatrix = new THREE.Matrix4();
     const tmpPos = new THREE.Vector3();
+    const tmpQuat = new THREE.Quaternion();
+    const upAxis = new THREE.Vector3(0, 1, 0);
+
+    function setMode(nextMode) {
+      mode = nextMode;
+      const stake = mode === 'stake';
+
+      measureModeBtn.classList.toggle('active', !stake);
+      stakeModeBtn.classList.toggle('active', stake);
+      stakeSettings.style.display = stake ? 'block' : 'none';
+
+      if (stake) {
+        introEl.textContent = 'Plaats een punt automatisch op een ingegeven afstand vanaf punt A.';
+        instructionsEl.textContent = 'Geef de afstand en modus in. In AR leg je A vast, daarna wijs je alleen de richting aan. Punt B wordt automatisch berekend.';
+      } else {
+        introEl.textContent = 'Meet de rechte 3D-afstand tussen twee punten met AR.';
+        instructionsEl.textContent = 'Start AR, richt het kruis op punt A en druk op de meetknop. Richt daarna op punt B en druk opnieuw.';
+      }
+    }
+
+    function setDirectionMode(nextMode) {
+      directionMode = nextMode;
+      dir3dBtn.classList.toggle('active', nextMode === 'free3d');
+      dirHorizontalBtn.classList.toggle('active', nextMode === 'horizontal');
+      dirSurfaceBtn.classList.toggle('active', nextMode === 'surface');
+
+      if (nextMode === 'free3d') {
+        dirHelp.textContent = 'B volgt exact de 3D-richting waarin je wijst, inclusief hoogteverschil.';
+      } else if (nextMode === 'horizontal') {
+        dirHelp.textContent = 'B blijft op dezelfde hoogte als A. Ideaal voor uitzetten op terrein of vloer.';
+      } else {
+        dirHelp.textContent = 'B blijft in het lokale vlak van oppervlak A, bijvoorbeeld vloer, helling of wand.';
+      }
+    }
+
+    function readTargetMeters() {
+      const value = Number(targetValueEl.value);
+      if (!Number.isFinite(value) || value <= 0) return null;
+      return targetUnitEl.value === 'cm' ? value / 100 : value;
+    }
 
     function showError(message) {
       errorBox.style.display = 'block';
@@ -209,17 +389,26 @@
       return `${meters.toFixed(2)} m`;
     }
 
-    function makeMarker(colorHex) {
+    function disposeObject(obj) {
+      if (!obj) return;
+      scene.remove(obj);
+      obj.traverse?.((child) => {
+        child.geometry?.dispose?.();
+        child.material?.dispose?.();
+      });
+    }
+
+    function makeMarker(colorHex, size = 1) {
       const group = new THREE.Group();
 
       const sphere = new THREE.Mesh(
-        new THREE.SphereGeometry(0.018, 24, 16),
+        new THREE.SphereGeometry(0.02 * size, 24, 16),
         new THREE.MeshBasicMaterial({ color: colorHex })
       );
       group.add(sphere);
 
       const ring = new THREE.Mesh(
-        new THREE.RingGeometry(0.025, 0.032, 40),
+        new THREE.RingGeometry(0.028 * size, 0.038 * size, 40),
         new THREE.MeshBasicMaterial({ color: colorHex, side: THREE.DoubleSide })
       );
       ring.rotation.x = -Math.PI / 2;
@@ -229,49 +418,132 @@
       return group;
     }
 
-    function updateLine() {
-      if (measureLine) {
-        scene.remove(measureLine);
-        measureLine.geometry.dispose();
-        measureLine.material.dispose();
-        measureLine = null;
-      }
-
-      if (!pointA || !pointB) return;
-
-      const geometry = new THREE.BufferGeometry().setFromPoints([pointA, pointB]);
+    function drawLine(a, b) {
+      if (measureLine) disposeObject(measureLine);
+      const geometry = new THREE.BufferGeometry().setFromPoints([a, b]);
       const material = new THREE.LineBasicMaterial({ color: 0xffffff });
       measureLine = new THREE.Line(geometry, material);
       scene.add(measureLine);
-
-      const d = pointA.distanceTo(pointB);
-      distanceEl.textContent = formatDistance(d);
-      stageEl.textContent = 'Meting voltooid';
-      hintEl.textContent = 'Reset om opnieuw te meten.';
     }
 
     function clearMeasurement() {
       pointA = null;
       pointB = null;
+      directionPoint = null;
+      normalAtA = null;
 
-      if (markerA) {
-        scene.remove(markerA);
-        markerA = null;
-      }
-      if (markerB) {
-        scene.remove(markerB);
-        markerB = null;
-      }
-      if (measureLine) {
-        scene.remove(measureLine);
-        measureLine.geometry.dispose();
-        measureLine.material.dispose();
-        measureLine = null;
-      }
+      disposeObject(markerA); markerA = null;
+      disposeObject(markerB); markerB = null;
+      disposeObject(directionMarker); directionMarker = null;
+      disposeObject(measureLine); measureLine = null;
 
       distanceEl.textContent = '—';
-      stageEl.textContent = 'Punt A';
-      hintEl.textContent = 'Richt het kruis op punt A en tik op het scherm.';
+      detailEl.textContent = '';
+      stageEl.textContent = reticle?.visible ? 'Punt A' : 'Zoek een oppervlak';
+      hintEl.textContent = reticle?.visible
+        ? 'Richt het kruis op punt A en druk op de meetknop.'
+        : 'Beweeg rustig zodat ARCore het oppervlak kan herkennen.';
+      captureBtn.disabled = !reticle?.visible;
+    }
+
+    function getReticlePosition() {
+      tmpPos.setFromMatrixPosition(reticle.matrix);
+      return tmpPos.clone();
+    }
+
+    function getReticleNormal() {
+      tmpQuat.setFromRotationMatrix(reticle.matrix);
+      return upAxis.clone().applyQuaternion(tmpQuat).normalize();
+    }
+
+    function computeAutomaticB() {
+      if (!pointA || !directionPoint) return null;
+
+      let dir = directionPoint.clone().sub(pointA);
+
+      if (directionMode === 'horizontal') {
+        dir.y = 0;
+      } else if (directionMode === 'surface') {
+        const n = (normalAtA || upAxis).clone().normalize();
+        dir.sub(n.multiplyScalar(dir.dot(n)));
+      }
+
+      if (dir.lengthSq() < 0.000001) return null;
+
+      dir.normalize();
+      return pointA.clone().add(dir.multiplyScalar(targetMeters));
+    }
+
+    function placeCurrentPoint() {
+      if (!reticle || !reticle.visible) return;
+      const current = getReticlePosition();
+
+      if (mode === 'measure') {
+        if (!pointA) {
+          pointA = current;
+          normalAtA = getReticleNormal();
+          markerA = makeMarker(0x69ff9a);
+          markerA.position.copy(pointA);
+          stageEl.textContent = 'Punt B';
+          hintEl.textContent = 'Richt het kruis op punt B en druk opnieuw.';
+        } else if (!pointB) {
+          pointB = current;
+          markerB = makeMarker(0xffd166);
+          markerB.position.copy(pointB);
+          drawLine(pointA, pointB);
+
+          const d = pointA.distanceTo(pointB);
+          distanceEl.textContent = formatDistance(d);
+          detailEl.textContent = 'Rechte 3D-afstand A → B';
+          stageEl.textContent = 'Meting voltooid';
+          hintEl.textContent = 'Reset om opnieuw te meten.';
+          captureBtn.disabled = true;
+        }
+        return;
+      }
+
+      // Uitzetten
+      if (!pointA) {
+        pointA = current;
+        normalAtA = getReticleNormal();
+        markerA = makeMarker(0x69ff9a);
+        markerA.position.copy(pointA);
+
+        stageEl.textContent = 'Kies richting';
+        distanceEl.textContent = formatDistance(targetMeters);
+        detailEl.textContent = 'Doelafstand';
+        hintEl.textContent = 'Richt nu ergens in de gewenste richting vanaf A en druk opnieuw. De afstand tot dit richtpunt maakt niet uit.';
+      } else if (!directionPoint && !pointB) {
+        directionPoint = current;
+
+        const b = computeAutomaticB();
+        if (!b) {
+          directionPoint = null;
+          stageEl.textContent = 'Richting ongeldig';
+          hintEl.textContent = 'Richt duidelijk weg van A en probeer opnieuw.';
+          return;
+        }
+
+        pointB = b;
+        markerB = makeMarker(0xffd166, 1.35);
+        markerB.position.copy(pointB);
+
+        // Kleine tijdelijke richting-marker, alleen om te tonen waar de richting vandaan kwam.
+        directionMarker = makeMarker(0x7ab7ff, 0.65);
+        directionMarker.position.copy(directionPoint);
+
+        drawLine(pointA, pointB);
+
+        distanceEl.textContent = formatDistance(pointA.distanceTo(pointB));
+        detailEl.textContent =
+          directionMode === 'free3d' ? 'B automatisch · Vrij 3D' :
+          directionMode === 'horizontal' ? 'B automatisch · Horizontaal' :
+          'B automatisch · Op oppervlak';
+
+        stageEl.textContent = 'Punt B berekend';
+        hintEl.textContent = 'B staat nu virtueel op de ingegeven afstand. Beweeg rond om het punt fysiek terug te vinden.';
+        captureBtn.disabled = true;
+      }
     }
 
     function initThree() {
@@ -316,6 +588,15 @@
     async function startAR() {
       errorBox.style.display = 'none';
 
+      if (mode === 'stake') {
+        const parsed = readTargetMeters();
+        if (parsed === null) {
+          showError('Geef eerst een geldige gewenste afstand in.');
+          return;
+        }
+        targetMeters = parsed;
+      }
+
       try {
         if (!renderer) initThree();
 
@@ -339,27 +620,6 @@
           xrSession = null;
           clearMeasurement();
         });
-
-        const controller = renderer.xr.getController(0);
-        controller.addEventListener('select', () => {
-          if (!reticle.visible) return;
-
-          tmpPos.setFromMatrixPosition(reticle.matrix);
-
-          if (!pointA) {
-            pointA = tmpPos.clone();
-            markerA = makeMarker(0x69ff9a);
-            markerA.position.copy(pointA);
-            stageEl.textContent = 'Punt B';
-            hintEl.textContent = 'Richt het kruis op punt B en tik opnieuw.';
-          } else if (!pointB) {
-            pointB = tmpPos.clone();
-            markerB = makeMarker(0xffd166);
-            markerB.position.copy(pointB);
-            updateLine();
-          }
-        });
-        scene.add(controller);
 
         clearMeasurement();
         renderer.setAnimationLoop(render);
@@ -401,28 +661,60 @@
             reticle.matrix.fromArray(pose.transform.matrix);
             aimEl.classList.add('ready');
 
+            if (!pointB) captureBtn.disabled = false;
+
             if (!pointA) {
               stageEl.textContent = 'Punt A';
-            } else if (!pointB) {
+              hintEl.textContent = 'Richt het kruis op punt A en druk op de meetknop.';
+            } else if (mode === 'measure' && !pointB) {
               stageEl.textContent = 'Punt B';
+            } else if (mode === 'stake' && !directionPoint && !pointB) {
+              stageEl.textContent = 'Kies richting';
+            }
+
+            // Na automatisch uitzetten: help om B fysiek terug te vinden.
+            if (mode === 'stake' && pointB) {
+              const here = getReticlePosition();
+              const remaining = here.distanceTo(pointB);
+              detailEl.textContent = `Richtpunt → B: ${formatDistance(remaining)}`;
+              if (remaining < 0.05) {
+                stageEl.textContent = 'Je zit op punt B';
+                hintEl.textContent = 'Je richtpunt ligt binnen 5 cm van het berekende punt B.';
+              }
             }
           }
         } else {
           reticle.visible = false;
           aimEl.classList.remove('ready');
-          if (!pointA) stageEl.textContent = 'Zoek een oppervlak';
+          captureBtn.disabled = true;
+
+          if (!pointA) {
+            stageEl.textContent = 'Zoek een oppervlak';
+            hintEl.textContent = 'Beweeg rustig zodat ARCore het oppervlak kan herkennen.';
+          }
         }
       }
 
       renderer.render(scene, camera);
     }
 
+    measureModeBtn.addEventListener('click', () => setMode('measure'));
+    stakeModeBtn.addEventListener('click', () => setMode('stake'));
+
+    dir3dBtn.addEventListener('click', () => setDirectionMode('free3d'));
+    dirHorizontalBtn.addEventListener('click', () => setDirectionMode('horizontal'));
+    dirSurfaceBtn.addEventListener('click', () => setDirectionMode('surface'));
+
     startBtn.addEventListener('click', startAR);
     resetBtn.addEventListener('click', clearMeasurement);
+    captureBtn.addEventListener('click', placeCurrentPoint);
+
     window.addEventListener('resize', () => {
       if (renderer) renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
+    setMode('measure');
+    setDirectionMode('horizontal');
     checkSupport();
   </script>
 </body>

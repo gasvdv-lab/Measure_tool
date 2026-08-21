@@ -1,36 +1,36 @@
-WEBXR MEASURE — korte installatie
+WEBXR MEASURE v0.3 — Meten + correct uitzetten
 
-Wat doet deze versie?
-- Start een WebXR/ARCore sessie in Chrome.
-- Toont een richtpunt op gevonden oppervlakken.
-- Eerste tik = punt A.
-- Tweede tik = punt B.
-- Berekent de rechte 3D-afstand tussen A en B.
-- Reset wist de meting.
+Deze versie bevat twee hoofdmodi.
 
-Belangrijk
-- De pagina moet via HTTPS draaien. Een lokaal file://-bestand is niet voldoende voor WebXR.
-- Gebruik Chrome op een ARCore-compatibel Android-toestel.
-- De app gebruikt Three.js via jsDelivr, dus internetverbinding is nodig om de pagina de eerste keer te laden.
+1. AFSTAND METEN
+- Start AR.
+- Richt op punt A en druk op de ronde knop.
+- Richt op punt B en druk opnieuw.
+- De app toont de rechte 3D-afstand A → B.
 
-Snelste gratis publicatie via GitHub Pages
-1. Maak een nieuwe GitHub repository, bijvoorbeeld webxr-measure.
-2. Upload index.html naar de root van de repository.
-3. Open Settings > Pages.
-4. Bij Build and deployment: kies Deploy from a branch.
-5. Branch: main, folder: /(root), Save.
-6. Na korte tijd krijg je een HTTPS-adres van GitHub Pages.
-7. Open dat adres in Chrome op je telefoon.
-8. Tik op 'AR starten' en geef cameratoestemming.
+2. AFSTAND UITZETTEN
+- Geef vooraf de gewenste afstand in.
+- Kies een richtingsmodus:
+  A. Vrij 3D
+     B volgt exact de gekozen 3D-richting, inclusief hoogteverschil.
+  B. Horizontaal
+     B blijft op dezelfde hoogte als A.
+  C. Op oppervlak
+     B wordt geprojecteerd in het lokale vlak van oppervlak A.
+- Start AR.
+- Leg punt A vast.
+- Richt daarna ergens in de gewenste richting vanaf A en druk opnieuw.
+  BELANGRIJK: de afstand tot dit tijdelijke richtpunt maakt niet uit.
+- De app berekent daarna automatisch punt B op exact de ingegeven afstand.
+- Een virtuele marker en lijn A → B verschijnen.
+- Terwijl je rondloopt toont de app de afstand van het huidige richtpunt tot B.
+- Binnen 5 cm meldt de app dat je op B zit.
 
-Gebruik
-1. Beweeg de telefoon rustig zodat ARCore een oppervlak vindt.
-2. Als het richtkruis groen wordt: richt op punt A en tik.
-3. Richt op punt B en tik opnieuw.
-4. De afstand verschijnt bovenaan.
-5. Tik op Reset om opnieuw te meten.
+Waarom deze werkwijze?
+Met alleen A + afstand bestaan oneindig veel mogelijke punten B. Daarom gebruikt de app een tweede tik alleen om de richting vast te leggen. Daarna wordt B automatisch berekend.
 
-Meetnauwkeurigheid
-- Dit is een eerste prototype.
-- Test bij voorkeur eerst tegen een echte meterlat op 0,5 m, 1,0 m en 2,0 m.
-- AR-metingen kunnen variëren door licht, textuur, reflecties en snelle bewegingen.
+Publiceren
+1. Vervang in GitHub repository Measure_tool het bestaande index.html door deze index.html.
+2. Commit naar main.
+3. GitHub Pages publiceert automatisch opnieuw.
+4. Vernieuw de pagina in Chrome.
