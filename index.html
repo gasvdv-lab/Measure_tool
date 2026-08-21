@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
   <meta name="theme-color" content="#111111" />
-  <title>WebXR Measure</title>
+  <title>WebXR Measure v0.4</title>
   <style>
     :root {
       color-scheme: dark;
@@ -169,6 +169,7 @@
     #aim::before { width:26px; height:2px; left:14px; top:26px; }
     #aim::after { width:2px; height:26px; left:26px; top:14px; }
     #aim.ready::before, #aim.ready::after { background:#69ff9a; }
+    #aim.virtual::before, #aim.virtual::after { background:#ffd166; }
 
     #captureWrap {
       position:absolute;
@@ -339,6 +340,13 @@
     const tmpPos = new THREE.Vector3();
     const tmpQuat = new THREE.Quaternion();
     const upAxis = new THREE.Vector3(0, 1, 0);
+    const cameraPos = new THREE.Vector3();
+    const cameraQuat = new THREE.Quaternion();
+    const cameraForward = new THREE.Vector3();
+    const MAX_VIRTUAL_RANGE = 40;
+
+    let targetSource = 'none';
+    let currentTargetPoint = null;
 
     function setMode(nextMode) {
       mode = nextMode;
@@ -444,6 +452,8 @@
         ? 'Richt het kruis op punt A en druk op de meetknop.'
         : 'Beweeg rustig zodat ARCore het oppervlak kan herkennen.';
       captureBtn.disabled = !reticle?.visible;
+      targetSource = reticle?.visible ? 'hit' : 'none';
+      currentTargetPoint = reticle?.visible ? getReticlePosition() : null;
     }
 
     function getReticlePosition() {
@@ -454,6 +464,79 @@
     function getReticleNormal() {
       tmpQuat.setFromRotationMatrix(reticle.matrix);
       return upAxis.clone().applyQuaternion(tmpQuat).normalize();
+    }
+
+    function getCameraRay() {
+      const xrCamera = renderer.xr.getCamera(camera);
+      xrCamera.getWorldPosition(cameraPos);
+      xrCamera.getWorldQuaternion(cameraQuat);
+      cameraForward.set(0, 0, -1).applyQuaternion(cameraQuat).normalize();
+      return {
+        origin: cameraPos.clone(),
+        direction: cameraForward.clone()
+      };
+    }
+
+    function intersectRayWithPlane(origin, direction, planePoint, planeNormal) {
+      const denom = planeNormal.dot(direction);
+      if (Math.abs(denom) < 0.015) return null;
+
+      const t = planeNormal.dot(planePoint.clone().sub(origin)) / denom;
+      if (t <= 0) return null;
+
+      const p = origin.clone().add(direction.clone().multiplyScalar(t));
+      if (p.distanceTo(origin) > MAX_VIRTUAL_RANGE) return null;
+      if (pointA && p.distanceTo(pointA) > MAX_VIRTUAL_RANGE) return null;
+      return p;
+    }
+
+    function getVirtualTarget() {
+      if (!pointA) return null;
+      const ray = getCameraRay();
+
+      if (mode === 'stake' && !pointB) {
+        let dir = ray.direction.clone();
+
+        if (directionMode === 'horizontal') {
+          dir.y = 0;
+        } else if (directionMode === 'surface') {
+          const n = (normalAtA || upAxis).clone().normalize();
+          dir.sub(n.multiplyScalar(dir.dot(n)));
+        }
+
+        if (dir.lengthSq() < 0.000001) return null;
+        dir.normalize();
+        return pointA.clone().add(dir.multiplyScalar(Math.min(Math.max(targetMeters, 2), 8)));
+      }
+
+      if (mode === 'measure' && !pointB) {
+        const n = (normalAtA || upAxis).clone().normalize();
+        return intersectRayWithPlane(ray.origin, ray.direction, pointA, n);
+      }
+
+      if (mode === 'stake' && pointB) {
+        const n = directionMode === 'horizontal'
+          ? upAxis.clone()
+          : (normalAtA || upAxis).clone().normalize();
+        return intersectRayWithPlane(ray.origin, ray.direction, pointA, n);
+      }
+
+      return null;
+    }
+
+    function setReticleToVirtualPoint(point) {
+      reticle.visible = true;
+      reticle.matrix.identity();
+      reticle.matrix.setPosition(point);
+    }
+
+    function updateAimState(source) {
+      aimEl.classList.remove('ready', 'virtual');
+      if (source === 'hit') {
+        aimEl.classList.add('ready');
+      } else if (source === 'virtual') {
+        aimEl.classList.add('virtual');
+      }
     }
 
     function computeAutomaticB() {
@@ -475,13 +558,13 @@
     }
 
     function placeCurrentPoint() {
-      if (!reticle || !reticle.visible) return;
-      const current = getReticlePosition();
+      if (!currentTargetPoint) return;
+      const current = currentTargetPoint.clone();
 
       if (mode === 'measure') {
         if (!pointA) {
           pointA = current;
-          normalAtA = getReticleNormal();
+          normalAtA = targetSource === 'hit' ? getReticleNormal() : upAxis.clone();
           markerA = makeMarker(0x69ff9a);
           markerA.position.copy(pointA);
           stageEl.textContent = 'Punt B';
@@ -505,7 +588,7 @@
       // Uitzetten
       if (!pointA) {
         pointA = current;
-        normalAtA = getReticleNormal();
+        normalAtA = targetSource === 'hit' ? getReticleNormal() : upAxis.clone();
         markerA = makeMarker(0x69ff9a);
         markerA.position.copy(pointA);
 
@@ -649,6 +732,9 @@
         hitTestSourceRequested = true;
       }
 
+      let physicalHitPoint = null;
+      let physicalPose = null;
+
       if (hitTestSource) {
         const results = frame.getHitTestResults(hitTestSource);
 
@@ -657,42 +743,143 @@
           const pose = hit.getPose(referenceSpace);
 
           if (pose) {
-            reticle.visible = true;
-            reticle.matrix.fromArray(pose.transform.matrix);
-            aimEl.classList.add('ready');
-
-            if (!pointB) captureBtn.disabled = false;
-
-            if (!pointA) {
-              stageEl.textContent = 'Punt A';
-              hintEl.textContent = 'Richt het kruis op punt A en druk op de meetknop.';
-            } else if (mode === 'measure' && !pointB) {
-              stageEl.textContent = 'Punt B';
-            } else if (mode === 'stake' && !directionPoint && !pointB) {
-              stageEl.textContent = 'Kies richting';
-            }
-
-            // Na automatisch uitzetten: help om B fysiek terug te vinden.
-            if (mode === 'stake' && pointB) {
-              const here = getReticlePosition();
-              const remaining = here.distanceTo(pointB);
-              detailEl.textContent = `Richtpunt → B: ${formatDistance(remaining)}`;
-              if (remaining < 0.05) {
-                stageEl.textContent = 'Je zit op punt B';
-                hintEl.textContent = 'Je richtpunt ligt binnen 5 cm van het berekende punt B.';
-              }
-            }
-          }
-        } else {
-          reticle.visible = false;
-          aimEl.classList.remove('ready');
-          captureBtn.disabled = true;
-
-          if (!pointA) {
-            stageEl.textContent = 'Zoek een oppervlak';
-            hintEl.textContent = 'Beweeg rustig zodat ARCore het oppervlak kan herkennen.';
+            physicalPose = pose;
+            tmpPos.set(
+              pose.transform.position.x,
+              pose.transform.position.y,
+              pose.transform.position.z
+            );
+            physicalHitPoint = tmpPos.clone();
           }
         }
+      }
+
+      if (!pointA) {
+        if (physicalPose && physicalHitPoint) {
+          reticle.visible = true;
+          reticle.matrix.fromArray(physicalPose.transform.matrix);
+          targetSource = 'hit';
+          currentTargetPoint = physicalHitPoint;
+          updateAimState('hit');
+          captureBtn.disabled = false;
+
+          stageEl.textContent = 'Punt A';
+          detailEl.textContent = 'Groen = echt AR-oppervlak';
+          hintEl.textContent = 'Richt het groene kruis op punt A en druk op de meetknop.';
+        } else {
+          reticle.visible = false;
+          targetSource = 'none';
+          currentTargetPoint = null;
+          updateAimState('none');
+          captureBtn.disabled = true;
+
+          stageEl.textContent = 'Zoek een oppervlak';
+          detailEl.textContent = '';
+          hintEl.textContent = 'Beweeg rustig zodat ARCore rond punt A een oppervlak kan herkennen.';
+        }
+
+        renderer.render(scene, camera);
+        return;
+      }
+
+      if (!pointB) {
+        if (physicalPose && physicalHitPoint) {
+          reticle.visible = true;
+          reticle.matrix.fromArray(physicalPose.transform.matrix);
+          targetSource = 'hit';
+          currentTargetPoint = physicalHitPoint;
+          updateAimState('hit');
+          captureBtn.disabled = false;
+
+          if (mode === 'measure') {
+            stageEl.textContent = 'Punt B';
+            detailEl.textContent = 'Groen = echt AR-oppervlak';
+            hintEl.textContent = 'Richt op punt B en druk op de meetknop.';
+          } else {
+            stageEl.textContent = 'Kies richting';
+            detailEl.textContent = 'Groen = richting via echt oppervlak';
+            hintEl.textContent = 'Richt in de gewenste richting. De afstand tot het richtpunt maakt niet uit.';
+          }
+        } else {
+          const fallback = getVirtualTarget();
+
+          if (fallback) {
+            setReticleToVirtualPoint(fallback);
+            targetSource = 'virtual';
+            currentTargetPoint = fallback.clone();
+            updateAimState('virtual');
+            captureBtn.disabled = false;
+
+            if (mode === 'measure') {
+              stageEl.textContent = 'Punt B · verlengd bereik';
+              detailEl.textContent = 'Geel = geprojecteerd op vlak van A';
+              hintEl.textContent = 'Geen oppervlak gedetecteerd; B wordt berekend op hetzelfde vlak als A.';
+            } else {
+              stageEl.textContent = 'Kies richting · verlengd bereik';
+              detailEl.textContent = 'Geel = richting uit camerastand';
+              hintEl.textContent = 'Geen oppervlak nodig: richt alleen in de gewenste richting en druk op de meetknop.';
+            }
+          } else {
+            reticle.visible = false;
+            targetSource = 'none';
+            currentTargetPoint = null;
+            updateAimState('none');
+            captureBtn.disabled = true;
+
+            stageEl.textContent = 'Richting niet bruikbaar';
+            detailEl.textContent = 'Wit = geen geldig richtpunt';
+            hintEl.textContent = 'Draai of kantel de telefoon iets zodat de richting het referentievlak kruist.';
+          }
+        }
+
+        renderer.render(scene, camera);
+        return;
+      }
+
+      if (mode === 'stake' && pointB) {
+        let here = null;
+
+        if (physicalPose && physicalHitPoint) {
+          reticle.visible = true;
+          reticle.matrix.fromArray(physicalPose.transform.matrix);
+          here = physicalHitPoint;
+          targetSource = 'hit';
+          updateAimState('hit');
+        } else {
+          const fallback = getVirtualTarget();
+          if (fallback) {
+            setReticleToVirtualPoint(fallback);
+            here = fallback;
+            targetSource = 'virtual';
+            updateAimState('virtual');
+          } else {
+            reticle.visible = false;
+            targetSource = 'none';
+            updateAimState('none');
+          }
+        }
+
+        currentTargetPoint = here ? here.clone() : null;
+        captureBtn.disabled = true;
+
+        if (here) {
+          const remaining = here.distanceTo(pointB);
+          distanceEl.textContent = formatDistance(pointA.distanceTo(pointB));
+          detailEl.textContent = `Richtpunt → B: ${formatDistance(remaining)} · ${targetSource === 'hit' ? 'groen' : 'geel'}`;
+
+          if (remaining < 0.05) {
+            stageEl.textContent = 'Je zit op punt B';
+            hintEl.textContent = 'Het richtpunt ligt binnen 5 cm van het berekende punt B.';
+          } else {
+            stageEl.textContent = 'Zoek punt B';
+            hintEl.textContent = 'Beweeg het richtpunt naar de virtuele marker B.';
+          }
+        }
+      } else {
+        reticle.visible = false;
+        currentTargetPoint = null;
+        updateAimState('none');
+        captureBtn.disabled = true;
       }
 
       renderer.render(scene, camera);

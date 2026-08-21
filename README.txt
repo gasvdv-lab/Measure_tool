@@ -1,36 +1,35 @@
-WEBXR MEASURE v0.3 — Meten + correct uitzetten
+WEBXR MEASURE v0.4 — VERLENGD AR-BEREIK
 
-Deze versie bevat twee hoofdmodi.
+Nieuw:
+- Groen kruis = echte WebXR/ARCore hit-test.
+- Geel kruis = mathematisch geprojecteerd richtpunt vanuit de AR-camera.
+- Wit = op dat moment geen geldig richtpunt.
 
-1. AFSTAND METEN
-- Start AR.
-- Richt op punt A en druk op de ronde knop.
-- Richt op punt B en druk opnieuw.
-- De app toont de rechte 3D-afstand A → B.
+Punt A:
+- blijft verplicht een echt groen AR-oppervlak gebruiken.
 
-2. AFSTAND UITZETTEN
-- Geef vooraf de gewenste afstand in.
-- Kies een richtingsmodus:
-  A. Vrij 3D
-     B volgt exact de gekozen 3D-richting, inclusief hoogteverschil.
-  B. Horizontaal
-     B blijft op dezelfde hoogte als A.
-  C. Op oppervlak
-     B wordt geprojecteerd in het lokale vlak van oppervlak A.
-- Start AR.
-- Leg punt A vast.
-- Richt daarna ergens in de gewenste richting vanaf A en druk opnieuw.
-  BELANGRIJK: de afstand tot dit tijdelijke richtpunt maakt niet uit.
-- De app berekent daarna automatisch punt B op exact de ingegeven afstand.
-- Een virtuele marker en lijn A → B verschijnen.
-- Terwijl je rondloopt toont de app de afstand van het huidige richtpunt tot B.
-- Binnen 5 cm meldt de app dat je op B zit.
+Afstand meten:
+- B gebruikt eerst een echte hit-test.
+- Valt die weg, dan projecteert de app B op het lokale vlak van A.
+- Dit verlengt het bruikbare bereik op hetzelfde vlak.
 
-Waarom deze werkwijze?
-Met alleen A + afstand bestaan oneindig veel mogelijke punten B. Daarom gebruikt de app een tweede tik alleen om de richting vast te leggen. Daarna wordt B automatisch berekend.
+Afstand uitzetten:
+- na A is geen oppervlak op grote afstand meer vereist.
+- Vrij 3D gebruikt de camerakijkrichting.
+- Horizontaal projecteert die richting horizontaal.
+- Op oppervlak projecteert de richting in het vlak van A.
+- B wordt daarna exact op de ingegeven afstand berekend.
 
-Publiceren
-1. Vervang in GitHub repository Measure_tool het bestaande index.html door deze index.html.
+B terugvinden:
+- de app blijft fysieke hit-test gebruiken als die beschikbaar is.
+- anders schakelt hij over op virtuele projectie.
+
+Virtuele projectie is begrensd op 40 m. Dit is een technische bereikgrens, geen garantie op centimeternauwkeurigheid op 40 m.
+
+Test buiten bij voorkeur 2 m, 5 m, 10 m en eventueel 15 m.
+
+Publiceren:
+1. Vervang index.html in Measure_tool.
 2. Commit naar main.
-3. GitHub Pages publiceert automatisch opnieuw.
-4. Vernieuw de pagina in Chrome.
+3. GitHub Pages publiceert automatisch.
+4. Vernieuw de bestaande site in Chrome.
