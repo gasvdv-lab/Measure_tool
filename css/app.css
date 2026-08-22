@@ -54,3 +54,5 @@ canvas{position:fixed;inset:0;width:100%;height:100%}
 #menuPanel button,#menuPanel .navRow,#menuPanel input,#menuPanel select{pointer-events:auto}
 
 #placementStartInfo,#placementPreviewInfo{padding:6px 8px;border-radius:9px;background:#ffffff08;margin-top:6px}#placementPreviewInfo{border:1px solid #ffd16633}
+
+.menuFoot.single{grid-template-columns:1fr}
