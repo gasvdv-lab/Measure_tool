@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#111111">
-  <title>Measure AR v0.8.9.1</title>
-  <link rel="stylesheet" href="./css/app.css?v=0.8.9.1-20260822-1715">
+  <title>Measure AR v0.8.9.2</title>
+  <link rel="stylesheet" href="./css/app.css?v=0.8.9.2-20260822-1840">
 </head>
 <body>
 <div id="app">
@@ -13,7 +13,7 @@
     <div class="logo">⌖</div>
     <h1>Measure AR</h1>
     <p id="launchStatus">Tik om AR te starten.</p>
-    <div id="buildInfo" class="build">v0.8.9.1 · build 20260822-1715</div>
+    <div id="buildInfo" class="build">v0.8.9.2 · build 20260822-1840</div>
     <button id="startArBtn" class="primary">AR starten</button>
     <div id="error" class="error"></div>
   </main>
@@ -32,7 +32,7 @@
   <aside id="menuPanel">
     <div class="menuHead">
       <button id="menuBackBtn" class="secondary">‹</button>
-      <div><strong id="menuTitle">Measure AR</strong><small id="menuMeta">v0.8.9.1</small></div>
+      <div><strong id="menuTitle">Measure AR</strong><small id="menuMeta">v0.8.9.2</small></div>
       <button id="menuCloseBtn" class="secondary">✕</button>
     </div>
     <div class="menuBody">
@@ -84,6 +84,7 @@
         <div class="menuCard">
           <button id="newIndependentBtn" class="primary">Nieuw → nieuw</button>
           <button id="newFromLastBtn" class="secondary">Vanaf laatste punt</button>
+          <button id="newExistingBtn" class="secondary">Bestaand punt kiezen</button>
           <button id="newParamBtn" class="secondary">Volgend punt op maat</button>
         </div>
       </section>
@@ -147,7 +148,7 @@
           <div id="placementReferenceWrap" style="display:none">
             <label>Referentielijn<select id="placementReference"></select></label>
           </div>
-          <div id="placementHelp" class="help">Plaats of selecteer eerst een vast vertrekpunt.</div>
+          <div id="placementHelp" class="help">Zonder vertrekpunt zal de app je eerst punt A laten plaatsen.</div>
           <button id="placementApplyBtn" class="primary">Punt op maat plaatsen</button>
         </div>
       </section>
@@ -203,7 +204,7 @@
               <option value="angle">Eigen hoek</option>
             </select>
           </label>
-          <label>Hoek (°) <input id="wallAngle" type="number" min="-180" max="180" step=".5" value="90"></label>
+          <div id="wallAngleWrap" style="display:none"><label>Hoek (°) <input id="wallAngle" type="number" min="-180" max="180" step=".5" value="90"></label></div>
           <div class="grid2">
             <label>Kleur <input id="wallColor" type="color" value="#d7d2c8"></label>
             <label>Transparantie <input id="wallOpacity" type="range" min=".05" max="1" step=".05" value=".45"></label>
@@ -241,8 +242,19 @@
       </section>
 
 
+
+
+      <section id="page-shape" class="page">
+        <h3>Vorm</h3>
+        <div class="menuCard">
+          <div id="shapeInfo" class="help">—</div>
+          <button id="deleteShapeBtn" class="danger">Vorm verwijderen</button>
+        </div>
+      </section>
+
       <section id="page-settings" class="page">
         <h3>Instellingen</h3>
+        <p class="help">Wijzigingen worden onmiddellijk toegepast.</p>
         <div class="menuCard">
           <label>Eenheid
             <select id="defaultUnit">
@@ -298,6 +310,6 @@
   <div id="hint">Beweeg rustig zodat ARCore een oppervlak kan herkennen.</div>
 </div>
 
-<script type="module" src="./js/bootstrap.js?v=0.8.9.1-20260822-1715"></script>
+<script type="module" src="./js/bootstrap.js?v=0.8.9.2-20260822-1840"></script>
 </body>
 </html>
