@@ -1,23 +1,17 @@
-# Measure AR v0.8.9.3 — Action & Result Flow
-Build: 20260822-1835
+# Measure AR v0.8.10 — Compact Drawing HUD
+Build: 20260822-1930
 
-Deze release maakt een duidelijke scheiding tussen kiezen/configureren en het resultaat in AR bekijken.
+Deze release vervangt de schermvullende tekenconfiguratie tijdens het tekenen door een compacte Drawing HUD.
 
-Belangrijkste wijzigingen:
-- `Punt op maat plaatsen` sluit na een geslaagde plaatsing onmiddellijk het menu.
-- Het resultaat wordt daarna duidelijk in AR getoond: nieuw punt, lijnnaam, afstand en actief vertrekpunt.
-- Het nieuw geplaatste punt blijft intern het actieve vertrekpunt voor de volgende stap.
-- Een korte action-lock voorkomt dubbele plaatsingen door dubbel tikken.
-- Muur aanmaken sluit na succes het menu en toont de muur in AR.
-- Vorm aanmaken sluit na succes het menu en toont de vorm in AR.
-- Referentielijn instellen sluit na succes het menu en bevestigt welke lijn actief is.
-- Alles wissen sluit na bevestiging het menu; AR blijft actief.
-- Verwijderacties voor lijn, punt, muur en vorm sluiten na uitvoering het menu en tonen het resultaat.
-- Instellingen blijven in het menu, omdat dit configuratie is en geen tekenactie.
-- Alle menu-knoppen zijn opnieuw statisch gecontroleerd op geldige handlers.
-- Constraint/core-fixes en menu-action-repair uit eerdere releases blijven behouden.
+## Nieuwe workflow
+- Hoofdmenu kiest **wat** je tekent: lijn, doorlopende lijn, vorm, muur, meten of uitzetten.
+- Na de keuze sluit het menu en blijft het AR-beeld vrij.
+- Onderaan staat één compacte balk: **functie | richting | AUTO/afstand | instellingen**.
+- Richting kan tijdens het tekenen worden gewijzigd: Vrij, Horizontaal, Verticaal, Op oppervlak, Parallel, Loodrecht 90° en Eigen hoek.
+- `AUTO` = handmatig plaatsen met camera.
+- Via de afstandsknop kan het volgende punt exact op maat worden geplaatst in cm of m.
+- De standaard eenheid blijft **cm**.
+- De bestaande geometry-, constraint-, wall-, shape- en objectlogica uit v0.8.9.3 blijft behouden.
 
-Vaste app-link:
-https://gasvdv-lab.github.io/Measure_tool/
-
-Upload ALLE bestanden uit deze ZIP naar GitHub.
+## Belangrijk
+Upload de volledige inhoud van deze map naar de root van de GitHub Pages repository, inclusief `css/` en `js/`.

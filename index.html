@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#111111">
-  <title>Measure AR v0.8.9.3</title>
-  <link rel="stylesheet" href="./css/app.css?v=0.8.9.3-20260822-1835">
+  <title>Measure AR v0.8.10</title>
+  <link rel="stylesheet" href="./css/app.css?v=0.8.10-20260822-1930">
 </head>
 <body>
 <div id="app">
@@ -13,7 +13,7 @@
     <div class="logo">⌖</div>
     <h1>Measure AR</h1>
     <p id="launchStatus">Tik om AR te starten.</p>
-    <div id="buildInfo" class="build">v0.8.9.3 · build 20260822-1835</div>
+    <div id="buildInfo" class="build">v0.8.10 · build 20260822-1835</div>
     <button id="startArBtn" class="primary">AR starten</button>
     <div id="error" class="error"></div>
   </main>
@@ -32,19 +32,19 @@
   <aside id="menuPanel">
     <div class="menuHead">
       <button id="menuBackBtn" class="secondary">‹</button>
-      <div><strong id="menuTitle">Measure AR</strong><small id="menuMeta">v0.8.9.3</small></div>
+      <div><strong id="menuTitle">Measure AR</strong><small id="menuMeta">v0.8.10</small></div>
       <button id="menuCloseBtn" class="secondary">✕</button>
     </div>
     <div class="menuBody">
       <section id="page-home" class="page active">
-        <h3>Werken</h3>
+        <h3>Tekenen</h3>
         <div class="menuCard navList">
+          <button id="quickLineBtn">Lijn tekenen <small>kies hier de functie; teken daarna in AR</small></button>
+          <button id="continuousBtn">Doorlopende lijn <small>A → B → C → …</small></button>
+          <button id="quickShapeBtn">Vorm tekenen <small>doorlopende contour, daarna voltooien</small></button>
+          <button id="quickWallBtn">Muur aanmaken <small>selecteer een bestaande lijn als basis</small></button>
           <button data-page="measure">Meten <small>afstand A → B</small></button>
           <button data-page="stake">Uitzetten <small>vaste afstand</small></button>
-          <button data-page="newline">Nieuwe lijn <small>nieuw / laatste / bestaand punt</small></button>
-          <button id="continuousBtn">Doorlopend tekenen <small>A → B → C → …</small></button>
-          <button id="continuousParamBtn">Doorlopend op maat <small>exacte segmenten vanaf actief punt</small></button>
-          <button data-page="constraint">Richting / tekenvlak <small>geldt voor alle tekenfuncties</small></button>
         </div>
         <h3>Project</h3>
         <div class="menuCard navList">
@@ -291,8 +291,26 @@
   <div id="lineLabels"></div>
   <div id="aim"></div>
 
-  <div id="constraintHud">
-    <button id="constraintHudBtn">Vrij ▾</button>
+  <div id="drawingHud" class="drawingHud">
+    <button id="hudToolBtn" class="hudTool">LIJN</button>
+    <button id="constraintHudBtn" class="hudSelect">Vrij ▾</button>
+    <button id="distanceHudBtn" class="hudSelect">AUTO ▾</button>
+    <button id="hudMoreBtn" class="hudIcon" aria-label="Tekenopties">⚙</button>
+  </div>
+  <div id="directionPopover" class="hudPopover">
+    <button data-hud-direction="free">Vrij</button>
+    <button data-hud-direction="horizontal">Horizontaal</button>
+    <button data-hud-direction="vertical">Verticaal</button>
+    <button data-hud-direction="surface">Op oppervlak</button>
+    <button data-hud-direction="parallel">Parallel</button>
+    <button data-hud-direction="perpendicular">Loodrecht 90°</button>
+    <button data-hud-direction="angle">Eigen hoek</button>
+  </div>
+  <div id="distancePopover" class="hudPopover distancePopover">
+    <button id="hudAutoBtn" class="secondary">AUTO · handmatig</button>
+    <div class="hudDistanceRow"><input id="hudDistance" type="number" min="0.01" step="0.1" value="100"><select id="hudUnit"><option value="cm" selected>cm</option><option value="m">m</option></select><button id="hudMetricBtn" class="primary">Op maat</button></div>
+    <div id="hudAngleRow" class="hudDistanceRow" style="display:none"><input id="hudAngle" type="number" min="-180" max="180" step="0.5" value="45"><span>°</span><button id="hudAngleApplyBtn" class="secondary">Hoek</button></div>
+    <div id="hudMetricHelp" class="help">AUTO gebruikt de camera. Op maat plaatst het volgende punt exact vanaf het actieve vertrekpunt.</div>
   </div>
   <div id="drawControls">
     <button id="drawUndoBtn" class="secondary">↶ Laatste</button>
@@ -310,6 +328,6 @@
   <div id="hint">Beweeg rustig zodat ARCore een oppervlak kan herkennen.</div>
 </div>
 
-<script type="module" src="./js/bootstrap.js?v=0.8.9.3-20260822-1835"></script>
+<script type="module" src="./js/bootstrap.js?v=0.8.10-20260822-1930"></script>
 </body>
 </html>
