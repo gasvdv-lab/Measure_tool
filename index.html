@@ -4,15 +4,15 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#111111">
-  <title>Measure AR v0.8.12</title>
-  <link rel="stylesheet" href="./css/app.css?v=0.8.12-20260822-2015">
+  <title>Measure AR v0.8.13</title>
+  <link rel="stylesheet" href="./css/app.css?v=0.8.13-20260822-2045">
 </head>
 <body>
 <div id="app">
   <main class="startCard directFallback">
     <div class="logo">⌖</div><h1>Measure AR</h1>
     <p id="launchStatus">Tik om AR te starten.</p>
-    <div id="buildInfo" class="build">v0.8.12 · stability build 20260822-2015</div>
+    <div id="buildInfo" class="build">v0.8.13 · stability build 20260822-2045</div>
     <button id="startArBtn" class="primary">AR starten</button>
     <div id="error" class="error"></div>
   </main>
@@ -32,7 +32,7 @@
   <aside id="menuPanel">
     <div class="menuHead">
       <button id="menuBackBtn" class="secondary">‹</button>
-      <div><strong id="menuTitle">Measure AR</strong><small id="menuMeta">v0.8.12</small></div>
+      <div><strong id="menuTitle">Measure AR</strong><small id="menuMeta">v0.8.13</small></div>
       <button id="menuCloseBtn" class="secondary">✕</button>
     </div>
     <div class="menuBody">
@@ -148,10 +148,15 @@
 
   <div id="drawingHud" class="drawingHud">
     <div class="hudMain">
-      <button id="hudToolBtn" class="hudTool">TEKENEN</button>
-      <button id="constraintHudBtn" class="hudSelect">Vrij ▾</button>
-      <button id="distanceHudBtn" class="hudSelect">AUTO ▾</button>
+      <button id="hudToolBtn" class="hudTool" aria-label="Tekenfunctie">TEKENEN</button>
+      <button id="constraintHudBtn" class="hudSelect" aria-label="Richting">Vrij ▾</button>
+      <button id="distanceHudBtn" class="hudSelect" aria-label="Afstand">AUTO ▾</button>
       <button id="hudMoreBtn" class="hudIcon">⋯</button>
+    </div>
+    <div id="hudStatusRow" class="hudStatusRow">
+      <span id="hudActivePoint" class="hudChip">Start: —</span>
+      <span id="hudReferenceChip" class="hudChip optional">Ref: —</span>
+      <span id="hudSideChip" class="hudChip optional">Zijde: +</span>
     </div>
     <div id="hudContext" class="hudContext">Kies eerst een tekenfunctie.</div>
     <div id="hudActions" class="hudActions">
@@ -168,6 +173,7 @@
     <button data-hud-direction="angle">Eigen hoek</button>
     <div id="hudReferenceWrap" class="hudWide">
       <label>Referentielijn<select id="hudReference"></select></label>
+      <div id="hudReferenceHelp" class="help">Kies de lijn waarop deze richting gebaseerd wordt.</div>
     </div>
     <div id="hudAngleWrap" class="hudWide hudInline">
       <label>Hoek<input id="hudAngle" type="number" min="-180" max="180" step=".5" value="45"></label>
@@ -183,6 +189,7 @@
 
   <div id="morePopover" class="hudPopover distancePopover">
     <label>Snappen<select id="hudSnap"><option value="points" selected>Bestaande punten</option><option value="off">Uit</option></select></label>
+<label>HUD<select id="hudDensity"><option value="compact" selected>Compact</option><option value="detailed">Meer info</option></select></label>
     <div class="help">Een kandidaatpunt is voorlopig. Alleen de witte ronde knop maakt het definitief.</div>
   </div>
 
@@ -191,6 +198,6 @@
   <div id="hint">Open ☰ en kies wat je wilt tekenen.</div>
 </div>
 
-<script type="module" src="./js/bootstrap.js?v=0.8.12-20260822-2015"></script>
+<script type="module" src="./js/bootstrap.js?v=0.8.13-20260822-2045"></script>
 </body>
 </html>
