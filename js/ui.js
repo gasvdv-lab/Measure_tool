@@ -1,17 +1,17 @@
-import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.16-20260822-2349";
+import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.17-20260823-0005";
 import {
   startTool,cancelTool,setPlacement,setDistance,setConstraint,setAngle,flipSide,setReferenceLine,setSnapMode,
   confirmCandidate,undoToolStep,finishTool,toolLabel,constraintLabel,getActivePoint,referenceRequired,resetDrawingCore
-} from "./drawing-core.js?v=0.8.16-20260822-2349";
+} from "./drawing-core.js?v=0.8.17-20260823-0005";
 import {
   createShape,updateShape,deleteShapeOnly,deleteShapeWithContour,deleteLineRaw,deletePointRaw,renamePoint,updateLine,analyzeContour,
   lineDependencies,pointDependencies,canDeleteLine,canDeletePoint,clearAllGeometry,validateGeometryState,dispose
-} from "./geometry.js?v=0.8.16-20260822-2349";
-import {startAR,applyZoom} from "./ar.js?v=0.8.16-20260822-2349";
-import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls} from "./walls.js?v=0.8.16-20260822-2349";
-import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.16-20260822-2349";
+} from "./geometry.js?v=0.8.17-20260823-0005";
+import {startAR,applyZoom} from "./ar.js?v=0.8.17-20260823-0005";
+import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls} from "./walls.js?v=0.8.17-20260823-0005";
+import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.17-20260823-0005";
 
-const pages=["home","objects","line","point","wallcreate","wall","shapecreate","shape","settings","clear"];
+const pages=["home","objects","line","point","walltool","wallcreate","wall","shapecreate","shape","settings","clear"];
 let menuStack=["home"];
 
 const el=id=>$(id);
@@ -39,7 +39,7 @@ function togglePopover(id){
 }
 function showPage(name,push=true){
   pages.forEach(p=>el("page-"+p)?.classList.remove("active"));const page=el("page-"+name);if(!page)throw new Error(`Menupagina ontbreekt: ${name}`);page.classList.add("active");
-  const titles={home:"Measure AR",objects:"Objecten",line:"Lijn",point:"Punt",wallcreate:"Muur maken",wall:"Muur",shapecreate:"Vorm opslaan",shape:"Vorm",settings:"Instellingen",clear:"Alles wissen"};
+  const titles={home:"Measure AR",objects:"Objecten",line:"Lijn",point:"Punt",walltool:"Muur tekenen",wallcreate:"Muur maken",wall:"Muur",shapecreate:"Vorm opslaan",shape:"Vorm",settings:"Instellingen",clear:"Alles wissen"};
   el("menuTitle").textContent=titles[name]||name;if(push&&menuStack.at(-1)!==name)menuStack.push(name);el("menuBackBtn").style.visibility=name==="home"?"hidden":"visible";if(name==="objects")renderObjects();
 }
 function openMenu(){menuStack=["home"];showPage("home",false);el("menuPanel").classList.add("open");el("menuMeta").textContent=`${S.points.length}p · ${S.lines.length}l · v${S.version}`;closePopovers();}
@@ -114,7 +114,7 @@ function syncHud(){
   el("hudAngle").value=String(S.tool.angleDeg);populateReference();
   if(refNeeded&&S.tool.referenceLineId)el("hudReference").value=S.tool.referenceLineId;
   syncCandidateContext();
-  const multi=["polyline","shape"].includes(S.tool.kind)&&S.tool.status==="drawing";
+  const multi=["polyline","shape","wall"].includes(S.tool.kind)&&S.tool.status==="drawing";
   const showActions=multi||Boolean(S.tool.transactions.length);
   el("hudActions").classList.toggle("visible",showActions);
   el("drawingHud").classList.toggle("detailed",S.hud.compact===false);
@@ -173,7 +173,23 @@ export function initUI(){
   document.querySelectorAll("[data-page]").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.page)));
 
   bind("quickLineBtn","click",()=>begin("line"));bind("quickPolylineBtn","click",()=>begin("polyline"));bind("quickShapeBtn","click",()=>begin("shape"));bind("quickStakeBtn","click",()=>begin("stake"));
-  bind("quickWallBtn","click",()=>{showPage("objects");showStatus("Kies een basislijn en daarna ‘Maak muur van lijn’.");});
+  bind("quickWallBtn","click",()=>{
+    el("wallToolPrefix").value=S.wallTool.namePrefix;el("wallToolHeight").value=S.wallTool.height;el("wallToolThickness").value=S.wallTool.thickness;
+    el("wallToolSide").value=S.wallTool.side;el("wallToolOrientation").value=S.wallTool.orientation;el("wallToolAngle").value=S.wallTool.angle;
+    el("wallToolAngleWrap").style.display=S.wallTool.orientation==="angle"?"block":"none";el("wallToolColor").value=S.wallTool.color;el("wallToolOpacity").value=S.wallTool.opacity;
+    showPage("walltool");
+  });
+  bind("wallToolOrientation","change",()=>{el("wallToolAngleWrap").style.display=el("wallToolOrientation").value==="angle"?"block":"none";});
+  bind("startWallToolBtn","click",()=>{
+    const height=Number(el("wallToolHeight").value),thickness=Number(el("wallToolThickness").value),opacity=Number(el("wallToolOpacity").value);
+    if(!Number.isFinite(height)||height<=0)throw new Error("Geef een geldige muurhoogte.");
+    if(!Number.isFinite(thickness)||thickness<=0)throw new Error("Geef een geldige muurdikte.");
+    if(!Number.isFinite(opacity)||opacity<=0||opacity>1)throw new Error("Geef een geldige transparantie.");
+    Object.assign(S.wallTool,{namePrefix:el("wallToolPrefix").value.trim()||"Muur",height,thickness,side:el("wallToolSide").value,orientation:el("wallToolOrientation").value,angle:Number(el("wallToolAngle").value)||90,color:el("wallToolColor").value,opacity});
+    begin("wall");
+    showStatus(`Muurmodus: ${height.toFixed(2)} m hoog · ${(thickness*100).toFixed(0)} cm dik.`);
+  });
+
 
   bind("hudToolBtn","click",openMenu);bind("constraintHudBtn","click",()=>togglePopover("directionPopover"));bind("distanceHudBtn","click",()=>togglePopover("distancePopover"));bind("hudMoreBtn","click",()=>togglePopover("morePopover"));
   document.querySelectorAll("[data-hud-direction]").forEach(b=>b.addEventListener("click",()=>{
@@ -217,7 +233,7 @@ export function initUI(){
   bind("hudRedoBtn","click",()=>{const e=redoHistory();afterProjectChange(`Opnieuw: ${e.label}`);});
   bind("hudFinishBtn","click",()=>{
     const result=finishTool();syncHud();syncHistoryControls();
-    if(result.type==="polyline"){el("hint").textContent="Doorlopende lijn voltooid en open gebleven.";}
+    if(result.type==="polyline"){el("hint").textContent="Doorlopende lijn voltooid en open gebleven.";}if(result.type==="wall"){el("hint").textContent="Muurpad voltooid. Alle muursegmenten blijven gekoppeld aan hun basislijnen.";}
     if(result.type==="shape"){const a=analyzeContour(result.contour);el("shapeCreateInfo").textContent=`${result.contour.pointIds.length} punten · ${a.area.toFixed(2)} m² · omtrek ${a.perimeter.toFixed(2)} m`;openMenu();showPage("shapecreate");}
   });
   bind("hudCancelBtn","click",()=>{runHistoryAction("Tekenfunctie stoppen",()=>cancelTool());syncHud();syncHistoryControls();showStatus("Tekenfunctie gestopt. Bevestigde geometrie blijft bestaan.");});
@@ -225,7 +241,7 @@ export function initUI(){
   bind("captureBtn","click",()=>{
     closePopovers();const r=confirmCandidate();syncHud();
     if(r.type==="point"){el("distance").textContent="—";el("detail").textContent=`Punt ${r.point.name} vastgezet`;el("hint").textContent=`${r.point.name} is vertrekpunt. Stel zo nodig afstand/richting in en bevestig het volgende punt.`;}
-    else{el("distance").textContent=fmt(r.line.distance);el("detail").textContent=`${r.line.name} · ${fmt(r.line.distance)}`;el("hint").textContent=r.complete?`Lijn voltooid. Bekijk het resultaat en open ☰ voor de volgende functie.`:`${r.point.name} is nu het actieve vertrekpunt.`;}
+    else{el("distance").textContent=fmt(r.line.distance);el("detail").textContent=r.wall?`${r.wall.name} · ${fmt(r.line.distance)}`:`${r.line.name} · ${fmt(r.line.distance)}`;el("hint").textContent=r.wall?`${r.wall.name} geplaatst. ${r.point.name} is nu vertrekpunt voor het volgende muursegment.`:(r.complete?`Lijn voltooid. Bekijk het resultaat en open ☰ voor de volgende functie.`:`${r.point.name} is nu het actieve vertrekpunt.`);}
     verifyState();syncHistoryControls();
   });
 

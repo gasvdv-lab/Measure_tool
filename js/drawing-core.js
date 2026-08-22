@@ -1,9 +1,10 @@
-import {S,$,fmt,getPoint,getLine} from "./state.js?v=0.8.16-20260822-2349";
-import {createPoint,createLine,deleteLineRaw,deletePointRaw,createContour,dispose,analyzeShapePoints} from "./geometry.js?v=0.8.16-20260822-2349";
-import {snapshotProject,commitSnapshot,undoHistory} from "./history.js?v=0.8.16-20260822-2349";
+import {S,$,fmt,getPoint,getLine} from "./state.js?v=0.8.17-20260823-0005";
+import {createPoint,createLine,deleteLineRaw,deletePointRaw,createContour,dispose,analyzeShapePoints} from "./geometry.js?v=0.8.17-20260823-0005";
+import {snapshotProject,commitSnapshot,undoHistory} from "./history.js?v=0.8.17-20260823-0005";
+import {createWall,nextWallName} from "./walls.js?v=0.8.17-20260823-0005";
 
 const REF_MODES=new Set(["parallel","perpendicular","angle"]);
-const TOOL_NAMES={line:"LIJN",polyline:"POLYLIJN",shape:"VORM",stake:"UITZETTEN"};
+const TOOL_NAMES={line:"LIJN",polyline:"POLYLIJN",shape:"VORM",stake:"UITZETTEN",wall:"MUUR"};
 
 function copyPlane(p){
   if(!p)return null;
@@ -368,7 +369,9 @@ export function confirmCandidate(){
     if(!end||end.id===active.id)throw new Error("Het eindpunt valt samen met het vertrekpunt.");
 
     let line;
-    try{line=createLine(active,end);}
+    try{
+      line=createLine(active,end,S.tool.kind==="wall"?{ownerType:"wallbase",labelsVisible:false,color:"#9aa0a6"}:{});
+    }
     catch(err){
       if(created&&!S.lines.some(l=>l.startId===end.id||l.endId===end.id))deletePointRaw(end.id);
       throw err;
@@ -377,13 +380,21 @@ export function confirmCandidate(){
     S.tool.lineIds.push(line.id);
     if(!S.tool.pointIds.includes(end.id))S.tool.pointIds.push(end.id);
     transaction({type:"segment",tool:S.tool.kind,lineId:line.id,createdPoint:created?end.id:null,previousActiveId:active.id,endId:end.id});
+    let wall=null;
+    if(S.tool.kind==="wall"){
+      wall=createWall(line,{
+        name:nextWallName(S.wallTool.namePrefix),height:S.wallTool.height,thickness:S.wallTool.thickness,
+        side:S.wallTool.side,orientation:S.wallTool.orientation,angle:S.wallTool.angle,
+        color:S.wallTool.color,opacity:S.wallTool.opacity
+      });
+    }
     S.tool.activePointId=end.id;
     if(end.surfaceNormal&&S.tool.kind!=="shape")S.tool.activePlane=planeFromPoint(end);
     S.tool.candidate=null;hidePreview();
     if(S.tool.kind==="line"||S.tool.kind==="stake")S.tool.status="complete";
-    commitSnapshot(`Lijn ${line.name} plaatsen`,before);
+    commitSnapshot(S.tool.kind==="wall"?`Muur ${wall?.name||line.name} tekenen`:`Lijn ${line.name} plaatsen`,before);
     document.dispatchEvent(new CustomEvent("measurear:reset-tracking"));
-    return {type:"segment",point:end,line,complete:S.tool.status==="complete"};
+    return {type:"segment",point:end,line,wall,complete:S.tool.status==="complete"};
   }finally{
     S.diagnostics.confirmBusy=false;
   }
@@ -420,6 +431,13 @@ export function finishTool(){
     S.pendingContourId=contour.id;S.tool.status="complete";S.tool.transactions=[];hidePreview();
     commitSnapshot("Vormcontour sluiten",before);
     return {type:"shape",contour};
+  }
+  if(S.tool.kind==="wall"){
+    if(!S.tool.lineIds.length)throw new Error("Teken eerst minstens één muursegment.");
+    const contour=createContour(S.tool.pointIds,S.tool.lineIds,{closed:false,kind:"wallpath"});
+    S.tool.status="complete";S.tool.transactions=[];hidePreview();
+    commitSnapshot("Muurpad voltooien",before);
+    return {type:"wall",contour};
   }
   throw new Error("Dit gereedschap heeft geen Voltooien-functie.");
 }

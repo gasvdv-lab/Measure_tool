@@ -1,6 +1,6 @@
 
-import {S,getPoint,getLine} from "./state.js?v=0.8.16-20260822-2349";
-import {dispose} from "./geometry.js?v=0.8.16-20260822-2349";
+import {S,getPoint,getLine} from "./state.js?v=0.8.17-20260823-0005";
+import {dispose} from "./geometry.js?v=0.8.17-20260823-0005";
 
 function cleanName(name){return String(name||"").trim().replace(/\s+/g," ");}
 export function wallNameExists(name,excludeId=null){
@@ -58,8 +58,11 @@ function buildMesh(wall){
   const T=S.THREE;
   const f=orientationFrame(line,wall.orientation,wall.angle);
   const t=wall.thickness, h=wall.height;
+  // Small end overlap avoids visible cracks between consecutive wall segments.
+  // This is a robust AR-friendly joint; exact architectural miters can be added later.
+  const jointOverlap=Math.min(t/2,.08),drawLength=f.length+jointOverlap*2;
 
-  const geo=new T.BoxGeometry(f.length,h,t);
+  const geo=new T.BoxGeometry(drawLength,h,t);
   const mat=new T.MeshBasicMaterial({
     color:wall.color,
     transparent:true,
@@ -85,9 +88,16 @@ function buildMesh(wall){
   wall.mesh=mesh;
 }
 
+
+export function nextWallName(prefix="Muur"){
+  const base=cleanName(prefix)||"Muur";
+  let i=1,name=`${base} ${i}`;
+  while(wallNameExists(name)){i++;name=`${base} ${i}`;}
+  return name;
+}
+
 export function createWall(line,opts){
-  const name=cleanName(opts.name);
-  if(!name)throw new Error("Naam is verplicht.");
+  const name=cleanName(opts.name)||nextWallName(opts.namePrefix||"Muur");
   if(wallNameExists(name))throw new Error("Deze muurnaam bestaat al.");
   const height=Number(opts.height),thickness=Number(opts.thickness),opacity=Number(opts.opacity);
   if(!Number.isFinite(height)||height<=0)throw new Error("Ongeldige hoogte.");

@@ -1,8 +1,8 @@
-import {S,getPoint,getLine,getContour} from "./state.js?v=0.8.16-20260822-2349";
+import {S,getPoint,getLine,getContour} from "./state.js?v=0.8.17-20260823-0005";
 import {
   createPoint,createLine,createShape,clearAllGeometry,validateGeometryState
-} from "./geometry.js?v=0.8.16-20260822-2349";
-import {createWall,clearWalls} from "./walls.js?v=0.8.16-20260822-2349";
+} from "./geometry.js?v=0.8.17-20260823-0005";
+import {createWall,clearWalls} from "./walls.js?v=0.8.17-20260823-0005";
 
 function vec(v){return v?{x:v.x,y:v.y,z:v.z}:null;}
 function vec3(v){return v?new S.THREE.Vector3(v.x,v.y,v.z):null;}
@@ -14,6 +14,7 @@ export function snapshotProject(){
   return {
     pointCounter:S.pointCounter,contourCounter:S.contourCounter,
     selected:{line:S.selectedLineId,point:S.selectedPointId,shape:S.selectedShapeId,wall:S.selectedWallId},
+    wallTool:{...S.wallTool},
     points:S.points.map(p=>({id:p.id,name:p.name,position:vec(p.position),surfaceNormal:vec(p.surfaceNormal)})),
     lines:S.lines.map(l=>({
       id:l.id,name:l.name,autoName:l.autoName!==false,startId:l.startId,endId:l.endId,
@@ -96,6 +97,7 @@ export function restoreProject(snap){
     S.selectedShapeId=S.shapes.find(x=>x.id===snap.selected.shape)?.id||null;
     S.selectedWallId=S.walls.find(x=>x.id===snap.selected.wall)?.id||null;
 
+    if(snap.wallTool)Object.assign(S.wallTool,snap.wallTool);
     const t=snap.tool;
     S.tool.kind=t.kind;S.tool.status=t.status;S.tool.activePointId=getPoint(t.activePointId)?.id||null;
     S.tool.firstPointId=getPoint(t.firstPointId)?.id||null;
