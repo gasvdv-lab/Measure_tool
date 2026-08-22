@@ -1,6 +1,6 @@
 
 export const S={
-  version:"0.8.8",build:"20260822-1605",
+  version:"0.8.8.1",build:"20260822-1615",
   THREE:null,renderer:null,scene:null,camera:null,reticle:null,xrSession:null,hitSource:null,hitRequested:false,
   mode:"measure",targetMeters:2,
   pointA:null,activeStartId:null,currentTarget:null,targetSource:"none",lineFinished:false,placing:false,

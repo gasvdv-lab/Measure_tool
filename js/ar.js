@@ -1,6 +1,6 @@
 
-import {S,$} from "./state.js?v=0.8.8-20260822-1605";
-import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.8-20260822-1605";
+import {S,$} from "./state.js?v=0.8.8.1-20260822-1615";
+import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.8.1-20260822-1615";
 let samples=[],tmpPos,tmpQuat,up,camPos,camQuat,forward;
 
 function withTimeout(promise,ms,label){

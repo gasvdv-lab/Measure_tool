@@ -1,7 +1,7 @@
 
-import {S,$,fmt} from "./state.js?v=0.8.8-20260822-1605";
-import {getPoint,getLine,createPoint,createLine} from "./geometry.js?v=0.8.8-20260822-1605";
-import {resetTrackingSamples} from "./ar.js?v=0.8.8-20260822-1605";
+import {S,$,fmt} from "./state.js?v=0.8.8.1-20260822-1615";
+import {getPoint,getLine,createPoint,createLine} from "./geometry.js?v=0.8.8.1-20260822-1615";
+import {resetTrackingSamples} from "./ar.js?v=0.8.8.1-20260822-1615";
 
 function distanceMeters(){
   const n=Number($("placementDistance").value);
