@@ -1,15 +1,35 @@
-import {getActivePoint,setActivePoint,setAngleDeg,setReferenceLine as setUnifiedReference} from "./drawing-engine.js?v=0.8.9.3-20260822-1835";
-import {S,$,fmt,getPoint,getLine,getContour} from "./state.js?v=0.8.9.3-20260822-1835";
-import {setConstraint,setReferenceLine,updateReferenceStatus} from "./constraints.js?v=0.8.9.3-20260822-1835";
-import {startMeasureNew,startMeasureFrom,startStake,startContinuous,undoContinuous,finishContinuous,placePoint,resetCurrent} from "./drawing.js?v=0.8.9.3-20260822-1835";
-import {createShape,deleteLineRaw,deletePointRaw,clearAllGeometry,dispose} from "./geometry.js?v=0.8.9.3-20260822-1835";
-import {startAR,leaveAR,applyZoom} from "./ar.js?v=0.8.9.3-20260822-1835";
-import {cancelParametricMode,placeParametricNext,setParametricStartPoint,updatePlacementUI} from "./placement.js?v=0.8.9.3-20260822-1835";
-import {createWall,getWall,deleteWall,toggleWall,wallsUsingLine,clearWalls} from "./walls.js?v=0.8.9.3-20260822-1835";
+import {getActivePoint,setActivePoint,setAngleDeg,setDistanceCm,setPlacementMode,placeMetricPoint,setReferenceLine as setUnifiedReference} from "./drawing-engine.js?v=0.8.10-20260822-1930";
+import {S,$,fmt,getPoint,getLine,getContour} from "./state.js?v=0.8.10-20260822-1930";
+import {setConstraint,setReferenceLine,updateReferenceStatus} from "./constraints.js?v=0.8.10-20260822-1930";
+import {startMeasureNew,startMeasureFrom,startStake,startContinuous,undoContinuous,finishContinuous,placePoint,resetCurrent} from "./drawing.js?v=0.8.10-20260822-1930";
+import {createShape,deleteLineRaw,deletePointRaw,clearAllGeometry,dispose} from "./geometry.js?v=0.8.10-20260822-1930";
+import {startAR,leaveAR,applyZoom} from "./ar.js?v=0.8.10-20260822-1930";
+import {cancelParametricMode,placeParametricNext,setParametricStartPoint,updatePlacementUI} from "./placement.js?v=0.8.10-20260822-1930";
+import {createWall,getWall,deleteWall,toggleWall,wallsUsingLine,clearWalls} from "./walls.js?v=0.8.10-20260822-1930";
 
 const pages=["home","measure","stake","newline","constraint","placement","objects","line","point","wallcreate","wall","shapecreate","shape","settings","clear"];
 let menuStack=["home"];
 let pendingPlacementStart=false;
+
+function closeHudPopovers(){
+  el("directionPopover")?.classList.remove("open");
+  el("distancePopover")?.classList.remove("open");
+}
+function setHudTool(label){if(el("hudToolBtn"))el("hudToolBtn").textContent=label;}
+function syncHud(){
+  const names={free:"Vrij",horizontal:"Horizontaal",vertical:"Verticaal",surface:"Op oppervlak",parallel:"Parallel",perpendicular:"Loodrecht",angle:"Eigen hoek"};
+  if(el("constraintHudBtn"))el("constraintHudBtn").textContent=(names[S.drawEngine.direction]||"Vrij")+" ▾";
+  document.querySelectorAll("[data-hud-direction]").forEach(b=>b.classList.toggle("active",b.dataset.hudDirection===S.drawEngine.direction));
+  if(el("distanceHudBtn")){
+    const metric=S.drawEngine.mode==="metric";
+    const unit=el("hudUnit")?.value||"cm";
+    const raw=Number(el("hudDistance")?.value)||100;
+    el("distanceHudBtn").textContent=metric?`${raw} ${unit} ▾`:"AUTO ▾";
+  }
+  if(el("hudAngleRow"))el("hudAngleRow").style.display=S.drawEngine.direction==="angle"?"grid":"none";
+}
+function startQuickLine(){cancelParametricMode();startMeasureNew();setHudTool("LIJN");syncHud();closeHudPopovers();closeMenu();}
+function startQuickContinuous(label="POLYLIJN"){cancelParametricMode();startContinuous();setHudTool(label);syncHud();closeHudPopovers();closeMenu();}
 
 function el(id){return $(id);}
 function actionMessage(message,isError=false){
@@ -90,6 +110,7 @@ function openMenu(){
 }
 function closeMenu(){
   el("menuPanel")?.classList.remove("open");
+  closeHudPopovers();
   S.objectPickMode=null;
 }
 function menuBack(){
@@ -190,10 +211,38 @@ export function initUI(){
   bind("menuBackBtn","click",menuBack);
 
   document.querySelectorAll("[data-page]").forEach(node=>node.addEventListener("click",()=>showPage(node.dataset.page)));
-  document.querySelectorAll(".constraintBtn").forEach(node=>node.addEventListener("click",()=>{setConstraint(node.dataset.constraint);if(el("placementConstraint"))el("placementConstraint").value=node.dataset.constraint;updatePlacementUI();}));
+  bind("quickLineBtn","click",startQuickLine);
+  bind("quickShapeBtn","click",()=>startQuickContinuous("VORM"));
+  bind("quickWallBtn","click",()=>{showPage("objects");actionMessage("Kies een basislijn en tik daarna ‘Maak muur van lijn’." );});
+
+  bind("constraintHudBtn","click",()=>{
+    el("distancePopover")?.classList.remove("open");
+    el("directionPopover")?.classList.toggle("open");
+  });
+  document.querySelectorAll("[data-hud-direction]").forEach(node=>node.addEventListener("click",()=>{
+    setConstraint(node.dataset.hudDirection);
+    if(el("placementConstraint"))el("placementConstraint").value=node.dataset.hudDirection;
+    syncHud();closeHudPopovers();
+  }));
+  bind("distanceHudBtn","click",()=>{
+    el("directionPopover")?.classList.remove("open");
+    el("distancePopover")?.classList.toggle("open");syncHud();
+  });
+  bind("hudAutoBtn","click",()=>{setPlacementMode("manual");syncHud();closeHudPopovers();actionMessage("Handmatig: richt de camera en plaats het volgende punt.");});
+  bind("hudMetricBtn","click",async()=>{
+    const n=Number(el("hudDistance")?.value),unit=el("hudUnit")?.value||"cm";
+    if(!Number.isFinite(n)||n<=0)throw new Error("Geef een geldige afstand.");
+    setDistanceCm(unit==="m"?n*100:n);setPlacementMode("metric");
+    if(!getActivePoint()){syncHud();closeHudPopovers();actionMessage("Plaats eerst punt A. Daarna kun je het volgende punt op maat plaatsen.",true);return;}
+    const r=await runActionOnce("hud-metric", "hudMetricBtn", ()=>placeMetricPoint(), {result:r=>({stageText:`Punt ${r.point.name} vastgezet`,detailText:`${r.line.name} · ${fmt(r.line.distance)}`,distanceText:fmt(r.line.distance),hintText:`Vertrekpunt ${r.point.name} actief.`})});
+    if(r){syncHud();closeHudPopovers();}
+  });
+  bind("hudAngleApplyBtn","click",()=>{setAngleDeg(Number(el("hudAngle")?.value)||45);if(el("constraintAngle"))el("constraintAngle").value=el("hudAngle").value;syncHud();closeHudPopovers();});
+  bind("hudMoreBtn","click",()=>{openMenu();showPage("settings");});
+  bind("hudToolBtn","click",openMenu);
+  document.querySelectorAll(".constraintBtn").forEach(node=>node.addEventListener("click",()=>{setConstraint(node.dataset.constraint);if(el("placementConstraint"))el("placementConstraint").value=node.dataset.constraint;updatePlacementUI();syncHud();}));
 
   bind("constraintAngle","input",()=>{setAngleDeg(Number(el("constraintAngle").value)||45);if(S.drawEngine.direction==="angle"){setConstraint("angle");updatePlacementUI();}});
-  bind("constraintHudBtn","click",()=>{openMenu();showPage("constraint");});
 
   bind("measureNewBtn","click",()=>{cancelParametricMode();startMeasureNew();closeMenu();});
   bind("measureLastBtn","click",()=>{const p=S.points.at(-1);if(!p)throw new Error("Er is nog geen bestaand punt.");startMeasureFrom(p.id);closeMenu();});
@@ -210,7 +259,7 @@ export function initUI(){
   bind("stakeExistingBtn","click",()=>{S.objectPickMode="stake";showPage("objects");});
   bind("stakeParamBtn","click",openPlacementPage);
 
-  bind("continuousBtn","click",()=>{cancelParametricMode();startContinuous();closeMenu();});
+  bind("continuousBtn","click",()=>startQuickContinuous("POLYLIJN"));
   bind("continuousParamBtn","click",()=>{if(!S.draw.active)startContinuous();openMenu();openPlacementPage();});
   bind("drawUndoBtn","click",undoContinuous);
   bind("drawFinishBtn","click",()=>{
@@ -221,7 +270,7 @@ export function initUI(){
     }catch(e){el("detail").textContent=e.message||String(e);}
   });
 
-  bind("captureBtn","click",placePoint);
+  bind("captureBtn","click",()=>{closeHudPopovers();placePoint();syncHud();});
 
   bind("lineFromStartBtn","click",()=>{const l=getLine(S.selectedLineId);if(l){startMeasureFrom(l.startId);closeMenu();}});
   bind("lineFromEndBtn","click",()=>{const l=getLine(S.selectedLineId);if(l){startMeasureFrom(l.endId);closeMenu();}});
@@ -393,6 +442,7 @@ export function initUI(){
   setConstraint("free");
   if(el("wallAngleWrap")&&el("wallOrientation"))el("wallAngleWrap").style.display=el("wallOrientation").value==="angle"?"block":"none";
   updateReferenceStatus();
+  syncHud();
   updateMeta();
 
   document.documentElement.dataset.uiReady="1";

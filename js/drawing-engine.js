@@ -1,5 +1,5 @@
-import {S,$,fmt,getPoint,getLine} from "./state.js?v=0.8.9.3-20260822-1835";
-import {createPoint,createLine,deletePointRaw} from "./geometry.js?v=0.8.9.3-20260822-1835";
+import {S,$,fmt,getPoint,getLine} from "./state.js?v=0.8.10-20260822-1930";
+import {createPoint,createLine,deletePointRaw} from "./geometry.js?v=0.8.10-20260822-1930";
 
 export function getActivePoint(){
   const id=S.draw?.active ? S.draw.lastId : S.drawEngine.activePointId;

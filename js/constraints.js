@@ -1,5 +1,5 @@
-import {S,$,getPoint} from "./state.js?v=0.8.9.3-20260822-1835";
-import {setDirection,setReferenceLine as setEngineReference,constrainManualTarget} from "./drawing-engine.js?v=0.8.9.3-20260822-1835";
+import {S,$,getPoint} from "./state.js?v=0.8.10-20260822-1930";
+import {setDirection,setReferenceLine as setEngineReference,constrainManualTarget} from "./drawing-engine.js?v=0.8.10-20260822-1930";
 
 const REFERENCE_MODES=new Set(["parallel","perpendicular","angle"]);
 
@@ -47,7 +47,7 @@ export function updateReferenceStatus(){
   const hud=$("constraintHudBtn");
   if(hud){
     const labels={free:"Vrij",horizontal:"Horizontaal",vertical:"Verticaal",surface:"Op oppervlak",parallel:"Parallel",perpendicular:"Loodrecht",angle:"Eigen hoek"};
-    hud.textContent=labels[S.drawEngine.direction]||"Vrij";
+    hud.textContent=(labels[S.drawEngine.direction]||"Vrij")+" ▾";
   }
 }
 

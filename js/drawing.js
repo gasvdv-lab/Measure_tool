@@ -1,8 +1,8 @@
-import {S,$,fmt,getPoint} from "./state.js?v=0.8.9.3-20260822-1835";
-import {applyConstraint,nearestSnap} from "./constraints.js?v=0.8.9.3-20260822-1835";
-import {createPoint,createLine,closeContour,deleteLineRaw,deletePointRaw} from "./geometry.js?v=0.8.9.3-20260822-1835";
-import {getFilteredTarget,resetTrackingSamples} from "./ar.js?v=0.8.9.3-20260822-1835";
-import {setActivePoint,clearActivePoint} from "./drawing-engine.js?v=0.8.9.3-20260822-1835";
+import {S,$,fmt,getPoint} from "./state.js?v=0.8.10-20260822-1930";
+import {applyConstraint,nearestSnap} from "./constraints.js?v=0.8.10-20260822-1930";
+import {createPoint,createLine,closeContour,deleteLineRaw,deletePointRaw} from "./geometry.js?v=0.8.10-20260822-1930";
+import {getFilteredTarget,resetTrackingSamples} from "./ar.js?v=0.8.10-20260822-1930";
+import {setActivePoint,clearActivePoint} from "./drawing-engine.js?v=0.8.10-20260822-1930";
 
 function currentStartPoint(){
   if(S.draw.active && S.draw.lastId)return getPoint(S.draw.lastId);
