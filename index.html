@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#111111">
-<title>Measure AR v0.7.0</title>
+<title>Measure AR v0.7.1</title>
 <style>
 :root{color-scheme:dark;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 *{box-sizing:border-box}
@@ -125,6 +125,56 @@ canvas{position:fixed;inset:0;width:100%;height:100%}
   margin:0;
 }
 
+
+#lineLabels{transform-origin:0 0}
+#zoomHud{
+  position:absolute;
+  right:12px;
+  bottom:max(152px,calc(env(safe-area-inset-bottom) + 152px));
+  display:grid;
+  gap:5px;
+  pointer-events:auto;
+}
+#zoomHud button{
+  width:42px;
+  height:42px;
+  min-height:42px;
+  padding:0;
+  border-radius:12px;
+  background:rgba(0,0,0,.72);
+  color:#fff;
+  border:1px solid rgba(255,255,255,.16);
+  font-size:1rem;
+}
+#zoomValue{
+  min-width:42px;
+  padding:5px 6px;
+  border-radius:9px;
+  background:rgba(0,0,0,.72);
+  color:#ddd;
+  text-align:center;
+  font-size:.62rem;
+  border:1px solid rgba(255,255,255,.12);
+}
+#closeAssist{
+  position:absolute;
+  left:50%;
+  top:calc(50% + 38px);
+  transform:translateX(-50%);
+  display:none;
+  min-width:150px;
+  max-width:78vw;
+  padding:6px 9px;
+  border-radius:10px;
+  background:rgba(0,0,0,.74);
+  border:1px solid rgba(255,255,255,.13);
+  color:#fff;
+  text-align:center;
+  font-size:.68rem;
+  pointer-events:none;
+}
+#closeAssist.visible{display:block}
+
 </style>
 </head>
 <body>
@@ -151,7 +201,7 @@ canvas{position:fixed;inset:0;width:100%;height:100%}
       <label class="check"><input id="defaultLabels" type="checkbox" checked> Labels op lijnen tonen</label>
     </div>
 
-    <div class="build">v0.7.0 · core drawing + stability</div>
+    <div class="build">v0.7.1 · navigation + precision</div>
     <div id="error"></div>
   </div>
 </div>
@@ -170,7 +220,7 @@ canvas{position:fixed;inset:0;width:100%;height:100%}
   <div id="menuPanel">
     <div class="menuHead">
       <button id="menuBackBtn" class="secondary" aria-label="Terug">‹</button>
-      <div class="menuTitle"><strong id="menuTitle">Measure AR</strong><span id="menuMeta">Meten · 0p · 0l · v0.7.0</span></div>
+      <div class="menuTitle"><strong id="menuTitle">Measure AR</strong><span id="menuMeta">Meten · 0p · 0l · v0.7.1</span></div>
       <button id="menuCloseBtn" class="secondary" aria-label="Sluiten">✕</button>
     </div>
 
@@ -265,6 +315,14 @@ canvas{position:fixed;inset:0;width:100%;height:100%}
     <button id="drawCloseBtn" class="primary">Sluiten naar A</button>
   </div>
 
+  <div id="zoomHud">
+    <button id="zoomInBtn" aria-label="Inzoomen">＋</button>
+    <div id="zoomValue">1.0×</div>
+    <button id="zoomOutBtn" aria-label="Uitzoomen">−</button>
+    <button id="zoomResetBtn" aria-label="Zoom reset">1×</button>
+  </div>
+
+  <div id="closeAssist"></div>
   <button id="captureBtn" disabled aria-label="Punt vastleggen"></button>
   <div id="hint">Beweeg rustig zodat ARCore een oppervlak kan herkennen.</div>
 </div>
@@ -279,12 +337,16 @@ const app=$("app"), overlay=$("overlay"), startBtn=$("startBtn"), settingsBtn=$(
 const defaultUnit=$("defaultUnit"), defaultThickness=$("defaultThickness"), defaultLabels=$("defaultLabels");
 const stage=$("stage"), distanceEl=$("distance"), detail=$("detail"), stability=$("stability"), hint=$("hint"), aim=$("aim"), captureBtn=$("captureBtn");
 const lineLabels=$("lineLabels"), drawControls=$("drawControls"), drawUndoBtn=$("drawUndoBtn"), drawFinishBtn=$("drawFinishBtn"), drawCloseBtn=$("drawCloseBtn");
+const zoomInBtn=$("zoomInBtn"), zoomOutBtn=$("zoomOutBtn"), zoomResetBtn=$("zoomResetBtn"), zoomValue=$("zoomValue"), closeAssist=$("closeAssist");
 const menuBtn=$("menuBtn"), menuPanel=$("menuPanel"), menuBackBtn=$("menuBackBtn"), menuCloseBtn=$("menuCloseBtn"), menuTitle=$("menuTitle"), menuMeta=$("menuMeta");
 const stakeDistance=$("stakeDistance"), stakeUnit=$("stakeUnit"), stakeDirection=$("stakeDirection"), objectsList=$("objectsList");
 const pages=["home","measure","stake","newline","objects","line","point"];
 
 let THREE=null;
 let renderer=null, scene=null, camera=null, reticle=null, xrSession=null, hitSource=null, hitRequested=false;
+let visualZoom=1, baseCameraFov=70;
+let pinchStartDistance=null, pinchStartZoom=1;
+let orientationAngle=0;
 
 let mode="measure", directionMode="horizontal", targetMeters=2;
 let pointA=null, normalA=null, activeStartId=null, currentTarget=null, targetSource="none", lineFinished=false;
@@ -314,7 +376,40 @@ function pointName(i){ const c=String.fromCharCode(65+(i%26)); const n=Math.floo
 function getPoint(id){ return points.find(p=>p.id===id)||null; }
 function getLine(id){ return lines.find(l=>l.id===id)||null; }
 
-function updateMeta(){ menuMeta.textContent=`${mode==="measure"?"Meten":"Uitzetten"} · ${points.length}p · ${lines.length}l · v0.7.0`; }
+
+function clampZoom(v){ return Math.max(1,Math.min(4,v)); }
+function applyVisualZoom(v){
+  visualZoom=clampZoom(v);
+  zoomValue.textContent=visualZoom.toFixed(1)+"×";
+  if(camera){
+    camera.fov=baseCameraFov/visualZoom;
+    camera.updateProjectionMatrix();
+  }
+}
+function resetZoom(){ applyVisualZoom(1); }
+
+function updateOrientationAngle(){
+  try{
+    if(screen.orientation && typeof screen.orientation.angle==="number"){
+      orientationAngle=screen.orientation.angle;
+    }else if(typeof window.orientation==="number"){
+      orientationAngle=window.orientation;
+    }else{
+      orientationAngle=window.innerWidth>window.innerHeight?90:0;
+    }
+  }catch{
+    orientationAngle=window.innerWidth>window.innerHeight?90:0;
+  }
+}
+
+function touchDistance(touches){
+  if(touches.length<2) return null;
+  const dx=touches[0].clientX-touches[1].clientX;
+  const dy=touches[0].clientY-touches[1].clientY;
+  return Math.hypot(dx,dy);
+}
+
+function updateMeta(){ menuMeta.textContent=`${mode==="measure"?"Meten":"Uitzetten"} · ${points.length}p · ${lines.length}l · v0.7.1`; }
 function showPage(name,push=true){
   pages.forEach(p=>$("page-"+p).classList.remove("active"));
   $("page-"+name).classList.add("active");
@@ -345,7 +440,8 @@ async function loadThree(){
 
 function initThree(){
   scene=new THREE.Scene();
-  camera=new THREE.PerspectiveCamera();
+  camera=new THREE.PerspectiveCamera(baseCameraFov,innerWidth/innerHeight,.01,100);
+  applyVisualZoom(visualZoom);
   renderer=new THREE.WebGLRenderer({alpha:true,antialias:true});
   renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
   renderer.setSize(innerWidth,innerHeight);
@@ -426,7 +522,8 @@ function updateScreenLabels(){
     l.labelEl.style.display="block";
     l.labelEl.style.left=x+"px";
     l.labelEl.style.top=y+"px";
-    l.labelEl.style.transform=`translate(-50%,-50%) scale(${scale})`;
+    const rot = orientationAngle===90 ? 90 : orientationAngle===270 ? -90 : orientationAngle===180 ? 180 : 0;
+    l.labelEl.style.transform=`translate(-50%,-50%) rotate(${rot}deg) scale(${scale})`;
   }
 }
 function thicknessPx(v){return({1:1,2:2,3:3,4:4})[v]||2;}
@@ -553,6 +650,7 @@ function resetDrawSession(){
     closed:false
   };
   drawControls.classList.remove("visible");
+  closeAssist.classList.remove("visible");
 }
 
 function startContinuousDrawing(){
@@ -606,6 +704,39 @@ function finishContinuousDrawing(){
   resetCurrent();
   lineFinished=true;
   captureBtn.disabled=true;
+}
+
+
+function updateCloseAssist(){
+  if(!drawSession.active || drawSession.pointIds.length<2 || !renderer || !camera){
+    closeAssist.classList.remove("visible");
+    return;
+  }
+
+  const first=getPoint(drawSession.startPointId);
+  if(!first){
+    closeAssist.classList.remove("visible");
+    return;
+  }
+
+  const xrCam=renderer.xr.getCamera(camera);
+  const p=first.position.clone().project(xrCam);
+  const onScreen=p.z>=-1 && p.z<=1 && Math.abs(p.x)<=1.05 && Math.abs(p.y)<=1.05;
+
+  if(onScreen){
+    const x=(p.x*.5+.5)*innerWidth;
+    const y=(-p.y*.5+.5)*innerHeight;
+    closeAssist.style.left=x+"px";
+    closeAssist.style.top=Math.max(70,Math.min(innerHeight-120,y+38))+"px";
+    closeAssist.style.transform="translateX(-50%)";
+    closeAssist.textContent="Startpunt A";
+    closeAssist.classList.add("visible");
+  }else{
+    closeAssist.style.left="50%";
+    closeAssist.style.top="calc(50% + 38px)";
+    closeAssist.textContent="Startpunt A buiten beeld · gebruik zoom/oriëntatie";
+    closeAssist.classList.add("visible");
+  }
 }
 
 function closeContinuousDrawing(){
@@ -872,6 +1003,7 @@ async function startAR(){
 function cleanup(){
   try{ renderer?.setAnimationLoop(null); if(renderer?.domElement){ renderer.domElement.style.display="none"; renderer.domElement.style.pointerEvents="none"; } }catch{}
   hitSource=null; hitRequested=false; xrSession=null;
+  resetZoom();
   clearAll(); closeMenu(); overlay.style.display="none"; app.style.display="grid";
   startBtn.disabled=false; startBtn.textContent="Start AR";
 }
@@ -909,11 +1041,12 @@ function render(t,frame){
   const xrCam=renderer.xr.getCamera(camera); xrCam.getWorldPosition(camPos);
   points.forEach(p=>{ const d=Math.max(.05,p.position.distanceTo(camPos)); p.marker.scale.setScalar(Math.min(4,Math.max(.55,.48+d*.28))); });
   updateScreenLabels();
+  updateCloseAssist();
 
   renderer.render(scene,camera);
 }
 
-function coreSelfCheck(){const req=["startBtn","menuBtn","captureBtn","continuousDrawRow","drawControls","drawUndoBtn","drawFinishBtn","drawCloseBtn","lineLabels","measureNewBtn","measureLastBtn","measureExistingBtn","stakeNewBtn","stakeLastBtn","stakeExistingBtn","newIndependentBtn","newFromLastBtn","stakeFromLastBtn","objectsList","lineLength","lineThickness","applyLineLengthBtn","undoBtn","clearAllBtn","exitArBtn"];const missing=req.filter(id=>!$(id));console.info("core self-check",{ok:!missing.length,missing,version:"0.6.9"});if(missing.length)showError("Interne UI-fout: "+missing.join(", "));return !missing.length;}
+function coreSelfCheck(){const req=["startBtn","menuBtn","captureBtn","continuousDrawRow","drawControls","drawUndoBtn","drawFinishBtn","drawCloseBtn","lineLabels","zoomInBtn","zoomOutBtn","zoomResetBtn","zoomValue","closeAssist","measureNewBtn","measureLastBtn","measureExistingBtn","stakeNewBtn","stakeLastBtn","stakeExistingBtn","newIndependentBtn","newFromLastBtn","stakeFromLastBtn","objectsList","lineLength","lineThickness","applyLineLengthBtn","undoBtn","clearAllBtn","exitArBtn"];const missing=req.filter(id=>!$(id));console.info("core self-check",{ok:!missing.length,missing,version:"0.6.9"});if(missing.length)showError("Interne UI-fout: "+missing.join(", "));return !missing.length;}
 function undoLast(){
   const a=undoStack.pop();
   if(!a){ stage.textContent="Niets om ongedaan te maken"; closeMenu(); return; }
@@ -947,6 +1080,32 @@ $("continuousDrawRow").addEventListener("click",startContinuousDrawing);
 drawUndoBtn.addEventListener("click",undoContinuousStep);
 drawFinishBtn.addEventListener("click",finishContinuousDrawing);
 drawCloseBtn.addEventListener("click",closeContinuousDrawing);
+
+
+zoomInBtn.addEventListener("click",()=>applyVisualZoom(visualZoom+.25));
+zoomOutBtn.addEventListener("click",()=>applyVisualZoom(visualZoom-.25));
+zoomResetBtn.addEventListener("click",resetZoom);
+
+overlay.addEventListener("touchstart",e=>{
+  if(e.touches.length===2){
+    pinchStartDistance=touchDistance(e.touches);
+    pinchStartZoom=visualZoom;
+  }
+},{passive:true});
+
+overlay.addEventListener("touchmove",e=>{
+  if(e.touches.length===2 && pinchStartDistance){
+    const d=touchDistance(e.touches);
+    if(d){
+      const ratio=d/pinchStartDistance;
+      applyVisualZoom(pinchStartZoom*ratio);
+    }
+  }
+},{passive:true});
+
+overlay.addEventListener("touchend",e=>{
+  if(e.touches.length<2) pinchStartDistance=null;
+},{passive:true});
 
 $("measureNewBtn").addEventListener("click",startMeasureNew);
 $("measureLastBtn").addEventListener("click",()=>points.length?startMeasureFrom(points[points.length-1].id):closeMenu());
@@ -985,7 +1144,28 @@ $("menuSettingsBtn").addEventListener("click",async()=>{ closeMenu(); await leav
 $("exitArBtn").addEventListener("click",leaveAR);
 captureBtn.addEventListener("click",placePoint);
 
-window.addEventListener("resize",()=>{ renderer?.setSize(innerWidth,innerHeight); });
+window.addEventListener("resize",()=>{
+  renderer?.setSize(innerWidth,innerHeight);
+  if(camera){
+    camera.aspect=innerWidth/innerHeight;
+    camera.updateProjectionMatrix();
+  }
+  updateOrientationAngle();
+});
+window.addEventListener("orientationchange",()=>{
+  setTimeout(()=>{
+    updateOrientationAngle();
+    if(renderer) renderer.setSize(innerWidth,innerHeight);
+    if(camera){
+      camera.aspect=innerWidth/innerHeight;
+      camera.updateProjectionMatrix();
+    }
+  },120);
+});
+if(screen.orientation?.addEventListener){
+  screen.orientation.addEventListener("change",updateOrientationAngle);
+}
+updateOrientationAngle();
 document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible"&&!renderer?.xr?.getSession?.()&&overlay.style.display==="block") cleanup(); });
 
 if(!navigator.xr){ showError("WebXR lijkt niet beschikbaar in deze browser. Gebruik Chrome op een ARCore-compatibele Android-telefoon."); }
