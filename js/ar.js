@@ -29,10 +29,10 @@ export function applyZoom(v){S.zoom=Math.max(1,Math.min(4,v));$("zoomValue").tex
 export async function startAR(){
   if(!navigator.xr)throw new Error("WebXR niet beschikbaar.");await loadThree();if(!S.renderer)init();const ok=await navigator.xr.isSessionSupported("immersive-ar");if(!ok)throw new Error("Immersive AR niet beschikbaar.");
   S.xrSession=await navigator.xr.requestSession("immersive-ar",{requiredFeatures:["hit-test"],optionalFeatures:["dom-overlay"],domOverlay:{root:document.body}});await S.renderer.xr.setSession(S.xrSession);
-  S.renderer.domElement.style.display="block";$("app").style.display="none";$("overlay").style.display="block";S.xrSession.addEventListener("end",cleanup,{once:true});S.renderer.setAnimationLoop(render);
+  S.renderer.domElement.style.display="block";$("app").style.display="none";$("overlay").style.display="block";$("placementHud")?.classList.add("visible");S.xrSession.addEventListener("end",cleanup,{once:true});S.renderer.setAnimationLoop(render);
 }
 export async function leaveAR(){if(S.xrSession){await S.xrSession.end();return;}cleanup();}
-function cleanup(){resetTrackingSamples();S.renderer?.setAnimationLoop(null);if(S.renderer?.domElement)S.renderer.domElement.style.display="none";S.xrSession=null;S.hitSource=null;S.hitRequested=false;clearAllGeometry();$("overlay").style.display="none";$("app").style.display="grid";}
+function cleanup(){resetTrackingSamples();S.renderer?.setAnimationLoop(null);if(S.renderer?.domElement)S.renderer.domElement.style.display="none";S.xrSession=null;S.hitSource=null;S.hitRequested=false;clearAllGeometry();$("placementHud")?.classList.remove("visible");$("overlay").style.display="none";$("app").style.display="grid";}
 function render(_,frame){
   if(!frame)return;const ref=S.renderer.xr.getReferenceSpace(),session=S.renderer.xr.getSession();
   if(!S.hitRequested){session.requestReferenceSpace("viewer").then(v=>session.requestHitTestSource({space:v}).then(s=>S.hitSource=s));S.hitRequested=true;}
