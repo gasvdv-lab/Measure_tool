@@ -39,3 +39,6 @@ canvas{position:fixed;inset:0;width:100%;height:100%}
   white-space:nowrap;
 }
 
+
+.directFallback{max-width:420px}
+.directFallback #launchStatus{color:#c9c9c9}
