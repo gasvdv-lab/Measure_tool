@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#111111">
-<title>Measure AR v0.7.2</title>
+<title>Measure AR v0.7.3</title>
 <style>
 :root{color-scheme:dark;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 *{box-sizing:border-box}
@@ -156,24 +156,6 @@ canvas{position:fixed;inset:0;width:100%;height:100%}
   font-size:.62rem;
   border:1px solid rgba(255,255,255,.12);
 }
-#closeAssist{
-  position:absolute;
-  left:50%;
-  top:calc(50% + 38px);
-  transform:translateX(-50%);
-  display:none;
-  min-width:150px;
-  max-width:78vw;
-  padding:6px 9px;
-  border-radius:10px;
-  background:rgba(0,0,0,.74);
-  border:1px solid rgba(255,255,255,.13);
-  color:#fff;
-  text-align:center;
-  font-size:.68rem;
-  pointer-events:none;
-}
-#closeAssist.visible{display:block}
 
 </style>
 </head>
@@ -201,7 +183,7 @@ canvas{position:fixed;inset:0;width:100%;height:100%}
       <label class="check"><input id="defaultLabels" type="checkbox" checked> Labels op lijnen tonen</label>
     </div>
 
-    <div class="build">v0.7.2 · fixed anchors + labels</div>
+    <div class="build">v0.7.3 · workflow fix</div>
     <div id="error"></div>
   </div>
 </div>
@@ -220,7 +202,7 @@ canvas{position:fixed;inset:0;width:100%;height:100%}
   <div id="menuPanel">
     <div class="menuHead">
       <button id="menuBackBtn" class="secondary" aria-label="Terug">‹</button>
-      <div class="menuTitle"><strong id="menuTitle">Measure AR</strong><span id="menuMeta">Meten · 0p · 0l · v0.7.2</span></div>
+      <div class="menuTitle"><strong id="menuTitle">Measure AR</strong><span id="menuMeta">Meten · 0p · 0l · v0.7.3</span></div>
       <button id="menuCloseBtn" class="secondary" aria-label="Sluiten">✕</button>
     </div>
 
@@ -299,6 +281,17 @@ canvas{position:fixed;inset:0;width:100%;height:100%}
           <button id="deletePointBtn" class="danger">Punt wissen</button>
         </div>
       </section>
+
+      <section id="page-clearconfirm" class="page">
+        <div class="sectionTitle">Alles wissen</div>
+        <div class="menuCard">
+          <p class="help" style="font-size:.72rem;color:#ddd">Alle punten, lijnen en contouren verwijderen? De AR-camera blijft actief.</p>
+          <div class="choice">
+            <button id="cancelClearBtn" class="secondary">Annuleren</button>
+            <button id="confirmClearBtn" class="danger">Alles wissen</button>
+          </div>
+        </div>
+      </section>
     </div>
 
     <div class="menuFoot">
@@ -310,10 +303,9 @@ canvas{position:fixed;inset:0;width:100%;height:100%}
   <div id="lineLabels"></div>
   <div id="aim"></div>
 
-  <div id="drawControls">
+  <div id="drawControls" style="grid-template-columns:1fr 1fr">
     <button id="drawUndoBtn" class="secondary">↶ Laatste</button>
-    <button id="drawFinishBtn" class="secondary">Voltooien</button>
-    <button id="drawCloseBtn" class="primary">Sluiten naar A</button>
+    <button id="drawFinishBtn" class="primary" disabled>Voltooien</button>
   </div>
 
   <div id="zoomHud">
@@ -322,8 +314,6 @@ canvas{position:fixed;inset:0;width:100%;height:100%}
     <button id="zoomOutBtn" aria-label="Uitzoomen">−</button>
     <button id="zoomResetBtn" aria-label="Zoom reset">1×</button>
   </div>
-
-  <div id="closeAssist"></div>
   <button id="captureBtn" disabled aria-label="Punt vastleggen"></button>
   <div id="hint">Beweeg rustig zodat ARCore een oppervlak kan herkennen.</div>
 </div>
@@ -337,11 +327,11 @@ const $ = id => document.getElementById(id);
 const app=$("app"), overlay=$("overlay"), startBtn=$("startBtn"), settingsBtn=$("settingsBtn"), settingsPanel=$("settingsPanel"), errorBox=$("error");
 const defaultUnit=$("defaultUnit"), defaultThickness=$("defaultThickness"), defaultLabels=$("defaultLabels");
 const stage=$("stage"), distanceEl=$("distance"), detail=$("detail"), stability=$("stability"), hint=$("hint"), aim=$("aim"), captureBtn=$("captureBtn");
-const lineLabels=$("lineLabels"), drawControls=$("drawControls"), drawUndoBtn=$("drawUndoBtn"), drawFinishBtn=$("drawFinishBtn"), drawCloseBtn=$("drawCloseBtn");
-const zoomInBtn=$("zoomInBtn"), zoomOutBtn=$("zoomOutBtn"), zoomResetBtn=$("zoomResetBtn"), zoomValue=$("zoomValue"), closeAssist=$("closeAssist");
+const lineLabels=$("lineLabels"), drawControls=$("drawControls"), drawUndoBtn=$("drawUndoBtn"), drawFinishBtn=$("drawFinishBtn");
+const zoomInBtn=$("zoomInBtn"), zoomOutBtn=$("zoomOutBtn"), zoomResetBtn=$("zoomResetBtn"), zoomValue=$("zoomValue");
 const menuBtn=$("menuBtn"), menuPanel=$("menuPanel"), menuBackBtn=$("menuBackBtn"), menuCloseBtn=$("menuCloseBtn"), menuTitle=$("menuTitle"), menuMeta=$("menuMeta");
 const stakeDistance=$("stakeDistance"), stakeUnit=$("stakeUnit"), stakeDirection=$("stakeDirection"), objectsList=$("objectsList");
-const pages=["home","measure","stake","newline","objects","line","point"];
+const pages=["home","measure","stake","newline","objects","line","point","clearconfirm"];
 
 let THREE=null;
 let renderer=null, scene=null, camera=null, reticle=null, xrSession=null, hitSource=null, hitRequested=false;
@@ -410,11 +400,11 @@ function touchDistance(touches){
   return Math.hypot(dx,dy);
 }
 
-function updateMeta(){ menuMeta.textContent=`${mode==="measure"?"Meten":"Uitzetten"} · ${points.length}p · ${lines.length}l · v0.7.2`; }
+function updateMeta(){ menuMeta.textContent=`${mode==="measure"?"Meten":"Uitzetten"} · ${points.length}p · ${lines.length}l · v0.7.3`; }
 function showPage(name,push=true){
   pages.forEach(p=>$("page-"+p).classList.remove("active"));
   $("page-"+name).classList.add("active");
-  const titles={home:"Measure AR",measure:"Meten",stake:"Uitzetten",newline:"Nieuwe lijn",objects:"Objecten",line:"Lijn",point:"Punt"};
+  const titles={home:"Measure AR",measure:"Meten",stake:"Uitzetten",newline:"Nieuwe lijn",objects:"Objecten",line:"Lijn",point:"Punt",clearconfirm:"Alles wissen"};
   menuTitle.textContent=titles[name]||"Measure AR";
   if(push && menuStack[menuStack.length-1]!==name) menuStack.push(name);
   menuBackBtn.style.visibility=name==="home"?"hidden":"visible";
@@ -501,8 +491,12 @@ function updateScreenLabels(){
 
   for(const l of lines){
     if(!l.labelEl) continue;
+
     const a=getPoint(l.startId), b=getPoint(l.endId);
-    if(!a||!b){ l.labelEl.style.display="none"; continue; }
+    if(!a||!b){
+      l.labelEl.style.display="none";
+      continue;
+    }
 
     const pa=a.position.clone().project(xrCam);
     const pb=b.position.clone().project(xrCam);
@@ -524,17 +518,10 @@ function updateScreenLabels(){
     const x=(ax+bx)/2;
     const y=(ay+by)/2;
 
-    // Rotate WITH the visible line. Normalize to keep the text readable
-    // rather than ever showing it upside-down.
-    let angle=Math.atan2(by-ay,bx-ax)*180/Math.PI;
-    if(angle>90) angle-=180;
-    if(angle<-90) angle+=180;
-
-    // Offset perpendicular to the line so the label never sits on top of it.
-    const rad=angle*Math.PI/180;
+    const dx=bx-ax, dy=by-ay;
+    const len=Math.hypot(dx,dy)||1;
+    const nx=-dy/len, ny=dx/len;
     const offset=18;
-    const ox=-Math.sin(rad)*offset;
-    const oy=Math.cos(rad)*offset;
 
     const mid=a.position.clone().add(b.position).multiplyScalar(.5);
     xrCam.getWorldPosition(camPos);
@@ -542,9 +529,9 @@ function updateScreenLabels(){
     const scale=Math.max(.72,Math.min(1.08,.78+d*.035));
 
     l.labelEl.style.display="block";
-    l.labelEl.style.left=(x+ox)+"px";
-    l.labelEl.style.top=(y+oy)+"px";
-    l.labelEl.style.transform=`translate(-50%,-50%) rotate(${angle}deg) scale(${scale})`;
+    l.labelEl.style.left=(x+nx*offset)+"px";
+    l.labelEl.style.top=(y+ny*offset)+"px";
+    l.labelEl.style.transform=`translate(-50%,-50%) scale(${scale})`;
   }
 }
 function thicknessPx(v){return({1:1,2:2,3:3,4:4})[v]||2;}
@@ -702,7 +689,7 @@ function resetDrawSession(){
     closed:false
   };
   drawControls.classList.remove("visible");
-  closeAssist.classList.remove("visible");
+  drawFinishBtn.disabled=true;
 }
 
 function startContinuousDrawing(){
@@ -718,6 +705,7 @@ function startContinuousDrawing(){
   };
   lineFinished=false;
   drawControls.classList.add("visible");
+  drawFinishBtn.disabled=true;
   stage.textContent="Doorlopend tekenen";
   distanceEl.textContent="—";
   detail.textContent="Plaats punt A";
@@ -740,68 +728,20 @@ function saveCurrentContour(closed){
 
 function finishContinuousDrawing(){
   if(!drawSession.active) return;
-  const count=drawSession.lineIds.length;
 
-  if(count>0){
-    const contour=saveCurrentContour(false);
-    stage.textContent="Tekenreeks voltooid";
-    detail.textContent=`${contour.name} · ${count} lijnen · open`;
-    hint.textContent="De lijnen blijven staan. Open ☰ om verder te werken.";
-  }else{
-    stage.textContent="Tekenen gestopt";
-    detail.textContent="";
-  }
-
-  resetDrawSession();
-  resetCurrent();
-  lineFinished=true;
-  captureBtn.disabled=true;
-}
-
-
-function updateCloseAssist(){
-  if(!drawSession.active || drawSession.pointIds.length<2 || !renderer || !camera){
-    closeAssist.classList.remove("visible");
-    return;
-  }
-
-  const first=getPoint(drawSession.startPointId);
-  if(!first){
-    closeAssist.classList.remove("visible");
-    return;
-  }
-
-  const xrCam=renderer.xr.getCamera(camera);
-  const p=first.position.clone().project(xrCam);
-  const onScreen=p.z>=-1 && p.z<=1 && Math.abs(p.x)<=1.05 && Math.abs(p.y)<=1.05;
-
-  if(onScreen){
-    const x=(p.x*.5+.5)*innerWidth;
-    const y=(-p.y*.5+.5)*innerHeight;
-    closeAssist.style.left=x+"px";
-    closeAssist.style.top=Math.max(70,Math.min(innerHeight-120,y+38))+"px";
-    closeAssist.style.transform="translateX(-50%)";
-    closeAssist.textContent="Startpunt A";
-    closeAssist.classList.add("visible");
-  }else{
-    closeAssist.style.left="50%";
-    closeAssist.style.top="calc(50% + 38px)";
-    closeAssist.textContent="Startpunt A buiten beeld · gebruik zoom/oriëntatie";
-    closeAssist.classList.add("visible");
-  }
-}
-
-function closeContinuousDrawing(){
-  if(!drawSession.active) return;
   if(drawSession.pointIds.length<3){
     stage.textContent="Minstens 3 punten nodig";
-    hint.textContent="Plaats minstens drie punten voordat je de contour sluit.";
+    detail.textContent="Plaats eerst A, B en C";
+    hint.textContent="Voltooien sluit automatisch het laatste punt terug naar A.";
     return;
   }
 
   const first=getPoint(drawSession.startPointId);
   const last=getPoint(drawSession.lastPointId);
-  if(!first||!last) return;
+  if(!first||!last){
+    stage.textContent="Contourdata ontbreekt";
+    return;
+  }
 
   try{
     const closing=createLine(last,first,{recordUndo:false});
@@ -809,6 +749,7 @@ function closeContinuousDrawing(){
     drawSession.closed=true;
 
     const contour=saveCurrentContour(true);
+
     undoStack.push({
       type:"continuousClosed",
       contourId:contour.id,
@@ -816,20 +757,25 @@ function closeContinuousDrawing(){
     });
 
     distanceEl.textContent=fmt(closing.distance);
-    stage.textContent="Contour gesloten";
-    detail.textContent=`${contour.name} · ${drawSession.lineIds.length} lijnen`;
-    hint.textContent="De gesloten contour blijft als gekoppelde tekenreeks bewaard.";
+    stage.textContent="Vorm voltooid";
+    detail.textContent=`${closing.name} toegevoegd · ${contour.name} gesloten`;
+    hint.textContent=`${closing.name} is automatisch verbonden met ${first.name}.`;
 
     resetDrawSession();
     resetCurrent();
     lineFinished=true;
     captureBtn.disabled=true;
+
   }catch(err){
-    console.error(err);
-    stage.textContent="Sluiten mislukt";
+    console.error("finishContinuousDrawing failed",err);
+    stage.textContent="Voltooien mislukt";
     detail.textContent=err.message||"Onbekende fout";
+    hint.textContent="De bestaande lijnen zijn behouden.";
   }
 }
+
+
+
 
 function undoContinuousStep(){
   if(!drawSession.active) return;
@@ -870,6 +816,7 @@ function undoContinuousStep(){
     normalA=up.clone();
   }
 
+  drawFinishBtn.disabled=drawSession.pointIds.length<3;
   stage.textContent="Laatste segment verwijderd";
   detail.textContent=`${drawSession.lineIds.length} lijnen in reeks`;
   hint.textContent="Plaats het volgende punt.";
@@ -980,6 +927,7 @@ function placePoint(){
       drawSession.pointIds.push(end.id);
       drawSession.lineIds.push(line.id);
       drawSession.lastPointId=end.id;
+      drawFinishBtn.disabled=drawSession.pointIds.length<3;
 
       // Continue directly from the new endpoint.
       activeStartId=end.id;
@@ -1095,12 +1043,11 @@ function render(t,frame){
   const xrCam=renderer.xr.getCamera(camera); xrCam.getWorldPosition(camPos);
   points.forEach(p=>{ const d=Math.max(.05,p.position.distanceTo(camPos)); p.marker.scale.setScalar(Math.min(4,Math.max(.55,.48+d*.28))); });
   updateScreenLabels();
-  updateCloseAssist();
 
   renderer.render(scene,camera);
 }
 
-function coreSelfCheck(){const req=["startBtn","menuBtn","captureBtn","continuousDrawRow","drawControls","drawUndoBtn","drawFinishBtn","drawCloseBtn","lineLabels","zoomInBtn","zoomOutBtn","zoomResetBtn","zoomValue","closeAssist","measureNewBtn","measureLastBtn","measureExistingBtn","stakeNewBtn","stakeLastBtn","stakeExistingBtn","newIndependentBtn","newFromLastBtn","stakeFromLastBtn","objectsList","lineLength","lineThickness","applyLineLengthBtn","undoBtn","clearAllBtn","exitArBtn"];const missing=req.filter(id=>!$(id));console.info("core self-check",{ok:!missing.length,missing,version:"0.6.9"});if(missing.length)showError("Interne UI-fout: "+missing.join(", "));return !missing.length;}
+function coreSelfCheck(){const req=["startBtn","menuBtn","captureBtn","continuousDrawRow","drawControls","drawUndoBtn","drawFinishBtn","lineLabels","zoomInBtn","zoomOutBtn","zoomResetBtn","zoomValue","cancelClearBtn","confirmClearBtn","measureNewBtn","measureLastBtn","measureExistingBtn","stakeNewBtn","stakeLastBtn","stakeExistingBtn","newIndependentBtn","newFromLastBtn","stakeFromLastBtn","objectsList","lineLength","lineThickness","applyLineLengthBtn","undoBtn","clearAllBtn","exitArBtn"];const missing=req.filter(id=>!$(id));console.info("core self-check",{ok:!missing.length,missing,version:"0.6.9"});if(missing.length)showError("Interne UI-fout: "+missing.join(", "));return !missing.length;}
 function undoLast(){
   const a=undoStack.pop();
   if(!a){ stage.textContent="Niets om ongedaan te maken"; closeMenu(); return; }
@@ -1130,7 +1077,6 @@ document.querySelectorAll("[data-page]").forEach(row=>row.addEventListener("clic
 $("continuousDrawRow").addEventListener("click",startContinuousDrawing);
 drawUndoBtn.addEventListener("click",undoContinuousStep);
 drawFinishBtn.addEventListener("click",finishContinuousDrawing);
-drawCloseBtn.addEventListener("click",closeContinuousDrawing);
 
 
 zoomInBtn.addEventListener("click",()=>applyVisualZoom(visualZoom+.25));
@@ -1190,20 +1136,23 @@ $("deletePointBtn").addEventListener("click",()=>{ if(selectedPointId) deletePoi
 
 $("undoBtn").addEventListener("click",undoLast);
 $("clearAllBtn").addEventListener("click",()=>{
-  if(!confirm("Alle punten, lijnen en contouren wissen?")) return;
+  showPage("clearconfirm");
+});
 
+$("cancelClearBtn").addEventListener("click",()=>{
+  showPage("home",false);
+});
+
+$("confirmClearBtn").addEventListener("click",()=>{
   clearAll();
   closeMenu();
 
-  // Important: do NOT call leaveAR(). Keep the same WebXR session/camera active.
   mode="measure";
   lineFinished=false;
   stage.textContent="Alles gewist";
   distanceEl.textContent="—";
   detail.textContent="AR-sessie blijft actief";
   hint.textContent="Richt op een oppervlak en plaats opnieuw punt A.";
-
-  // The render loop will enable capture again as soon as a valid target exists.
   captureBtn.disabled=!currentTarget;
 });
 $("menuSettingsBtn").addEventListener("click",async()=>{ closeMenu(); await leaveAR(); settingsPanel.classList.add("open"); });
