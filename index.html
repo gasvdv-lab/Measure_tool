@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#111111">
-  <title>Measure AR v0.8.0</title>
+  <title>Measure AR v0.8.1</title>
   <link rel="stylesheet" href="./css/app.css">
 </head>
 <body>
@@ -24,7 +24,7 @@
       </label>
       <label class="check"><input id="defaultLabels" type="checkbox" checked> Labels tonen</label>
     </section>
-    <div class="build">v0.8.0 · modular core + universal constraints</div>
+    <div class="build">v0.8.1 · walls on modular core</div>
     <div id="error" class="error"></div>
   </main>
 </div>
@@ -43,7 +43,7 @@
   <aside id="menuPanel">
     <div class="menuHead">
       <button id="menuBackBtn" class="secondary">‹</button>
-      <div><strong id="menuTitle">Measure AR</strong><small id="menuMeta">v0.8.0</small></div>
+      <div><strong id="menuTitle">Measure AR</strong><small id="menuMeta">v0.8.1</small></div>
       <button id="menuCloseBtn" class="secondary">✕</button>
     </div>
     <div class="menuBody">
@@ -125,6 +125,7 @@
           <button id="lineFromStartBtn" class="secondary">Nieuwe lijn vanaf start</button>
           <button id="lineFromEndBtn" class="secondary">Nieuwe lijn vanaf einde</button>
           <button id="useReferenceBtn" class="secondary">Gebruik als referentielijn</button>
+          <button id="createWallBtn" class="primary">Maak muur van lijn</button>
           <button id="deleteLineBtn" class="danger">Lijn wissen</button>
         </div>
       </section>
@@ -136,6 +137,50 @@
           <button id="pointNewLineBtn" class="primary">Nieuwe lijn vanaf punt</button>
           <button id="pointStakeBtn" class="secondary">Uitzetten vanaf punt</button>
           <button id="deletePointBtn" class="danger">Punt wissen</button>
+        </div>
+      </section>
+
+
+      <section id="page-wallcreate" class="page">
+        <h3>Muur aanmaken</h3>
+        <div class="menuCard">
+          <div id="wallCreateInfo" class="help">—</div>
+          <label>Unieke naam <input id="wallName" maxlength="40" placeholder="bv. Voorgevel"></label>
+          <div class="grid2">
+            <label>Hoogte (m) <input id="wallHeight" type="number" min=".05" step=".05" value="2.40"></label>
+            <label>Dikte (m) <input id="wallThickness" type="number" min=".01" step=".01" value=".14"></label>
+          </div>
+          <label>Zijde
+            <select id="wallSide">
+              <option value="center">Gecentreerd</option>
+              <option value="left">Links van lijn</option>
+              <option value="right">Rechts van lijn</option>
+            </select>
+          </label>
+          <label>Oriëntatie
+            <select id="wallOrientation">
+              <option value="vertical">Verticaal</option>
+              <option value="perpendicular">Loodrecht 90°</option>
+              <option value="angle">Eigen hoek</option>
+            </select>
+          </label>
+          <label>Hoek (°) <input id="wallAngle" type="number" min="-180" max="180" step=".5" value="90"></label>
+          <div class="grid2">
+            <label>Kleur <input id="wallColor" type="color" value="#d7d2c8"></label>
+            <label>Transparantie <input id="wallOpacity" type="range" min=".05" max="1" step=".05" value=".45"></label>
+          </div>
+          <div id="wallCreateError" class="error"></div>
+          <button id="confirmWallBtn" class="primary">Muur maken</button>
+          <button id="cancelWallBtn" class="secondary">Annuleren</button>
+        </div>
+      </section>
+
+      <section id="page-wall" class="page">
+        <h3>Muur</h3>
+        <div class="menuCard">
+          <div id="wallInfo" class="help">—</div>
+          <button id="toggleWallBtn" class="secondary">Zichtbaar / verborgen</button>
+          <button id="deleteWallBtn" class="danger">Muur wissen</button>
         </div>
       </section>
 
