@@ -1,8 +1,15 @@
-# Measure AR v0.8.7 — Universal Drawing Foundation
-Build 20260822-0830
+# Measure AR v0.8.8 — Module Consistency Fix
+Build: 20260822-1605
 
-Nieuw: universele Handmatig/Op maat HUD; cm standaard; Vrij/Horizontaal/Verticaal/Op oppervlak/Parallel/Loodrecht/Vaste hoek; centraal referentielijnmodel; fixed-point enforcement; basis voor doorlopend tekenen en latere muur-openingen. Startup hardening en cache-busting blijven behouden.
+Fixes:
+- geometry.js exporteert nu getPoint en getLine.
+- Alle named ES-module imports zijn automatisch gevalideerd tegen de exports van hun doelmodule.
+- Alle interne modules gebruiken exact dezelfde cache-key: ?v=0.8.8-20260822-1605
+- Oude v0.8.6/v0.8.7 verwijzingen zijn verwijderd.
+- Startup hardening, universal drawing, muren, placement en fixed points blijven behouden.
+- Alle JavaScriptmodules zijn syntactisch gecontroleerd.
 
-Vaste app-link: https://gasvdv-lab.github.io/Measure_tool/
+Vaste app-link:
+https://gasvdv-lab.github.io/Measure_tool/
 
-Upload ALLE bestanden uit deze ZIP, inclusief js/universal-placement.js.
+Upload ALLE bestanden uit deze ZIP naar GitHub. Een gedeeltelijke upload kan opnieuw builds mengen.
