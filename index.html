@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#111111">
-  <title>Measure AR v0.8.8</title>
-  <link rel="stylesheet" href="./css/app.css?v=0.8.8-20260822-1605">
+  <title>Measure AR v0.8.8.1</title>
+  <link rel="stylesheet" href="./css/app.css?v=0.8.8.1-20260822-1615">
 </head>
 <body>
 <div id="app">
@@ -13,7 +13,7 @@
     <div class="logo">⌖</div>
     <h1>Measure AR</h1>
     <p id="launchStatus">Tik om AR te starten.</p>
-    <div id="buildInfo" class="build">v0.8.8 · build 20260822-1605</div>
+    <div id="buildInfo" class="build">v0.8.8.1 · build 20260822-1615</div>
     <button id="startArBtn" class="primary">AR starten</button>
     <div id="error" class="error"></div>
   </main>
@@ -32,7 +32,7 @@
   <aside id="menuPanel">
     <div class="menuHead">
       <button id="menuBackBtn" class="secondary">‹</button>
-      <div><strong id="menuTitle">Measure AR</strong><small id="menuMeta">v0.8.8</small></div>
+      <div><strong id="menuTitle">Measure AR</strong><small id="menuMeta">v0.8.8.1</small></div>
       <button id="menuCloseBtn" class="secondary">✕</button>
     </div>
     <div class="menuBody">
@@ -268,29 +268,6 @@
 
   <div id="pointLabels"></div>
   <div id="lineLabels"></div>
-
-  <div id="placementHud" class="placementHud">
-    <button id="placementModeBtn" class="secondary" type="button">Handmatig</button>
-    <div id="placementMeasurePanel" class="placementMeasurePanel">
-      <label>Afstand<div class="placementDistanceRow">
-        <input id="placementDistance" type="number" min="0.1" step="0.1" value="100">
-        <select id="placementUnit"><option value="cm" selected>cm</option><option value="m">m</option></select>
-      </div></label>
-      <label>Richting<select id="placementDirection">
-        <option value="free">Vrij</option><option value="horizontal">Horizontaal</option>
-        <option value="vertical">Verticaal</option><option value="surface">Op oppervlak</option>
-        <option value="parallel">Parallel aan referentielijn</option>
-        <option value="perpendicular">Loodrecht op referentielijn</option>
-        <option value="angle">Vaste hoek</option>
-      </select></label>
-      <label id="placementAngleWrap">Hoek<div class="placementAngleRow">
-        <input id="placementAngle" type="number" step="1" value="90"><span>°</span>
-      </div></label>
-      <div id="placementReferenceInfo" class="placementReferenceInfo">Referentie: geen</div>
-      <div class="grid2"><button id="placementCancelBtn" class="secondary">Handmatig</button>
-      <button id="placementConfirmBtn" class="primary">Bevestigen</button></div>
-    </div>
-  </div>
   <div id="aim"></div>
 
   <div id="constraintHud">
@@ -312,6 +289,6 @@
   <div id="hint">Beweeg rustig zodat ARCore een oppervlak kan herkennen.</div>
 </div>
 
-<script type="module" src="./js/bootstrap.js?v=0.8.8-20260822-1605"></script>
+<script type="module" src="./js/bootstrap.js?v=0.8.8.1-20260822-1615"></script>
 </body>
 </html>
