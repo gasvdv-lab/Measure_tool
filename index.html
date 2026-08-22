@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#111111">
-  <title>Measure AR v0.8.9</title>
-  <link rel="stylesheet" href="./css/app.css?v=0.8.9-20260822-1645">
+  <title>Measure AR v0.8.9.1</title>
+  <link rel="stylesheet" href="./css/app.css?v=0.8.9.1-20260822-1715">
 </head>
 <body>
 <div id="app">
@@ -13,7 +13,7 @@
     <div class="logo">⌖</div>
     <h1>Measure AR</h1>
     <p id="launchStatus">Tik om AR te starten.</p>
-    <div id="buildInfo" class="build">v0.8.9 · build 20260822-1645</div>
+    <div id="buildInfo" class="build">v0.8.9.1 · build 20260822-1715</div>
     <button id="startArBtn" class="primary">AR starten</button>
     <div id="error" class="error"></div>
   </main>
@@ -32,7 +32,7 @@
   <aside id="menuPanel">
     <div class="menuHead">
       <button id="menuBackBtn" class="secondary">‹</button>
-      <div><strong id="menuTitle">Measure AR</strong><small id="menuMeta">v0.8.9</small></div>
+      <div><strong id="menuTitle">Measure AR</strong><small id="menuMeta">v0.8.9.1</small></div>
       <button id="menuCloseBtn" class="secondary">✕</button>
     </div>
     <div class="menuBody">
@@ -87,7 +87,6 @@
           <button id="newParamBtn" class="secondary">Volgend punt op maat</button>
         </div>
       </section>
-
       <section id="page-constraint" class="page">
         <h3>Universele richting</h3>
         <div class="menuCard">
@@ -100,15 +99,25 @@
             <button class="constraintBtn" data-constraint="perpendicular">Loodrecht 90°</button>
             <button class="constraintBtn" data-constraint="angle">Eigen hoek</button>
           </div>
-          <label>Hoek in graden <input id="constraintAngle" type="number" min="-180" max="180" step=".5" value="45"></label>
-          <div id="referenceStatus" class="help">Referentie: geen</div>
-          <p class="help">Parallel, loodrecht en eigen hoek gebruiken een geselecteerde referentielijn.</p>
+
+          <div id="constraintAngleWrap" style="display:none">
+            <label>Hoek in graden
+              <input id="constraintAngle" type="number" min="-180" max="180" step=".5" value="45">
+            </label>
+          </div>
+
+          <div id="constraintReferenceWrap" style="display:none">
+            <div id="constraintReference" class="help">Referentie: geen</div>
+            <p id="constraintReferenceHelp" class="help">Selecteer eerst een lijn en kies “Gebruik als referentielijn”.</p>
+          </div>
+
+          <div id="constraintModeHelp" class="help">Vrij tekenen zonder richtingsbeperking.</div>
         </div>
       </section>
 
 
       <section id="page-placement" class="page">
-        <h3>Punt op maat</h3>
+        <h3>Op maat</h3>
         <div class="menuCard">
           <div id="placementContextInfo" class="help">Gebruik het huidige actieve startpunt.</div>
 <div id="placementStartInfo" class="help" style="color:#d8ffd8">Vertrekpunt: geen</div>
@@ -289,6 +298,6 @@
   <div id="hint">Beweeg rustig zodat ARCore een oppervlak kan herkennen.</div>
 </div>
 
-<script type="module" src="./js/bootstrap.js?v=0.8.9-20260822-1645"></script>
+<script type="module" src="./js/bootstrap.js?v=0.8.9.1-20260822-1715"></script>
 </body>
 </html>
