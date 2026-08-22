@@ -1,6 +1,6 @@
 
-import {S,getPoint,getLine} from "./state.js?v=0.8.11-20260822-1945";
-import {dispose} from "./geometry.js?v=0.8.11-20260822-1945";
+import {S,getPoint,getLine} from "./state.js?v=0.8.12-20260822-2015";
+import {dispose} from "./geometry.js?v=0.8.12-20260822-2015";
 
 function cleanName(name){return String(name||"").trim().replace(/\s+/g," ");}
 export function wallNameExists(name,excludeId=null){
@@ -110,7 +110,7 @@ export function createWall(line,opts){
   };
   buildMesh(wall);
   S.walls.push(wall);
-  S.undo.push({type:"createdWall",wallId:wall.id});
+  S.history.undo.push({type:"createdWall",wallId:wall.id});S.history.redo.length=0;
   return wall;
 }
 

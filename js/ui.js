@@ -1,14 +1,14 @@
-import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.11-20260822-1945";
+import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.12-20260822-2015";
 import {
   startTool,cancelTool,setPlacement,setDistance,setConstraint,setAngle,flipSide,setReferenceLine,setSnapMode,
   confirmCandidate,undoToolStep,finishTool,toolLabel,constraintLabel,getActivePoint,referenceRequired,resetDrawingCore
-} from "./drawing-core.js?v=0.8.11-20260822-1945";
+} from "./drawing-core.js?v=0.8.12-20260822-2015";
 import {
   createShape,updateShape,deleteShapeOnly,deleteShapeWithContour,deleteLineRaw,deletePointRaw,
-  lineDependencies,pointDependencies,canDeleteLine,canDeletePoint,clearAllGeometry,dispose
-} from "./geometry.js?v=0.8.11-20260822-1945";
-import {startAR,applyZoom} from "./ar.js?v=0.8.11-20260822-1945";
-import {createWall,deleteWall,toggleWall,wallsUsingLine,clearWalls} from "./walls.js?v=0.8.11-20260822-1945";
+  lineDependencies,pointDependencies,canDeleteLine,canDeletePoint,clearAllGeometry,validateGeometryState,dispose
+} from "./geometry.js?v=0.8.12-20260822-2015";
+import {startAR,applyZoom} from "./ar.js?v=0.8.12-20260822-2015";
+import {createWall,deleteWall,toggleWall,wallsUsingLine,clearWalls} from "./walls.js?v=0.8.12-20260822-2015";
 
 const pages=["home","objects","line","point","wallcreate","wall","shapecreate","shape","settings","clear"];
 let menuStack=["home"];
@@ -19,6 +19,11 @@ function bind(id,event,fn){
   node.addEventListener(event,async ev=>{
     try{await fn(ev);}catch(err){console.error(`Actie #${id} mislukt`,err);showStatus(err.message||String(err),true);}
   });
+}
+function verifyState(){
+  const r=validateGeometryState();S.diagnostics.lastCheck=r;
+  if(!r.ok){S.diagnostics.lastError=r.errors.join(" | ");throw new Error("Projectconsistentie-fout: "+r.errors[0]);}
+  return true;
 }
 function showStatus(msg,error=false){
   if(el("detail"))el("detail").textContent=msg;
@@ -68,7 +73,7 @@ function syncHud(){
   syncCandidateContext();
   const multi=["polyline","shape"].includes(S.tool.kind)&&S.tool.status==="drawing";
   el("hudActions").classList.toggle("visible",multi||Boolean(S.tool.transactions.length));
-  el("hudUndoBtn").disabled=!S.tool.transactions.length;
+  el("hudUndoBtn").disabled=S.tool.status==="complete"||!S.tool.transactions.length;
   el("hudFinishBtn").style.display=multi?"block":"none";
   el("hudFinishBtn").disabled=S.tool.kind==="shape"?S.tool.pointIds.length<3:!S.tool.lineIds.length;
   el("hudFinishBtn").textContent=S.tool.kind==="shape"?"Sluiten":"Voltooien";
@@ -134,6 +139,7 @@ export function initUI(){
     closePopovers();const r=confirmCandidate();syncHud();
     if(r.type==="point"){el("distance").textContent="—";el("detail").textContent=`Punt ${r.point.name} vastgezet`;el("hint").textContent=`${r.point.name} is vertrekpunt. Stel zo nodig afstand/richting in en bevestig het volgende punt.`;}
     else{el("distance").textContent=fmt(r.line.distance);el("detail").textContent=`${r.line.name} · ${fmt(r.line.distance)}`;el("hint").textContent=r.complete?`Lijn voltooid. Bekijk het resultaat en open ☰ voor de volgende functie.`:`${r.point.name} is nu het actieve vertrekpunt.`;}
+    verifyState();
   });
 
   bind("lineFromStartBtn","click",()=>{const l=getLine(S.selectedLineId);if(!l)throw new Error("Geen lijn geselecteerd.");begin("line",l.startId);});
@@ -145,7 +151,7 @@ export function initUI(){
   bind("pointNewLineBtn","click",()=>{if(!S.selectedPointId)throw new Error("Geen punt geselecteerd.");begin("line",S.selectedPointId);});
   bind("pointPolylineBtn","click",()=>{if(!S.selectedPointId)throw new Error("Geen punt geselecteerd.");begin("polyline",S.selectedPointId);});
   bind("pointStakeBtn","click",()=>{if(!S.selectedPointId)throw new Error("Geen punt geselecteerd.");begin("stake",S.selectedPointId);});
-  bind("deletePointBtn","click",()=>{const id=S.selectedPointId;if(!canDeletePoint(id))throw new Error("Dit punt is gekoppeld aan een muur of vorm.");const d=pointDependencies(id);for(const l of [...d.lines])deleteLineRaw(l.id);deletePointRaw(id);showPage("objects");renderObjects();});
+  bind("deletePointBtn","click",()=>{const id=S.selectedPointId;if(!canDeletePoint(id))throw new Error("Dit punt is gekoppeld aan een muur, vorm of contour.");const d=pointDependencies(id);for(const l of [...d.lines])deleteLineRaw(l.id);deletePointRaw(id);showPage("objects");renderObjects();});
 
   bind("confirmWallBtn","click",()=>{const line=getLine(S.selectedLineId);if(!line)throw new Error("Geen basislijn geselecteerd.");const w=createWall(line,{name:el("wallName").value,height:el("wallHeight").value,thickness:el("wallThickness").value,side:el("wallSide").value,orientation:el("wallOrientation").value,angle:el("wallAngle").value,color:el("wallColor").value,opacity:el("wallOpacity").value});closeMenu();showStatus(`Muur ${w.name} aangemaakt.`);});
   bind("cancelWallBtn","click",()=>showPage("line",false));bind("wallOrientation","change",()=>{el("wallAngleWrap").style.display=el("wallOrientation").value==="angle"?"block":"none";});
@@ -157,7 +163,7 @@ export function initUI(){
   bind("deleteShapeOnlyBtn","click",()=>{deleteShapeOnly(S.selectedShapeId);showPage("objects");renderObjects();});
   bind("deleteShapeContourBtn","click",()=>{deleteShapeWithContour(S.selectedShapeId);showPage("objects");renderObjects();});
 
-  bind("clearAllBtn","click",()=>showPage("clear"));bind("cancelClearBtn","click",()=>showPage("home",false));bind("confirmClearBtn","click",()=>{clearWalls();clearAllGeometry();resetDrawingCore();closeMenu();syncHud();el("distance").textContent="—";el("hint").textContent="Alles gewist. Open ☰ om opnieuw te beginnen.";});
+  bind("clearAllBtn","click",()=>showPage("clear"));bind("cancelClearBtn","click",()=>showPage("home",false));bind("confirmClearBtn","click",()=>{clearWalls();clearAllGeometry();resetDrawingCore();closeMenu();syncHud();el("distance").textContent="—";el("hint").textContent="Alles gewist. Open ☰ om opnieuw te beginnen.";verifyState();});
 
   bind("menuSettingsBtn","click",()=>showPage("settings"));
   bind("defaultUnit","change",()=>{S.defaults.unit=el("defaultUnit").value;el("hudUnit").value=S.defaults.unit;syncHud();});

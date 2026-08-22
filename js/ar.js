@@ -1,7 +1,7 @@
-import {S,$} from "./state.js?v=0.8.11-20260822-1945";
-import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.11-20260822-1945";
-import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.11-20260822-1945";
-import {clearWalls} from "./walls.js?v=0.8.11-20260822-1945";
+import {S,$} from "./state.js?v=0.8.12-20260822-2015";
+import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.12-20260822-2015";
+import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.12-20260822-2015";
+import {clearWalls} from "./walls.js?v=0.8.12-20260822-2015";
 
 let samples=[],sampleSource=null,camPos,camQuat,forward;
 
@@ -53,7 +53,7 @@ export async function startAR(){
 function cleanup(){
   resetTrackingSamples();S.renderer?.setAnimationLoop(null);
   if(S.renderer?.domElement)S.renderer.domElement.style.display="none";
-  S.xrSession=null;S.hitSource=null;S.hitRequested=false;
+  S.xrSession=null;S.hitSource=null;S.hitRequested=false;S.currentTarget=null;S.targetSource="none";
   clearWalls();clearAllGeometry();resetDrawingCore();
   $("overlay").style.display="none";$("app").style.display="grid";
   if($("startArBtn")){$("startArBtn").disabled=false;$("startArBtn").textContent="AR starten";}

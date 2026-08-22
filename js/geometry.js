@@ -1,4 +1,4 @@
-import {S,$,fmt,pointName,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.11-20260822-1945";
+import {S,$,fmt,pointName,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.12-20260822-2015";
 
 export function dispose(obj){
   if(!obj||!S.scene)return;
@@ -167,6 +167,8 @@ export function createShape(contour,{name,fill="#4caf50",opacity=.30,border="#ff
   if(shapeNameExists(name))throw new Error("Deze vormnaam bestaat al.");
   if(!contour?.closed)throw new Error("Een vorm vereist een gesloten contour.");
   const T=S.THREE,plane=contourPlane(contour.pointIds);
+  const maxPlaneError=Math.max(...plane.pts.map(p=>Math.abs(p.clone().sub(plane.origin).dot(plane.normal))));
+  if(maxPlaneError>.03)throw new Error(`De vorm is niet vlak genoeg (afwijking ${(maxPlaneError*100).toFixed(1)} cm).`);
   const pts2=plane.pts.map(p=>{
     const d=p.clone().sub(plane.origin);return new T.Vector2(d.dot(plane.u),d.dot(plane.v));
   });
@@ -211,7 +213,7 @@ export function deleteShapeWithContour(id){
   const ci=S.contours.findIndex(c=>c.id===contourId);if(ci>=0)S.contours.splice(ci,1);
   for(const lid of lineIds){
     const deps=lineDependencies(lid);
-    if(!deps.walls.length&&!deps.shapes.length)deleteLineRaw(lid);
+    if(!deps.walls.length&&!deps.shapes.length&&!deps.contours.length)deleteLineRaw(lid);
   }
   for(const pid of pointIds){
     if(!S.lines.some(l=>l.startId===pid||l.endId===pid))deletePointRaw(pid);
@@ -256,4 +258,33 @@ export function clearAllGeometry(){
   S.shapes.length=0;S.contours.length=0;S.lines.length=0;S.points.length=0;
   S.pointCounter=0;S.contourCounter=1;
   S.selectedLineId=S.selectedPointId=S.selectedShapeId=null;
+}
+
+export function validateGeometryState(){
+  const errors=[];
+  const pointIds=new Set(S.points.map(p=>p.id));
+  const lineIds=new Set(S.lines.map(l=>l.id));
+  if(pointIds.size!==S.points.length)errors.push("Dubbele punt-ID.");
+  if(lineIds.size!==S.lines.length)errors.push("Dubbele lijn-ID.");
+
+  for(const p of S.points){
+    if(!p.position||![p.position.x,p.position.y,p.position.z].every(Number.isFinite))errors.push(`Punt ${p.name||p.id} heeft ongeldige coördinaten.`);
+  }
+  for(const l of S.lines){
+    if(!pointIds.has(l.startId)||!pointIds.has(l.endId))errors.push(`Lijn ${l.name||l.id} verwijst naar ontbrekend punt.`);
+    if(l.startId===l.endId)errors.push(`Lijn ${l.name||l.id} heeft hetzelfde start- en eindpunt.`);
+    if(!Number.isFinite(l.distance)||l.distance<.001)errors.push(`Lijn ${l.name||l.id} heeft ongeldige lengte.`);
+  }
+  for(const c of S.contours){
+    for(const pid of c.pointIds||[])if(!pointIds.has(pid))errors.push(`Contour ${c.name||c.id} verwijst naar ontbrekend punt.`);
+    for(const lid of c.lineIds||[])if(!lineIds.has(lid))errors.push(`Contour ${c.name||c.id} verwijst naar ontbrekende lijn.`);
+  }
+  for(const s of S.shapes){
+    for(const pid of s.pointIds||[])if(!pointIds.has(pid))errors.push(`Vorm ${s.name||s.id} verwijst naar ontbrekend punt.`);
+    for(const lid of s.lineIds||[])if(!lineIds.has(lid))errors.push(`Vorm ${s.name||s.id} verwijst naar ontbrekende lijn.`);
+  }
+  for(const w of S.walls){
+    if(!lineIds.has(w.lineId))errors.push(`Muur ${w.name||w.id} verwijst naar ontbrekende basislijn.`);
+  }
+  return {ok:errors.length===0,errors};
 }
