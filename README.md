@@ -1,12 +1,18 @@
-# Measure AR v0.8.8.2 — Parametric Workflow Fix
-Build: 20260822-1625
+# Measure AR v0.8.9 — Unified Drawing Engine
+Build: 20260822-1645
 
-- Op maat heeft nu een expliciet vertrekpunt.
-- Vertrekpunt en preview zijn zichtbaar.
-- Na bevestigen wordt het nieuwe punt automatisch het vertrekpunt voor het volgende exacte segment.
-- De placement-pagina blijft open voor kettingen van exacte segmenten.
-- Afstand, eenheid, richting, hoek en referentielijn werken de preview live bij.
-- Menu Repair, fixed points, muren, vormen, zoom en startup hardening blijven behouden.
+Deze release vervangt de dubbele tekenlogica door één centrale tekenengine.
+
+- Eén actief vertrekpunt voor Handmatig en Op maat.
+- Eén richtingstate: Vrij, Horizontaal, Verticaal, Op oppervlak, Parallel, Loodrecht en Eigen hoek.
+- Eén referentielijnstate.
+- Na ieder bevestigd punt wordt dat punt automatisch het nieuwe vertrekpunt.
+- Doorlopend tekenen gebruikt dezelfde actieve-puntlogica.
+- AR surface normal wordt gebruikt voor `Op oppervlak`.
+- `AR afsluiten` is volledig uit het menu verwijderd.
+- De oude `universal-placement.js` is verwijderd.
+- Bestaande helpers `applyConstraint` en `nearestSnap` blijven compatibel.
+- Fixed points, muren, vormen, zoom, menu repair en startup hardening blijven behouden.
 
 Vaste app-link:
 https://gasvdv-lab.github.io/Measure_tool/
