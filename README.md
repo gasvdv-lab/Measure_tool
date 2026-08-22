@@ -1,29 +1,21 @@
-# Measure AR v0.8.9.2 — Menu Action Repair
-Build: 20260822-1840
+# Measure AR v0.8.9.3 — Action & Result Flow
+Build: 20260822-1835
 
-Deze release volgt op een volledige audit van alle menu's en statische knoppen.
+Deze release maakt een duidelijke scheiding tussen kiezen/configureren en het resultaat in AR bekijken.
 
-Belangrijkste fixes:
-- `Punt op maat plaatsen` reageert nu ook wanneer nog geen vertrekpunt bestaat:
-  de app vraagt eerst punt A en opent daarna automatisch opnieuw `Op maat`.
-- Alle button-handlers lopen via een veilige action-wrapper; fouten worden zichtbaar in de AR-status in plaats van stil te falen.
-- `Nieuwe lijn` heeft nu ook werkelijk `Bestaand punt kiezen`.
-- `Uitzetten vanaf punt` gebruikt daadwerkelijk het geselecteerde punt als vertrekpunt.
-- Knoppen die een bestaand punt/lijn vereisen geven een zichtbare melding wanneer dat object ontbreekt.
-- Vorm-objecten hebben nu een werkende detailknop en een detailpagina met verwijderen.
-- Undo meldt zichtbaar wanneer er niets te herstellen is.
-- Muurhoek wordt alleen getoond bij `Eigen hoek`.
-- Menutitels zijn leesbaar Nederlands in plaats van interne pagina-ID's.
-- Bootstrap-versie is gecorrigeerd; geen `v0.8.9.1.1` meer.
-- Constraint/core-fixes van v0.8.9.1 blijven behouden.
-
-Automatische releasecontrole:
-- alle statische HTML-knoppen hebben een handler of geldige navigatie;
-- alle menu-pagina's bestaan;
-- alle UI-ID-referenties bestaan;
-- geen dubbele HTML-ID's;
-- alle ES-module named imports bestaan;
-- alle JavaScriptbestanden slagen voor syntaxcontrole.
+Belangrijkste wijzigingen:
+- `Punt op maat plaatsen` sluit na een geslaagde plaatsing onmiddellijk het menu.
+- Het resultaat wordt daarna duidelijk in AR getoond: nieuw punt, lijnnaam, afstand en actief vertrekpunt.
+- Het nieuw geplaatste punt blijft intern het actieve vertrekpunt voor de volgende stap.
+- Een korte action-lock voorkomt dubbele plaatsingen door dubbel tikken.
+- Muur aanmaken sluit na succes het menu en toont de muur in AR.
+- Vorm aanmaken sluit na succes het menu en toont de vorm in AR.
+- Referentielijn instellen sluit na succes het menu en bevestigt welke lijn actief is.
+- Alles wissen sluit na bevestiging het menu; AR blijft actief.
+- Verwijderacties voor lijn, punt, muur en vorm sluiten na uitvoering het menu en tonen het resultaat.
+- Instellingen blijven in het menu, omdat dit configuratie is en geen tekenactie.
+- Alle menu-knoppen zijn opnieuw statisch gecontroleerd op geldige handlers.
+- Constraint/core-fixes en menu-action-repair uit eerdere releases blijven behouden.
 
 Vaste app-link:
 https://gasvdv-lab.github.io/Measure_tool/
