@@ -1,5 +1,5 @@
-import {S,$,fmt,getPoint,getLine} from "./state.js?v=0.8.13-20260822-2045";
-import {createPoint,createLine,deleteLineRaw,deletePointRaw,createContour,dispose} from "./geometry.js?v=0.8.13-20260822-2045";
+import {S,$,fmt,getPoint,getLine} from "./state.js?v=0.8.14-20260822-2130";
+import {createPoint,createLine,deleteLineRaw,deletePointRaw,createContour,dispose} from "./geometry.js?v=0.8.14-20260822-2130";
 
 const REF_MODES=new Set(["parallel","perpendicular","angle"]);
 const TOOL_NAMES={line:"LIJN",polyline:"POLYLIJN",shape:"VORM",stake:"UITZETTEN"};
@@ -117,23 +117,119 @@ function manualCandidate(active,hit,ray){
   const delta=raw.clone().sub(active.position),scalar=delta.dot(dir);
   return active.position.clone().add(dir.clone().multiplyScalar(scalar));
 }
-function pointSatisfiesConstraint(p,active){
-  if(S.tool.constraint==="free")return true;
-  const projected=manualCandidate(active,p.position? p.position:p,null);
-  return projected?projected.distanceTo(p.position||p)<.025:false;
+
+function constraintExpectedDirection(active,rawPos){
+  const kind=S.tool.constraint;
+  if(kind==="free")return null;
+  const plane=S.tool.activePlane||planeFromPoint(active);
+  if(kind==="horizontal"){
+    const d=rawPos.clone().sub(active.position);d.y=0;
+    return d.lengthSq()>1e-10?d.normalize():null;
+  }
+  if(kind==="vertical")return new S.THREE.Vector3(0,rawPos.y>=active.position.y?1:-1,0);
+  if(kind==="surface"){
+    const d=rawPos.clone().sub(active.position);
+    d.sub(plane.normal.clone().multiplyScalar(d.dot(plane.normal)));
+    return d.lengthSq()>1e-10?d.normalize():null;
+  }
+  if(kind==="parallel")return requireReference(plane).multiplyScalar(S.tool.side).normalize();
+  if(kind==="perpendicular"){
+    const ref=requireReference(plane);
+    return plane.normal.clone().cross(ref).normalize().multiplyScalar(S.tool.side);
+  }
+  if(kind==="angle"){
+    const ref=requireReference(plane);
+    return rotateInPlane(ref,plane,S.tool.angleDeg*S.tool.side).normalize();
+  }
+  return null;
 }
-function snapCandidate(pos,active){
-  if(!pos||S.tool.snapMode!=="points")return {position:pos,snappedPointId:null};
-  let best=null,bestD=S.tool.snapTolerance;
-  for(const p of S.points){
-    if(active&&p.id===active.id)continue;
-    const d=p.position.distanceTo(pos);
-    if(d<bestD){
-      if(S.tool.constraint==="free"||!active||pointSatisfiesConstraint(p,active)){best=p;bestD=d;}
+
+function positionSatisfiesConstraint(pos,active,tolerance=.025){
+  if(!active||S.tool.constraint==="free")return true;
+  const kind=S.tool.constraint,plane=S.tool.activePlane||planeFromPoint(active);
+  const d=pos.clone().sub(active.position);
+
+  if(kind==="horizontal")return Math.abs(d.y)<=tolerance;
+  if(kind==="vertical")return Math.hypot(d.x,d.z)<=tolerance;
+  if(kind==="surface")return Math.abs(d.dot(plane.normal))<=tolerance;
+
+  const expected=constraintExpectedDirection(active,pos);
+  if(!expected||d.lengthSq()<1e-10)return false;
+  const axial=expected.clone().multiplyScalar(d.dot(expected));
+  const lateral=d.clone().sub(axial).length();
+  return lateral<=tolerance;
+}
+
+function closestPointOnSegment(pos,a,b){
+  const ab=b.clone().sub(a),den=ab.lengthSq();
+  if(den<1e-12)return a.clone();
+  const t=Math.max(0,Math.min(1,pos.clone().sub(a).dot(ab)/den));
+  return a.clone().add(ab.multiplyScalar(t));
+}
+
+function candidateSnapOptions(pos,active){
+  const options=[];
+  const pointTol=S.tool.snapTolerance||.08;
+  const lineTol=S.tool.snapLineTolerance||.06;
+
+  if(["smart","points"].includes(S.tool.snapMode)){
+    for(const p of S.points){
+      if(active&&p.id===active.id)continue;
+      const dist=p.position.distanceTo(pos);
+      if(dist<=pointTol&&positionSatisfiesConstraint(p.position,active)){
+        options.push({type:"point",priority:0,distance:dist,position:p.position.clone(),pointId:p.id,lineId:null,label:`Punt ${p.name}`});
+      }
     }
   }
-  return best?{position:best.position.clone(),snappedPointId:best.id}:{position:pos,snappedPointId:null};
+
+  if(["smart","midpoints"].includes(S.tool.snapMode)){
+    for(const l of S.lines){
+      const a=getPoint(l.startId),b=getPoint(l.endId);if(!a||!b)continue;
+      const mid=a.position.clone().add(b.position).multiplyScalar(.5);
+      const dist=mid.distanceTo(pos);
+      if(dist<=pointTol&&positionSatisfiesConstraint(mid,active)){
+        options.push({type:"midpoint",priority:1,distance:dist,position:mid,lineId:l.id,pointId:null,label:`Midden ${l.name}`});
+      }
+    }
+  }
+
+  if(["smart","lines"].includes(S.tool.snapMode)){
+    for(const l of S.lines){
+      const a=getPoint(l.startId),b=getPoint(l.endId);if(!a||!b)continue;
+      const q=closestPointOnSegment(pos,a.position,b.position);
+      const dist=q.distanceTo(pos);
+      if(dist<=lineTol&&positionSatisfiesConstraint(q,active)){
+        options.push({type:"line",priority:2,distance:dist,position:q,lineId:l.id,pointId:null,label:`Lijn ${l.name}`});
+      }
+    }
+  }
+
+  return options.sort((x,y)=>x.priority-y.priority||x.distance-y.distance);
 }
+
+function snapCandidate(pos,active){
+  if(!pos||S.tool.snapMode==="off")return {position:pos,snappedPointId:null,snappedLineId:null,snapType:null,snapLabel:""};
+
+  // Exact-distance placement must remain exact. It may only reuse an existing point
+  // if that point is effectively at the exact computed location (<= 5 mm).
+  if(S.tool.placement==="metric"){
+    let best=null,bestD=.005;
+    for(const p of S.points){
+      if(active&&p.id===active.id)continue;
+      const d=p.position.distanceTo(pos);
+      if(d<=bestD&&positionSatisfiesConstraint(p.position,active,.006)){best=p;bestD=d;}
+    }
+    return best
+      ? {position:best.position.clone(),snappedPointId:best.id,snappedLineId:null,snapType:"point",snapLabel:`Punt ${best.name}`}
+      : {position:pos,snappedPointId:null,snappedLineId:null,snapType:null,snapLabel:""};
+  }
+
+  const best=candidateSnapOptions(pos,active)[0];
+  return best
+    ? {position:best.position,snappedPointId:best.pointId,snappedLineId:best.lineId,snapType:best.type,snapLabel:best.label}
+    : {position:pos,snappedPointId:null,snappedLineId:null,snapType:null,snapLabel:""};
+}
+
 
 function previewObjects(){
   if(S.preview.point&&S.preview.line)return;
@@ -161,7 +257,7 @@ function updatePreviewVisual(){
     pos.setXYZ(0,active.position.x,active.position.y,active.position.z);
     pos.setXYZ(1,c.position.x,c.position.y,c.position.z);pos.needsUpdate=true;
     S.preview.line.computeLineDistances();S.preview.line.visible=true;
-    S.preview.label.textContent=`${fmt(active.position.distanceTo(c.position))} · ${constraintLabel()}`;
+    S.preview.label.textContent=`${fmt(active.position.distanceTo(c.position))} · ${constraintLabel()}${c.snapLabel?` · ${c.snapLabel}`:""}`;
   }else{
     S.preview.line.visible=false;S.preview.label.textContent="Punt A";
   }
@@ -212,7 +308,7 @@ export function setConstraint(mode){S.tool.constraint=mode||"free";document.disp
 export function setAngle(deg){const n=Number(deg);if(!Number.isFinite(n))throw new Error("Ongeldige hoek.");S.tool.angleDeg=n;document.dispatchEvent(new CustomEvent("measurear:tool-settings"));}
 export function flipSide(){S.tool.side*=-1;document.dispatchEvent(new CustomEvent("measurear:tool-settings"));}
 export function setReferenceLine(id){S.tool.referenceLineId=id||null;document.dispatchEvent(new CustomEvent("measurear:tool-settings"));}
-export function setSnapMode(mode){S.tool.snapMode=mode==="off"?"off":"points";document.dispatchEvent(new CustomEvent("measurear:tool-settings"));}
+export function setSnapMode(mode){const valid=new Set(["smart","points","midpoints","lines","off"]);S.tool.snapMode=valid.has(mode)?mode:"smart";document.dispatchEvent(new CustomEvent("measurear:tool-settings"));}
 export function referenceRequired(){return REF_MODES.has(S.tool.constraint);}
 export function isCaptureAllowed(){return S.tool.kind&&S.tool.status==="drawing"&&Boolean(S.tool.candidate?.valid);}
 
@@ -234,9 +330,9 @@ export function updateCandidate({hit=null,hitNormal=null,ray=null}={}){
       if(!pos)throw new Error("Geen geldig kandidaatpunt in deze richting.");
     }
     const snapped=snapCandidate(pos,active);
-    S.tool.candidate={valid:true,position:snapped.position,snappedPointId:snapped.snappedPointId,surfaceNormal:planeNormal,reason:""};
+    S.tool.candidate={valid:true,position:snapped.position,snappedPointId:snapped.snappedPointId,snappedLineId:snapped.snappedLineId,snapType:snapped.snapType,snapLabel:snapped.snapLabel,surfaceNormal:planeNormal,reason:""};
   }catch(err){
-    S.tool.candidate={valid:false,position:null,snappedPointId:null,surfaceNormal:null,reason:err.message||String(err)};
+    S.tool.candidate={valid:false,position:null,snappedPointId:null,snappedLineId:null,snapType:null,snapLabel:"",surfaceNormal:null,reason:err.message||String(err)};
   }
   updatePreviewVisual();
   document.dispatchEvent(new CustomEvent("measurear:candidate-changed"));

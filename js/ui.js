@@ -1,14 +1,14 @@
-import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.13-20260822-2045";
+import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.14-20260822-2130";
 import {
   startTool,cancelTool,setPlacement,setDistance,setConstraint,setAngle,flipSide,setReferenceLine,setSnapMode,
   confirmCandidate,undoToolStep,finishTool,toolLabel,constraintLabel,getActivePoint,referenceRequired,resetDrawingCore
-} from "./drawing-core.js?v=0.8.13-20260822-2045";
+} from "./drawing-core.js?v=0.8.14-20260822-2130";
 import {
   createShape,updateShape,deleteShapeOnly,deleteShapeWithContour,deleteLineRaw,deletePointRaw,
   lineDependencies,pointDependencies,canDeleteLine,canDeletePoint,clearAllGeometry,validateGeometryState,dispose
-} from "./geometry.js?v=0.8.13-20260822-2045";
-import {startAR,applyZoom} from "./ar.js?v=0.8.13-20260822-2045";
-import {createWall,deleteWall,toggleWall,wallsUsingLine,clearWalls} from "./walls.js?v=0.8.13-20260822-2045";
+} from "./geometry.js?v=0.8.14-20260822-2130";
+import {startAR,applyZoom} from "./ar.js?v=0.8.14-20260822-2130";
+import {createWall,deleteWall,toggleWall,wallsUsingLine,clearWalls} from "./walls.js?v=0.8.14-20260822-2130";
 
 const pages=["home","objects","line","point","wallcreate","wall","shapecreate","shape","settings","clear"];
 let menuStack=["home"];
@@ -67,9 +67,15 @@ function syncHudStatus(){
   el("hudReferenceChip").classList.toggle("optional",!needsRef);
   el("hudReferenceChip").textContent=`Ref: ${ref?.name||"—"}`;
 
-  const sideRelevant=["perpendicular","angle"].includes(S.tool.constraint);
+  const sideRelevant=["parallel","perpendicular","angle"].includes(S.tool.constraint);
   el("hudSideChip").classList.toggle("optional",!sideRelevant);
-  el("hudSideChip").textContent=`Zijde: ${S.tool.side>0?"+":"−"}`;
+  if(S.tool.constraint==="parallel")el("hudSideChip").textContent=`Richting: ${S.tool.side>0?"voor":"tegen"}`;
+  else el("hudSideChip").textContent=`Zijde: ${S.tool.side>0?"links":"rechts"}`;
+
+  const c=S.tool.candidate;
+  const snapVisible=Boolean(c?.valid&&c.snapType);
+  el("hudSnapChip").classList.toggle("optional",!snapVisible);
+  el("hudSnapChip").textContent=snapVisible?`Snap: ${c.snapType==="point"?"punt":c.snapType==="midpoint"?"midden":"lijn"}`:"Snap: —";
 }
 function syncCandidateContext(){
   if(!S.tool.kind||!el("hudContext"))return;
@@ -154,9 +160,27 @@ export function initUI(){
   });
   bind("hudAngle","input",()=>{setAngle(el("hudAngle").value);syncHud();});
   bind("hudSideBtn","click",()=>{flipSide();showStatus(`Zijde omgekeerd (${S.tool.side>0?"links/positief":"rechts/negatief"}).`);syncHud();});
+  bind("hudSideChip","click",()=>{flipSide();syncHud();showStatus(S.tool.constraint==="parallel"?`Parallelrichting ${S.tool.side>0?"voor":"tegen"} referentie.`:`Zijde ${S.tool.side>0?"links":"rechts"}.`);});
+  bind("hudLastReferenceBtn","click",()=>{
+    const l=S.lines.at(-1);if(!l)throw new Error("Er bestaat nog geen lijn om als referentie te gebruiken.");
+    setReferenceLine(l.id);syncHud();
+    if(S.tool.constraint!=="angle")closePopovers();
+    showStatus(`Referentielijn ${l.name} actief.`);
+  });
   bind("hudAutoBtn","click",()=>{setPlacement("manual");closePopovers();syncHud();showStatus("AUTO actief: camera bepaalt het volgende punt.");});
   bind("hudUseDistanceBtn","click",()=>{setDistance(el("hudDistance").value,el("hudUnit").value);setPlacement("metric");closePopovers();syncHud();showStatus("Exacte afstand ingesteld. Bevestig met de witte ronde knop.");});
-  bind("hudSnap","change",()=>{setSnapMode(el("hudSnap").value);syncHud();});
+  bind("hudSnap","change",()=>{
+    setSnapMode(el("hudSnap").value);
+    const labels={
+      smart:"Smart: punt → middenpunt → lijn.",
+      points:"Alleen bestaande punten.",
+      midpoints:"Alleen middelpunten van lijnen.",
+      lines:"Alleen dichtstbijzijnde positie op lijnen.",
+      off:"Snapping uit."
+    };
+    el("hudSnapHelp").textContent=labels[S.tool.snapMode]||"";
+    syncHud();
+  });
   bind("hudDensity","change",()=>{
     S.hud.compact=el("hudDensity").value!=="detailed";
     syncHud();
@@ -207,6 +231,6 @@ export function initUI(){
 
   document.addEventListener("measurear:tool-changed",syncHud);document.addEventListener("measurear:tool-settings",syncHud);document.addEventListener("measurear:candidate-changed",syncCandidateContext);
 
-  S.defaults.unit="cm";S.defaults.lineThickness=2;S.defaults.labels=true;S.hud.compact=true;el("hudDensity").value="compact";el("defaultUnit").value="cm";el("hudUnit").value="cm";el("defaultThickness").value="2";el("defaultLabels").checked=true;
+  S.defaults.unit="cm";S.defaults.lineThickness=2;S.defaults.labels=true;S.hud.compact=true;S.tool.snapMode="smart";el("hudDensity").value="compact";el("hudSnap").value="smart";el("defaultUnit").value="cm";el("hudUnit").value="cm";el("defaultThickness").value="2";el("defaultLabels").checked=true;
   syncHud();document.documentElement.dataset.uiReady="1";console.info("Measure AR unified drawing UI ready",S.version,S.build);
 }
