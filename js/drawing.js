@@ -1,13 +1,13 @@
-import {setParametricStartPoint,cancelParametricMode} from "./placement.js?v=0.8.8.2-20260822-1625";
+import {setActivePoint,clearActivePoint} from "./drawing-engine.js?v=0.8.9-20260822-1645";
 
-import {S,$,fmt,getPoint} from "./state.js?v=0.8.8.2-20260822-1625";
-import {applyConstraint,nearestSnap} from "./constraints.js?v=0.8.8.2-20260822-1625";
-import {createPoint,createLine,closeContour,deleteLineRaw,deletePointRaw} from "./geometry.js?v=0.8.8.2-20260822-1625";
-import {cameraRay,getFilteredTarget,resetTrackingSamples} from "./ar.js?v=0.8.8.2-20260822-1625";
+import {S,$,fmt,getPoint} from "./state.js?v=0.8.9-20260822-1645";
+import {applyConstraint,nearestSnap} from "./constraints.js?v=0.8.9-20260822-1645";
+import {createPoint,createLine,closeContour,deleteLineRaw,deletePointRaw} from "./geometry.js?v=0.8.9-20260822-1645";
+import {cameraRay,getFilteredTarget,resetTrackingSamples} from "./ar.js?v=0.8.9-20260822-1645";
 
 function target(){const p=getFilteredTarget();return p?nearestSnap(applyConstraint(p,cameraRay)):null;}
-export function resetCurrent(){cancelParametricMode();
-  S.pointA=null;S.activeStartId=null;S.lineFinished=false;S.constraint.verticalPlane=null;
+export function resetCurrent(){clearActivePoint();
+  S.pointA=null;S.activeStartId=null;S.lineFinished=false;
   $("distance").textContent="—";$("detail").textContent="";
 }
 export function startMeasureNew(){S.mode="measure";S.draw.active=false;resetCurrent();$("stage").textContent="Nieuw startpunt";$("hint").textContent="Plaats punt A.";}
@@ -56,7 +56,7 @@ export function placePoint(){
 
         S.draw.pointIds.push(b.id);
         S.draw.lineIds.push(l.id);
-        S.draw.lastId=b.id;
+        S.draw.lastId=b.id;setActivePoint(b.id);
         S.activeStartId=b.id;
         S.pointA=b.position.clone();
 

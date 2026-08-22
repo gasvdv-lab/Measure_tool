@@ -1,6 +1,6 @@
 
 export const S={
-  version:"0.8.8.2",build:"20260822-1625",
+  version:"0.8.9",build:"20260822-1645",
   THREE:null,renderer:null,scene:null,camera:null,reticle:null,xrSession:null,hitSource:null,hitRequested:false,
   mode:"measure",targetMeters:2,
   pointA:null,activeStartId:null,currentTarget:null,targetSource:"none",lineFinished:false,placing:false,
@@ -8,9 +8,8 @@ export const S={
   pointCounter:0,contourCounter:1,selectedLineId:null,selectedPointId:null,selectedWallId:null,pendingContourId:null,objectPickMode:null,
   draw:{active:false,startId:null,lastId:null,pointIds:[],lineIds:[]},
   samples:[],
-  constraint:{mode:"free",angle:45,referenceLineId:null,verticalPlane:null},
-  zoom:1, pointPlacementEpoch:0, placementMode:"manual", placementDistance:100, placementConstraint:"horizontal", placementAngle:90, placementReferenceLineId:null,
-  parametric:{active:false,startPointId:null}
+  zoom:1, pointPlacementEpoch:0,
+  drawEngine:{mode:"manual",activePointId:null,distanceCm:100,direction:"free",angleDeg:45,referenceLineId:null,surfaceNormal:null},
 };
 export const $=id=>document.getElementById(id);
 export function fmt(m){return m<1?`${(m*100).toFixed(1)} cm`:m<10?`${m.toFixed(3)} m`:`${m.toFixed(2)} m`;}

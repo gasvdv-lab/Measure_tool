@@ -1,5 +1,5 @@
 
-import {S,$,fmt,pointName,getPoint,getLine,getContour} from "./state.js?v=0.8.8.2-20260822-1625";
+import {S,$,fmt,pointName,getPoint,getLine,getContour} from "./state.js?v=0.8.9-20260822-1645";
 
 export function dispose(obj){
   if(!obj||!S.scene)return; S.scene.remove(obj);
