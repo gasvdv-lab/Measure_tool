@@ -1,6 +1,6 @@
 
-import {S,getPoint,getLine} from "./state.js?v=0.8.14-20260822-2130";
-import {dispose} from "./geometry.js?v=0.8.14-20260822-2130";
+import {S,getPoint,getLine} from "./state.js?v=0.8.15-20260822-2215";
+import {dispose} from "./geometry.js?v=0.8.15-20260822-2215";
 
 function cleanName(name){return String(name||"").trim().replace(/\s+/g," ");}
 export function wallNameExists(name,excludeId=null){
@@ -95,7 +95,7 @@ export function createWall(line,opts){
   if(!Number.isFinite(opacity)||opacity<=0||opacity>1)throw new Error("Ongeldige transparantie.");
 
   const wall={
-    id:"w"+crypto.randomUUID(),
+    id:opts.id||"w"+crypto.randomUUID(),
     name,
     lineId:line.id,
     height,
@@ -110,8 +110,24 @@ export function createWall(line,opts){
   };
   buildMesh(wall);
   S.walls.push(wall);
-  S.history.undo.push({type:"createdWall",wallId:wall.id});S.history.redo.length=0;
+  if(opts.visible===false){wall.visible=false;if(wall.mesh)wall.mesh.visible=false;}
   return wall;
+}
+
+
+export function updateWall(wall,opts={}){
+  if(!wall)throw new Error("Muur ontbreekt.");
+  const name=cleanName(opts.name??wall.name);
+  if(!name)throw new Error("Naam is verplicht.");
+  if(wallNameExists(name,wall.id))throw new Error("Deze muurnaam bestaat al.");
+  const height=Number(opts.height??wall.height),thickness=Number(opts.thickness??wall.thickness),opacity=Number(opts.opacity??wall.opacity);
+  if(!Number.isFinite(height)||height<=0)throw new Error("Ongeldige hoogte.");
+  if(!Number.isFinite(thickness)||thickness<=0)throw new Error("Ongeldige dikte.");
+  if(!Number.isFinite(opacity)||opacity<=0||opacity>1)throw new Error("Ongeldige transparantie.");
+  wall.name=name;wall.height=height;wall.thickness=thickness;
+  wall.side=opts.side??wall.side;wall.orientation=opts.orientation??wall.orientation;
+  wall.angle=Number(opts.angle??wall.angle)||90;wall.color=opts.color??wall.color;wall.opacity=opacity;
+  rebuildWall(wall);return wall;
 }
 
 export function rebuildWall(wall){

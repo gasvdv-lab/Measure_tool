@@ -1,5 +1,5 @@
 export const S={
-  version:"0.8.14",build:"20260822-2130",
+  version:"0.8.15",build:"20260822-2215",
   THREE:null,renderer:null,scene:null,camera:null,reticle:null,xrSession:null,hitSource:null,hitRequested:false,
   currentTarget:null,targetSource:"none",zoom:1,pointPlacementEpoch:0,
   points:[],lines:[],contours:[],shapes:[],walls:[],
@@ -15,7 +15,7 @@ export const S={
     activePlane:null,hoverSurfaceNormal:null,
     candidate:null,snapMode:"smart",snapTolerance:.08,snapLineTolerance:.06
   },
-  history:{undo:[],redo:[]},
+  history:{undo:[],redo:[],limit:80,restoring:false},
   preview:{point:null,line:null,label:null},
   diagnostics:{lastError:"",lastCheck:null,confirmBusy:false},
   hud:{compact:true,lastPopover:null}

@@ -1,4 +1,4 @@
-import {S,$,fmt,pointName,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.14-20260822-2130";
+import {S,$,fmt,pointName,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.15-20260822-2215";
 
 export function dispose(obj){
   if(!obj||!S.scene)return;
@@ -63,7 +63,7 @@ export function findLineBetween(aId,bId){
   return S.lines.find(l=>(l.startId===aId&&l.endId===bId)||(l.startId===bId&&l.endId===aId))||null;
 }
 
-export function createLine(a,b,{color="#ffffff",thickness=null,ownerType=null,ownerId=null,id=null}={}){
+export function createLine(a,b,{color="#ffffff",thickness=null,ownerType=null,ownerId=null,id=null,name=null,autoName=true,labelsVisible=true}={}){
   if(!a||!b)throw new Error("Start- of eindpunt ontbreekt.");
   if(a.id===b.id)throw new Error("Begin- en eindpunt mogen niet hetzelfde zijn.");
   if(findLineBetween(a.id,b.id))throw new Error("Deze lijn bestaat al.");
@@ -71,12 +71,13 @@ export function createLine(a,b,{color="#ffffff",thickness=null,ownerType=null,ow
   if(!Number.isFinite(distance)||distance<.001)throw new Error("De lijn is te kort.");
   const t=Number(thickness||S.defaults.lineThickness)||2;
   const l={
-    id:id||"l"+crypto.randomUUID(),name:a.name+b.name,
+    id:id||"l"+crypto.randomUUID(),name:String(name||a.name+b.name).trim(),
+    autoName:name?Boolean(autoName):true,
     startId:a.id,endId:b.id,distance,
     thickness:t,color,ownerType,ownerId,
-    labelsVisible:true,
+    labelsVisible:labelsVisible!==false,
     object:makeLineMesh(a.position,b.position,color,t),
-    label:makeLineLabel(`${a.name+b.name} · ${fmt(distance)}`)
+    label:makeLineLabel(`${String(name||a.name+b.name).trim()} · ${fmt(distance)}`)
   };
   S.lines.push(l);return l;
 }
@@ -88,6 +89,48 @@ export function setLineStyle(line,{color=line.color,thickness=line.thickness,lab
   const a=getPoint(line.startId),b=getPoint(line.endId);
   if(a&&b)line.object=makeLineMesh(a.position,b.position,line.color,line.thickness);
   line.labelsVisible=labels!==false;if(line.label)line.label.style.display=line.labelsVisible?"block":"none";
+}
+
+
+function cleanObjectName(name){return String(name||"").trim().replace(/\s+/g," ");}
+export function pointNameExists(name,excludeId=null){
+  const key=cleanObjectName(name).toLocaleLowerCase("nl");
+  return S.points.some(p=>p.id!==excludeId&&p.name.toLocaleLowerCase("nl")===key);
+}
+export function lineNameExists(name,excludeId=null){
+  const key=cleanObjectName(name).toLocaleLowerCase("nl");
+  return S.lines.some(l=>l.id!==excludeId&&l.name.toLocaleLowerCase("nl")===key);
+}
+function refreshLineLabel(line){
+  if(line?.label)line.label.textContent=`${line.name} · ${fmt(line.distance)}`;
+}
+export function renamePoint(point,name){
+  if(!point)throw new Error("Punt ontbreekt.");
+  name=cleanObjectName(name);
+  if(!name)throw new Error("Puntnaam is verplicht.");
+  if(pointNameExists(name,point.id))throw new Error("Deze puntnaam bestaat al.");
+  point.name=name;if(point.label)point.label.textContent=name;
+  for(const line of S.lines){
+    if(!line.autoName)continue;
+    if(line.startId===point.id||line.endId===point.id){
+      const a=getPoint(line.startId),b=getPoint(line.endId);
+      if(a&&b){line.name=a.name+b.name;refreshLineLabel(line);}
+    }
+  }
+  return point;
+}
+export function updateLine(line,opts={}){
+  if(!line)throw new Error("Lijn ontbreekt.");
+  const name=cleanObjectName(opts.name??line.name);
+  if(!name)throw new Error("Lijnnaam is verplicht.");
+  if(lineNameExists(name,line.id))throw new Error("Deze lijnnaam bestaat al.");
+  if(name!==line.name){line.name=name;line.autoName=false;}
+  const color=opts.color??line.color;
+  const thickness=Number(opts.thickness??line.thickness)||2;
+  const labels=opts.labels??line.labelsVisible;
+  setLineStyle(line,{color,thickness,labels});
+  refreshLineLabel(line);
+  return line;
 }
 
 export function deleteLineRaw(id){
@@ -122,9 +165,9 @@ export function canDeletePoint(id){
   const d=pointDependencies(id);return !d.walls.length&&!d.shapes.length&&!d.contours.length;
 }
 
-export function createContour(pointIds,lineIds,{closed=false,kind="polyline"}={}){
+export function createContour(pointIds,lineIds,{closed=false,kind="polyline",id=null,name=null}={}){
   if(pointIds.length<2)throw new Error("Contour heeft te weinig punten.");
-  const c={id:"c"+crypto.randomUUID(),name:`Contour ${S.contourCounter++}`,pointIds:[...pointIds],lineIds:[...lineIds],closed,kind};
+  const c={id:id||"c"+crypto.randomUUID(),name:name||`Contour ${S.contourCounter++}`,pointIds:[...pointIds],lineIds:[...lineIds],closed,kind};
   S.contours.push(c);return c;
 }
 
@@ -161,7 +204,7 @@ function shapeNameExists(name,excludeId=null){
   return S.shapes.some(s=>s.id!==excludeId&&s.name.toLocaleLowerCase("nl")===k);
 }
 
-export function createShape(contour,{name,fill="#4caf50",opacity=.30,border="#ffffff",thickness=2,labels=true}){
+export function createShape(contour,{name,fill="#4caf50",opacity=.30,border="#ffffff",thickness=2,labels=true,id=null}){
   name=String(name||"").trim();
   if(!name)throw new Error("Naam is verplicht.");
   if(shapeNameExists(name))throw new Error("Deze vormnaam bestaat al.");
@@ -180,7 +223,7 @@ export function createShape(contour,{name,fill="#4caf50",opacity=.30,border="#ff
   const mat=new T.MeshBasicMaterial({color:fill,transparent:true,opacity:Number(opacity),side:T.DoubleSide,depthWrite:false});
   const mesh=new T.Mesh(geo,mat);S.scene.add(mesh);
   const s={
-    id:"s"+crypto.randomUUID(),name,contourId:contour.id,
+    id:id||"s"+crypto.randomUUID(),name,contourId:contour.id,
     pointIds:[...contour.pointIds],lineIds:[...contour.lineIds],
     mesh,area,fill,opacity:Number(opacity),border,thickness:Number(thickness)||2,labels:labels!==false,
     plane:{origin:plane.origin.clone(),normal:plane.normal.clone(),u:plane.u.clone(),v:plane.v.clone()}

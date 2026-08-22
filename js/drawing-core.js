@@ -1,5 +1,6 @@
-import {S,$,fmt,getPoint,getLine} from "./state.js?v=0.8.14-20260822-2130";
-import {createPoint,createLine,deleteLineRaw,deletePointRaw,createContour,dispose} from "./geometry.js?v=0.8.14-20260822-2130";
+import {S,$,fmt,getPoint,getLine} from "./state.js?v=0.8.15-20260822-2215";
+import {createPoint,createLine,deleteLineRaw,deletePointRaw,createContour,dispose} from "./geometry.js?v=0.8.15-20260822-2215";
+import {snapshotProject,commitSnapshot,undoHistory} from "./history.js?v=0.8.15-20260822-2215";
 
 const REF_MODES=new Set(["parallel","perpendicular","angle"]);
 const TOOL_NAMES={line:"LIJN",polyline:"POLYLIJN",shape:"VORM",stake:"UITZETTEN"};
@@ -339,11 +340,12 @@ export function updateCandidate({hit=null,hitNormal=null,ray=null}={}){
 }
 
 function transaction(tx){
-  S.tool.transactions.push(tx);S.history.undo.push(tx);S.history.redo.length=0;
+  S.tool.transactions.push(tx);
 }
 export function confirmCandidate(){
   if(S.diagnostics.confirmBusy)throw new Error("Punt wordt al bevestigd.");
   S.diagnostics.confirmBusy=true;
+  const before=snapshotProject();
   try{
     if(!isCaptureAllowed())throw new Error(S.tool.candidate?.reason||"Geen geldig punt om te plaatsen.");
     const c=S.tool.candidate,active=getActivePoint();
@@ -355,6 +357,7 @@ export function confirmCandidate(){
       S.tool.activePointId=p.id;S.tool.firstPointId=p.id;S.tool.pointIds=[p.id];S.tool.activePlane=planeFromPoint(p);
       transaction({type:"start",tool:S.tool.kind,pointId:p.id,createdPoint:created});
       S.tool.candidate=null;hidePreview();
+      commitSnapshot(`Punt ${p.name} plaatsen`,before);
       document.dispatchEvent(new CustomEvent("measurear:reset-tracking"));
       return {type:"point",point:p};
     }
@@ -373,12 +376,12 @@ export function confirmCandidate(){
 
     S.tool.lineIds.push(line.id);
     if(!S.tool.pointIds.includes(end.id))S.tool.pointIds.push(end.id);
-    const tx={type:"segment",tool:S.tool.kind,lineId:line.id,createdPoint:created?end.id:null,previousActiveId:active.id,endId:end.id};
-    transaction(tx);
+    transaction({type:"segment",tool:S.tool.kind,lineId:line.id,createdPoint:created?end.id:null,previousActiveId:active.id,endId:end.id});
     S.tool.activePointId=end.id;
     if(end.surfaceNormal&&S.tool.kind!=="shape")S.tool.activePlane=planeFromPoint(end);
     S.tool.candidate=null;hidePreview();
     if(S.tool.kind==="line"||S.tool.kind==="stake")S.tool.status="complete";
+    commitSnapshot(`Lijn ${line.name} plaatsen`,before);
     document.dispatchEvent(new CustomEvent("measurear:reset-tracking"));
     return {type:"segment",point:end,line,complete:S.tool.status==="complete"};
   }finally{
@@ -387,37 +390,17 @@ export function confirmCandidate(){
 }
 
 export function undoToolStep(){
-  const tx=S.tool.transactions.pop();if(!tx)throw new Error("Er is niets om ongedaan te maken.");
-  S.history.undo.pop();S.history.redo.push(tx);
-  if(tx.type==="segment"){
-    deleteLineRaw(tx.lineId);
-    if(tx.createdPoint&&!S.lines.some(l=>l.startId===tx.createdPoint||l.endId===tx.createdPoint))deletePointRaw(tx.createdPoint);
-    S.tool.lineIds=S.tool.lineIds.filter(id=>id!==tx.lineId);
-    S.tool.pointIds=S.tool.pointIds.filter(id=>id!==tx.endId||id===S.tool.firstPointId);
-    S.tool.activePointId=tx.previousActiveId;S.tool.status="drawing";
-    const p=getActivePoint();if(p)S.tool.activePlane=planeFromPoint(p);
-  }else if(tx.type==="closing"){
-    deleteLineRaw(tx.lineId);
-    S.tool.lineIds=S.tool.lineIds.filter(id=>id!==tx.lineId);
-    S.tool.activePointId=tx.previousActiveId;
-    S.tool.status="drawing";
-  }else if(tx.type==="closing"){
-    deleteLineRaw(tx.lineId);
-    S.tool.lineIds=S.tool.lineIds.filter(id=>id!==tx.lineId);
-    S.tool.activePointId=tx.previousActiveId;
-    S.tool.status="drawing";
-  }else if(tx.type==="start"){
-    if(tx.createdPoint&&!S.lines.some(l=>l.startId===tx.pointId||l.endId===tx.pointId))deletePointRaw(tx.pointId);
-    S.tool.activePointId=null;S.tool.firstPointId=null;S.tool.pointIds=[];S.tool.activePlane=null;
-  }
-  hidePreview();return tx;
+  return undoHistory();
 }
 
 export function finishTool(){
+  const before=snapshotProject();
   if(S.tool.kind==="polyline"){
     if(!S.tool.lineIds.length)throw new Error("Teken eerst minstens één segment.");
     const contour=createContour(S.tool.pointIds,S.tool.lineIds,{closed:false,kind:"polyline"});
-    S.tool.status="complete";S.tool.transactions=[];hidePreview();return {type:"polyline",contour};
+    S.tool.status="complete";S.tool.transactions=[];hidePreview();
+    commitSnapshot("Doorlopende lijn voltooien",before);
+    return {type:"polyline",contour};
   }
   if(S.tool.kind==="shape"){
     if(S.tool.pointIds.length<3)throw new Error("Een vorm vereist minstens 3 punten.");
@@ -433,7 +416,9 @@ export function finishTool(){
       }
     }
     const contour=createContour(S.tool.pointIds,S.tool.lineIds,{closed:true,kind:"shape"});
-    S.pendingContourId=contour.id;S.tool.status="complete";S.tool.transactions=[];hidePreview();return {type:"shape",contour};
+    S.pendingContourId=contour.id;S.tool.status="complete";S.tool.transactions=[];hidePreview();
+    commitSnapshot("Vormcontour sluiten",before);
+    return {type:"shape",contour};
   }
   throw new Error("Dit gereedschap heeft geen Voltooien-functie.");
 }
