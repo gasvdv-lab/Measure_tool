@@ -1,3 +1,3 @@
 // Compatibility entry. index.html loads bootstrap.js directly.
-import {initUI} from "./ui.js?v=0.8.9-20260822-1645";
+import {initUI} from "./ui.js?v=0.8.9.1-20260822-1715";
 export {initUI};

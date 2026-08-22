@@ -1,5 +1,5 @@
 
-import {S,$,fmt,pointName,getPoint,getLine,getContour} from "./state.js?v=0.8.9-20260822-1645";
+import {S,$,fmt,pointName,getPoint,getLine,getContour} from "./state.js?v=0.8.9.1-20260822-1715";
 
 export function dispose(obj){
   if(!obj||!S.scene)return; S.scene.remove(obj);
@@ -36,6 +36,7 @@ export function createPoint(pos,color=0x69ff9a){
     name:pointName(S.pointCounter++),
     position:fixed.clone(),
     locked:Object.freeze({x:fixed.x,y:fixed.y,z:fixed.z}),
+    surfaceNormal:S.drawEngine?.hoverSurfaceNormal?.clone?.()||null,
     marker:marker(color),
     label:makePointLabel(pointName(S.pointCounter-1))
   };

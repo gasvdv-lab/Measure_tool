@@ -1,6 +1,6 @@
 
 export const S={
-  version:"0.8.9",build:"20260822-1645",
+  version:"0.8.9.1",build:"20260822-1715",
   THREE:null,renderer:null,scene:null,camera:null,reticle:null,xrSession:null,hitSource:null,hitRequested:false,
   mode:"measure",targetMeters:2,
   pointA:null,activeStartId:null,currentTarget:null,targetSource:"none",lineFinished:false,placing:false,
@@ -9,7 +9,7 @@ export const S={
   draw:{active:false,startId:null,lastId:null,pointIds:[],lineIds:[]},
   samples:[],
   zoom:1, pointPlacementEpoch:0,
-  drawEngine:{mode:"manual",activePointId:null,distanceCm:100,direction:"free",angleDeg:45,referenceLineId:null,surfaceNormal:null},
+  drawEngine:{mode:"manual",activePointId:null,distanceCm:100,direction:"free",angleDeg:45,referenceLineId:null,hoverSurfaceNormal:null,surfaceNormal:null},
 };
 export const $=id=>document.getElementById(id);
 export function fmt(m){return m<1?`${(m*100).toFixed(1)} cm`:m<10?`${m.toFixed(3)} m`:`${m.toFixed(2)} m`;}

@@ -1,7 +1,7 @@
-import {setSurfaceNormal} from "./drawing-engine.js?v=0.8.9-20260822-1645";
+import {setHoverSurfaceNormal} from "./drawing-engine.js?v=0.8.9.1-20260822-1715";
 
-import {S,$} from "./state.js?v=0.8.9-20260822-1645";
-import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.9-20260822-1645";
+import {S,$} from "./state.js?v=0.8.9.1-20260822-1715";
+import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.9.1-20260822-1715";
 let samples=[],tmpPos,tmpQuat,up,camPos,camQuat,forward;
 
 function withTimeout(promise,ms,label){
@@ -80,9 +80,11 @@ function render(_,frame){
   if(!S.hitRequested){session.requestReferenceSpace("viewer").then(v=>session.requestHitTestSource({space:v}).then(s=>S.hitSource=s));S.hitRequested=true;}
   let hit=null,pose=null;if(S.hitSource){const r=frame.getHitTestResults(S.hitSource);if(r.length){pose=r[0].getPose(ref);if(pose)hit=new S.THREE.Vector3(pose.transform.position.x,pose.transform.position.y,pose.transform.position.z);}}
   if(hit&&pose){S.reticle.visible=true;S.reticle.matrix.fromArray(pose.transform.matrix);
-    try{const q=new S.THREE.Quaternion().setFromRotationMatrix(reticle.matrix);setSurfaceNormal(new S.THREE.Vector3(0,1,0).applyQuaternion(q).normalize());}catch{}S.currentTarget=hit;S.targetSource="hit";addSample(hit);$("aim").className="hit";$("captureBtn").disabled=S.lineFinished;}
+    try{const q=new S.THREE.Quaternion().setFromRotationMatrix(S.reticle.matrix);setHoverSurfaceNormal(new S.THREE.Vector3(0,1,0).applyQuaternion(q).normalize());}catch{}S.currentTarget=hit;S.targetSource="hit";addSample(hit);$("aim").className="hit";$("captureBtn").disabled=S.lineFinished;}
   else if(S.pointA){const v=virtualTarget();if(v){S.reticle.visible=true;S.reticle.matrix.identity();S.reticle.matrix.setPosition(v);S.currentTarget=v;S.targetSource="virtual";addSample(v);$("aim").className="virtual";$("captureBtn").disabled=S.lineFinished;}else{$("captureBtn").disabled=true;}}
   else{S.reticle.visible=false;S.currentTarget=null;$("captureBtn").disabled=true;$("stage").textContent="Zoek een oppervlak";}
   enforceLocked();updateMarkerScale();updatePointLabels();updateLabels();S.renderer.render(S.scene,S.camera);
 }
 window.addEventListener("resize",()=>{S.renderer?.setSize(innerWidth,innerHeight);if(S.camera){S.camera.aspect=innerWidth/innerHeight;S.camera.updateProjectionMatrix();}});
+
+document.addEventListener("measurear:reset-tracking",resetTrackingSamples);

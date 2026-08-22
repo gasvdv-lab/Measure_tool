@@ -1,11 +1,11 @@
-import {setAngleDeg,setReferenceLine as setUnifiedReference} from "./drawing-engine.js?v=0.8.9-20260822-1645";
-import {S,$,fmt,getPoint,getLine,getContour} from "./state.js?v=0.8.9-20260822-1645";
-import {setConstraint,setReferenceLine,updateReferenceStatus} from "./constraints.js?v=0.8.9-20260822-1645";
-import {startMeasureNew,startMeasureFrom,startStake,startContinuous,undoContinuous,finishContinuous,placePoint,resetCurrent} from "./drawing.js?v=0.8.9-20260822-1645";
-import {createShape,deleteLineRaw,deletePointRaw,clearAllGeometry,dispose} from "./geometry.js?v=0.8.9-20260822-1645";
-import {startAR,leaveAR,applyZoom} from "./ar.js?v=0.8.9-20260822-1645";
-import {cancelParametricMode,placeParametricNext,setParametricStartPoint,updatePlacementUI} from "./placement.js?v=0.8.9-20260822-1645";
-import {createWall,getWall,deleteWall,toggleWall,wallsUsingLine,clearWalls} from "./walls.js?v=0.8.9-20260822-1645";
+import {setAngleDeg,setReferenceLine as setUnifiedReference} from "./drawing-engine.js?v=0.8.9.1-20260822-1715";
+import {S,$,fmt,getPoint,getLine,getContour} from "./state.js?v=0.8.9.1-20260822-1715";
+import {setConstraint,setReferenceLine,updateReferenceStatus} from "./constraints.js?v=0.8.9.1-20260822-1715";
+import {startMeasureNew,startMeasureFrom,startStake,startContinuous,undoContinuous,finishContinuous,placePoint,resetCurrent} from "./drawing.js?v=0.8.9.1-20260822-1715";
+import {createShape,deleteLineRaw,deletePointRaw,clearAllGeometry,dispose} from "./geometry.js?v=0.8.9.1-20260822-1715";
+import {startAR,leaveAR,applyZoom} from "./ar.js?v=0.8.9.1-20260822-1715";
+import {cancelParametricMode,placeParametricNext,setParametricStartPoint,updatePlacementUI} from "./placement.js?v=0.8.9.1-20260822-1715";
+import {createWall,getWall,deleteWall,toggleWall,wallsUsingLine,clearWalls} from "./walls.js?v=0.8.9.1-20260822-1715";
 
 const pages=["home","measure","stake","newline","constraint","placement","objects","line","point","wallcreate","wall","shapecreate","settings","clear"];
 let menuStack=["home"];
@@ -14,7 +14,7 @@ function el(id){return $(id);}
 function bind(id,event,handler){
   const node=el(id);
   if(!node){
-    console.warn(`[UI 0.8.9] ontbrekend element: #${id}`);
+    console.warn(`[UI 0.8.9.1] ontbrekend element: #${id}`);
     return false;
   }
   node.addEventListener(event,handler);
@@ -146,26 +146,26 @@ export function initUI(){
   bind("menuBackBtn","click",menuBack);
 
   document.querySelectorAll("[data-page]").forEach(node=>node.addEventListener("click",()=>showPage(node.dataset.page)));
-  document.querySelectorAll(".constraintBtn").forEach(node=>node.addEventListener("click",()=>setConstraint(node.dataset.constraint)));
+  document.querySelectorAll(".constraintBtn").forEach(node=>node.addEventListener("click",()=>{setConstraint(node.dataset.constraint);if(el("placementConstraint"))el("placementConstraint").value=node.dataset.constraint;updatePlacementUI();}));
 
-  bind("constraintAngle","change",()=>{setAngleDeg(Number(el("constraintAngle").value)||45);if(S.drawEngine.direction==="angle")setConstraint("angle");});
+  bind("constraintAngle","input",()=>{setAngleDeg(Number(el("constraintAngle").value)||45);if(S.drawEngine.direction==="angle"){setConstraint("angle");updatePlacementUI();}});
   bind("constraintHudBtn","click",()=>{openMenu();showPage("constraint");});
 
-  bind("measureNewBtn","click",()=>{cancelParametricMode();S.placementMode="manual";startMeasureNew();closeMenu();});
+  bind("measureNewBtn","click",()=>{cancelParametricMode();startMeasureNew();closeMenu();});
   bind("measureLastBtn","click",()=>{const p=S.points.at(-1);if(p){startMeasureFrom(p.id);closeMenu();}});
   bind("measureExistingBtn","click",()=>{S.objectPickMode="measure";showPage("objects");});
   bind("measureParamBtn","click",openPlacementPage);
 
-  bind("newIndependentBtn","click",()=>{cancelParametricMode();S.placementMode="manual";startMeasureNew();closeMenu();});
+  bind("newIndependentBtn","click",()=>{cancelParametricMode();startMeasureNew();closeMenu();});
   bind("newFromLastBtn","click",()=>{const p=S.points.at(-1);if(p){startMeasureFrom(p.id);closeMenu();}});
   bind("newParamBtn","click",openPlacementPage);
 
-  bind("stakeNewBtn","click",()=>{cancelParametricMode();S.placementMode="manual";const m=readStake();if(m){startStake(null,m);closeMenu();}});
+  bind("stakeNewBtn","click",()=>{cancelParametricMode();const m=readStake();if(m){startStake(null,m);closeMenu();}});
   bind("stakeLastBtn","click",()=>{const p=S.points.at(-1),m=readStake();if(p&&m){startStake(p.id,m);closeMenu();}});
   bind("stakeExistingBtn","click",()=>{S.objectPickMode="stake";showPage("objects");});
   bind("stakeParamBtn","click",openPlacementPage);
 
-  bind("continuousBtn","click",()=>{cancelParametricMode();S.placementMode="manual";startContinuous();closeMenu();});
+  bind("continuousBtn","click",()=>{cancelParametricMode();startContinuous();closeMenu();});
   bind("continuousParamBtn","click",()=>{if(!S.draw.active)startContinuous();openMenu();openPlacementPage();});
   bind("drawUndoBtn","click",undoContinuous);
   bind("drawFinishBtn","click",()=>{
@@ -180,7 +180,7 @@ export function initUI(){
 
   bind("lineFromStartBtn","click",()=>{const l=getLine(S.selectedLineId);if(l){startMeasureFrom(l.startId);closeMenu();}});
   bind("lineFromEndBtn","click",()=>{const l=getLine(S.selectedLineId);if(l){startMeasureFrom(l.endId);closeMenu();}});
-  bind("useReferenceBtn","click",()=>{setReferenceLine(S.selectedLineId);setUnifiedReference(S.selectedLineId);closeMenu();});
+  bind("useReferenceBtn","click",()=>{setReferenceLine(S.selectedLineId);setUnifiedReference(S.selectedLineId);updateReferenceStatus();closeMenu();});
   bind("createWallBtn","click",()=>{
     const l=getLine(S.selectedLineId);if(!l)return;
     el("wallCreateInfo").textContent=`Basislijn ${l.name} · ${fmt(l.distance)}`;
@@ -218,11 +218,11 @@ export function initUI(){
   bind("toggleWallBtn","click",()=>{toggleWall(S.selectedWallId);renderObjects();});
   bind("deleteWallBtn","click",()=>{deleteWall(S.selectedWallId);showPage("objects");renderObjects();});
 
-  bind("placementConstraint","change",updatePlacementUI);
+  bind("placementConstraint","change",()=>{setConstraint(el("placementConstraint").value);updatePlacementUI();});
   bind("placementDistance","input",updatePlacementUI);
   bind("placementUnit","change",updatePlacementUI);
-  bind("placementAngle","input",()=>{setAngleDeg(Number(el("placementAngle").value)||45);updatePlacementUI();});
-  bind("placementReference","change",()=>{setUnifiedReference(el("placementReference").value||null);updatePlacementUI();});
+  bind("placementAngle","input",()=>{setAngleDeg(Number(el("placementAngle").value)||45);if(el("constraintAngle"))el("constraintAngle").value=el("placementAngle").value;updatePlacementUI();});
+  bind("placementReference","change",()=>{setUnifiedReference(el("placementReference").value||null);updateReferenceStatus();updatePlacementUI();});
   bind("placementApplyBtn","click",()=>{
     try{const r=placeParametricNext();if(el("placementHelp"))el("placementHelp").textContent=`${r.line.name} geplaatst. ${r.point.name} is nu vertrekpunt.`;updatePlacementUI();}
     catch(e){el("placementHelp").textContent=e.message||String(e);}
