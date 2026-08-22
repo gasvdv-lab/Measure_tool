@@ -1,89 +1,38 @@
-# Measure AR v0.8.15 — Objectbeheer & Undo/Redo
-Build: 20260822-2215
+# Measure AR v0.8.16 — Shape Engine Hardening
+Build: 20260822-2349
 
-Deze release introduceert één centrale projecthistorie en breidt objectbeheer uit.
+## Nieuw
+- Zelfkruisende vormen worden geweigerd.
+- Punten dichter dan 5 mm worden geweigerd.
+- Segmenten korter dan 1 cm worden geweigerd.
+- Vlakheidscontrole: maximaal 3 cm afwijking.
+- Oppervlakte én omtrek worden berekend.
+- CW/CCW-orientatie wordt intern bepaald.
+- Triangulatie wordt gecontroleerd vóór een vorm wordt aangemaakt.
+- De volledige contour wordt gevalideerd vóór Sluiten mutaties uitvoert.
+- Undo/Redo en objectbeheer uit v0.8.15 blijven behouden.
 
-## Nieuw in v0.8.15
-- Centrale snapshot-gebaseerde Undo/Redo-engine in `js/history.js`.
-- Undo en Redo werken op volledige consistente projectstates, niet op losse halve objecten.
-- Nieuwe actie wist de Redo-stack, zoals in CAD-software gebruikelijk.
-- Historie bewaart maximaal 80 projectacties.
-- Undo/Redo beschikbaar in hoofdmenu én compacte AR-HUD.
-- Tekenen van punten/lijnen wordt in dezelfde centrale historie opgenomen.
-- Voltooien van polyline en sluiten van vorm wordt als historie-actie geregistreerd.
-- Muur aanmaken, wijzigen, zichtbaar/verbergen en verwijderen zijn historie-acties.
-- Vorm aanmaken, stijl wijzigen, alleen opvulling verwijderen en vorm+contour verwijderen zijn historie-acties.
-- Losse lijnen en punten verwijderen zijn historie-acties.
-- `Alles wissen` kan ongedaan worden gemaakt.
-- Projectstate wordt na herstel opnieuw op gebroken references gecontroleerd.
+## Automatische tests na genereren — PASS
+- JavaScript-syntax: alle modules.
+- Zelfkruisingsguard aanwezig.
+- 5-mm dubbele-puntguard aanwezig.
+- 1-cm segmentguard aanwezig.
+- 3-cm vlakheidsguard aanwezig.
+- Omtrekberekening gekoppeld aan UI.
+- Triangulatieguard aanwezig.
+- Shape pre-validatie vóór definitief sluiten aanwezig.
 
-## Objectbeheer
-### Punt
-- Puntnaam achteraf wijzigen.
-- Puntnamen blijven uniek.
-- Automatisch benoemde lijnen worden mee bijgewerkt wanneer een punt wordt hernoemd.
-
-### Lijn
-- Naam wijzigen.
-- Kleur wijzigen.
-- Dikte wijzigen.
-- Label aan/uit.
-- Een handmatig aangepaste lijnnaam blijft behouden wanneer later een puntnaam verandert.
-
-### Vorm
-- Naam, opvulling, transparantie, randkleur, randdikte en labels blijven achteraf bewerkbaar.
-- Alleen vorm/opvulling verwijderen blijft gescheiden van vorm + contour verwijderen.
-
-### Muur
-- Naam, hoogte, dikte, zijde, oriëntatie, hoek, kleur en transparantie kunnen achteraf gewijzigd worden.
-- Muur blijft gekoppeld aan zijn basislijn.
-
-## Tests automatisch uitgevoerd na genereren — PASS
-### Statische applicatietests
-- Alle JavaScriptmodules slagen voor syntaxcontrole.
-- Alle named imports verwijzen naar bestaande exports.
-- Geen dubbele HTML-ID's.
-- Alle UI-ID-referenties bestaan.
-- Alle statische knoppen hebben een handler.
-- Oude tekenmodules blijven verwijderd.
-- Nieuwe `history.js` is gekoppeld.
-- Undo/Redo-knoppen bestaan in menu en HUD.
-- Punt-, lijn- en muurbewerkingsknoppen zijn gekoppeld.
-
-### Historie-algoritmetests — PASS
-- Undo brengt de vorige state terug.
-- Redo brengt de volgende state terug.
-- Een nieuwe actie na Undo wist de Redo-stack.
-- Historie wordt begrensd op 80 acties.
-- No-op wijzigingen maken geen historie-entry.
-
-### Architectuur/regressie — PASS
-- Snapshot bevat punten, lijnen, contouren, vormen en muren.
-- Tekensegmenten registreren centrale historie.
-- Wall-module schrijft niet meer rechtstreeks losse oude undo-records.
-- Puntnaam-editing bestaat.
-- Lijnstijl/editing bestaat.
-- Muur-editing bestaat.
-- Vorm-editing loopt via historie.
-- Projectvalidator blijft actief na Undo/Redo.
-
-## Eerder automatisch uitgevoerd — PASS
-Alle eerder geslaagde automatische tests uit v0.8.12–v0.8.14 blijven regressie-eisen:
-- Gewone lijn A→B.
-- Actief eindpunt.
-- Polyline A→B→C→D.
-- Undo van tekenstap.
-- Open Voltooien van polyline.
-- Sluiten van vorm.
-- Exacte horizontale/verticale afstanden.
-- Parallel/Loodrecht/Eigen hoek.
-- Dependencybescherming.
-- Projectvalidator.
-- Mislukte lijn rollback.
-- Smart snapping punt/midden/lijn.
-- 5-mm-regel bij exacte afstand.
-- Constraint-safe snapping.
-- HUD/reference/snap-controls.
+## Nieuwe fysieke tests v0.8.16
+- Rechthoek vloer: oppervlakte en omtrek vergelijken met handmeting.
+- Dezelfde vorm omgekeerd tekenen.
+- Verticale rechthoek op muur.
+- Schuine vlakke vorm.
+- Bow-tie/zelfkruising: Sluiten moet weigeren.
+- Twee punten <5 mm: weigeren.
+- Segment <1 cm: weigeren.
+- Punt >3 cm uit vlak: weigeren.
+- Undo/Redo na Sluiten.
+- Vormstijl na Undo/Redo wijzigen.
 
 ## Nog fysiek te testen — cumulatief
 Deze tests vereisen echte WebXR/ARCore en blijven open.
@@ -150,7 +99,7 @@ Deze tests vereisen echte WebXR/ARCore en blijven open.
 - Ref-chip.
 - Zijde/Richting-chip.
 
-### Objectbeheer — nieuw voor v0.8.15
+### Objectbeheer — nieuw voor v0.8.16
 - Punt hernoemen en label controleren.
 - Automatische lijnnaam verandert mee na punt-hernoeming.
 - Lijn handmatig hernoemen en daarna punt hernoemen: custom lijnnaam moet blijven.
@@ -165,7 +114,7 @@ Deze tests vereisen echte WebXR/ARCore en blijven open.
 - Muurhoek wijzigen.
 - Objectbeheer mag tracking niet verstoren.
 
-### Undo/Redo — nieuw voor v0.8.15
+### Undo/Redo — nieuw voor v0.8.16
 - Punt plaatsen → Undo → Redo.
 - Lijn A→B → Undo → Redo.
 - Polyline meerdere stappen achteruit en opnieuw vooruit.
@@ -205,3 +154,4 @@ Vaste app-link:
 https://gasvdv-lab.github.io/Measure_tool/
 
 Upload alle bestanden uit deze ZIP. `js/history.js` is nieuw en moet mee naar GitHub.
+
