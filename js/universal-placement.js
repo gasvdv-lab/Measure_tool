@@ -1,5 +1,5 @@
-import {S} from "./state.js?v=0.8.7-20260822-0830";
-import {getPoint} from "./geometry.js?v=0.8.7-20260822-0830";
+import {S} from "./state.js?v=0.8.8-20260822-1605";
+import {getPoint} from "./geometry.js?v=0.8.8-20260822-1605";
 export const placementState={mode:"manual",distanceCm:100,direction:"free",angleDeg:90,referenceLineId:null};
 export function setPlacementMode(v){placementState.mode=v==="metric"?"metric":"manual";}
 export function setPlacementOptions(o={}){if(Number.isFinite(Number(o.distanceCm)))placementState.distanceCm=Math.max(.1,Number(o.distanceCm));if(o.direction)placementState.direction=o.direction;if(Number.isFinite(Number(o.angleDeg)))placementState.angleDeg=Number(o.angleDeg);if("referenceLineId" in o)placementState.referenceLineId=o.referenceLineId;}

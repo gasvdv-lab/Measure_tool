@@ -17,15 +17,15 @@ function bindPlacementHud(){
  $("placementConfirmBtn")?.addEventListener("click",()=>document.dispatchEvent(new CustomEvent("measurear:metric-confirm")));
  syncPlacementHud();
 }
-import {placementState,setPlacementMode,setPlacementOptions} from "./universal-placement.js?v=0.8.7-20260822-0830";
+import {placementState,setPlacementMode,setPlacementOptions} from "./universal-placement.js?v=0.8.8-20260822-1605";
 
-import {S,$,fmt,getPoint,getLine,getContour} from "./state.js?v=0.8.7-20260822-0830";
-import {setConstraint,setReferenceLine,updateReferenceStatus} from "./constraints.js?v=0.8.7-20260822-0830";
-import {startMeasureNew,startMeasureFrom,startStake,startContinuous,undoContinuous,finishContinuous,placePoint,resetCurrent} from "./drawing.js?v=0.8.7-20260822-0830";
-import {createShape,deleteLineRaw,deletePointRaw,clearAllGeometry,dispose} from "./geometry.js?v=0.8.7-20260822-0830";
-import {startAR,leaveAR,applyZoom} from "./ar.js?v=0.8.7-20260822-0830";
-import {updatePlacementUI,placeParametricNext} from "./placement.js?v=0.8.7-20260822-0830";
-import {createWall,getWall,deleteWall,toggleWall,wallsUsingLine,clearWalls} from "./walls.js?v=0.8.7-20260822-0830";
+import {S,$,fmt,getPoint,getLine,getContour} from "./state.js?v=0.8.8-20260822-1605";
+import {setConstraint,setReferenceLine,updateReferenceStatus} from "./constraints.js?v=0.8.8-20260822-1605";
+import {startMeasureNew,startMeasureFrom,startStake,startContinuous,undoContinuous,finishContinuous,placePoint,resetCurrent} from "./drawing.js?v=0.8.8-20260822-1605";
+import {createShape,deleteLineRaw,deletePointRaw,clearAllGeometry,dispose} from "./geometry.js?v=0.8.8-20260822-1605";
+import {startAR,leaveAR,applyZoom} from "./ar.js?v=0.8.8-20260822-1605";
+import {updatePlacementUI,placeParametricNext} from "./placement.js?v=0.8.8-20260822-1605";
+import {createWall,getWall,deleteWall,toggleWall,wallsUsingLine,clearWalls} from "./walls.js?v=0.8.8-20260822-1605";
 
 const pages=["home","measure","stake","newline","constraint","placement","objects","line","point","wallcreate","wall","shapecreate","settings","clear"];
 let menuStack=["home"];

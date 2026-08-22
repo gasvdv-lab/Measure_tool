@@ -1,5 +1,5 @@
 
-import {S,$,fmt,pointName,getPoint,getLine,getContour} from "./state.js?v=0.8.7-20260822-0830";
+import {S,$,fmt,pointName,getPoint,getLine,getContour} from "./state.js?v=0.8.8-20260822-1605";
 
 export function dispose(obj){
   if(!obj||!S.scene)return; S.scene.remove(obj);
@@ -149,3 +149,7 @@ export function clearAllGeometry(){
 }
 
 export function enforceLockedPoints(){for(const p of S.points){if(!p.lockedPosition)continue;const q=p.lockedPosition;p.position.set(q.x,q.y,q.z);if(p.marker)p.marker.position.set(q.x,q.y,q.z);}}
+
+export {getPoint};
+
+export {getLine};

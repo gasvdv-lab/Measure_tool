@@ -1,5 +1,5 @@
 
-import {S,$,getPoint,getLine} from "./state.js?v=0.8.7-20260822-0830";
+import {S,$,getPoint,getLine} from "./state.js?v=0.8.8-20260822-1605";
 const labels={free:"Vrij",horizontal:"Horizontaal",vertical:"Verticaal",surface:"Op oppervlak",parallel:"Parallel",perpendicular:"Loodrecht 90°",angle:"Eigen hoek"};
 export function setConstraint(mode){
   S.constraint.mode=mode; S.constraint.verticalPlane=null;
