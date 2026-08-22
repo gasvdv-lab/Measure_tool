@@ -1,38 +1,74 @@
-# Measure AR v0.8.16 — Shape Engine Hardening
-Build: 20260822-2349
+# Measure AR v0.8.17 — Muur als zelfstandig tekengereedschap
+Build: 20260823-0005
 
-## Nieuw
-- Zelfkruisende vormen worden geweigerd.
-- Punten dichter dan 5 mm worden geweigerd.
-- Segmenten korter dan 1 cm worden geweigerd.
-- Vlakheidscontrole: maximaal 3 cm afwijking.
-- Oppervlakte én omtrek worden berekend.
-- CW/CCW-orientatie wordt intern bepaald.
-- Triangulatie wordt gecontroleerd vóór een vorm wordt aangemaakt.
-- De volledige contour wordt gevalideerd vóór Sluiten mutaties uitvoert.
-- Undo/Redo en objectbeheer uit v0.8.15 blijven behouden.
+## Nieuw in v0.8.17
+- `Muur` is nu een zelfstandig gereedschap in het hoofdmenu.
+- Workflow: Muur kiezen → eigenschappen instellen → terug naar AR → A → B → C → D → …
+- Elk nieuw eindpunt wordt automatisch het vertrekpunt van het volgende muursegment.
+- Dezelfde compacte HUD bepaalt AUTO/exacte afstand en alle bestaande constraints.
+- Hoogte, dikte, zijde, oriëntatie, hoek, kleur en transparantie worden vóór het tekenen ingesteld.
+- Ieder muursegment krijgt automatisch een unieke naam.
+- Interne basislijnen worden automatisch aangemaakt en blijven gekoppeld aan de muur.
+- Basislijnlabels zijn verborgen zodat ze het AR-beeld niet onnodig vullen.
+- Aangrenzende muursegmenten krijgen een kleine eind-overlap om zichtbare kieren in AR te vermijden.
+- `Voltooien` maakt een open `wallpath`; er wordt nooit automatisch terug naar A gesloten.
+- Undo/Redo omvat muursegment + basislijn + nieuw punt als één consistente projectstate.
+- De oude methode `Maak muur van lijn` blijft voorlopig beschikbaar voor bestaande workflows.
 
 ## Automatische tests na genereren — PASS
 - JavaScript-syntax: alle modules.
-- Zelfkruisingsguard aanwezig.
-- 5-mm dubbele-puntguard aanwezig.
-- 1-cm segmentguard aanwezig.
-- 3-cm vlakheidsguard aanwezig.
-- Omtrekberekening gekoppeld aan UI.
-- Triangulatieguard aanwezig.
-- Shape pre-validatie vóór definitief sluiten aanwezig.
+- Named imports/exports.
+- Geen dubbele HTML-ID's.
+- Alle UI-ID-referenties bestaan.
+- Alle statische knoppen hebben een handler.
+- Muurtool-pagina en instellingen zijn gekoppeld.
+- Tool `wall` bestaat in de centrale drawing core.
+- Na ieder segment wordt automatisch een muur aangemaakt.
+- Actief eindpunt schuift door naar het volgende segment.
+- Muurtool stopt niet automatisch na AB.
+- `Voltooien` creëert een open wallpath.
+- Basislijnen blijven aanwezig maar hun labels zijn verborgen.
+- Automatische unieke muurnamen zijn aanwezig.
+- Wall-toolinstellingen zitten in Undo/Redo-snapshots.
+- Hoekverbinding heeft AR-vriendelijke overlapcompensatie.
+- Centrale Undo/Redo uit v0.8.15 blijft gekoppeld.
 
-## Nieuwe fysieke tests v0.8.16
-- Rechthoek vloer: oppervlakte en omtrek vergelijken met handmeting.
-- Dezelfde vorm omgekeerd tekenen.
-- Verticale rechthoek op muur.
-- Schuine vlakke vorm.
-- Bow-tie/zelfkruising: Sluiten moet weigeren.
-- Twee punten <5 mm: weigeren.
-- Segment <1 cm: weigeren.
-- Punt >3 cm uit vlak: weigeren.
-- Undo/Redo na Sluiten.
-- Vormstijl na Undo/Redo wijzigen.
+## Nieuwe fysieke tests v0.8.17
+- Kies Muur en controleer dat het menu sluit na `Muur tekenen starten`.
+- A→B: één muur AB verschijnt.
+- B→C: BC verschijnt en B blijft gedeelde hoek.
+- C→D: CD verschijnt.
+- Voltooien: geen automatische D→A muur.
+- AUTO-afstand met muur.
+- Exact 100 cm met muur.
+- Horizontaal met muur.
+- Loodrecht met muur.
+- Eigen hoek met muur.
+- Parallel met muur.
+- Muurdikte 10/14/20 cm vergelijken.
+- Hoogte wijzigen vóór nieuwe muurmodus.
+- Gecentreerd/links/rechts testen.
+- Twee muren onder 90°: controleer visueel op kieren/overlap.
+- Undo na BC: muur BC, lijn BC en eventueel punt C moeten samen verdwijnen.
+- Redo: alles moet terugkomen.
+- Alles wissen → Undo: volledig muurpad moet terugkomen.
+- Bestaande oude `Maak muur van lijn` workflow blijft werken.
+
+## Gepland — uitgebreide functie Meten
+De huidige meetfunctie is nog niet de definitieve meetmodule. Deze wordt later aanzienlijk uitgebreid. Minstens voorzien:
+- enkele afstand;
+- doorlopend meten;
+- totale lengte;
+- horizontale afstand;
+- verticale afstand;
+- hoogteverschil;
+- hoek;
+- helling;
+- oppervlakte;
+- omtrek;
+- koppeling aan snapping, referentielijnen en tekenvlakken;
+- bijkomende meetfuncties die later tijdens ontwikkeling worden bepaald.
+Deze roadmapsectie moet in iedere volgende README behouden blijven.
 
 ## Nog fysiek te testen — cumulatief
 Deze tests vereisen echte WebXR/ARCore en blijven open.
@@ -99,7 +135,7 @@ Deze tests vereisen echte WebXR/ARCore en blijven open.
 - Ref-chip.
 - Zijde/Richting-chip.
 
-### Objectbeheer — nieuw voor v0.8.16
+### Objectbeheer — nieuw voor v0.8.17
 - Punt hernoemen en label controleren.
 - Automatische lijnnaam verandert mee na punt-hernoeming.
 - Lijn handmatig hernoemen en daarna punt hernoemen: custom lijnnaam moet blijven.
@@ -114,7 +150,7 @@ Deze tests vereisen echte WebXR/ARCore en blijven open.
 - Muurhoek wijzigen.
 - Objectbeheer mag tracking niet verstoren.
 
-### Undo/Redo — nieuw voor v0.8.16
+### Undo/Redo — nieuw voor v0.8.17
 - Punt plaatsen → Undo → Redo.
 - Lijn A→B → Undo → Redo.
 - Polyline meerdere stappen achteruit en opnieuw vooruit.
@@ -155,3 +191,9 @@ https://gasvdv-lab.github.io/Measure_tool/
 
 Upload alle bestanden uit deze ZIP. `js/history.js` is nieuw en moet mee naar GitHub.
 
+
+
+Vaste app-link:
+https://gasvdv-lab.github.io/Measure_tool/
+
+Upload de volledige inhoud van deze ZIP naar GitHub.

@@ -4,15 +4,15 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#111111">
-  <title>Measure AR v0.8.16</title>
-  <link rel="stylesheet" href="./css/app.css?v=0.8.16-20260822-2349">
+  <title>Measure AR v0.8.17</title>
+  <link rel="stylesheet" href="./css/app.css?v=0.8.17-20260823-0005">
 </head>
 <body>
 <div id="app">
   <main class="startCard directFallback">
     <div class="logo">⌖</div><h1>Measure AR</h1>
     <p id="launchStatus">Tik om AR te starten.</p>
-    <div id="buildInfo" class="build">v0.8.16 · stability build 20260822-2349</div>
+    <div id="buildInfo" class="build">v0.8.17 · stability build 20260823-0005</div>
     <button id="startArBtn" class="primary">AR starten</button>
     <div id="error" class="error"></div>
   </main>
@@ -32,7 +32,7 @@
   <aside id="menuPanel">
     <div class="menuHead">
       <button id="menuBackBtn" class="secondary">‹</button>
-      <div><strong id="menuTitle">Measure AR</strong><small id="menuMeta">v0.8.16</small></div>
+      <div><strong id="menuTitle">Measure AR</strong><small id="menuMeta">v0.8.17</small></div>
       <button id="menuCloseBtn" class="secondary">✕</button>
     </div>
     <div class="menuBody">
@@ -43,7 +43,7 @@
           <button id="quickPolylineBtn">Doorlopende lijn <small>A → B → C → D → …</small></button>
           <button id="quickShapeBtn">Vorm <small>doorlopend tekenen, daarna Sluiten</small></button>
           <button id="quickStakeBtn">Uitzetten <small>zelfde tekenmotor, exacte afstand mogelijk</small></button>
-          <button id="quickWallBtn">Muur <small>maak voorlopig van een bestaande basislijn</small></button>
+          <button id="quickWallBtn">Muur <small>A → B → C → … rechtstreeks muren tekenen</small></button>
         </div>
         <h3>Project</h3>
         <div class="menuCard navList"><button data-page="objects">Objecten <small>vormen, muren, lijnen en punten</small></button></div>
@@ -84,6 +84,27 @@
           <button id="pointPolylineBtn" class="secondary">Doorlopende lijn vanaf punt</button>
           <button id="pointStakeBtn" class="secondary">Uitzetten vanaf punt</button>
           <button id="deletePointBtn" class="danger">Punt wissen</button>
+        </div>
+      </section>
+
+
+      <section id="page-walltool" class="page">
+        <h3>Muur tekenen</h3>
+        <div class="menuCard">
+          <p class="help">Stel alleen de muureigenschappen in. Afstand en richting kies je daarna compact in het AR-scherm.</p>
+          <label>Naamreeks<input id="wallToolPrefix" maxlength="24" value="Muur"></label>
+          <div class="grid2">
+            <label>Hoogte (m)<input id="wallToolHeight" type="number" min=".05" step=".05" value="2.40"></label>
+            <label>Dikte (m)<input id="wallToolThickness" type="number" min=".01" step=".01" value=".14"></label>
+          </div>
+          <label>Zijde<select id="wallToolSide"><option value="center">Gecentreerd</option><option value="left">Links</option><option value="right">Rechts</option></select></label>
+          <label>Oriëntatie<select id="wallToolOrientation"><option value="vertical">Verticaal</option><option value="angle">Eigen hoek</option></select></label>
+          <div id="wallToolAngleWrap" style="display:none"><label>Hoek (°)<input id="wallToolAngle" type="number" min="-180" max="180" step=".5" value="90"></label></div>
+          <div class="grid2">
+            <label>Kleur<input id="wallToolColor" type="color" value="#d7d2c8"></label>
+            <label>Transparantie<input id="wallToolOpacity" type="number" min=".05" max="1" step=".05" value=".65"></label>
+          </div>
+          <button id="startWallToolBtn" class="primary">Muur tekenen starten</button>
         </div>
       </section>
 
@@ -225,6 +246,6 @@
   <div id="hint">Open ☰ en kies wat je wilt tekenen.</div>
 </div>
 
-<script type="module" src="./js/bootstrap.js?v=0.8.16-20260822-2349"></script>
+<script type="module" src="./js/bootstrap.js?v=0.8.17-20260823-0005"></script>
 </body>
 </html>
