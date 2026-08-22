@@ -1,5 +1,5 @@
 export const S={
-  version:"0.8.12",build:"20260822-2015",
+  version:"0.8.13",build:"20260822-2045",
   THREE:null,renderer:null,scene:null,camera:null,reticle:null,xrSession:null,hitSource:null,hitRequested:false,
   currentTarget:null,targetSource:"none",zoom:1,pointPlacementEpoch:0,
   points:[],lines:[],contours:[],shapes:[],walls:[],
@@ -17,7 +17,8 @@ export const S={
   },
   history:{undo:[],redo:[]},
   preview:{point:null,line:null,label:null},
-  diagnostics:{lastError:"",lastCheck:null,confirmBusy:false}
+  diagnostics:{lastError:"",lastCheck:null,confirmBusy:false},
+  hud:{compact:true,lastPopover:null}
 };
 
 export const $=id=>document.getElementById(id);

@@ -1,5 +1,5 @@
-import {S,$,fmt,getPoint,getLine} from "./state.js?v=0.8.12-20260822-2015";
-import {createPoint,createLine,deleteLineRaw,deletePointRaw,createContour,dispose} from "./geometry.js?v=0.8.12-20260822-2015";
+import {S,$,fmt,getPoint,getLine} from "./state.js?v=0.8.13-20260822-2045";
+import {createPoint,createLine,deleteLineRaw,deletePointRaw,createContour,dispose} from "./geometry.js?v=0.8.13-20260822-2045";
 
 const REF_MODES=new Set(["parallel","perpendicular","angle"]);
 const TOOL_NAMES={line:"LIJN",polyline:"POLYLIJN",shape:"VORM",stake:"UITZETTEN"};

@@ -1,7 +1,7 @@
-import {S,$} from "./state.js?v=0.8.12-20260822-2015";
-import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.12-20260822-2015";
-import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.12-20260822-2015";
-import {clearWalls} from "./walls.js?v=0.8.12-20260822-2015";
+import {S,$} from "./state.js?v=0.8.13-20260822-2045";
+import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.13-20260822-2045";
+import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.13-20260822-2045";
+import {clearWalls} from "./walls.js?v=0.8.13-20260822-2045";
 
 let samples=[],sampleSource=null,camPos,camQuat,forward;
 

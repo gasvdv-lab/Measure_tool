@@ -1,14 +1,14 @@
-import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.12-20260822-2015";
+import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.13-20260822-2045";
 import {
   startTool,cancelTool,setPlacement,setDistance,setConstraint,setAngle,flipSide,setReferenceLine,setSnapMode,
   confirmCandidate,undoToolStep,finishTool,toolLabel,constraintLabel,getActivePoint,referenceRequired,resetDrawingCore
-} from "./drawing-core.js?v=0.8.12-20260822-2015";
+} from "./drawing-core.js?v=0.8.13-20260822-2045";
 import {
   createShape,updateShape,deleteShapeOnly,deleteShapeWithContour,deleteLineRaw,deletePointRaw,
   lineDependencies,pointDependencies,canDeleteLine,canDeletePoint,clearAllGeometry,validateGeometryState,dispose
-} from "./geometry.js?v=0.8.12-20260822-2015";
-import {startAR,applyZoom} from "./ar.js?v=0.8.12-20260822-2015";
-import {createWall,deleteWall,toggleWall,wallsUsingLine,clearWalls} from "./walls.js?v=0.8.12-20260822-2015";
+} from "./geometry.js?v=0.8.13-20260822-2045";
+import {startAR,applyZoom} from "./ar.js?v=0.8.13-20260822-2045";
+import {createWall,deleteWall,toggleWall,wallsUsingLine,clearWalls} from "./walls.js?v=0.8.13-20260822-2045";
 
 const pages=["home","objects","line","point","wallcreate","wall","shapecreate","shape","settings","clear"];
 let menuStack=["home"];
@@ -29,8 +29,13 @@ function showStatus(msg,error=false){
   if(el("detail"))el("detail").textContent=msg;
   if(error&&el("hint"))el("hint").textContent=msg;
 }
-function closePopovers(){["directionPopover","distancePopover","morePopover"].forEach(id=>el(id)?.classList.remove("open"));}
-function togglePopover(id){const was=el(id).classList.contains("open");closePopovers();if(!was)el(id).classList.add("open");}
+function closePopovers(){["directionPopover","distancePopover","morePopover"].forEach(id=>el(id)?.classList.remove("open"));S.hud.lastPopover=null;}
+function togglePopover(id){
+  const node=el(id),was=node.classList.contains("open");
+  closePopovers();
+  if(!was){node.classList.add("open");S.hud.lastPopover=id;}
+  else S.hud.lastPopover=null;
+}
 function showPage(name,push=true){
   pages.forEach(p=>el("page-"+p)?.classList.remove("active"));const page=el("page-"+name);if(!page)throw new Error(`Menupagina ontbreekt: ${name}`);page.classList.add("active");
   const titles={home:"Measure AR",objects:"Objecten",line:"Lijn",point:"Punt",wallcreate:"Muur maken",wall:"Muur",shapecreate:"Vorm opslaan",shape:"Vorm",settings:"Instellingen",clear:"Alles wissen"};
@@ -52,12 +57,27 @@ function populateReference(){
   S.lines.forEach(l=>s.add(new Option(`${l.name} · ${fmt(l.distance)}`,l.id)));
   if(old&&S.lines.some(l=>l.id===old))s.value=old;
 }
+function syncHudStatus(){
+  if(!S.tool.kind)return;
+  const p=getActivePoint();
+  el("hudActivePoint").textContent=`Start: ${p?.name||"—"}`;
+
+  const ref=getLine(S.tool.referenceLineId);
+  const needsRef=referenceRequired();
+  el("hudReferenceChip").classList.toggle("optional",!needsRef);
+  el("hudReferenceChip").textContent=`Ref: ${ref?.name||"—"}`;
+
+  const sideRelevant=["perpendicular","angle"].includes(S.tool.constraint);
+  el("hudSideChip").classList.toggle("optional",!sideRelevant);
+  el("hudSideChip").textContent=`Zijde: ${S.tool.side>0?"+":"−"}`;
+}
 function syncCandidateContext(){
   if(!S.tool.kind||!el("hudContext"))return;
   const p=getActivePoint(),candidate=S.tool.candidate;
-  let context=S.tool.status==="complete"?"Klaar · open ☰ voor een nieuwe functie":p?`Vertrekpunt ${p.name} actief`:"Plaats punt A";
+  let context=S.tool.status==="complete"?"Klaar · resultaat zichtbaar · open ☰ voor een nieuwe functie":p?`Vertrekpunt ${p.name} actief`:"Plaats punt A";
   if(candidate&&!candidate.valid)context=candidate.reason;
   el("hudContext").textContent=context;
+  syncHudStatus();
 }
 function syncHud(){
   const active=Boolean(S.tool.kind);
@@ -72,7 +92,9 @@ function syncHud(){
   if(refNeeded&&S.tool.referenceLineId)el("hudReference").value=S.tool.referenceLineId;
   syncCandidateContext();
   const multi=["polyline","shape"].includes(S.tool.kind)&&S.tool.status==="drawing";
-  el("hudActions").classList.toggle("visible",multi||Boolean(S.tool.transactions.length));
+  const showActions=multi||Boolean(S.tool.transactions.length);
+  el("hudActions").classList.toggle("visible",showActions);
+  el("drawingHud").classList.toggle("detailed",S.hud.compact===false);
   el("hudUndoBtn").disabled=S.tool.status==="complete"||!S.tool.transactions.length;
   el("hudFinishBtn").style.display=multi?"block":"none";
   el("hudFinishBtn").disabled=S.tool.kind==="shape"?S.tool.pointIds.length<3:!S.tool.lineIds.length;
@@ -120,13 +142,25 @@ export function initUI(){
   bind("quickWallBtn","click",()=>{showPage("objects");showStatus("Kies een basislijn en daarna ‘Maak muur van lijn’.");});
 
   bind("hudToolBtn","click",openMenu);bind("constraintHudBtn","click",()=>togglePopover("directionPopover"));bind("distanceHudBtn","click",()=>togglePopover("distancePopover"));bind("hudMoreBtn","click",()=>togglePopover("morePopover"));
-  document.querySelectorAll("[data-hud-direction]").forEach(b=>b.addEventListener("click",()=>{setConstraint(b.dataset.hudDirection);syncHud();if(!referenceRequired())closePopovers();}));
-  bind("hudReference","change",()=>{setReferenceLine(el("hudReference").value||null);syncHud();});
+  document.querySelectorAll("[data-hud-direction]").forEach(b=>b.addEventListener("click",()=>{
+    setConstraint(b.dataset.hudDirection);
+    syncHud();
+    if(!referenceRequired() && S.tool.constraint!=="angle") closePopovers();
+  }));
+  bind("hudReference","change",()=>{
+    setReferenceLine(el("hudReference").value||null);
+    syncHud();
+    if(S.tool.referenceLineId && S.tool.constraint!=="angle") closePopovers();
+  });
   bind("hudAngle","input",()=>{setAngle(el("hudAngle").value);syncHud();});
   bind("hudSideBtn","click",()=>{flipSide();showStatus(`Zijde omgekeerd (${S.tool.side>0?"links/positief":"rechts/negatief"}).`);syncHud();});
-  bind("hudAutoBtn","click",()=>{setPlacement("manual");closePopovers();syncHud();showStatus("AUTO: camera bepaalt het volgende punt.");});
+  bind("hudAutoBtn","click",()=>{setPlacement("manual");closePopovers();syncHud();showStatus("AUTO actief: camera bepaalt het volgende punt.");});
   bind("hudUseDistanceBtn","click",()=>{setDistance(el("hudDistance").value,el("hudUnit").value);setPlacement("metric");closePopovers();syncHud();showStatus("Exacte afstand ingesteld. Bevestig met de witte ronde knop.");});
   bind("hudSnap","change",()=>{setSnapMode(el("hudSnap").value);syncHud();});
+  bind("hudDensity","change",()=>{
+    S.hud.compact=el("hudDensity").value!=="detailed";
+    syncHud();
+  });
   bind("hudUndoBtn","click",()=>{undoToolStep();syncHud();showStatus("Laatste tekenstap ongedaan gemaakt.");});
   bind("hudFinishBtn","click",()=>{
     const result=finishTool();syncHud();
@@ -173,6 +207,6 @@ export function initUI(){
 
   document.addEventListener("measurear:tool-changed",syncHud);document.addEventListener("measurear:tool-settings",syncHud);document.addEventListener("measurear:candidate-changed",syncCandidateContext);
 
-  S.defaults.unit="cm";S.defaults.lineThickness=2;S.defaults.labels=true;el("defaultUnit").value="cm";el("hudUnit").value="cm";el("defaultThickness").value="2";el("defaultLabels").checked=true;
+  S.defaults.unit="cm";S.defaults.lineThickness=2;S.defaults.labels=true;S.hud.compact=true;el("hudDensity").value="compact";el("defaultUnit").value="cm";el("hudUnit").value="cm";el("defaultThickness").value="2";el("defaultLabels").checked=true;
   syncHud();document.documentElement.dataset.uiReady="1";console.info("Measure AR unified drawing UI ready",S.version,S.build);
 }
