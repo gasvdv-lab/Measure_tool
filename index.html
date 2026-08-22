@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#111111">
-  <title>Measure AR v0.8.2</title>
+  <title>Measure AR v0.8.3</title>
   <link rel="stylesheet" href="./css/app.css">
 </head>
 <body>
@@ -24,7 +24,7 @@
       </label>
       <label class="check"><input id="defaultLabels" type="checkbox" checked> Labels tonen</label>
     </section>
-    <div class="build">v0.8.2 · fixed points core fix</div>
+    <div class="build">v0.8.3 · universal point placement</div>
     <div id="error" class="error"></div>
   </main>
 </div>
@@ -43,7 +43,7 @@
   <aside id="menuPanel">
     <div class="menuHead">
       <button id="menuBackBtn" class="secondary">‹</button>
-      <div><strong id="menuTitle">Measure AR</strong><small id="menuMeta">v0.8.2</small></div>
+      <div><strong id="menuTitle">Measure AR</strong><small id="menuMeta">v0.8.3</small></div>
       <button id="menuCloseBtn" class="secondary">✕</button>
     </div>
     <div class="menuBody">
@@ -222,6 +222,26 @@
 
   <div id="constraintHud">
     <button id="constraintHudBtn">Vrij ▾</button>
+  </div>
+
+
+  <div id="placementHud">
+    <button id="placementModeBtn" class="secondary">Plaatsing: Handmatig</button>
+    <div id="placementParamPanel">
+      <div class="placementGrid">
+        <div><label for="placementDistance">Afstand</label><input id="placementDistance" type="number" min="0.01" step="0.01" value="1.00"></div>
+        <div><label for="placementUnit">Eenheid</label><select id="placementUnit"><option value="m">m</option><option value="cm">cm</option></select></div>
+        <div class="full"><label for="placementConstraint">Richting</label><select id="placementConstraint">
+          <option value="free">Vrij</option><option value="horizontal">Horizontaal</option><option value="vertical">Verticaal</option>
+          <option value="surface">Op oppervlak</option><option value="parallel">Parallel aan referentielijn</option>
+          <option value="perpendicular">Loodrecht (90°) op referentielijn</option><option value="angle">Eigen hoek t.o.v. referentielijn</option>
+        </select></div>
+        <div id="placementAngleWrap" class="full" style="display:none"><label for="placementAngle">Hoek (°)</label><input id="placementAngle" type="number" step="1" value="90"></div>
+        <div id="placementReferenceWrap" class="full" style="display:none"><label for="placementReference">Referentielijn</label><select id="placementReference"></select></div>
+        <button id="placementApplyBtn" class="primary full">Punt op maat plaatsen</button>
+      </div>
+      <div id="placementHelp" class="help">Plaats of selecteer eerst een vast vertrekpunt.</div>
+    </div>
   </div>
 
   <div id="drawControls">
