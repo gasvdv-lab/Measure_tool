@@ -4,24 +4,24 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#111111">
-  <title>Measure AR v0.8.10</title>
-  <link rel="stylesheet" href="./css/app.css?v=0.8.10-20260822-1930">
+  <title>Measure AR v0.8.11</title>
+  <link rel="stylesheet" href="./css/app.css?v=0.8.11-20260822-1945">
 </head>
 <body>
 <div id="app">
   <main class="startCard directFallback">
-    <div class="logo">⌖</div>
-    <h1>Measure AR</h1>
+    <div class="logo">⌖</div><h1>Measure AR</h1>
     <p id="launchStatus">Tik om AR te starten.</p>
-    <div id="buildInfo" class="build">v0.8.10 · build 20260822-1835</div>
+    <div id="buildInfo" class="build">v0.8.11 · build 20260822-1945</div>
     <button id="startArBtn" class="primary">AR starten</button>
     <div id="error" class="error"></div>
   </main>
 </div>
+
 <div id="overlay">
   <header id="topbar">
     <div class="status">
-      <div id="stage">Zoek een oppervlak</div>
+      <div id="stage">Kies een tekenfunctie</div>
       <div id="distance">—</div>
       <div id="detail"></div>
       <div id="stability">Stabiliteit: —</div>
@@ -32,135 +32,29 @@
   <aside id="menuPanel">
     <div class="menuHead">
       <button id="menuBackBtn" class="secondary">‹</button>
-      <div><strong id="menuTitle">Measure AR</strong><small id="menuMeta">v0.8.10</small></div>
+      <div><strong id="menuTitle">Measure AR</strong><small id="menuMeta">v0.8.11</small></div>
       <button id="menuCloseBtn" class="secondary">✕</button>
     </div>
     <div class="menuBody">
       <section id="page-home" class="page active">
-        <h3>Tekenen</h3>
+        <h3>Wat wil je tekenen?</h3>
         <div class="menuCard navList">
-          <button id="quickLineBtn">Lijn tekenen <small>kies hier de functie; teken daarna in AR</small></button>
-          <button id="continuousBtn">Doorlopende lijn <small>A → B → C → …</small></button>
-          <button id="quickShapeBtn">Vorm tekenen <small>doorlopende contour, daarna voltooien</small></button>
-          <button id="quickWallBtn">Muur aanmaken <small>selecteer een bestaande lijn als basis</small></button>
-          <button data-page="measure">Meten <small>afstand A → B</small></button>
-          <button data-page="stake">Uitzetten <small>vaste afstand</small></button>
+          <button id="quickLineBtn">Lijn <small>A → B en klaar</small></button>
+          <button id="quickPolylineBtn">Doorlopende lijn <small>A → B → C → D → …</small></button>
+          <button id="quickShapeBtn">Vorm <small>doorlopend tekenen, daarna Sluiten</small></button>
+          <button id="quickStakeBtn">Uitzetten <small>zelfde tekenmotor, exacte afstand mogelijk</small></button>
+          <button id="quickWallBtn">Muur <small>maak voorlopig van een bestaande basislijn</small></button>
         </div>
         <h3>Project</h3>
-        <div class="menuCard navList">
-          <button data-page="objects">Objecten <small>vormen, lijnen en punten</small></button>
-        </div>
+        <div class="menuCard navList"><button data-page="objects">Objecten <small>vormen, muren, lijnen en punten</small></button></div>
         <h3>Bewerken</h3>
-        <div class="menuCard">
-          <button id="undoBtn" class="secondary">Ongedaan maken</button>
-          <button id="clearAllBtn" class="danger">Alles wissen</button>
-        </div>
+        <div class="menuCard"><button id="clearAllBtn" class="danger">Alles wissen</button></div>
       </section>
 
-      <section id="page-measure" class="page">
-        <h3>Meten</h3>
-        <div class="menuCard">
-          <button id="measureNewBtn" class="primary">Nieuw startpunt</button>
-          <button id="measureLastBtn" class="secondary">Vanaf laatste punt</button>
-          <button id="measureExistingBtn" class="secondary">Bestaand punt kiezen</button>
-          <button id="measureParamBtn" class="secondary">Volgend punt op maat</button>
-        </div>
-      </section>
-
-      <section id="page-stake" class="page">
-        <h3>Uitzetten</h3>
-        <div class="menuCard">
-          <label>Afstand <input id="stakeDistance" type="number" min=".01" step=".1" value="100"></label>
-          <label>Eenheid <select id="stakeUnit"><option value="cm" selected>cm</option><option value="m">m</option></select></label>
-          <button id="stakeNewBtn" class="primary">Nieuw startpunt</button>
-          <button id="stakeLastBtn" class="secondary">Vanaf laatste punt</button>
-          <button id="stakeExistingBtn" class="secondary">Bestaand punt kiezen</button>
-          <button id="stakeParamBtn" class="secondary">Volgend punt op maat</button>
-        </div>
-      </section>
-
-      <section id="page-newline" class="page">
-        <h3>Nieuwe lijn</h3>
-        <div class="menuCard">
-          <button id="newIndependentBtn" class="primary">Nieuw → nieuw</button>
-          <button id="newFromLastBtn" class="secondary">Vanaf laatste punt</button>
-          <button id="newExistingBtn" class="secondary">Bestaand punt kiezen</button>
-          <button id="newParamBtn" class="secondary">Volgend punt op maat</button>
-        </div>
-      </section>
-      <section id="page-constraint" class="page">
-        <h3>Universele richting</h3>
-        <div class="menuCard">
-          <div class="grid2">
-            <button class="constraintBtn" data-constraint="free">Vrij</button>
-            <button class="constraintBtn" data-constraint="horizontal">Horizontaal</button>
-            <button class="constraintBtn" data-constraint="vertical">Verticaal</button>
-            <button class="constraintBtn" data-constraint="surface">Op oppervlak</button>
-            <button class="constraintBtn" data-constraint="parallel">Parallel</button>
-            <button class="constraintBtn" data-constraint="perpendicular">Loodrecht 90°</button>
-            <button class="constraintBtn" data-constraint="angle">Eigen hoek</button>
-          </div>
-
-          <div id="constraintAngleWrap" style="display:none">
-            <label>Hoek in graden
-              <input id="constraintAngle" type="number" min="-180" max="180" step=".5" value="45">
-            </label>
-          </div>
-
-          <div id="constraintReferenceWrap" style="display:none">
-            <div id="constraintReference" class="help">Referentie: geen</div>
-            <p id="constraintReferenceHelp" class="help">Selecteer eerst een lijn en kies “Gebruik als referentielijn”.</p>
-          </div>
-
-          <div id="constraintModeHelp" class="help">Vrij tekenen zonder richtingsbeperking.</div>
-        </div>
-      </section>
-
-
-      <section id="page-placement" class="page">
-        <h3>Op maat</h3>
-        <div class="menuCard">
-          <div id="placementContextInfo" class="help">Gebruik het huidige actieve startpunt.</div>
-<div id="placementStartInfo" class="help" style="color:#d8ffd8">Vertrekpunt: geen</div>
-<div id="placementPreviewInfo" class="help" style="color:#ffe6a3">Preview: —</div>
-          <div class="grid2">
-            <label>Afstand
-              <input id="placementDistance" type="number" min="0.01" step="0.1" value="100">
-            </label>
-            <label>Eenheid
-              <select id="placementUnit"><option value="cm" selected>cm</option><option value="m">m</option></select>
-            </label>
-          </div>
-          <label>Richting
-            <select id="placementConstraint">
-              <option value="free">Vrij</option>
-              <option value="horizontal">Horizontaal</option>
-              <option value="vertical">Verticaal</option>
-              <option value="surface">Op oppervlak</option>
-              <option value="parallel">Parallel aan referentielijn</option>
-              <option value="perpendicular">Loodrecht (90°) op referentielijn</option>
-              <option value="angle">Eigen hoek t.o.v. referentielijn</option>
-            </select>
-          </label>
-          <div id="placementAngleWrap" style="display:none">
-            <label>Hoek (°)<input id="placementAngle" type="number" min="-360" max="360" step="1" value="90"></label>
-          </div>
-          <div id="placementReferenceWrap" style="display:none">
-            <label>Referentielijn<select id="placementReference"></select></label>
-          </div>
-          <div id="placementHelp" class="help">Zonder vertrekpunt zal de app je eerst punt A laten plaatsen.</div>
-          <button id="placementApplyBtn" class="primary">Punt op maat plaatsen</button>
-        </div>
-      </section>
-
-      <section id="page-objects" class="page">
-        <h3>Objecten</h3>
-        <div id="objectsList" class="menuCard"></div>
-      </section>
+      <section id="page-objects" class="page"><h3>Objecten</h3><div id="objectsList" class="menuCard"></div></section>
 
       <section id="page-line" class="page">
-        <h3>Lijn</h3>
-        <div class="menuCard">
+        <h3>Lijn</h3><div class="menuCard">
           <div id="lineInfo" class="help">—</div>
           <button id="lineFromStartBtn" class="secondary">Nieuwe lijn vanaf start</button>
           <button id="lineFromEndBtn" class="secondary">Nieuwe lijn vanaf einde</button>
@@ -171,163 +65,132 @@
       </section>
 
       <section id="page-point" class="page">
-        <h3>Punt</h3>
-        <div class="menuCard">
+        <h3>Punt</h3><div class="menuCard">
           <div id="pointInfo" class="help">—</div>
           <button id="pointNewLineBtn" class="primary">Nieuwe lijn vanaf punt</button>
+          <button id="pointPolylineBtn" class="secondary">Doorlopende lijn vanaf punt</button>
           <button id="pointStakeBtn" class="secondary">Uitzetten vanaf punt</button>
           <button id="deletePointBtn" class="danger">Punt wissen</button>
         </div>
       </section>
 
-
       <section id="page-wallcreate" class="page">
-        <h3>Muur aanmaken</h3>
-        <div class="menuCard">
+        <h3>Muur aanmaken</h3><div class="menuCard">
           <div id="wallCreateInfo" class="help">—</div>
           <label>Unieke naam <input id="wallName" maxlength="40" placeholder="bv. Voorgevel"></label>
           <div class="grid2">
-            <label>Hoogte (m) <input id="wallHeight" type="number" min=".05" step=".05" value="2.40"></label>
-            <label>Dikte (m) <input id="wallThickness" type="number" min=".01" step=".01" value=".14"></label>
+            <label>Hoogte (m)<input id="wallHeight" type="number" min=".05" step=".05" value="2.40"></label>
+            <label>Dikte (m)<input id="wallThickness" type="number" min=".01" step=".01" value=".14"></label>
           </div>
-          <label>Zijde
-            <select id="wallSide">
-              <option value="center">Gecentreerd</option>
-              <option value="left">Links van lijn</option>
-              <option value="right">Rechts van lijn</option>
-            </select>
-          </label>
-          <label>Oriëntatie
-            <select id="wallOrientation">
-              <option value="vertical">Verticaal</option>
-              <option value="perpendicular">Loodrecht 90°</option>
-              <option value="angle">Eigen hoek</option>
-            </select>
-          </label>
-          <div id="wallAngleWrap" style="display:none"><label>Hoek (°) <input id="wallAngle" type="number" min="-180" max="180" step=".5" value="90"></label></div>
-          <div class="grid2">
-            <label>Kleur <input id="wallColor" type="color" value="#d7d2c8"></label>
-            <label>Transparantie <input id="wallOpacity" type="range" min=".05" max="1" step=".05" value=".45"></label>
-          </div>
+          <label>Zijde<select id="wallSide"><option value="center">Gecentreerd</option><option value="left">Links</option><option value="right">Rechts</option></select></label>
+          <label>Oriëntatie<select id="wallOrientation"><option value="vertical">Verticaal</option><option value="angle">Eigen hoek</option></select></label>
+          <div id="wallAngleWrap" style="display:none"><label>Hoek (°)<input id="wallAngle" type="number" min="-180" max="180" step=".5" value="90"></label></div>
+          <div class="grid2"><label>Kleur<input id="wallColor" type="color" value="#d7d2c8"></label><label>Transparantie<input id="wallOpacity" type="number" min=".05" max="1" step=".05" value=".65"></label></div>
           <div id="wallCreateError" class="error"></div>
-          <button id="confirmWallBtn" class="primary">Muur maken</button>
+          <button id="confirmWallBtn" class="primary">Muur aanmaken</button>
           <button id="cancelWallBtn" class="secondary">Annuleren</button>
         </div>
       </section>
 
       <section id="page-wall" class="page">
-        <h3>Muur</h3>
-        <div class="menuCard">
-          <div id="wallInfo" class="help">—</div>
+        <h3>Muur</h3><div class="menuCard"><div id="wallInfo" class="help">—</div>
           <button id="toggleWallBtn" class="secondary">Zichtbaar / verborgen</button>
           <button id="deleteWallBtn" class="danger">Muur wissen</button>
         </div>
       </section>
 
       <section id="page-shapecreate" class="page">
-        <h3>Vorm aanmaken</h3>
-        <div class="menuCard">
-          <div id="shapeCreateInfo" class="help">—</div>
-          <label>Unieke naam <input id="shapeName" maxlength="40" placeholder="bv. Hut vloer"></label>
-          <div class="grid2">
-            <label>Opvulling <input id="shapeFill" type="color" value="#4caf50"></label>
-            <label>Randkleur <input id="shapeBorder" type="color" value="#ffffff"></label>
-          </div>
-          <label>Transparantie <input id="shapeOpacity" type="range" min="0" max=".8" step=".05" value=".30"></label>
-          <label>Randdikte <select id="shapeThickness"><option value="1">1</option><option value="2" selected>2</option><option value="3">3</option><option value="4">4</option></select></label>
+        <h3>Vorm opslaan</h3><div class="menuCard">
+          <div id="shapeCreateInfo" class="help">Gesloten contour klaar.</div>
+          <label>Unieke naam<input id="shapeName" maxlength="40" placeholder="bv. Vloer"></label>
+          <div class="grid2"><label>Opvulling<input id="shapeFill" type="color" value="#4caf50"></label><label>Rand<input id="shapeBorder" type="color" value="#ffffff"></label></div>
+          <label>Transparantie<input id="shapeOpacity" type="number" min="0" max=".9" step=".05" value=".30"></label>
+          <label>Randdikte<select id="shapeThickness"><option value="1">1 · fijn</option><option value="2" selected>2 · normaal</option><option value="3">3 · duidelijk</option><option value="4">4 · zwaar</option></select></label>
+          <label class="check"><input id="shapeLabels" type="checkbox" checked> Randlabels tonen</label>
           <div id="shapeError" class="error"></div>
           <button id="createShapeBtn" class="primary">Vorm aanmaken</button>
           <button id="cancelShapeBtn" class="secondary">Alleen contour bewaren</button>
         </div>
       </section>
 
-
-
-
       <section id="page-shape" class="page">
-        <h3>Vorm</h3>
-        <div class="menuCard">
+        <h3>Vorm</h3><div class="menuCard">
           <div id="shapeInfo" class="help">—</div>
-          <button id="deleteShapeBtn" class="danger">Vorm verwijderen</button>
+          <label>Naam<input id="editShapeName" maxlength="40"></label>
+          <div class="grid2"><label>Opvulling<input id="editShapeFill" type="color"></label><label>Rand<input id="editShapeBorder" type="color"></label></div>
+          <label>Transparantie<input id="editShapeOpacity" type="number" min="0" max=".9" step=".05"></label>
+          <label>Randdikte<select id="editShapeThickness"><option value="1">1 · fijn</option><option value="2">2 · normaal</option><option value="3">3 · duidelijk</option><option value="4">4 · zwaar</option></select></label>
+          <label class="check"><input id="editShapeLabels" type="checkbox"> Randlabels tonen</label>
+          <button id="saveShapeBtn" class="primary">Wijzigingen opslaan</button>
+          <button id="deleteShapeOnlyBtn" class="secondary">Alleen vorm/opvulling verwijderen</button>
+          <button id="deleteShapeContourBtn" class="danger">Vorm + contour verwijderen</button>
         </div>
       </section>
 
       <section id="page-settings" class="page">
-        <h3>Instellingen</h3>
-        <p class="help">Wijzigingen worden onmiddellijk toegepast.</p>
-        <div class="menuCard">
-          <label>Eenheid
-            <select id="defaultUnit">
-              <option value="cm" selected>centimeter</option>
-              <option value="m">meter</option>
-            </select>
-          </label>
-          <label>Lijndikte
-            <select id="defaultThickness">
-              <option value="1">1 · fijn</option>
-              <option value="2" selected>2 · normaal</option>
-              <option value="3">3 · duidelijk</option>
-              <option value="4">4 · zwaar</option>
-            </select>
-          </label>
+        <h3>Instellingen</h3><div class="menuCard">
+          <label>Eenheid<select id="defaultUnit"><option value="cm" selected>centimeter</option><option value="m">meter</option></select></label>
+          <label>Lijndikte<select id="defaultThickness"><option value="1">1 · fijn</option><option value="2" selected>2 · normaal</option><option value="3">3 · duidelijk</option><option value="4">4 · zwaar</option></select></label>
           <label class="check"><input id="defaultLabels" type="checkbox" checked> Labels tonen</label>
         </div>
       </section>
 
       <section id="page-clear" class="page">
-        <h3>Alles wissen</h3>
-        <div class="menuCard">
-          <p>Alle punten, lijnen, contouren en vormen wissen? AR blijft actief.</p>
-          <button id="confirmClearBtn" class="danger">Alles wissen</button>
-          <button id="cancelClearBtn" class="secondary">Annuleren</button>
+        <h3>Alles wissen</h3><div class="menuCard"><p>Alle objecten wissen? AR blijft actief.</p>
+          <button id="confirmClearBtn" class="danger">Alles wissen</button><button id="cancelClearBtn" class="secondary">Annuleren</button>
         </div>
       </section>
     </div>
-    <div class="menuFoot single">
-      <button id="menuSettingsBtn" class="secondary">Instellingen</button></div>
+    <div class="menuFoot single"><button id="menuSettingsBtn" class="secondary">Instellingen</button></div>
   </aside>
 
-  <div id="pointLabels"></div>
-  <div id="lineLabels"></div>
-  <div id="aim"></div>
+  <div id="pointLabels"></div><div id="lineLabels"></div><div id="aim"></div>
 
   <div id="drawingHud" class="drawingHud">
-    <button id="hudToolBtn" class="hudTool">LIJN</button>
-    <button id="constraintHudBtn" class="hudSelect">Vrij ▾</button>
-    <button id="distanceHudBtn" class="hudSelect">AUTO ▾</button>
-    <button id="hudMoreBtn" class="hudIcon" aria-label="Tekenopties">⚙</button>
+    <div class="hudMain">
+      <button id="hudToolBtn" class="hudTool">TEKENEN</button>
+      <button id="constraintHudBtn" class="hudSelect">Vrij ▾</button>
+      <button id="distanceHudBtn" class="hudSelect">AUTO ▾</button>
+      <button id="hudMoreBtn" class="hudIcon">⋯</button>
+    </div>
+    <div id="hudContext" class="hudContext">Kies eerst een tekenfunctie.</div>
+    <div id="hudActions" class="hudActions">
+      <button id="hudUndoBtn" class="secondary">↶</button>
+      <button id="hudFinishBtn" class="primary">Voltooien</button>
+      <button id="hudCancelBtn" class="secondary">Stop</button>
+    </div>
   </div>
+
   <div id="directionPopover" class="hudPopover">
-    <button data-hud-direction="free">Vrij</button>
-    <button data-hud-direction="horizontal">Horizontaal</button>
-    <button data-hud-direction="vertical">Verticaal</button>
-    <button data-hud-direction="surface">Op oppervlak</button>
-    <button data-hud-direction="parallel">Parallel</button>
-    <button data-hud-direction="perpendicular">Loodrecht 90°</button>
+    <button data-hud-direction="free">Vrij</button><button data-hud-direction="horizontal">Horizontaal</button>
+    <button data-hud-direction="vertical">Verticaal</button><button data-hud-direction="surface">Op oppervlak</button>
+    <button data-hud-direction="parallel">Parallel</button><button data-hud-direction="perpendicular">Loodrecht 90°</button>
     <button data-hud-direction="angle">Eigen hoek</button>
+    <div id="hudReferenceWrap" class="hudWide">
+      <label>Referentielijn<select id="hudReference"></select></label>
+    </div>
+    <div id="hudAngleWrap" class="hudWide hudInline">
+      <label>Hoek<input id="hudAngle" type="number" min="-180" max="180" step=".5" value="45"></label>
+      <button id="hudSideBtn" class="secondary">Zijde ↔</button>
+    </div>
   </div>
+
   <div id="distancePopover" class="hudPopover distancePopover">
-    <button id="hudAutoBtn" class="secondary">AUTO · handmatig</button>
-    <div class="hudDistanceRow"><input id="hudDistance" type="number" min="0.01" step="0.1" value="100"><select id="hudUnit"><option value="cm" selected>cm</option><option value="m">m</option></select><button id="hudMetricBtn" class="primary">Op maat</button></div>
-    <div id="hudAngleRow" class="hudDistanceRow" style="display:none"><input id="hudAngle" type="number" min="-180" max="180" step="0.5" value="45"><span>°</span><button id="hudAngleApplyBtn" class="secondary">Hoek</button></div>
-    <div id="hudMetricHelp" class="help">AUTO gebruikt de camera. Op maat plaatst het volgende punt exact vanaf het actieve vertrekpunt.</div>
-  </div>
-  <div id="drawControls">
-    <button id="drawUndoBtn" class="secondary">↶ Laatste</button>
-    <button id="drawFinishBtn" class="primary" disabled>Voltooien</button>
+    <button id="hudAutoBtn" class="secondary">AUTO · camera bepaalt afstand</button>
+    <div class="hudDistanceRow"><input id="hudDistance" type="number" min=".01" step=".1" value="100"><select id="hudUnit"><option value="cm" selected>cm</option><option value="m">m</option></select><button id="hudUseDistanceBtn" class="primary">Gebruik</button></div>
+    <div class="help">Dit stelt alleen de volgende plaatsing in. De witte ronde knop bevestigt altijd het punt.</div>
   </div>
 
-  <div id="zoomHud">
-    <button id="zoomInBtn">＋</button>
-    <div id="zoomValue">1.0×</div>
-    <button id="zoomOutBtn">−</button>
-    <button id="zoomResetBtn">1×</button>
+  <div id="morePopover" class="hudPopover distancePopover">
+    <label>Snappen<select id="hudSnap"><option value="points" selected>Bestaande punten</option><option value="off">Uit</option></select></label>
+    <div class="help">Een kandidaatpunt is voorlopig. Alleen de witte ronde knop maakt het definitief.</div>
   </div>
 
-  <button id="captureBtn" disabled aria-label="Punt vastleggen"></button>
-  <div id="hint">Beweeg rustig zodat ARCore een oppervlak kan herkennen.</div>
+  <div id="zoomHud"><button id="zoomInBtn">＋</button><div id="zoomValue">1.0×</div><button id="zoomOutBtn">−</button><button id="zoomResetBtn">1×</button></div>
+  <button id="captureBtn" disabled aria-label="Punt bevestigen"></button>
+  <div id="hint">Open ☰ en kies wat je wilt tekenen.</div>
 </div>
 
-<script type="module" src="./js/bootstrap.js?v=0.8.10-20260822-1930"></script>
+<script type="module" src="./js/bootstrap.js?v=0.8.11-20260822-1945"></script>
 </body>
 </html>
