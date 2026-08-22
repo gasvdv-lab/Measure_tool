@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#111111">
-<title>Measure AR v0.6.9</title>
+<title>Measure AR v0.7.0</title>
 <style>
 :root{color-scheme:dark;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 *{box-sizing:border-box}
@@ -78,6 +78,53 @@ canvas{position:fixed;inset:0;width:100%;height:100%}
 .objectRow{display:grid;grid-template-columns:1fr auto;gap:5px;align-items:center;padding:5px;border-bottom:1px solid #ffffff10}
 .objectRow:last-child{border-bottom:0}
 .objectRow button{margin:0;width:auto}
+
+#lineLabels{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  overflow:hidden;
+}
+.lineScreenLabel{
+  position:absolute;
+  transform:translate(-50%,-50%);
+  padding:4px 7px;
+  border-radius:8px;
+  background:rgba(0,0,0,.78);
+  border:1px solid rgba(255,255,255,.12);
+  color:#fff;
+  font-size:.66rem;
+  line-height:1;
+  font-weight:750;
+  white-space:nowrap;
+  box-shadow:0 2px 8px rgba(0,0,0,.22);
+  transform-origin:center center;
+}
+#drawControls{
+  position:absolute;
+  left:50%;
+  bottom:max(154px,calc(env(safe-area-inset-bottom) + 154px));
+  transform:translateX(-50%);
+  display:none;
+  width:min(92vw,430px);
+  grid-template-columns:1fr 1fr 1fr;
+  gap:5px;
+  padding:6px;
+  border-radius:12px;
+  background:rgba(0,0,0,.72);
+  border:1px solid rgba(255,255,255,.14);
+  backdrop-filter:blur(8px);
+  pointer-events:auto;
+}
+#drawControls.visible{display:grid}
+#drawControls button{
+  min-height:34px;
+  padding:6px 5px;
+  border-radius:8px;
+  font-size:.66rem;
+  margin:0;
+}
+
 </style>
 </head>
 <body>
@@ -104,7 +151,7 @@ canvas{position:fixed;inset:0;width:100%;height:100%}
       <label class="check"><input id="defaultLabels" type="checkbox" checked> Labels op lijnen tonen</label>
     </div>
 
-    <div class="build">v0.6.9 · core stabilization</div>
+    <div class="build">v0.7.0 · core drawing + stability</div>
     <div id="error"></div>
   </div>
 </div>
@@ -123,7 +170,7 @@ canvas{position:fixed;inset:0;width:100%;height:100%}
   <div id="menuPanel">
     <div class="menuHead">
       <button id="menuBackBtn" class="secondary" aria-label="Terug">‹</button>
-      <div class="menuTitle"><strong id="menuTitle">Measure AR</strong><span id="menuMeta">Meten · 0p · 0l · v0.6.9</span></div>
+      <div class="menuTitle"><strong id="menuTitle">Measure AR</strong><span id="menuMeta">Meten · 0p · 0l · v0.7.0</span></div>
       <button id="menuCloseBtn" class="secondary" aria-label="Sluiten">✕</button>
     </div>
 
@@ -134,6 +181,7 @@ canvas{position:fixed;inset:0;width:100%;height:100%}
           <div class="navRow" data-page="measure"><div><strong>Meten</strong><span>Afstand tussen twee punten</span></div><div class="chev">›</div></div>
           <div class="navRow" data-page="stake"><div><strong>Uitzetten</strong><span>Punt op vaste afstand plaatsen</span></div><div class="chev">›</div></div>
           <div class="navRow" data-page="newline"><div><strong>Nieuwe lijn</strong><span>Verder bouwen aan bestaande geometrie</span></div><div class="chev">›</div></div>
+          <div class="navRow" id="continuousDrawRow"><div><strong>Doorlopend tekenen</strong><span>A → B → C → D zonder terug naar menu</span></div><div class="chev">›</div></div>
         </div>
         <div class="sectionTitle">Project</div>
         <div class="menuCard"><div class="navRow" data-page="objects"><div><strong>Objecten</strong><span>Punten en lijnen beheren</span></div><div class="chev">›</div></div></div>
@@ -208,7 +256,15 @@ canvas{position:fixed;inset:0;width:100%;height:100%}
     </div>
   </div>
 
+  <div id="lineLabels"></div>
   <div id="aim"></div>
+
+  <div id="drawControls">
+    <button id="drawUndoBtn" class="secondary">↶ Laatste</button>
+    <button id="drawFinishBtn" class="secondary">Voltooien</button>
+    <button id="drawCloseBtn" class="primary">Sluiten naar A</button>
+  </div>
+
   <button id="captureBtn" disabled aria-label="Punt vastleggen"></button>
   <div id="hint">Beweeg rustig zodat ARCore een oppervlak kan herkennen.</div>
 </div>
@@ -222,6 +278,7 @@ const $ = id => document.getElementById(id);
 const app=$("app"), overlay=$("overlay"), startBtn=$("startBtn"), settingsBtn=$("settingsBtn"), settingsPanel=$("settingsPanel"), errorBox=$("error");
 const defaultUnit=$("defaultUnit"), defaultThickness=$("defaultThickness"), defaultLabels=$("defaultLabels");
 const stage=$("stage"), distanceEl=$("distance"), detail=$("detail"), stability=$("stability"), hint=$("hint"), aim=$("aim"), captureBtn=$("captureBtn");
+const lineLabels=$("lineLabels"), drawControls=$("drawControls"), drawUndoBtn=$("drawUndoBtn"), drawFinishBtn=$("drawFinishBtn"), drawCloseBtn=$("drawCloseBtn");
 const menuBtn=$("menuBtn"), menuPanel=$("menuPanel"), menuBackBtn=$("menuBackBtn"), menuCloseBtn=$("menuCloseBtn"), menuTitle=$("menuTitle"), menuMeta=$("menuMeta");
 const stakeDistance=$("stakeDistance"), stakeUnit=$("stakeUnit"), stakeDirection=$("stakeDirection"), objectsList=$("objectsList");
 const pages=["home","measure","stake","newline","objects","line","point"];
@@ -234,8 +291,17 @@ let pointA=null, normalA=null, activeStartId=null, currentTarget=null, targetSou
 let placingPoint=false;
 let temporaryDirectionMarker=null;
 
-const points=[], lines=[], undoStack=[];
-let pointCounter=0, selectedLineId=null, selectedPointId=null, pendingStakePointId=null, objectPickMode=null;
+const points=[], lines=[], undoStack=[], contours=[];
+let pointCounter=0, contourCounter=1, selectedLineId=null, selectedPointId=null, pendingStakePointId=null, objectPickMode=null;
+
+let drawSession={
+  active:false,
+  startPointId:null,
+  lastPointId:null,
+  pointIds:[],
+  lineIds:[],
+  closed:false
+};
 let menuStack=["home"];
 
 const samples=[]; const MAX_SAMPLES=16;
@@ -248,7 +314,7 @@ function pointName(i){ const c=String.fromCharCode(65+(i%26)); const n=Math.floo
 function getPoint(id){ return points.find(p=>p.id===id)||null; }
 function getLine(id){ return lines.find(l=>l.id===id)||null; }
 
-function updateMeta(){ menuMeta.textContent=`${mode==="measure"?"Meten":"Uitzetten"} · ${points.length}p · ${lines.length}l · v0.6.9`; }
+function updateMeta(){ menuMeta.textContent=`${mode==="measure"?"Meten":"Uitzetten"} · ${points.length}p · ${lines.length}l · v0.7.0`; }
 function showPage(name,push=true){
   pages.forEach(p=>$("page-"+p).classList.remove("active"));
   $("page-"+name).classList.add("active");
@@ -313,16 +379,55 @@ function makeMarker(color){
   r.rotation.x=-Math.PI/2;
   g.add(s,r); scene.add(g); return g;
 }
-function textSprite(text){
-  const c=document.createElement("canvas"); c.width=512; c.height=128;
-  const x=c.getContext("2d");
-  x.font="700 34px system-ui"; x.textAlign="center"; x.textBaseline="middle";
-  const w=Math.max(210,Math.min(480,x.measureText(text).width+70));
-  x.fillStyle="rgba(0,0,0,.78)"; x.fillRect(256-w/2,18,w,92);
-  x.fillStyle="#fff"; x.fillText(text,256,64);
-  const tex=new THREE.CanvasTexture(c);
-  const mat=new THREE.SpriteMaterial({map:tex,transparent:true,depthTest:false});
-  const s=new THREE.Sprite(mat); s.scale.set(.72,.18,1); scene.add(s); return s;
+function makeLineLabel(text){
+  const el=document.createElement("div");
+  el.className="lineScreenLabel";
+  el.textContent=text;
+  lineLabels.appendChild(el);
+  return el;
+}
+function removeLineLabel(el){
+  if(el?.parentNode) el.parentNode.removeChild(el);
+}
+function updateLineLabelText(line){
+  if(!line.labelEl) line.labelEl=makeLineLabel(`${line.name} · ${fmt(line.distance)}`);
+  else line.labelEl.textContent=`${line.name} · ${fmt(line.distance)}`;
+}
+function updateScreenLabels(){
+  if(!renderer||!camera||!defaultLabels.checked){
+    for(const l of lines) if(l.labelEl) l.labelEl.style.display="none";
+    return;
+  }
+
+  const xrCam=renderer.xr.getCamera(camera);
+  const width=window.innerWidth, height=window.innerHeight;
+
+  for(const l of lines){
+    if(!l.labelEl) continue;
+    const a=getPoint(l.startId), b=getPoint(l.endId);
+    if(!a||!b){ l.labelEl.style.display="none"; continue; }
+
+    const mid=a.position.clone().add(b.position).multiplyScalar(.5);
+    mid.y+=0.035;
+    const projected=mid.clone().project(xrCam);
+
+    if(projected.z<-1 || projected.z>1 || Math.abs(projected.x)>1.15 || Math.abs(projected.y)>1.15){
+      l.labelEl.style.display="none";
+      continue;
+    }
+
+    const x=(projected.x*.5+.5)*width;
+    const y=(-projected.y*.5+.5)*height - 18;
+
+    xrCam.getWorldPosition(camPos);
+    const d=Math.max(.15,mid.distanceTo(camPos));
+    const scale=Math.max(.72,Math.min(1.08,.78+d*.035));
+
+    l.labelEl.style.display="block";
+    l.labelEl.style.left=x+"px";
+    l.labelEl.style.top=y+"px";
+    l.labelEl.style.transform=`translate(-50%,-50%) scale(${scale})`;
+  }
 }
 function thicknessPx(v){return({1:1,2:2,3:3,4:4})[v]||2;}
 function technicalLine(a,b,t){
@@ -334,26 +439,68 @@ function createPoint(pos,color=0x69ff9a){
   const p={id:"p"+Date.now()+Math.random(),name:pointName(pointCounter++),position:pos.clone(),marker:makeMarker(color)};
   p.marker.position.copy(pos); points.push(p); renderObjects(); return p;
 }
-function createLine(a,b){
-  if(!a||!b||!a.position||!b.position)throw new Error("Start- of eindpunt ontbreekt.");
-  const d=a.position.distanceTo(b.position);if(!Number.isFinite(d)||d<.0001)throw new Error("De lijn is te kort of ongeldig.");
-  const thickness=Number(defaultThickness.value)||2,name=a.name+b.name;
-  const object=technicalLine(a.position,b.position,thickness);if(!object)throw new Error("De lijn kon niet worden getekend.");
-  let label=null;try{label=textSprite(`${name} · ${fmt(d)}`);label.position.copy(a.position).add(b.position).multiplyScalar(.5);label.position.y+=.04;}catch(err){console.warn("Label creation failed",err);}
-  const l={id:"l"+Date.now()+Math.random(),name,startId:a.id,endId:b.id,distance:d,object,label,thickness};lines.push(l);undoStack.push({type:"created",lineId:l.id,endId:b.id});renderObjects();return l;
+function createLine(a,b,{recordUndo=true}={}){
+  if(!a||!b||!a.position||!b.position) throw new Error("Start- of eindpunt ontbreekt.");
+
+  const d=a.position.distanceTo(b.position);
+  if(!Number.isFinite(d)||d<.0001) throw new Error("De lijn is te kort of ongeldig.");
+
+  const thickness=Number(defaultThickness.value)||2;
+  const name=a.name+b.name;
+
+  // First create the geometry record, then attach the renderer.
+  const l={
+    id:"l"+Date.now()+Math.random(),
+    name,
+    startId:a.id,
+    endId:b.id,
+    distance:d,
+    thickness,
+    object:null,
+    labelEl:null
+  };
+
+  l.object=technicalLine(a.position,b.position,thickness);
+  if(!l.object) throw new Error("De lijn kon niet worden getekend.");
+
+  try{
+    l.labelEl=makeLineLabel(`${name} · ${fmt(d)}`);
+  }catch(err){
+    console.warn("DOM label creation failed; keeping geometry",err);
+  }
+
+  lines.push(l);
+  if(recordUndo) undoStack.push({type:"created",lineId:l.id,endId:b.id});
+  renderObjects();
+  return l;
 }
 function refreshLine(l){
-  const a=getPoint(l.startId),b=getPoint(l.endId);if(!a||!b)return;
+  const a=getPoint(l.startId),b=getPoint(l.endId);
+  if(!a||!b)return;
+
   l.distance=a.position.distanceTo(b.position);
-  const pos=l.object.geometry.getAttribute("position");
-  if(pos&&pos.count===2){pos.setXYZ(0,a.position.x,a.position.y,a.position.z);pos.setXYZ(1,b.position.x,b.position.y,b.position.z);pos.needsUpdate=true;l.object.geometry.computeBoundingSphere();}
-  else{l.object.geometry.dispose();l.object.geometry=new THREE.BufferGeometry().setFromPoints([a.position,b.position]);}
-  l.object.material.linewidth=thicknessPx(l.thickness);l.object.material.needsUpdate=true;
-  const old=l.label;try{l.label=textSprite(`${l.name} · ${fmt(l.distance)}`);l.label.position.copy(a.position).add(b.position).multiplyScalar(.5);l.label.position.y+=.04;if(old)dispose(old);}catch(err){console.warn("Label refresh failed",err);l.label=old||null;}
+
+  const pos=l.object?.geometry?.getAttribute("position");
+  if(pos&&pos.count===2){
+    pos.setXYZ(0,a.position.x,a.position.y,a.position.z);
+    pos.setXYZ(1,b.position.x,b.position.y,b.position.z);
+    pos.needsUpdate=true;
+    l.object.geometry.computeBoundingSphere();
+  }else if(l.object){
+    l.object.geometry?.dispose?.();
+    l.object.geometry=new THREE.BufferGeometry().setFromPoints([a.position,b.position]);
+  }
+
+  if(l.object?.material){
+    l.object.material.linewidth=thicknessPx(l.thickness);
+    l.object.material.needsUpdate=true;
+  }
+
+  updateLineLabelText(l);
 }
 function deleteLine(id){
   const i=lines.findIndex(l=>l.id===id); if(i<0) return;
-  dispose(lines[i].object); if(lines[i].label) dispose(lines[i].label); lines.splice(i,1);
+  dispose(lines[i].object); removeLineLabel(lines[i].labelEl); lines.splice(i,1);
   if(selectedLineId===id) selectedLineId=null;
   renderObjects();
 }
@@ -368,7 +515,9 @@ function deletePoint(id){
 function clearAll(){
   [...lines].forEach(l=>deleteLine(l.id));
   [...points].forEach(p=>deletePoint(p.id));
-  pointCounter=0; selectedLineId=null; selectedPointId=null; pendingStakePointId=null; undoStack.length=0;
+  pointCounter=0; contourCounter=1; selectedLineId=null; selectedPointId=null; pendingStakePointId=null; undoStack.length=0;
+  contours.length=0;
+  resetDrawSession();
   resetCurrent(); renderObjects();
 }
 
@@ -391,6 +540,157 @@ function renderObjects(){
     open.onclick=()=>{selectedPointId=p.id;selectedLineId=null;if(objectPickMode==="measure"){objectPickMode=null;startMeasureFrom(p.id);return;}if(objectPickMode==="stake"){objectPickMode=null;startStake(p.id);return;}const linked=lines.filter(l=>l.startId===p.id||l.endId===p.id).map(l=>l.name).join(", ");$("pointInfo").textContent=linked?`Punt ${p.name} · ${linked}`:`Punt ${p.name}`;showPage("point");};
     row.append(open); objectsList.append(row);
   });
+}
+
+
+function resetDrawSession(){
+  drawSession={
+    active:false,
+    startPointId:null,
+    lastPointId:null,
+    pointIds:[],
+    lineIds:[],
+    closed:false
+  };
+  drawControls.classList.remove("visible");
+}
+
+function startContinuousDrawing(){
+  mode="measure";
+  resetCurrent();
+  drawSession={
+    active:true,
+    startPointId:null,
+    lastPointId:null,
+    pointIds:[],
+    lineIds:[],
+    closed:false
+  };
+  lineFinished=false;
+  drawControls.classList.add("visible");
+  stage.textContent="Doorlopend tekenen";
+  distanceEl.textContent="—";
+  detail.textContent="Plaats punt A";
+  hint.textContent="Plaats A. Daarna wordt elk nieuw punt automatisch verbonden met het vorige.";
+  closeMenu();
+}
+
+function saveCurrentContour(closed){
+  if(drawSession.pointIds.length<2) return null;
+  const contour={
+    id:"c"+Date.now()+Math.random(),
+    name:`Contour ${contourCounter++}`,
+    pointIds:[...drawSession.pointIds],
+    lineIds:[...drawSession.lineIds],
+    closed:Boolean(closed)
+  };
+  contours.push(contour);
+  return contour;
+}
+
+function finishContinuousDrawing(){
+  if(!drawSession.active) return;
+  const count=drawSession.lineIds.length;
+
+  if(count>0){
+    const contour=saveCurrentContour(false);
+    stage.textContent="Tekenreeks voltooid";
+    detail.textContent=`${contour.name} · ${count} lijnen · open`;
+    hint.textContent="De lijnen blijven staan. Open ☰ om verder te werken.";
+  }else{
+    stage.textContent="Tekenen gestopt";
+    detail.textContent="";
+  }
+
+  resetDrawSession();
+  resetCurrent();
+  lineFinished=true;
+  captureBtn.disabled=true;
+}
+
+function closeContinuousDrawing(){
+  if(!drawSession.active) return;
+  if(drawSession.pointIds.length<3){
+    stage.textContent="Minstens 3 punten nodig";
+    hint.textContent="Plaats minstens drie punten voordat je de contour sluit.";
+    return;
+  }
+
+  const first=getPoint(drawSession.startPointId);
+  const last=getPoint(drawSession.lastPointId);
+  if(!first||!last) return;
+
+  try{
+    const closing=createLine(last,first,{recordUndo:false});
+    drawSession.lineIds.push(closing.id);
+    drawSession.closed=true;
+
+    const contour=saveCurrentContour(true);
+    undoStack.push({
+      type:"continuousClosed",
+      contourId:contour.id,
+      lineId:closing.id
+    });
+
+    distanceEl.textContent=fmt(closing.distance);
+    stage.textContent="Contour gesloten";
+    detail.textContent=`${contour.name} · ${drawSession.lineIds.length} lijnen`;
+    hint.textContent="De gesloten contour blijft als gekoppelde tekenreeks bewaard.";
+
+    resetDrawSession();
+    resetCurrent();
+    lineFinished=true;
+    captureBtn.disabled=true;
+  }catch(err){
+    console.error(err);
+    stage.textContent="Sluiten mislukt";
+    detail.textContent=err.message||"Onbekende fout";
+  }
+}
+
+function undoContinuousStep(){
+  if(!drawSession.active) return;
+  if(drawSession.lineIds.length===0){
+    // Remove the first point if the user has only placed A.
+    if(drawSession.pointIds.length===1){
+      const id=drawSession.pointIds.pop();
+      deletePoint(id);
+      drawSession.startPointId=null;
+      drawSession.lastPointId=null;
+      pointA=null;
+      activeStartId=null;
+      stage.textContent="Doorlopend tekenen";
+      detail.textContent="Plaats punt A";
+      hint.textContent="Plaats opnieuw het eerste punt.";
+    }
+    return;
+  }
+
+  const lineId=drawSession.lineIds.pop();
+  const line=getLine(lineId);
+  if(!line) return;
+
+  const endId=line.endId;
+  deleteLine(lineId);
+
+  // End point was created by this continuous-drawing step and is not needed anymore.
+  const connectedElsewhere=lines.some(l=>l.startId===endId||l.endId===endId);
+  if(!connectedElsewhere) deletePoint(endId);
+
+  drawSession.pointIds.pop();
+  drawSession.lastPointId=drawSession.pointIds[drawSession.pointIds.length-1]||drawSession.startPointId;
+
+  const last=getPoint(drawSession.lastPointId);
+  if(last){
+    pointA=last.position.clone();
+    activeStartId=last.id;
+    normalA=up.clone();
+  }
+
+  stage.textContent="Laatste segment verwijderd";
+  detail.textContent=`${drawSession.lineIds.length} lijnen in reeks`;
+  hint.textContent="Plaats het volgende punt.";
+  lineFinished=false;
 }
 
 function resetSamples(){ samples.length=0; stability.textContent="Stabiliteit: meten…"; }
@@ -420,10 +720,11 @@ function setStart(id){
   hint.textContent=mode==="measure"?"Richt op het eindpunt en druk op de meetknop.":"Richt in de gewenste richting en druk op de meetknop.";
   closeMenu();
 }
-function startMeasureNew(){ mode="measure"; resetCurrent(); stage.textContent="Nieuw startpunt"; hint.textContent="Plaats het startpunt van de nieuwe lijn."; closeMenu(); }
-function startMeasureFrom(id){ mode="measure"; setStart(id); }
+function startMeasureNew(){ resetDrawSession(); mode="measure"; resetCurrent(); stage.textContent="Nieuw startpunt"; hint.textContent="Plaats het startpunt van de nieuwe lijn."; closeMenu(); }
+function startMeasureFrom(id){ resetDrawSession(); mode="measure"; setStart(id); }
 function readStake(){ const n=Number(stakeDistance.value); if(!Number.isFinite(n)||n<=0) return null; return stakeUnit.value==="cm"?n/100:n; }
 function startStake(id=null){
+  resetDrawSession();
   const t=readStake(); if(t===null){ stage.textContent="Ongeldige afstand"; return; }
   targetMeters=t; directionMode=stakeDirection.value; mode="stake"; resetCurrent();
   if(id) setStart(id); else{ stage.textContent="Uitzetten"; hint.textContent="Plaats eerst het startpunt."; closeMenu(); }
@@ -455,6 +756,79 @@ function automaticB(directionPoint){
 function setAim(src){ aim.className=src==="hit"?"hit":src==="virtual"?"virtual":""; }
 
 function placePoint(){
+  if(drawSession.active){
+    if(placingPoint) return;
+    const p=filteredTarget();
+    if(!p) return;
+
+    placingPoint=true;
+    captureBtn.disabled=true;
+
+    try{
+      if(!drawSession.startPointId){
+        const a=createPoint(p);
+        drawSession.startPointId=a.id;
+        drawSession.lastPointId=a.id;
+        drawSession.pointIds.push(a.id);
+
+        activeStartId=a.id;
+        pointA=a.position.clone();
+        normalA=targetSource==="hit"?reticleNormal():up.clone();
+
+        resetSamples();
+        stage.textContent=`Punt ${a.name} geplaatst`;
+        detail.textContent="Doorlopend tekenen · 0 lijnen";
+        hint.textContent="Plaats punt B. Daarna kun je C, D, E… blijven plaatsen.";
+        return;
+      }
+
+      const start=getPoint(drawSession.lastPointId);
+      if(!start) throw new Error("Laatste tekenpunt ontbreekt.");
+
+      const end=createPoint(p,0xffd166);
+      let line=null;
+      try{
+        line=createLine(start,end,{recordUndo:false});
+      }catch(err){
+        deletePoint(end.id);
+        throw err;
+      }
+
+      drawSession.pointIds.push(end.id);
+      drawSession.lineIds.push(line.id);
+      drawSession.lastPointId=end.id;
+
+      // Continue directly from the new endpoint.
+      activeStartId=end.id;
+      pointA=end.position.clone();
+      normalA=targetSource==="hit"?reticleNormal():up.clone();
+      lineFinished=false;
+
+      undoStack.push({
+        type:"continuousStep",
+        lineId:line.id,
+        endId:end.id
+      });
+
+      distanceEl.textContent=fmt(line.distance);
+      stage.textContent=`Lijn ${line.name}`;
+      detail.textContent=`Doorlopend · ${drawSession.lineIds.length} lijnen`;
+      hint.textContent="Plaats het volgende punt, of kies Voltooien / Sluiten naar A.";
+      resetSamples();
+
+    }catch(err){
+      console.error("continuous drawing failed",err);
+      stage.textContent="Tekenen mislukt";
+      detail.textContent=err.message||"Onbekende fout";
+      hint.textContent="De bestaande tekenreeks is behouden.";
+    }finally{
+      placingPoint=false;
+      captureBtn.disabled=!currentTarget;
+    }
+    return;
+  }
+
+
   if(placingPoint||lineFinished)return;const p=filteredTarget();if(!p)return;placingPoint=true;captureBtn.disabled=true;
   try{
     if(!pointA){const a=createPoint(p);activeStartId=a.id;pointA=a.position.clone();normalA=targetSource==="hit"?reticleNormal():up.clone();resetSamples();stage.textContent=`Punt ${a.name} geplaatst`;distanceEl.textContent=mode==="stake"?fmt(targetMeters):"—";hint.textContent=mode==="measure"?"Richt op het eindpunt en druk opnieuw.":"Richt in de gewenste richting en druk opnieuw.";return;}
@@ -534,12 +908,12 @@ function render(t,frame){
 
   const xrCam=renderer.xr.getCamera(camera); xrCam.getWorldPosition(camPos);
   points.forEach(p=>{ const d=Math.max(.05,p.position.distanceTo(camPos)); p.marker.scale.setScalar(Math.min(4,Math.max(.55,.48+d*.28))); });
-  lines.forEach(l=>{ if(l.label) l.label.visible=defaultLabels.checked; });
+  updateScreenLabels();
 
   renderer.render(scene,camera);
 }
 
-function coreSelfCheck(){const req=["startBtn","menuBtn","captureBtn","measureNewBtn","measureLastBtn","measureExistingBtn","stakeNewBtn","stakeLastBtn","stakeExistingBtn","newIndependentBtn","newFromLastBtn","stakeFromLastBtn","objectsList","lineLength","lineThickness","applyLineLengthBtn","undoBtn","clearAllBtn","exitArBtn"];const missing=req.filter(id=>!$(id));console.info("core self-check",{ok:!missing.length,missing,version:"0.6.9"});if(missing.length)showError("Interne UI-fout: "+missing.join(", "));return !missing.length;}
+function coreSelfCheck(){const req=["startBtn","menuBtn","captureBtn","continuousDrawRow","drawControls","drawUndoBtn","drawFinishBtn","drawCloseBtn","lineLabels","measureNewBtn","measureLastBtn","measureExistingBtn","stakeNewBtn","stakeLastBtn","stakeExistingBtn","newIndependentBtn","newFromLastBtn","stakeFromLastBtn","objectsList","lineLength","lineThickness","applyLineLengthBtn","undoBtn","clearAllBtn","exitArBtn"];const missing=req.filter(id=>!$(id));console.info("core self-check",{ok:!missing.length,missing,version:"0.6.9"});if(missing.length)showError("Interne UI-fout: "+missing.join(", "));return !missing.length;}
 function undoLast(){
   const a=undoStack.pop();
   if(!a){ stage.textContent="Niets om ongedaan te maken"; closeMenu(); return; }
@@ -548,6 +922,14 @@ function undoLast(){
     if(l&&p){ p.position.fromArray(a.old); p.marker.position.copy(p.position); refreshLine(l); }
   }else if(a.type==="created"){
     deleteLine(a.lineId); deletePoint(a.endId);
+  }else if(a.type==="continuousStep"){
+    deleteLine(a.lineId);
+    const stillUsed=lines.some(l=>l.startId===a.endId||l.endId===a.endId);
+    if(!stillUsed) deletePoint(a.endId);
+  }else if(a.type==="continuousClosed"){
+    deleteLine(a.lineId);
+    const i=contours.findIndex(c=>c.id===a.contourId);
+    if(i>=0) contours.splice(i,1);
   }
   renderObjects(); closeMenu();
 }
@@ -560,6 +942,11 @@ menuBtn.addEventListener("click",()=>menuPanel.classList.contains("open")?closeM
 menuCloseBtn.addEventListener("click",closeMenu);
 menuBackBtn.addEventListener("click",menuBack);
 document.querySelectorAll("[data-page]").forEach(row=>row.addEventListener("click",()=>showPage(row.dataset.page)));
+
+$("continuousDrawRow").addEventListener("click",startContinuousDrawing);
+drawUndoBtn.addEventListener("click",undoContinuousStep);
+drawFinishBtn.addEventListener("click",finishContinuousDrawing);
+drawCloseBtn.addEventListener("click",closeContinuousDrawing);
 
 $("measureNewBtn").addEventListener("click",startMeasureNew);
 $("measureLastBtn").addEventListener("click",()=>points.length?startMeasureFrom(points[points.length-1].id):closeMenu());
