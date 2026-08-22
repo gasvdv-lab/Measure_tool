@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#111111">
-<title>Measure AR v0.7.3</title>
+<title>Measure AR v0.7.4</title>
 <style>
 :root{color-scheme:dark;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 *{box-sizing:border-box}
@@ -157,6 +157,15 @@ canvas{position:fixed;inset:0;width:100%;height:100%}
   border:1px solid rgba(255,255,255,.12);
 }
 
+
+.shapeGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.shapeGrid .full{grid-column:1/-1}
+input[type="color"]{height:42px;padding:4px}
+.rangeLine{display:grid;grid-template-columns:1fr 48px;gap:8px;align-items:center}
+.rangeValue{font-size:.72rem;text-align:center;color:#ddd}
+.objectGroupTitle{font-size:.62rem;color:#999;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin:9px 2px 5px}
+.shapeSwatch{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;border:1px solid rgba(255,255,255,.5)}
+
 </style>
 </head>
 <body>
@@ -183,7 +192,7 @@ canvas{position:fixed;inset:0;width:100%;height:100%}
       <label class="check"><input id="defaultLabels" type="checkbox" checked> Labels op lijnen tonen</label>
     </div>
 
-    <div class="build">v0.7.3 · workflow fix</div>
+    <div class="build">v0.7.4 · shapes + fill</div>
     <div id="error"></div>
   </div>
 </div>
@@ -202,7 +211,7 @@ canvas{position:fixed;inset:0;width:100%;height:100%}
   <div id="menuPanel">
     <div class="menuHead">
       <button id="menuBackBtn" class="secondary" aria-label="Terug">‹</button>
-      <div class="menuTitle"><strong id="menuTitle">Measure AR</strong><span id="menuMeta">Meten · 0p · 0l · v0.7.3</span></div>
+      <div class="menuTitle"><strong id="menuTitle">Measure AR</strong><span id="menuMeta">Meten · 0p · 0l · v0.7.4</span></div>
       <button id="menuCloseBtn" class="secondary" aria-label="Sluiten">✕</button>
     </div>
 
@@ -282,6 +291,76 @@ canvas{position:fixed;inset:0;width:100%;height:100%}
         </div>
       </section>
 
+
+      <section id="page-shapecreate" class="page">
+        <div class="sectionTitle">Vorm aanmaken</div>
+        <div class="menuCard">
+          <div id="shapeCreateInfo" class="help">Gesloten contour klaar.</div>
+          <div class="shapeGrid">
+            <div class="full">
+              <label for="shapeNameInput">Unieke naam</label>
+              <input id="shapeNameInput" type="text" maxlength="40" placeholder="bv. Hut vloer">
+            </div>
+            <div>
+              <label for="shapeFillColor">Opvulling</label>
+              <input id="shapeFillColor" type="color" value="#4caf50">
+            </div>
+            <div>
+              <label for="shapeBorderColor">Randkleur</label>
+              <input id="shapeBorderColor" type="color" value="#ffffff">
+            </div>
+            <div class="full">
+              <label for="shapeOpacity">Transparantie opvulling</label>
+              <div class="rangeLine">
+                <input id="shapeOpacity" type="range" min="0" max="0.8" step="0.05" value="0.30">
+                <div id="shapeOpacityValue" class="rangeValue">30%</div>
+              </div>
+            </div>
+            <div class="full">
+              <label for="shapeBorderThickness">Randdikte</label>
+              <select id="shapeBorderThickness"><option value="1">1 · fijn</option><option value="2" selected>2 · normaal</option><option value="3">3 · duidelijk</option><option value="4">4 · zwaar</option></select>
+            </div>
+            <label class="full" style="display:flex;gap:8px;align-items:center;font-size:.72rem"><input id="shapeLabelsVisible" type="checkbox" checked style="width:auto;min-height:0"> Labels op randlijnen</label>
+          </div>
+          <div id="shapeNameError" class="help" style="color:#ff9c9c;display:none"></div>
+          <div class="choice">
+            <button id="cancelShapeBtn" class="secondary">Annuleren</button>
+            <button id="createShapeBtn" class="primary">Vorm aanmaken</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="page-shape" class="page">
+        <div class="sectionTitle">Vorm</div>
+        <div class="menuCard">
+          <div id="shapeInfo" class="help">—</div>
+          <div class="shapeGrid">
+            <div class="full"><label for="editShapeName">Naam</label><input id="editShapeName" type="text" maxlength="40"></div>
+            <div><label for="editFillColor">Opvulling</label><input id="editFillColor" type="color"></div>
+            <div><label for="editBorderColor">Randkleur</label><input id="editBorderColor" type="color"></div>
+            <div class="full"><label for="editShapeOpacity">Transparantie</label><div class="rangeLine"><input id="editShapeOpacity" type="range" min="0" max="0.8" step="0.05"><div id="editShapeOpacityValue" class="rangeValue">—</div></div></div>
+            <div class="full"><label for="editBorderThickness">Randdikte</label><select id="editBorderThickness"><option value="1">1 · fijn</option><option value="2">2 · normaal</option><option value="3">3 · duidelijk</option><option value="4">4 · zwaar</option></select></div>
+            <label class="full" style="display:flex;gap:8px;align-items:center;font-size:.72rem"><input id="editShapeVisible" type="checkbox" checked style="width:auto;min-height:0"> Opvulling zichtbaar</label>
+            <label class="full" style="display:flex;gap:8px;align-items:center;font-size:.72rem"><input id="editShapeLabels" type="checkbox" checked style="width:auto;min-height:0"> Randlabels zichtbaar</label>
+          </div>
+          <div id="editShapeError" class="help" style="color:#ff9c9c;display:none"></div>
+          <button id="saveShapeBtn" class="primary">Wijzigingen opslaan</button>
+          <button id="deleteShapeFillBtn" class="secondary">Alleen vorm/opvulling verwijderen</button>
+          <button id="deleteShapeContourBtn" class="danger">Vorm + contour verwijderen</button>
+        </div>
+      </section>
+
+      <section id="page-deleteconfirm" class="page">
+        <div class="sectionTitle">Object wissen</div>
+        <div class="menuCard">
+          <div id="deleteDependencyInfo" class="help">—</div>
+          <div class="choice">
+            <button id="cancelDeleteBtn" class="secondary">Annuleren</button>
+            <button id="confirmDeleteBtn" class="danger">Toch wissen</button>
+          </div>
+        </div>
+      </section>
+
       <section id="page-clearconfirm" class="page">
         <div class="sectionTitle">Alles wissen</div>
         <div class="menuCard">
@@ -331,7 +410,7 @@ const lineLabels=$("lineLabels"), drawControls=$("drawControls"), drawUndoBtn=$(
 const zoomInBtn=$("zoomInBtn"), zoomOutBtn=$("zoomOutBtn"), zoomResetBtn=$("zoomResetBtn"), zoomValue=$("zoomValue");
 const menuBtn=$("menuBtn"), menuPanel=$("menuPanel"), menuBackBtn=$("menuBackBtn"), menuCloseBtn=$("menuCloseBtn"), menuTitle=$("menuTitle"), menuMeta=$("menuMeta");
 const stakeDistance=$("stakeDistance"), stakeUnit=$("stakeUnit"), stakeDirection=$("stakeDirection"), objectsList=$("objectsList");
-const pages=["home","measure","stake","newline","objects","line","point","clearconfirm"];
+const pages=["home","measure","stake","newline","objects","line","point","shapecreate","shape","deleteconfirm","clearconfirm"];
 
 let THREE=null;
 let renderer=null, scene=null, camera=null, reticle=null, xrSession=null, hitSource=null, hitRequested=false;
@@ -344,8 +423,8 @@ let pointA=null, normalA=null, activeStartId=null, currentTarget=null, targetSou
 let placingPoint=false;
 let temporaryDirectionMarker=null;
 
-const points=[], lines=[], undoStack=[], contours=[];
-let pointCounter=0, contourCounter=1, selectedLineId=null, selectedPointId=null, pendingStakePointId=null, objectPickMode=null;
+const points=[], lines=[], undoStack=[], contours=[], shapes=[];
+let pointCounter=0, contourCounter=1, selectedLineId=null, selectedPointId=null, selectedShapeId=null, pendingStakePointId=null, objectPickMode=null, pendingContourId=null, pendingDelete=null;
 
 let drawSession={
   active:false,
@@ -400,11 +479,11 @@ function touchDistance(touches){
   return Math.hypot(dx,dy);
 }
 
-function updateMeta(){ menuMeta.textContent=`${mode==="measure"?"Meten":"Uitzetten"} · ${points.length}p · ${lines.length}l · v0.7.3`; }
+function updateMeta(){ menuMeta.textContent=`${mode==="measure"?"Meten":"Uitzetten"} · ${points.length}p · ${lines.length}l · v0.7.4`; }
 function showPage(name,push=true){
   pages.forEach(p=>$("page-"+p).classList.remove("active"));
   $("page-"+name).classList.add("active");
-  const titles={home:"Measure AR",measure:"Meten",stake:"Uitzetten",newline:"Nieuwe lijn",objects:"Objecten",line:"Lijn",point:"Punt",clearconfirm:"Alles wissen"};
+  const titles={home:"Measure AR",measure:"Meten",stake:"Uitzetten",newline:"Nieuwe lijn",objects:"Objecten",line:"Lijn",point:"Punt",shapecreate:"Vorm aanmaken",shape:"Vorm",deleteconfirm:"Object wissen",clearconfirm:"Alles wissen"};
   menuTitle.textContent=titles[name]||"Measure AR";
   if(push && menuStack[menuStack.length-1]!==name) menuStack.push(name);
   menuBackBtn.style.visibility=name==="home"?"hidden":"visible";
@@ -491,6 +570,7 @@ function updateScreenLabels(){
 
   for(const l of lines){
     if(!l.labelEl) continue;
+    if(l.labelEl.dataset.shapeLabels==="hidden"){l.labelEl.style.display="none";continue;}
 
     const a=getPoint(l.startId), b=getPoint(l.endId);
     if(!a||!b){
@@ -634,24 +714,13 @@ function refreshLine(l){
 
   updateLineLabelText(l);
 }
-function deleteLine(id){
-  const i=lines.findIndex(l=>l.id===id); if(i<0) return;
-  dispose(lines[i].object); removeLineLabel(lines[i].labelEl); lines.splice(i,1);
-  if(selectedLineId===id) selectedLineId=null;
-  renderObjects();
-}
-function deletePoint(id){
-  lines.filter(l=>l.startId===id||l.endId===id).map(l=>l.id).forEach(deleteLine);
-  const i=points.findIndex(p=>p.id===id);
-  if(i>=0){ dispose(points[i].marker); points.splice(i,1); }
-  if(activeStartId===id) activeStartId=null;
-  if(selectedPointId===id) selectedPointId=null;
-  renderObjects();
-}
+function deleteLine(id){ requestDelete("line",id); }
+function deletePoint(id){ requestDelete("point",id); }
 function clearAll(){
-  [...lines].forEach(l=>deleteLine(l.id));
-  [...points].forEach(p=>deletePoint(p.id));
-  pointCounter=0; contourCounter=1; selectedLineId=null; selectedPointId=null; pendingStakePointId=null; undoStack.length=0;
+  shapes.forEach(s=>dispose(s.mesh)); shapes.length=0;
+  [...lines].forEach(l=>deleteLineRaw(l.id));
+  [...points].forEach(p=>deletePointRaw(p.id));
+  pointCounter=0; contourCounter=1; selectedLineId=null; selectedPointId=null; selectedShapeId=null; pendingStakePointId=null; pendingContourId=null; pendingDelete=null; undoStack.length=0;
   contours.length=0;
   resetDrawSession();
   resetCurrent(); renderObjects();
@@ -660,24 +729,223 @@ function clearAll(){
 function renderObjects(){
   updateMeta();
   objectsList.innerHTML="";
-  if(!points.length&&!lines.length){ objectsList.innerHTML='<div class="help">Nog geen objecten.</div>'; return; }
+  if(!points.length&&!lines.length&&!shapes.length){ objectsList.innerHTML='<div class="help">Nog geen objecten.</div>'; return; }
 
-  lines.forEach(l=>{
-    const row=document.createElement("div"); row.className="objectRow";
-    const open=document.createElement("button"); open.className="secondary"; open.textContent=`${l.name} · ${fmt(l.distance)}`;
-    open.onclick=()=>{ selectedLineId=l.id; selectedPointId=null; $("lineInfo").textContent=`${l.name} · ${fmt(l.distance)}`; $("lineLength").value=l.distance.toFixed(3); $("lineThickness").value=l.thickness; showPage("line"); };
-    const del=document.createElement("button"); del.className="danger"; del.textContent="Wis"; del.onclick=()=>deleteLine(l.id);
-    row.append(open,del); objectsList.append(row);
-  });
+  if(shapes.length){
+    const title=document.createElement("div"); title.className="objectGroupTitle"; title.textContent="Vormen"; objectsList.append(title);
+    shapes.forEach(s=>{
+      const row=document.createElement("div"); row.className="objectRow";
+      const open=document.createElement("button"); open.className="secondary";
+      open.innerHTML=`<span class="shapeSwatch" style="background:${s.fillColor}"></span>${s.name} · ${s.area.toFixed(2)} m²`;
+      open.onclick=()=>openShapeEditor(s.id);
+      const del=document.createElement("button"); del.className="danger"; del.textContent="Wis"; del.onclick=()=>openShapeEditor(s.id);
+      row.append(open,del); objectsList.append(row);
+    });
+  }
 
-  points.forEach(p=>{
-    const row=document.createElement("div"); row.className="objectRow";
-    const open=document.createElement("button"); open.className="secondary"; open.textContent=`Punt ${p.name}`;
-    open.onclick=()=>{selectedPointId=p.id;selectedLineId=null;if(objectPickMode==="measure"){objectPickMode=null;startMeasureFrom(p.id);return;}if(objectPickMode==="stake"){objectPickMode=null;startStake(p.id);return;}const linked=lines.filter(l=>l.startId===p.id||l.endId===p.id).map(l=>l.name).join(", ");$("pointInfo").textContent=linked?`Punt ${p.name} · ${linked}`:`Punt ${p.name}`;showPage("point");};
-    row.append(open); objectsList.append(row);
-  });
+  if(lines.length){
+    const title=document.createElement("div"); title.className="objectGroupTitle"; title.textContent="Lijnen"; objectsList.append(title);
+    lines.forEach(l=>{
+      const row=document.createElement("div"); row.className="objectRow";
+      const open=document.createElement("button"); open.className="secondary"; open.textContent=`${l.name} · ${fmt(l.distance)}`;
+      open.onclick=()=>{ selectedLineId=l.id; selectedPointId=null; selectedShapeId=null; $("lineInfo").textContent=`${l.name} · ${fmt(l.distance)}`; $("lineLength").value=l.distance.toFixed(3); $("lineThickness").value=l.thickness; showPage("line"); };
+      const del=document.createElement("button"); del.className="danger"; del.textContent="Wis"; del.onclick=()=>requestDelete("line",l.id);
+      row.append(open,del); objectsList.append(row);
+    });
+  }
+
+  if(points.length){
+    const title=document.createElement("div"); title.className="objectGroupTitle"; title.textContent="Punten"; objectsList.append(title);
+    points.forEach(p=>{
+      const row=document.createElement("div"); row.className="objectRow";
+      const open=document.createElement("button"); open.className="secondary"; open.textContent=`Punt ${p.name}`;
+      open.onclick=()=>{selectedPointId=p.id;selectedLineId=null;selectedShapeId=null;if(objectPickMode==="measure"){objectPickMode=null;startMeasureFrom(p.id);return;}if(objectPickMode==="stake"){objectPickMode=null;startStake(p.id);return;}const linked=lines.filter(l=>l.startId===p.id||l.endId===p.id).map(l=>l.name).join(", ");$("pointInfo").textContent=linked?`Punt ${p.name} · ${linked}`:`Punt ${p.name}`;showPage("point");};
+      const del=document.createElement("button"); del.className="danger"; del.textContent="Wis"; del.onclick=()=>requestDelete("point",p.id);
+      row.append(open,del); objectsList.append(row);
+    });
+  }
 }
 
+function openShapeEditor(id){
+  const s=getShape(id); if(!s)return;
+  selectedShapeId=id; selectedLineId=null; selectedPointId=null;
+  $("shapeInfo").textContent=`${s.name} · ${s.pointIds.length} punten · ${s.lineIds.length} lijnen · ${s.area.toFixed(2)} m²`;
+  $("editShapeName").value=s.name;
+  $("editFillColor").value=s.fillColor;
+  $("editBorderColor").value=s.borderColor;
+  $("editShapeOpacity").value=s.opacity;
+  $("editShapeOpacityValue").textContent=Math.round(s.opacity*100)+"%";
+  $("editBorderThickness").value=String(s.borderThickness);
+  $("editShapeVisible").checked=s.visible!==false;
+  $("editShapeLabels").checked=s.labelsVisible!==false;
+  $("editShapeError").style.display="none";
+  showPage("shape");
+}
+
+
+function normalizeShapeName(name){ return String(name||"").trim().replace(/\s+/g," "); }
+function shapeNameExists(name,excludeId=null){
+  const key=normalizeShapeName(name).toLocaleLowerCase("nl");
+  return shapes.some(s=>s.id!==excludeId && s.name.toLocaleLowerCase("nl")===key);
+}
+function getShape(id){ return shapes.find(s=>s.id===id)||null; }
+function getContour(id){ return contours.find(c=>c.id===id)||null; }
+
+function contourNormal(pointIds){
+  const pts=pointIds.map(getPoint).filter(Boolean).map(p=>p.position);
+  const n=new THREE.Vector3();
+  for(let i=0;i<pts.length;i++){
+    const a=pts[i], b=pts[(i+1)%pts.length];
+    n.x+=(a.y-b.y)*(a.z+b.z);
+    n.y+=(a.z-b.z)*(a.x+b.x);
+    n.z+=(a.x-b.x)*(a.y+b.y);
+  }
+  if(n.lengthSq()<1e-10) n.set(0,1,0);
+  return n.normalize();
+}
+function contourBasis(pointIds){
+  const pts=pointIds.map(getPoint).filter(Boolean).map(p=>p.position);
+  const origin=pts[0].clone();
+  const normal=contourNormal(pointIds);
+  let u=null;
+  for(let i=1;i<pts.length;i++){
+    const candidate=pts[i].clone().sub(origin);
+    candidate.sub(normal.clone().multiplyScalar(candidate.dot(normal)));
+    if(candidate.lengthSq()>1e-8){u=candidate.normalize();break;}
+  }
+  if(!u) u=new THREE.Vector3(1,0,0);
+  const v=normal.clone().cross(u).normalize();
+  return {origin,normal,u,v};
+}
+function projectedContour(pointIds){
+  const basis=contourBasis(pointIds);
+  const pts3=pointIds.map(id=>getPoint(id)?.position).filter(Boolean);
+  const pts2=pts3.map(p=>{
+    const d=p.clone().sub(basis.origin);
+    return new THREE.Vector2(d.dot(basis.u),d.dot(basis.v));
+  });
+  return {basis,pts2,pts3};
+}
+function polygonArea2D(pts){
+  let a=0;
+  for(let i=0;i<pts.length;i++){const p=pts[i],q=pts[(i+1)%pts.length];a+=p.x*q.y-q.x*p.y;}
+  return Math.abs(a)*.5;
+}
+function buildShapeMesh(pointIds,color,opacity){
+  const {pts2,pts3}=projectedContour(pointIds);
+  if(pts2.length<3) throw new Error("Minstens 3 punten nodig.");
+  const tris=THREE.ShapeUtils.triangulateShape(pts2,[]);
+  const arr=[];
+  for(const tri of tris) for(const idx of tri){const p=pts3[idx];arr.push(p.x,p.y,p.z);}
+  const geo=new THREE.BufferGeometry();
+  geo.setAttribute("position",new THREE.Float32BufferAttribute(arr,3));
+  geo.computeVertexNormals();
+  const mat=new THREE.MeshBasicMaterial({color,transparent:true,opacity:Number(opacity),side:THREE.DoubleSide,depthWrite:false});
+  const mesh=new THREE.Mesh(geo,mat);
+  mesh.renderOrder=-1;
+  scene.add(mesh);
+  return {mesh,area:polygonArea2D(pts2)};
+}
+function hexToNumber(hex){ return parseInt(String(hex).replace("#",""),16); }
+function applyShapeStyle(shape){
+  if(shape.mesh?.material){
+    shape.mesh.material.color.set(shape.fillColor);
+    shape.mesh.material.opacity=shape.opacity;
+    shape.mesh.material.transparent=true;
+    shape.mesh.visible=shape.visible!==false;
+  }
+  for(const id of shape.lineIds){
+    const l=getLine(id); if(!l) continue;
+    l.thickness=shape.borderThickness;
+    if(l.object?.material?.color) l.object.material.color.set(shape.borderColor);
+    if(l.labelEl){ l.labelEl.dataset.shapeLabels=shape.labelsVisible===false?"hidden":"visible"; }
+    refreshLine(l);
+  }
+}
+function createShapeFromContour(contour,opts){
+  const built=buildShapeMesh(contour.pointIds,opts.fillColor,opts.opacity);
+  const shape={
+    id:"s"+Date.now()+Math.random(),
+    name:normalizeShapeName(opts.name),
+    contourId:contour.id,
+    pointIds:[...contour.pointIds],
+    lineIds:[...contour.lineIds],
+    mesh:built.mesh,
+    area:built.area,
+    fillColor:opts.fillColor,
+    opacity:Number(opts.opacity),
+    borderColor:opts.borderColor,
+    borderThickness:Number(opts.borderThickness)||2,
+    labelsVisible:opts.labelsVisible!==false,
+    visible:true
+  };
+  shapes.push(shape);
+  applyShapeStyle(shape);
+  return shape;
+}
+function deleteShapeOnly(id){
+  const i=shapes.findIndex(s=>s.id===id); if(i<0)return;
+  dispose(shapes[i].mesh);
+  shapes.splice(i,1);
+  if(selectedShapeId===id) selectedShapeId=null;
+  renderObjects();
+}
+function deleteShapeWithContour(id){
+  const s=getShape(id); if(!s)return;
+  const lineIds=[...s.lineIds], pointIds=[...s.pointIds], contourId=s.contourId;
+  deleteShapeOnly(id);
+  const ci=contours.findIndex(c=>c.id===contourId); if(ci>=0)contours.splice(ci,1);
+  lineIds.forEach(lid=>{if(getLine(lid)) deleteLineRaw(lid);});
+  pointIds.forEach(pid=>{
+    const stillUsed=lines.some(l=>l.startId===pid||l.endId===pid);
+    if(!stillUsed) deletePointRaw(pid);
+  });
+  renderObjects();
+}
+function linkedShapesForLine(id){ return shapes.filter(s=>s.lineIds.includes(id)); }
+function linkedShapesForPoint(id){ return shapes.filter(s=>s.pointIds.includes(id)); }
+
+function deleteLineRaw(id){
+  const i=lines.findIndex(l=>l.id===id); if(i<0)return;
+  dispose(lines[i].object); removeLineLabel(lines[i].labelEl); lines.splice(i,1);
+  if(selectedLineId===id)selectedLineId=null;
+}
+function deletePointRaw(id){
+  const i=points.findIndex(p=>p.id===id); if(i<0)return;
+  dispose(points[i].marker); points.splice(i,1);
+  if(activeStartId===id)activeStartId=null;
+  if(selectedPointId===id)selectedPointId=null;
+}
+function requestDelete(kind,id){
+  const linked=kind==="line"?linkedShapesForLine(id):linkedShapesForPoint(id);
+  if(linked.length){
+    pendingDelete={kind,id};
+    $("deleteDependencyInfo").textContent=`Dit ${kind==="line"?"lijn":"punt"} maakt deel uit van: ${linked.map(s=>s.name).join(", ")}. Wissen verbreekt/verwijdert de gekoppelde vorm(en).`;
+    showPage("deleteconfirm");
+    return;
+  }
+  if(kind==="line") deleteLineRaw(id);
+  else{
+    lines.filter(l=>l.startId===id||l.endId===id).map(l=>l.id).forEach(deleteLineRaw);
+    deletePointRaw(id);
+  }
+  renderObjects();
+}
+function forceDeletePending(){
+  if(!pendingDelete)return;
+  const {kind,id}=pendingDelete;
+  const linked=kind==="line"?linkedShapesForLine(id):linkedShapesForPoint(id);
+  linked.forEach(s=>deleteShapeOnly(s.id));
+  contours.forEach(c=>{
+    if((kind==="line"&&c.lineIds.includes(id))||(kind==="point"&&c.pointIds.includes(id))) c.closed=false;
+  });
+  if(kind==="line") deleteLineRaw(id);
+  else{
+    lines.filter(l=>l.startId===id||l.endId===id).map(l=>l.id).forEach(deleteLineRaw);
+    deletePointRaw(id);
+  }
+  pendingDelete=null; renderObjects(); showPage("objects");
+}
 
 function resetDrawSession(){
   drawSession={
@@ -728,49 +996,33 @@ function saveCurrentContour(closed){
 
 function finishContinuousDrawing(){
   if(!drawSession.active) return;
-
   if(drawSession.pointIds.length<3){
-    stage.textContent="Minstens 3 punten nodig";
-    detail.textContent="Plaats eerst A, B en C";
-    hint.textContent="Voltooien sluit automatisch het laatste punt terug naar A.";
-    return;
+    stage.textContent="Minstens 3 punten nodig"; detail.textContent="Plaats eerst A, B en C"; return;
   }
-
-  const first=getPoint(drawSession.startPointId);
-  const last=getPoint(drawSession.lastPointId);
-  if(!first||!last){
-    stage.textContent="Contourdata ontbreekt";
-    return;
-  }
+  const first=getPoint(drawSession.startPointId), last=getPoint(drawSession.lastPointId);
+  if(!first||!last)return;
 
   try{
     const closing=createLine(last,first,{recordUndo:false});
-    drawSession.lineIds.push(closing.id);
-    drawSession.closed=true;
-
+    drawSession.lineIds.push(closing.id); drawSession.closed=true;
     const contour=saveCurrentContour(true);
-
-    undoStack.push({
-      type:"continuousClosed",
-      contourId:contour.id,
-      lineId:closing.id
-    });
+    pendingContourId=contour.id;
 
     distanceEl.textContent=fmt(closing.distance);
-    stage.textContent="Vorm voltooid";
-    detail.textContent=`${closing.name} toegevoegd · ${contour.name} gesloten`;
-    hint.textContent=`${closing.name} is automatisch verbonden met ${first.name}.`;
+    stage.textContent="Contour gesloten";
+    detail.textContent=`${closing.name} toegevoegd`;
+    hint.textContent="Geef nu een unieke naam en kies de vormstijl.";
 
-    resetDrawSession();
-    resetCurrent();
-    lineFinished=true;
-    captureBtn.disabled=true;
-
+    $("shapeNameInput").value="";
+    $("shapeNameError").style.display="none";
+    $("shapeBorderThickness").value=String(defaultThickness.value||2);
+    $("shapeLabelsVisible").checked=defaultLabels.checked;
+    $("shapeCreateInfo").textContent=`${contour.pointIds.length} punten · ${contour.lineIds.length} lijnen`;
+    drawControls.classList.remove("visible");
+    openMenu();
+    showPage("shapecreate");
   }catch(err){
-    console.error("finishContinuousDrawing failed",err);
-    stage.textContent="Voltooien mislukt";
-    detail.textContent=err.message||"Onbekende fout";
-    hint.textContent="De bestaande lijnen zijn behouden.";
+    stage.textContent="Voltooien mislukt"; detail.textContent=err.message||"Onbekende fout";
   }
 }
 
@@ -1047,7 +1299,7 @@ function render(t,frame){
   renderer.render(scene,camera);
 }
 
-function coreSelfCheck(){const req=["startBtn","menuBtn","captureBtn","continuousDrawRow","drawControls","drawUndoBtn","drawFinishBtn","lineLabels","zoomInBtn","zoomOutBtn","zoomResetBtn","zoomValue","cancelClearBtn","confirmClearBtn","measureNewBtn","measureLastBtn","measureExistingBtn","stakeNewBtn","stakeLastBtn","stakeExistingBtn","newIndependentBtn","newFromLastBtn","stakeFromLastBtn","objectsList","lineLength","lineThickness","applyLineLengthBtn","undoBtn","clearAllBtn","exitArBtn"];const missing=req.filter(id=>!$(id));console.info("core self-check",{ok:!missing.length,missing,version:"0.6.9"});if(missing.length)showError("Interne UI-fout: "+missing.join(", "));return !missing.length;}
+function coreSelfCheck(){const req=["startBtn","menuBtn","captureBtn","continuousDrawRow","drawControls","drawUndoBtn","drawFinishBtn","lineLabels","zoomInBtn","zoomOutBtn","zoomResetBtn","zoomValue","cancelClearBtn","confirmClearBtn","shapeNameInput","createShapeBtn","cancelShapeBtn","shapeInfo","saveShapeBtn","deleteShapeFillBtn","deleteShapeContourBtn","cancelDeleteBtn","confirmDeleteBtn","measureNewBtn","measureLastBtn","measureExistingBtn","stakeNewBtn","stakeLastBtn","stakeExistingBtn","newIndependentBtn","newFromLastBtn","stakeFromLastBtn","objectsList","lineLength","lineThickness","applyLineLengthBtn","undoBtn","clearAllBtn","exitArBtn"];const missing=req.filter(id=>!$(id));console.info("core self-check",{ok:!missing.length,missing,version:"0.7.4"});if(missing.length)showError("Interne UI-fout: "+missing.join(", "));return !missing.length;}
 function undoLast(){
   const a=undoStack.pop();
   if(!a){ stage.textContent="Niets om ongedaan te maken"; closeMenu(); return; }
@@ -1058,9 +1310,11 @@ function undoLast(){
     const stillUsed=lines.some(l=>l.startId===a.endId||l.endId===a.endId);
     if(!stillUsed) deletePoint(a.endId);
   }else if(a.type==="continuousClosed"){
-    deleteLine(a.lineId);
+    deleteLineRaw(a.lineId);
     const i=contours.findIndex(c=>c.id===a.contourId);
     if(i>=0) contours.splice(i,1);
+  }else if(a.type==="shapeCreated"){
+    deleteShapeOnly(a.shapeId);
   }
   renderObjects(); closeMenu();
 }
@@ -1128,11 +1382,67 @@ $("applyLineLengthBtn").addEventListener("click",()=>{
 $("lineThickness").addEventListener("change",()=>{ const l=getLine(selectedLineId); if(l){ l.thickness=Number($("lineThickness").value)||2; refreshLine(l); } });
 $("lineFromStartBtn").addEventListener("click",()=>{ const l=getLine(selectedLineId); if(l) startMeasureFrom(l.startId); });
 $("lineFromEndBtn").addEventListener("click",()=>{ const l=getLine(selectedLineId); if(l) startMeasureFrom(l.endId); });
-$("deleteLineBtn").addEventListener("click",()=>{ if(selectedLineId) deleteLine(selectedLineId); showPage("objects"); });
+$("deleteLineBtn").addEventListener("click",()=>{ if(selectedLineId) requestDelete("line",selectedLineId); });
 
 $("pointNewLineBtn").addEventListener("click",()=>{ if(selectedPointId) startMeasureFrom(selectedPointId); });
 $("pointStakeBtn").addEventListener("click",()=>{ if(selectedPointId){ pendingStakePointId=selectedPointId; $("stakeSelectedBtn").style.display="block"; showPage("stake"); } });
-$("deletePointBtn").addEventListener("click",()=>{ if(selectedPointId) deletePoint(selectedPointId); showPage("objects"); });
+$("deletePointBtn").addEventListener("click",()=>{ if(selectedPointId) requestDelete("point",selectedPointId); });
+
+
+$("shapeOpacity").addEventListener("input",()=>{$("shapeOpacityValue").textContent=Math.round(Number($("shapeOpacity").value)*100)+"%";});
+$("editShapeOpacity").addEventListener("input",()=>{$("editShapeOpacityValue").textContent=Math.round(Number($("editShapeOpacity").value)*100)+"%";});
+
+$("cancelShapeBtn").addEventListener("click",()=>{
+  // Geometry remains safely closed; only shape creation is cancelled.
+  pendingContourId=null;
+  resetDrawSession(); resetCurrent(); lineFinished=true;
+  closeMenu();
+  stage.textContent="Contour bewaard";
+  detail.textContent="Geen vorm/opvulling aangemaakt";
+});
+
+$("createShapeBtn").addEventListener("click",()=>{
+  const contour=getContour(pendingContourId);
+  if(!contour){$("shapeNameError").textContent="Contour niet gevonden."; $("shapeNameError").style.display="block"; return;}
+  const name=normalizeShapeName($("shapeNameInput").value);
+  if(!name){$("shapeNameError").textContent="Geef een naam voor de vorm."; $("shapeNameError").style.display="block"; return;}
+  if(shapeNameExists(name)){$("shapeNameError").textContent="Deze vormnaam bestaat al in deze sessie."; $("shapeNameError").style.display="block"; return;}
+  try{
+    const s=createShapeFromContour(contour,{
+      name,
+      fillColor:$("shapeFillColor").value,
+      opacity:Number($("shapeOpacity").value),
+      borderColor:$("shapeBorderColor").value,
+      borderThickness:Number($("shapeBorderThickness").value),
+      labelsVisible:$("shapeLabelsVisible").checked
+    });
+    undoStack.push({type:"shapeCreated",shapeId:s.id});
+    pendingContourId=null;
+    resetDrawSession(); resetCurrent(); lineFinished=true;
+    closeMenu(); renderObjects();
+    stage.textContent=`Vorm ${s.name} aangemaakt`;
+    detail.textContent=`Oppervlakte: ${s.area.toFixed(2)} m²`;
+    hint.textContent="Open Objecten om de vorm te bewerken.";
+  }catch(err){$("shapeNameError").textContent=err.message||"Vorm kon niet worden aangemaakt."; $("shapeNameError").style.display="block";}
+});
+
+$("saveShapeBtn").addEventListener("click",()=>{
+  const s=getShape(selectedShapeId); if(!s)return;
+  const name=normalizeShapeName($("editShapeName").value);
+  if(!name){$("editShapeError").textContent="Naam is verplicht."; $("editShapeError").style.display="block"; return;}
+  if(shapeNameExists(name,s.id)){$("editShapeError").textContent="Deze vormnaam bestaat al."; $("editShapeError").style.display="block"; return;}
+  s.name=name; s.fillColor=$("editFillColor").value; s.borderColor=$("editBorderColor").value;
+  s.opacity=Number($("editShapeOpacity").value); s.borderThickness=Number($("editBorderThickness").value)||2;
+  s.visible=$("editShapeVisible").checked; s.labelsVisible=$("editShapeLabels").checked;
+  applyShapeStyle(s); renderObjects(); openShapeEditor(s.id);
+  $("editShapeError").style.display="none";
+});
+
+$("deleteShapeFillBtn").addEventListener("click",()=>{if(selectedShapeId){deleteShapeOnly(selectedShapeId);showPage("objects");}});
+$("deleteShapeContourBtn").addEventListener("click",()=>{if(selectedShapeId){deleteShapeWithContour(selectedShapeId);showPage("objects");}});
+
+$("cancelDeleteBtn").addEventListener("click",()=>{pendingDelete=null;showPage("objects");});
+$("confirmDeleteBtn").addEventListener("click",forceDeletePending);
 
 $("undoBtn").addEventListener("click",undoLast);
 $("clearAllBtn").addEventListener("click",()=>{
