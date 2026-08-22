@@ -12,7 +12,7 @@ canvas{position:fixed;inset:0;width:100%;height:100%}
 #overlay{position:fixed;inset:0;z-index:10;pointer-events:none;display:none}
 #topbar{position:absolute;top:max(12px,env(safe-area-inset-top));left:12px;right:12px;display:flex;gap:8px}.status{flex:1;padding:9px 11px;border-radius:14px;background:#000a}.menuBtn{pointer-events:auto;width:48px;height:48px;background:#000b;color:#fff;font-size:1.35rem}
 #stage{font-size:.73rem;color:#ccc}#distance{font-size:1.2rem;font-weight:800}#detail,#stability{font-size:.65rem;color:#999}
-#menuPanel{position:absolute;top:max(10px,env(safe-area-inset-top));right:10px;width:min(90vw,360px);height:min(78vh,680px);display:none;overflow:hidden;border:1px solid #ffffff24;border-radius:18px;background:#0b0b0bf5;pointer-events:auto}
+#menuPanel{z-index:100;position:absolute;top:max(10px,env(safe-area-inset-top));right:10px;width:min(90vw,360px);height:min(78vh,680px);display:none;overflow:hidden;border:1px solid #ffffff24;border-radius:18px;background:#0b0b0bf5;pointer-events:auto}
 #menuPanel.open{display:grid;grid-template-rows:auto 1fr auto}.menuHead{display:grid;grid-template-columns:38px 1fr 38px;align-items:center;gap:7px;padding:8px;border-bottom:1px solid #ffffff15;text-align:center}.menuHead small{display:block;color:#888}.menuBody{overflow-y:auto;padding:8px}.menuFoot{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:8px;border-top:1px solid #ffffff15}
 .page{display:none}.page.active{display:block}.page h3{font-size:.68rem;text-transform:uppercase;color:#888}.menuCard{padding:7px;border:1px solid #ffffff12;border-radius:12px;background:#ffffff08;margin-bottom:8px}.menuCard button{width:100%;margin-top:5px}.navList button{text-align:left}.navList small{display:block;color:#999;font-weight:400}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:6px}.help{font-size:.65rem;color:#999;line-height:1.35}.objectRow{display:grid;grid-template-columns:1fr auto;gap:5px;padding:4px;border-bottom:1px solid #ffffff10}.objectRow button{margin:0;width:auto}
 #aim{position:absolute;left:50%;top:50%;width:44px;height:44px;transform:translate(-50%,-50%)}#aim:before,#aim:after{content:"";position:absolute;background:#fff}#aim:before{width:22px;height:2px;left:11px;top:21px}#aim:after{width:2px;height:22px;left:21px;top:11px}#aim.hit:before,#aim.hit:after{background:#69ff9a}#aim.virtual:before,#aim.virtual:after{background:#ffd166}
@@ -46,7 +46,9 @@ canvas{position:fixed;inset:0;width:100%;height:100%}
 #buildInfo{margin:8px 0 2px;color:#777;font-size:.68rem}
 .directFallback .error{white-space:pre-wrap;text-align:left;line-height:1.4}
 
-.placementHud{position:absolute;left:12px;bottom:max(152px,calc(env(safe-area-inset-bottom) + 152px));width:min(78vw,320px);pointer-events:auto;z-index:22}
-#placementModeBtn{width:auto;background:#000c;color:#fff}.placementMeasurePanel{display:none;margin-top:6px;padding:9px;border-radius:14px;background:#090909e8;border:1px solid #ffffff22;backdrop-filter:blur(8px)}
-.placementHud.metric .placementMeasurePanel{display:block}.placementDistanceRow{display:grid;grid-template-columns:1fr 76px;gap:6px}.placementAngleRow{display:grid;grid-template-columns:1fr 28px;gap:6px;align-items:center}
-#placementAngleWrap{display:none}.placementHud.angle #placementAngleWrap{display:block}.placementReferenceInfo{font-size:.65rem;color:#aaa;margin:7px 0}
+
+
+.placementHud.metric 
+
+
+#menuPanel button,#menuPanel .navRow,#menuPanel input,#menuPanel select{pointer-events:auto}
