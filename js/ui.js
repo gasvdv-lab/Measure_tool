@@ -1,450 +1,172 @@
-import {getActivePoint,setActivePoint,setAngleDeg,setDistanceCm,setPlacementMode,placeMetricPoint,setReferenceLine as setUnifiedReference} from "./drawing-engine.js?v=0.8.10-20260822-1930";
-import {S,$,fmt,getPoint,getLine,getContour} from "./state.js?v=0.8.10-20260822-1930";
-import {setConstraint,setReferenceLine,updateReferenceStatus} from "./constraints.js?v=0.8.10-20260822-1930";
-import {startMeasureNew,startMeasureFrom,startStake,startContinuous,undoContinuous,finishContinuous,placePoint,resetCurrent} from "./drawing.js?v=0.8.10-20260822-1930";
-import {createShape,deleteLineRaw,deletePointRaw,clearAllGeometry,dispose} from "./geometry.js?v=0.8.10-20260822-1930";
-import {startAR,leaveAR,applyZoom} from "./ar.js?v=0.8.10-20260822-1930";
-import {cancelParametricMode,placeParametricNext,setParametricStartPoint,updatePlacementUI} from "./placement.js?v=0.8.10-20260822-1930";
-import {createWall,getWall,deleteWall,toggleWall,wallsUsingLine,clearWalls} from "./walls.js?v=0.8.10-20260822-1930";
+import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.11-20260822-1945";
+import {
+  startTool,cancelTool,setPlacement,setDistance,setConstraint,setAngle,flipSide,setReferenceLine,setSnapMode,
+  confirmCandidate,undoToolStep,finishTool,toolLabel,constraintLabel,getActivePoint,referenceRequired,resetDrawingCore
+} from "./drawing-core.js?v=0.8.11-20260822-1945";
+import {
+  createShape,updateShape,deleteShapeOnly,deleteShapeWithContour,deleteLineRaw,deletePointRaw,
+  lineDependencies,pointDependencies,canDeleteLine,canDeletePoint,clearAllGeometry,dispose
+} from "./geometry.js?v=0.8.11-20260822-1945";
+import {startAR,applyZoom} from "./ar.js?v=0.8.11-20260822-1945";
+import {createWall,deleteWall,toggleWall,wallsUsingLine,clearWalls} from "./walls.js?v=0.8.11-20260822-1945";
 
-const pages=["home","measure","stake","newline","constraint","placement","objects","line","point","wallcreate","wall","shapecreate","shape","settings","clear"];
+const pages=["home","objects","line","point","wallcreate","wall","shapecreate","shape","settings","clear"];
 let menuStack=["home"];
-let pendingPlacementStart=false;
 
-function closeHudPopovers(){
-  el("directionPopover")?.classList.remove("open");
-  el("distancePopover")?.classList.remove("open");
-}
-function setHudTool(label){if(el("hudToolBtn"))el("hudToolBtn").textContent=label;}
-function syncHud(){
-  const names={free:"Vrij",horizontal:"Horizontaal",vertical:"Verticaal",surface:"Op oppervlak",parallel:"Parallel",perpendicular:"Loodrecht",angle:"Eigen hoek"};
-  if(el("constraintHudBtn"))el("constraintHudBtn").textContent=(names[S.drawEngine.direction]||"Vrij")+" ▾";
-  document.querySelectorAll("[data-hud-direction]").forEach(b=>b.classList.toggle("active",b.dataset.hudDirection===S.drawEngine.direction));
-  if(el("distanceHudBtn")){
-    const metric=S.drawEngine.mode==="metric";
-    const unit=el("hudUnit")?.value||"cm";
-    const raw=Number(el("hudDistance")?.value)||100;
-    el("distanceHudBtn").textContent=metric?`${raw} ${unit} ▾`:"AUTO ▾";
-  }
-  if(el("hudAngleRow"))el("hudAngleRow").style.display=S.drawEngine.direction==="angle"?"grid":"none";
-}
-function startQuickLine(){cancelParametricMode();startMeasureNew();setHudTool("LIJN");syncHud();closeHudPopovers();closeMenu();}
-function startQuickContinuous(label="POLYLIJN"){cancelParametricMode();startContinuous();setHudTool(label);syncHud();closeHudPopovers();closeMenu();}
-
-function el(id){return $(id);}
-function actionMessage(message,isError=false){
-  const detail=el("detail"),hint=el("hint");
-  if(detail)detail.textContent=message;
-  if(hint && isError)hint.textContent=message;
-}
-function setResultStatus({stageText,detailText,hintText,distanceText}={}){
-  if(stageText&&el("stage"))el("stage").textContent=stageText;
-  if(detailText&&el("detail"))el("detail").textContent=detailText;
-  if(hintText&&el("hint"))el("hint").textContent=hintText;
-  if(distanceText&&el("distance"))el("distance").textContent=distanceText;
-}
-async function runActionOnce(actionName,buttonId,fn,{closeAfter=false,result}={}){
-  const now=Date.now();
-  if(S.actionLock?.busy)return null;
-  if(S.actionLock?.lastAction===actionName && now-(S.actionLock?.lastAt||0)<650)return null;
-  S.actionLock.busy=true;
-  S.actionLock.lastAction=actionName;
-  S.actionLock.lastAt=now;
-  const btn=buttonId?el(buttonId):null;
-  if(btn)btn.disabled=true;
-  try{
-    const value=await fn();
-    if(result){
-      const data=typeof result==="function"?result(value):result;
-      setResultStatus(data||{});
-    }
-    if(closeAfter)closeMenu();
-    return value;
-  }finally{
-    setTimeout(()=>{
-      S.actionLock.busy=false;
-      if(btn)btn.disabled=false;
-    },450);
-  }
-}
-function bind(id,event,handler){
-  const node=el(id);
-  if(!node){
-    console.warn(`[UI ${S.version}] ontbrekend element: #${id}`);
-    return false;
-  }
+const el=id=>$(id);
+function bind(id,event,fn){
+  const node=el(id);if(!node)throw new Error(`UI-element ontbreekt: #${id}`);
   node.addEventListener(event,async ev=>{
-    try{
-      await handler(ev);
-    }catch(err){
-      console.error(`Actie #${id} mislukt`,err);
-      actionMessage(err?.message||String(err),true);
-    }
+    try{await fn(ev);}catch(err){console.error(`Actie #${id} mislukt`,err);showStatus(err.message||String(err),true);}
   });
-  return true;
 }
+function showStatus(msg,error=false){
+  if(el("detail"))el("detail").textContent=msg;
+  if(error&&el("hint"))el("hint").textContent=msg;
+}
+function closePopovers(){["directionPopover","distancePopover","morePopover"].forEach(id=>el(id)?.classList.remove("open"));}
+function togglePopover(id){const was=el(id).classList.contains("open");closePopovers();if(!was)el(id).classList.add("open");}
 function showPage(name,push=true){
-  for(const p of pages){
-    el("page-"+p)?.classList.remove("active");
-  }
-  const page=el("page-"+name);
-  if(!page){
-    console.error(`Onbekende menupagina: ${name}`);
-    return;
-  }
-  page.classList.add("active");
-  const titles={home:"Measure AR",measure:"Meten",stake:"Uitzetten",newline:"Nieuwe lijn",constraint:"Richting",placement:"Op maat",objects:"Objecten",line:"Lijn",point:"Punt",wallcreate:"Muur maken",wall:"Muur",shapecreate:"Vorm maken",shape:"Vorm",settings:"Instellingen",clear:"Alles wissen"};
-  if(el("menuTitle")) el("menuTitle").textContent=titles[name]||name;
-  if(push && menuStack.at(-1)!==name) menuStack.push(name);
-  if(el("menuBackBtn")) el("menuBackBtn").style.visibility=name==="home"?"hidden":"visible";
-  if(name==="objects") renderObjects();
+  pages.forEach(p=>el("page-"+p)?.classList.remove("active"));const page=el("page-"+name);if(!page)throw new Error(`Menupagina ontbreekt: ${name}`);page.classList.add("active");
+  const titles={home:"Measure AR",objects:"Objecten",line:"Lijn",point:"Punt",wallcreate:"Muur maken",wall:"Muur",shapecreate:"Vorm opslaan",shape:"Vorm",settings:"Instellingen",clear:"Alles wissen"};
+  el("menuTitle").textContent=titles[name]||name;if(push&&menuStack.at(-1)!==name)menuStack.push(name);el("menuBackBtn").style.visibility=name==="home"?"hidden":"visible";if(name==="objects")renderObjects();
 }
-function updateMeta(){
-  if(el("menuMeta")) el("menuMeta").textContent=`${S.points.length}p · ${S.lines.length}l · v${S.version}`;
+function openMenu(){menuStack=["home"];showPage("home",false);el("menuPanel").classList.add("open");el("menuMeta").textContent=`${S.points.length}p · ${S.lines.length}l · v${S.version}`;closePopovers();}
+function closeMenu(){el("menuPanel").classList.remove("open");closePopovers();S.objectPickMode=null;}
+function menuBack(){if(menuStack.length<=1){closeMenu();return;}menuStack.pop();showPage(menuStack.at(-1),false);}
+
+function unitDistanceText(){
+  if(S.tool.placement==="manual")return "AUTO ▾";
+  const unit=el("hudUnit")?.value||S.defaults.unit;
+  const n=unit==="cm"?S.tool.distanceM*100:S.tool.distanceM;
+  return `${Number(n.toFixed(unit==="cm"?1:3))} ${unit} ▾`;
 }
-function openMenu(){
-  menuStack=["home"];
-  showPage("home",false);
-  el("menuPanel")?.classList.add("open");
-  updateMeta();
+function populateReference(){
+  const s=el("hudReference");if(!s)return;const old=S.tool.referenceLineId;s.innerHTML="";
+  if(!S.lines.length){s.add(new Option("Geen lijnen beschikbaar",""));return;}
+  S.lines.forEach(l=>s.add(new Option(`${l.name} · ${fmt(l.distance)}`,l.id)));
+  if(old&&S.lines.some(l=>l.id===old))s.value=old;
 }
-function closeMenu(){
-  el("menuPanel")?.classList.remove("open");
-  closeHudPopovers();
-  S.objectPickMode=null;
+function syncCandidateContext(){
+  if(!S.tool.kind||!el("hudContext"))return;
+  const p=getActivePoint(),candidate=S.tool.candidate;
+  let context=S.tool.status==="complete"?"Klaar · open ☰ voor een nieuwe functie":p?`Vertrekpunt ${p.name} actief`:"Plaats punt A";
+  if(candidate&&!candidate.valid)context=candidate.reason;
+  el("hudContext").textContent=context;
 }
-function menuBack(){
-  if(menuStack.length<=1){closeMenu();return;}
-  menuStack.pop();
-  showPage(menuStack.at(-1),false);
+function syncHud(){
+  const active=Boolean(S.tool.kind);
+  el("drawingHud").classList.toggle("active",active);
+  if(!active){closePopovers();return;}
+  el("hudToolBtn").textContent=toolLabel();
+  el("constraintHudBtn").textContent=constraintLabel()+" ▾";
+  el("distanceHudBtn").textContent=unitDistanceText();
+  document.querySelectorAll("[data-hud-direction]").forEach(b=>b.classList.toggle("active",b.dataset.hudDirection===S.tool.constraint));
+  const refNeeded=referenceRequired();el("hudReferenceWrap").style.display=refNeeded?"block":"none";el("hudAngleWrap").style.display=S.tool.constraint==="angle"?"grid":"none";
+  el("hudAngle").value=String(S.tool.angleDeg);populateReference();
+  if(refNeeded&&S.tool.referenceLineId)el("hudReference").value=S.tool.referenceLineId;
+  syncCandidateContext();
+  const multi=["polyline","shape"].includes(S.tool.kind)&&S.tool.status==="drawing";
+  el("hudActions").classList.toggle("visible",multi||Boolean(S.tool.transactions.length));
+  el("hudUndoBtn").disabled=!S.tool.transactions.length;
+  el("hudFinishBtn").style.display=multi?"block":"none";
+  el("hudFinishBtn").disabled=S.tool.kind==="shape"?S.tool.pointIds.length<3:!S.tool.lineIds.length;
+  el("hudFinishBtn").textContent=S.tool.kind==="shape"?"Sluiten":"Voltooien";
 }
-function openPlacementPage(){
-  const start=getActivePoint() || getPoint(S.draw?.active?S.draw.lastId:S.activeStartId);
-  if(start)setActivePoint(start.id);
-  if(el("placementUnit"))el("placementUnit").value=el("defaultUnit")?.value||"cm";
-  if(el("placementUnit")?.value==="cm"&&Number(el("placementDistance")?.value)<0.01)el("placementDistance").value="100";
-  updatePlacementUI();
-  showPage("placement");
+
+function begin(kind,startPointId=null){
+  startTool(kind,{startPointId});closeMenu();closePopovers();syncHud();
+  el("distance").textContent="—";
+  el("hint").textContent=startPointId?`Vertrekpunt ${getPoint(startPointId)?.name} actief. Stel richting/afstand in of richt handmatig.`:"Richt op een oppervlak en bevestig punt A.";
 }
-function readStake(){
-  const n=Number(el("stakeDistance")?.value);
-  if(!Number.isFinite(n)||n<=0) return null;
-  return el("stakeUnit")?.value==="cm"?n/100:n;
-}
+
 function renderObjects(){
-  const box=el("objectsList");
-  if(!box)return;
-  box.innerHTML="";
-
-  if(!S.walls.length&&!S.shapes.length&&!S.lines.length&&!S.points.length){
-    box.innerHTML='<div class="help">Nog geen objecten.</div>';
-    return;
-  }
-
-  if(S.walls.length){
-    box.insertAdjacentHTML("beforeend","<h3>Muren</h3>");
-    for(const w of S.walls){
-      const row=document.createElement("div");row.className="objectRow";
-      const open=document.createElement("button");open.className="secondary";open.textContent=`${w.name} · ${w.height.toFixed(2)} m hoog`;
-      const del=document.createElement("button");del.className="danger";del.textContent="Wis";
-      open.addEventListener("click",()=>{S.selectedWallId=w.id;el("wallInfo").textContent=`${w.name} · hoogte ${w.height.toFixed(2)} m · dikte ${w.thickness.toFixed(2)} m`;showPage("wall");});
-      del.addEventListener("click",()=>{deleteWall(w.id);renderObjects();});
-      row.append(open,del);box.append(row);
-    }
-  }
-
-  if(S.shapes.length){
-    box.insertAdjacentHTML("beforeend","<h3>Vormen</h3>");
-    for(const s of S.shapes){
-      const row=document.createElement("div");row.className="objectRow";
-      const open=document.createElement("button");open.className="secondary";open.textContent=`${s.name} · ${s.area.toFixed(2)} m²`;
-      const del=document.createElement("button");del.className="danger";del.textContent="Wis";
-      open.addEventListener("click",()=>{S.selectedShapeId=s.id;if(el("shapeInfo"))el("shapeInfo").textContent=`${s.name} · ${s.area.toFixed(2)} m²`;showPage("shape");});
-      del.addEventListener("click",()=>{dispose(s.mesh);S.shapes.splice(S.shapes.indexOf(s),1);if(S.selectedShapeId===s.id)S.selectedShapeId=null;renderObjects();});
-      row.append(open,del);box.append(row);
-    }
-  }
-
-  if(S.lines.length){
-    box.insertAdjacentHTML("beforeend","<h3>Lijnen</h3>");
-    for(const l of S.lines){
-      const row=document.createElement("div");row.className="objectRow";
-      const open=document.createElement("button");open.className="secondary";open.textContent=`${l.name} · ${fmt(l.distance)}`;
-      const del=document.createElement("button");del.className="danger";del.textContent="Wis";
-      open.addEventListener("click",()=>{S.selectedLineId=l.id;el("lineInfo").textContent=open.textContent;showPage("line");});
-      del.addEventListener("click",()=>{
-        const deps=wallsUsingLine(l.id);
-        if(deps.length){el("detail").textContent=`Lijn wordt gebruikt door muur: ${deps.map(w=>w.name).join(", ")}`;return;}
-        deleteLineRaw(l.id);renderObjects();
-      });
-      row.append(open,del);box.append(row);
-    }
-  }
-
-  if(S.points.length){
-    box.insertAdjacentHTML("beforeend","<h3>Punten</h3>");
-    for(const p of S.points){
-      const row=document.createElement("div");row.className="objectRow";
-      const open=document.createElement("button");open.className="secondary";open.textContent=`Punt ${p.name}`;
-      const del=document.createElement("button");del.className="danger";del.textContent="Wis";
-      open.addEventListener("click",()=>{
-        if(S.objectPickMode==="measure"){S.objectPickMode=null;startMeasureFrom(p.id);closeMenu();return;}
-        if(S.objectPickMode==="stake"){const m=readStake();S.objectPickMode=null;if(m)startStake(p.id,m);closeMenu();return;}
-        S.selectedPointId=p.id;
-        el("pointInfo").textContent=`Punt ${p.name}`;
-        showPage("point");
-      });
-      del.addEventListener("click",()=>{
-        for(const l of [...S.lines]) if(l.startId===p.id||l.endId===p.id) deleteLineRaw(l.id);
-        deletePointRaw(p.id);renderObjects();
-      });
-      row.append(open,del);box.append(row);
-    }
-  }
+  const box=el("objectsList");box.innerHTML="";
+  if(!S.walls.length&&!S.shapes.length&&!S.lines.length&&!S.points.length){box.innerHTML='<div class="help">Nog geen objecten.</div>';return;}
+  if(S.walls.length){box.insertAdjacentHTML("beforeend","<h3>Muren</h3>");for(const w of S.walls){
+    const row=document.createElement("div");row.className="objectRow";const open=document.createElement("button");open.className="secondary";open.textContent=`${w.name} · ${w.height.toFixed(2)} m`;
+    const del=document.createElement("button");del.className="danger";del.textContent="Wis";open.onclick=()=>{S.selectedWallId=w.id;el("wallInfo").textContent=`${w.name} · hoogte ${w.height.toFixed(2)} m · dikte ${w.thickness.toFixed(2)} m`;showPage("wall");};del.onclick=()=>{deleteWall(w.id);renderObjects();};row.append(open,del);box.append(row);
+  }}
+  if(S.shapes.length){box.insertAdjacentHTML("beforeend","<h3>Vormen</h3>");for(const s of S.shapes){
+    const row=document.createElement("div");row.className="objectRow";const open=document.createElement("button");open.className="secondary";open.textContent=`${s.name} · ${s.area.toFixed(2)} m²`;
+    const del=document.createElement("button");del.className="danger";del.textContent="Wis";open.onclick=()=>openShape(s.id);del.onclick=()=>{deleteShapeOnly(s.id);renderObjects();};row.append(open,del);box.append(row);
+  }}
+  if(S.lines.length){box.insertAdjacentHTML("beforeend","<h3>Lijnen</h3>");for(const l of S.lines){
+    const row=document.createElement("div");row.className="objectRow";const open=document.createElement("button");open.className="secondary";open.textContent=`${l.name} · ${fmt(l.distance)}`;
+    const del=document.createElement("button");del.className="danger";del.textContent="Wis";open.onclick=()=>{S.selectedLineId=l.id;el("lineInfo").textContent=open.textContent;showPage("line");};
+    del.onclick=()=>{const d=lineDependencies(l.id);if(d.walls.length||d.shapes.length){showStatus("Deze lijn is gekoppeld aan een muur, vorm of contour.",true);return;}deleteLineRaw(l.id);renderObjects();};row.append(open,del);box.append(row);
+  }}
+  if(S.points.length){box.insertAdjacentHTML("beforeend","<h3>Punten</h3>");for(const p of S.points){
+    const row=document.createElement("div");row.className="objectRow";const open=document.createElement("button");open.className="secondary";open.textContent=`Punt ${p.name}`;const del=document.createElement("button");del.className="danger";del.textContent="Wis";
+    open.onclick=()=>{S.selectedPointId=p.id;el("pointInfo").textContent=`Punt ${p.name}`;showPage("point");};
+    del.onclick=()=>{const d=pointDependencies(p.id);if(d.walls.length||d.shapes.length){showStatus("Dit punt hoort bij een muur, vorm of contour.",true);return;}for(const l of [...d.lines])deleteLineRaw(l.id);deletePointRaw(p.id);renderObjects();};row.append(open,del);box.append(row);
+  }}
+}
+function openShape(id){
+  const s=getShape(id);if(!s)return;S.selectedShapeId=id;el("shapeInfo").textContent=`${s.name} · ${s.area.toFixed(2)} m²`;
+  el("editShapeName").value=s.name;el("editShapeFill").value=s.fill;el("editShapeBorder").value=s.border;el("editShapeOpacity").value=s.opacity;el("editShapeThickness").value=String(s.thickness);el("editShapeLabels").checked=s.labels;showPage("shape");
 }
 
 export function initUI(){
-  console.info("Measure AR UI init",S.version,S.build);
+  bind("menuBtn","click",()=>el("menuPanel").classList.contains("open")?closeMenu():openMenu());bind("menuCloseBtn","click",closeMenu);bind("menuBackBtn","click",menuBack);
+  document.querySelectorAll("[data-page]").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.page)));
 
-  bind("menuBtn","click",()=>el("menuPanel")?.classList.contains("open")?closeMenu():openMenu());
-  bind("menuCloseBtn","click",closeMenu);
-  bind("menuBackBtn","click",menuBack);
+  bind("quickLineBtn","click",()=>begin("line"));bind("quickPolylineBtn","click",()=>begin("polyline"));bind("quickShapeBtn","click",()=>begin("shape"));bind("quickStakeBtn","click",()=>begin("stake"));
+  bind("quickWallBtn","click",()=>{showPage("objects");showStatus("Kies een basislijn en daarna ‘Maak muur van lijn’.");});
 
-  document.querySelectorAll("[data-page]").forEach(node=>node.addEventListener("click",()=>showPage(node.dataset.page)));
-  bind("quickLineBtn","click",startQuickLine);
-  bind("quickShapeBtn","click",()=>startQuickContinuous("VORM"));
-  bind("quickWallBtn","click",()=>{showPage("objects");actionMessage("Kies een basislijn en tik daarna ‘Maak muur van lijn’." );});
-
-  bind("constraintHudBtn","click",()=>{
-    el("distancePopover")?.classList.remove("open");
-    el("directionPopover")?.classList.toggle("open");
+  bind("hudToolBtn","click",openMenu);bind("constraintHudBtn","click",()=>togglePopover("directionPopover"));bind("distanceHudBtn","click",()=>togglePopover("distancePopover"));bind("hudMoreBtn","click",()=>togglePopover("morePopover"));
+  document.querySelectorAll("[data-hud-direction]").forEach(b=>b.addEventListener("click",()=>{setConstraint(b.dataset.hudDirection);syncHud();if(!referenceRequired())closePopovers();}));
+  bind("hudReference","change",()=>{setReferenceLine(el("hudReference").value||null);syncHud();});
+  bind("hudAngle","input",()=>{setAngle(el("hudAngle").value);syncHud();});
+  bind("hudSideBtn","click",()=>{flipSide();showStatus(`Zijde omgekeerd (${S.tool.side>0?"links/positief":"rechts/negatief"}).`);syncHud();});
+  bind("hudAutoBtn","click",()=>{setPlacement("manual");closePopovers();syncHud();showStatus("AUTO: camera bepaalt het volgende punt.");});
+  bind("hudUseDistanceBtn","click",()=>{setDistance(el("hudDistance").value,el("hudUnit").value);setPlacement("metric");closePopovers();syncHud();showStatus("Exacte afstand ingesteld. Bevestig met de witte ronde knop.");});
+  bind("hudSnap","change",()=>{setSnapMode(el("hudSnap").value);syncHud();});
+  bind("hudUndoBtn","click",()=>{undoToolStep();syncHud();showStatus("Laatste tekenstap ongedaan gemaakt.");});
+  bind("hudFinishBtn","click",()=>{
+    const result=finishTool();syncHud();
+    if(result.type==="polyline"){el("hint").textContent="Doorlopende lijn voltooid en open gebleven.";}
+    if(result.type==="shape"){el("shapeCreateInfo").textContent=`${result.contour.pointIds.length} punten · gesloten contour`;openMenu();showPage("shapecreate");}
   });
-  document.querySelectorAll("[data-hud-direction]").forEach(node=>node.addEventListener("click",()=>{
-    setConstraint(node.dataset.hudDirection);
-    if(el("placementConstraint"))el("placementConstraint").value=node.dataset.hudDirection;
-    syncHud();closeHudPopovers();
-  }));
-  bind("distanceHudBtn","click",()=>{
-    el("directionPopover")?.classList.remove("open");
-    el("distancePopover")?.classList.toggle("open");syncHud();
-  });
-  bind("hudAutoBtn","click",()=>{setPlacementMode("manual");syncHud();closeHudPopovers();actionMessage("Handmatig: richt de camera en plaats het volgende punt.");});
-  bind("hudMetricBtn","click",async()=>{
-    const n=Number(el("hudDistance")?.value),unit=el("hudUnit")?.value||"cm";
-    if(!Number.isFinite(n)||n<=0)throw new Error("Geef een geldige afstand.");
-    setDistanceCm(unit==="m"?n*100:n);setPlacementMode("metric");
-    if(!getActivePoint()){syncHud();closeHudPopovers();actionMessage("Plaats eerst punt A. Daarna kun je het volgende punt op maat plaatsen.",true);return;}
-    const r=await runActionOnce("hud-metric", "hudMetricBtn", ()=>placeMetricPoint(), {result:r=>({stageText:`Punt ${r.point.name} vastgezet`,detailText:`${r.line.name} · ${fmt(r.line.distance)}`,distanceText:fmt(r.line.distance),hintText:`Vertrekpunt ${r.point.name} actief.`})});
-    if(r){syncHud();closeHudPopovers();}
-  });
-  bind("hudAngleApplyBtn","click",()=>{setAngleDeg(Number(el("hudAngle")?.value)||45);if(el("constraintAngle"))el("constraintAngle").value=el("hudAngle").value;syncHud();closeHudPopovers();});
-  bind("hudMoreBtn","click",()=>{openMenu();showPage("settings");});
-  bind("hudToolBtn","click",openMenu);
-  document.querySelectorAll(".constraintBtn").forEach(node=>node.addEventListener("click",()=>{setConstraint(node.dataset.constraint);if(el("placementConstraint"))el("placementConstraint").value=node.dataset.constraint;updatePlacementUI();syncHud();}));
+  bind("hudCancelBtn","click",()=>{cancelTool();syncHud();showStatus("Tekenfunctie gestopt. Bevestigde geometrie blijft bestaan.");});
 
-  bind("constraintAngle","input",()=>{setAngleDeg(Number(el("constraintAngle").value)||45);if(S.drawEngine.direction==="angle"){setConstraint("angle");updatePlacementUI();}});
-
-  bind("measureNewBtn","click",()=>{cancelParametricMode();startMeasureNew();closeMenu();});
-  bind("measureLastBtn","click",()=>{const p=S.points.at(-1);if(!p)throw new Error("Er is nog geen bestaand punt.");startMeasureFrom(p.id);closeMenu();});
-  bind("measureExistingBtn","click",()=>{S.objectPickMode="measure";showPage("objects");});
-  bind("measureParamBtn","click",openPlacementPage);
-
-  bind("newIndependentBtn","click",()=>{cancelParametricMode();startMeasureNew();closeMenu();});
-  bind("newFromLastBtn","click",()=>{const p=S.points.at(-1);if(!p)throw new Error("Er is nog geen bestaand punt.");startMeasureFrom(p.id);closeMenu();});
-  bind("newExistingBtn","click",()=>{S.objectPickMode="measure";showPage("objects");});
-  bind("newParamBtn","click",openPlacementPage);
-
-  bind("stakeNewBtn","click",()=>{cancelParametricMode();const m=readStake();if(m){startStake(null,m);closeMenu();}});
-  bind("stakeLastBtn","click",()=>{const p=S.points.at(-1),m=readStake();if(!p)throw new Error("Er is nog geen bestaand punt.");if(!m)throw new Error("Geef een geldige afstand.");startStake(p.id,m);closeMenu();});
-  bind("stakeExistingBtn","click",()=>{S.objectPickMode="stake";showPage("objects");});
-  bind("stakeParamBtn","click",openPlacementPage);
-
-  bind("continuousBtn","click",()=>startQuickContinuous("POLYLIJN"));
-  bind("continuousParamBtn","click",()=>{if(!S.draw.active)startContinuous();openMenu();openPlacementPage();});
-  bind("drawUndoBtn","click",undoContinuous);
-  bind("drawFinishBtn","click",()=>{
-    try{
-      const c=finishContinuous();
-      el("shapeCreateInfo").textContent=`${c.pointIds.length} punten · ${c.lineIds.length} lijnen`;
-      openMenu();showPage("shapecreate");
-    }catch(e){el("detail").textContent=e.message||String(e);}
+  bind("captureBtn","click",()=>{
+    closePopovers();const r=confirmCandidate();syncHud();
+    if(r.type==="point"){el("distance").textContent="—";el("detail").textContent=`Punt ${r.point.name} vastgezet`;el("hint").textContent=`${r.point.name} is vertrekpunt. Stel zo nodig afstand/richting in en bevestig het volgende punt.`;}
+    else{el("distance").textContent=fmt(r.line.distance);el("detail").textContent=`${r.line.name} · ${fmt(r.line.distance)}`;el("hint").textContent=r.complete?`Lijn voltooid. Bekijk het resultaat en open ☰ voor de volgende functie.`:`${r.point.name} is nu het actieve vertrekpunt.`;}
   });
 
-  bind("captureBtn","click",()=>{closeHudPopovers();placePoint();syncHud();});
+  bind("lineFromStartBtn","click",()=>{const l=getLine(S.selectedLineId);if(!l)throw new Error("Geen lijn geselecteerd.");begin("line",l.startId);});
+  bind("lineFromEndBtn","click",()=>{const l=getLine(S.selectedLineId);if(!l)throw new Error("Geen lijn geselecteerd.");begin("line",l.endId);});
+  bind("useReferenceBtn","click",()=>{const l=getLine(S.selectedLineId);if(!l)throw new Error("Geen lijn geselecteerd.");setReferenceLine(l.id);closeMenu();syncHud();showStatus(`Referentielijn ${l.name} actief.`);});
+  bind("createWallBtn","click",()=>{const l=getLine(S.selectedLineId);if(!l)throw new Error("Geen lijn geselecteerd.");el("wallCreateInfo").textContent=`Basislijn ${l.name} · ${fmt(l.distance)}`;el("wallName").value="";showPage("wallcreate");});
+  bind("deleteLineBtn","click",()=>{const id=S.selectedLineId;if(!canDeleteLine(id))throw new Error("Deze lijn is gekoppeld aan een muur, vorm of contour.");deleteLineRaw(id);showPage("objects");renderObjects();});
 
-  bind("lineFromStartBtn","click",()=>{const l=getLine(S.selectedLineId);if(l){startMeasureFrom(l.startId);closeMenu();}});
-  bind("lineFromEndBtn","click",()=>{const l=getLine(S.selectedLineId);if(l){startMeasureFrom(l.endId);closeMenu();}});
-  bind("useReferenceBtn","click",async()=>{
-    const l=getLine(S.selectedLineId);if(!l)throw new Error("Geen lijn geselecteerd.");
-    await runActionOnce("reference-line","useReferenceBtn",()=>{
-      setReferenceLine(l.id);setUnifiedReference(l.id);updateReferenceStatus();return l;
-    },{
-      closeAfter:true,
-      result:l=>({
-        stageText:`Referentielijn ${l.name} actief`,
-        detailText:`${l.name} · ${fmt(l.distance)}`,
-        hintText:"De referentielijn is ingesteld. Open het menu om verder te werken."
-      })
-    });
-  });
-  bind("createWallBtn","click",()=>{
-    const l=getLine(S.selectedLineId);if(!l)throw new Error("Geen lijn geselecteerd.");
-    el("wallCreateInfo").textContent=`Basislijn ${l.name} · ${fmt(l.distance)}`;
-    el("wallName").value="";el("wallCreateError").style.display="none";
-    showPage("wallcreate");
-  });
-  bind("deleteLineBtn","click",async()=>{
-    const l=getLine(S.selectedLineId);if(!l)throw new Error("Geen lijn geselecteerd.");
-    const deps=wallsUsingLine(l.id);
-    if(deps.length)throw new Error(`Lijn wordt gebruikt door muur: ${deps.map(w=>w.name).join(", ")}`);
-    await runActionOnce("line-delete","deleteLineBtn",()=>{deleteLineRaw(l.id);renderObjects();return l;},{
-      closeAfter:true,
-      result:l=>({stageText:`Lijn ${l.name} verwijderd`,hintText:"AR blijft actief."})
-    });
-  });
+  bind("pointNewLineBtn","click",()=>{if(!S.selectedPointId)throw new Error("Geen punt geselecteerd.");begin("line",S.selectedPointId);});
+  bind("pointPolylineBtn","click",()=>{if(!S.selectedPointId)throw new Error("Geen punt geselecteerd.");begin("polyline",S.selectedPointId);});
+  bind("pointStakeBtn","click",()=>{if(!S.selectedPointId)throw new Error("Geen punt geselecteerd.");begin("stake",S.selectedPointId);});
+  bind("deletePointBtn","click",()=>{const id=S.selectedPointId;if(!canDeletePoint(id))throw new Error("Dit punt is gekoppeld aan een muur of vorm.");const d=pointDependencies(id);for(const l of [...d.lines])deleteLineRaw(l.id);deletePointRaw(id);showPage("objects");renderObjects();});
 
-  bind("pointNewLineBtn","click",()=>{if(S.selectedPointId){startMeasureFrom(S.selectedPointId);closeMenu();}});
-  bind("pointStakeBtn","click",()=>{if(!S.selectedPointId)throw new Error("Geen punt geselecteerd.");setActivePoint(S.selectedPointId);showPage("stake");});
-  bind("deletePointBtn","click",async()=>{
-    const id=S.selectedPointId;const p=getPoint(id);if(!p)throw new Error("Geen punt geselecteerd.");
-    await runActionOnce("point-delete","deletePointBtn",()=>{
-      for(const l of [...S.lines])if(l.startId===id||l.endId===id)deleteLineRaw(l.id);
-      deletePointRaw(id);renderObjects();return p;
-    },{
-      closeAfter:true,
-      result:p=>({stageText:`Punt ${p.name} verwijderd`,hintText:"AR blijft actief."})
-    });
-  });
+  bind("confirmWallBtn","click",()=>{const line=getLine(S.selectedLineId);if(!line)throw new Error("Geen basislijn geselecteerd.");const w=createWall(line,{name:el("wallName").value,height:el("wallHeight").value,thickness:el("wallThickness").value,side:el("wallSide").value,orientation:el("wallOrientation").value,angle:el("wallAngle").value,color:el("wallColor").value,opacity:el("wallOpacity").value});closeMenu();showStatus(`Muur ${w.name} aangemaakt.`);});
+  bind("cancelWallBtn","click",()=>showPage("line",false));bind("wallOrientation","change",()=>{el("wallAngleWrap").style.display=el("wallOrientation").value==="angle"?"block":"none";});
+  bind("toggleWallBtn","click",()=>{toggleWall(S.selectedWallId);renderObjects();});bind("deleteWallBtn","click",()=>{deleteWall(S.selectedWallId);showPage("objects");renderObjects();});
 
-  bind("confirmWallBtn","click",async()=>{
-    const line=getLine(S.selectedLineId);if(!line)throw new Error("Geen basislijn geselecteerd.");
-    const w=await runActionOnce("wall-create","confirmWallBtn",()=>createWall(line,{
-      name:el("wallName").value,height:el("wallHeight").value,thickness:el("wallThickness").value,
-      side:el("wallSide").value,orientation:el("wallOrientation").value,angle:el("wallAngle").value,
-      color:el("wallColor").value,opacity:el("wallOpacity").value
-    }),{
-      closeAfter:true,
-      result:w=>({
-        stageText:`Muur ${w.name} aangemaakt`,
-        detailText:`${w.height.toFixed(2)} m hoog · ${w.thickness.toFixed(2)} m dik`,
-        hintText:"Controleer de muur in AR. Open het menu om verder te werken."
-      })
-    });
-    if(!w)return;
-    el("wallCreateError").style.display="none";
-    S.selectedWallId=w.id;
-    renderObjects();
-  });
-  bind("cancelWallBtn","click",()=>showPage("line",false));
-  bind("wallOrientation","change",()=>{if(el("wallAngleWrap"))el("wallAngleWrap").style.display=el("wallOrientation").value==="angle"?"block":"none";});
-  bind("toggleWallBtn","click",()=>{toggleWall(S.selectedWallId);renderObjects();});
-  bind("deleteWallBtn","click",async()=>{
-    const w=S.walls.find(x=>x.id===S.selectedWallId);if(!w)throw new Error("Geen muur geselecteerd.");
-    await runActionOnce("wall-delete","deleteWallBtn",()=>{deleteWall(w.id);renderObjects();return w;},{
-      closeAfter:true,
-      result:w=>({stageText:`Muur ${w.name} verwijderd`,hintText:"AR blijft actief."})
-    });
-  });
+  bind("createShapeBtn","click",()=>{const c=getContour(S.pendingContourId);if(!c)throw new Error("Gesloten contour ontbreekt.");const s=createShape(c,{name:el("shapeName").value,fill:el("shapeFill").value,opacity:el("shapeOpacity").value,border:el("shapeBorder").value,thickness:el("shapeThickness").value,labels:el("shapeLabels").checked});S.pendingContourId=null;closeMenu();cancelTool();syncHud();showStatus(`Vorm ${s.name} aangemaakt · ${s.area.toFixed(2)} m².`);});
+  bind("cancelShapeBtn","click",()=>{S.pendingContourId=null;closeMenu();cancelTool();syncHud();showStatus("Gesloten contour bewaard zonder opvulling.");});
+  bind("saveShapeBtn","click",()=>{const s=getShape(S.selectedShapeId);if(!s)throw new Error("Geen vorm geselecteerd.");updateShape(s,{name:el("editShapeName").value,fill:el("editShapeFill").value,border:el("editShapeBorder").value,opacity:el("editShapeOpacity").value,thickness:el("editShapeThickness").value,labels:el("editShapeLabels").checked});openShape(s.id);});
+  bind("deleteShapeOnlyBtn","click",()=>{deleteShapeOnly(S.selectedShapeId);showPage("objects");renderObjects();});
+  bind("deleteShapeContourBtn","click",()=>{deleteShapeWithContour(S.selectedShapeId);showPage("objects");renderObjects();});
 
-  bind("placementConstraint","change",()=>{setConstraint(el("placementConstraint").value);updatePlacementUI();});
-  bind("placementDistance","input",updatePlacementUI);
-  bind("placementUnit","change",updatePlacementUI);
-  bind("placementAngle","input",()=>{setAngleDeg(Number(el("placementAngle").value)||45);if(el("constraintAngle"))el("constraintAngle").value=el("placementAngle").value;updatePlacementUI();});
-  bind("placementReference","change",()=>{setUnifiedReference(el("placementReference").value||null);updateReferenceStatus();updatePlacementUI();});
-  bind("placementApplyBtn","click",async()=>{
-    const start=getActivePoint();
-    if(!start){
-      pendingPlacementStart=true;
-      if(!S.draw.active)startMeasureNew();
-      else{
-        el("stage").textContent="Plaats vertrekpunt";
-        el("hint").textContent="Plaats eerst punt A; daarna opent Op maat automatisch opnieuw.";
-      }
-      closeMenu();
-      return;
-    }
+  bind("clearAllBtn","click",()=>showPage("clear"));bind("cancelClearBtn","click",()=>showPage("home",false));bind("confirmClearBtn","click",()=>{clearWalls();clearAllGeometry();resetDrawingCore();closeMenu();syncHud();el("distance").textContent="—";el("hint").textContent="Alles gewist. Open ☰ om opnieuw te beginnen.";});
 
-    const r=await runActionOnce("placement","placementApplyBtn",()=>placeParametricNext(),{
-      closeAfter:true,
-      result:r=>({
-        stageText:`Punt ${r.point.name} vastgezet`,
-        detailText:`${r.line.name} · ${fmt(r.line.distance)}`,
-        hintText:`Vertrekpunt ${r.point.name} actief. Controleer het resultaat en open het menu voor de volgende stap.`,
-        distanceText:fmt(r.line.distance)
-      })
-    });
-    if(!r)return;
-  });
+  bind("menuSettingsBtn","click",()=>showPage("settings"));
+  bind("defaultUnit","change",()=>{S.defaults.unit=el("defaultUnit").value;el("hudUnit").value=S.defaults.unit;syncHud();});
+  bind("defaultThickness","change",()=>{S.defaults.lineThickness=Number(el("defaultThickness").value)||2;});
+  bind("defaultLabels","change",()=>{S.defaults.labels=el("defaultLabels").checked;});
+  bind("zoomInBtn","click",()=>applyZoom(S.zoom+.25));bind("zoomOutBtn","click",()=>applyZoom(S.zoom-.25));bind("zoomResetBtn","click",()=>applyZoom(1));
 
-  bind("createShapeBtn","click",async()=>{
-    try{
-      const c=getContour(S.pendingContourId);
-      const s=await runActionOnce("shape-create","createShapeBtn",()=>createShape(c,{
-        name:el("shapeName").value,fill:el("shapeFill").value,opacity:el("shapeOpacity").value,border:el("shapeBorder").value
-      }),{
-        closeAfter:true,
-        result:s=>({
-          stageText:`Vorm ${s.name} aangemaakt`,
-          detailText:`${s.area.toFixed(2)} m²`,
-          hintText:"Controleer de vorm in AR. Open het menu om verder te werken."
-        })
-      });
-      if(!s)return;
-      S.pendingContourId=null;S.draw.active=false;
-    }catch(e){
-      el("shapeError").style.display="block";
-      el("shapeError").textContent=e.message||String(e);
-    }
-  });
-  bind("cancelShapeBtn","click",()=>{S.pendingContourId=null;S.draw.active=false;resetCurrent();closeMenu();});
-  bind("deleteShapeBtn","click",async()=>{
-    const s=S.shapes.find(x=>x.id===S.selectedShapeId);if(!s)throw new Error("Geen vorm geselecteerd.");
-    await runActionOnce("shape-delete","deleteShapeBtn",()=>{
-      dispose(s.mesh);S.shapes.splice(S.shapes.indexOf(s),1);S.selectedShapeId=null;renderObjects();return s;
-    },{
-      closeAfter:true,
-      result:s=>({stageText:`Vorm ${s.name} verwijderd`,hintText:"AR blijft actief."})
-    });
-  });
+  document.addEventListener("measurear:tool-changed",syncHud);document.addEventListener("measurear:tool-settings",syncHud);document.addEventListener("measurear:candidate-changed",syncCandidateContext);
 
-  bind("undoBtn","click",()=>{
-    const a=S.undo.pop();
-    if(!a)throw new Error("Er is niets om ongedaan te maken.");
-    if(a.type==="createdLine"){deleteLineRaw(a.lineId);deletePointRaw(a.endId);}
-    else if(a.type==="createdWall")deleteWall(a.wallId);
-    closeMenu();renderObjects();
-  });
-
-  bind("clearAllBtn","click",()=>showPage("clear"));
-  bind("cancelClearBtn","click",()=>showPage("home",false));
-  bind("confirmClearBtn","click",async()=>{
-    await runActionOnce("clear-all","confirmClearBtn",()=>{
-      clearWalls();clearAllGeometry();S.draw.active=false;resetCurrent();return true;
-    },{
-      closeAfter:true,
-      result:()=>({stageText:"Alles gewist",detailText:"",hintText:"AR blijft actief. Plaats opnieuw punt A.",distanceText:"—"})
-    });
-  });
-
-    bind("menuSettingsBtn","click",()=>showPage("settings"));
-  bind("zoomInBtn","click",()=>applyZoom(S.zoom+.25));
-  bind("zoomOutBtn","click",()=>applyZoom(S.zoom-.25));
-  bind("zoomResetBtn","click",()=>applyZoom(1));
-
-  document.addEventListener("measurear:active-point-changed",()=>{
-    if(!pendingPlacementStart)return;
-    pendingPlacementStart=false;
-    setTimeout(()=>{openMenu();openPlacementPage();},0);
-  });
-
-  if(el("defaultUnit"))el("defaultUnit").value="cm";
-  if(el("stakeUnit"))el("stakeUnit").value="cm";
-  setConstraint("free");
-  if(el("wallAngleWrap")&&el("wallOrientation"))el("wallAngleWrap").style.display=el("wallOrientation").value==="angle"?"block":"none";
-  updateReferenceStatus();
-  syncHud();
-  updateMeta();
-
-  document.documentElement.dataset.uiReady="1";
-  console.info("Measure AR menu bindings ready");
+  S.defaults.unit="cm";S.defaults.lineThickness=2;S.defaults.labels=true;el("defaultUnit").value="cm";el("hudUnit").value="cm";el("defaultThickness").value="2";el("defaultLabels").checked=true;
+  syncHud();document.documentElement.dataset.uiReady="1";console.info("Measure AR unified drawing UI ready",S.version,S.build);
 }

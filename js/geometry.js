@@ -1,97 +1,229 @@
-
-import {S,$,fmt,pointName,getPoint,getLine,getContour} from "./state.js?v=0.8.10-20260822-1930";
+import {S,$,fmt,pointName,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.11-20260822-1945";
 
 export function dispose(obj){
-  if(!obj||!S.scene)return; S.scene.remove(obj);
-  obj.traverse?.(c=>{c.geometry?.dispose?.();c.material?.dispose?.();});
+  if(!obj||!S.scene)return;
+  S.scene.remove(obj);
+  obj.traverse?.(c=>{
+    c.geometry?.dispose?.();
+    if(Array.isArray(c.material))c.material.forEach(m=>m?.dispose?.());
+    else c.material?.dispose?.();
+  });
 }
-function marker(color){
+
+function makePointMarker(color){
   const T=S.THREE,g=new T.Group();
-
-  // Permanent point marker: deliberately NOT the same visual language as the moving reticle.
-  const pin=new T.Mesh(
-    new T.SphereGeometry(.014,20,14),
-    new T.MeshBasicMaterial({color})
-  );
-  const halo=new T.Mesh(
-    new T.RingGeometry(.022,.029,36),
-    new T.MeshBasicMaterial({color,side:T.DoubleSide,transparent:true,opacity:.95})
-  );
+  const pin=new T.Mesh(new T.SphereGeometry(.014,18,12),new T.MeshBasicMaterial({color}));
+  const halo=new T.Mesh(new T.RingGeometry(.022,.029,32),new T.MeshBasicMaterial({color,side:T.DoubleSide,transparent:true,opacity:.95}));
   halo.rotation.x=-Math.PI/2;
-
-  const stem=new T.Mesh(
-    new T.CylinderGeometry(.0025,.0025,.045,10),
-    new T.MeshBasicMaterial({color})
-  );
-  stem.position.y=.0225;
-
-  g.add(pin,halo,stem);
-  S.scene.add(g);
-  return g;
+  g.add(pin,halo);S.scene.add(g);return g;
 }
-export function createPoint(pos,color=0x69ff9a){
+function makePointLabel(text){
+  const el=document.createElement("div");el.className="pointLabel";el.textContent=text;$("pointLabels").appendChild(el);return el;
+}
+function makeLineLabel(text){
+  const el=document.createElement("div");el.className="lineLabel";el.textContent=text;$("lineLabels").appendChild(el);return el;
+}
+function lineRadius(level){
+  return ({1:.0015,2:.0025,3:.004,4:.006})[Number(level)]||.0025;
+}
+function makeLineMesh(a,b,color="#ffffff",thickness=2,opacity=1){
+  const T=S.THREE,mid=a.clone().add(b).multiplyScalar(.5),dir=b.clone().sub(a),len=dir.length();
+  const geo=new T.CylinderGeometry(lineRadius(thickness),lineRadius(thickness),len,10);
+  const mat=new T.MeshBasicMaterial({color,transparent:opacity<1,opacity});
+  const mesh=new T.Mesh(geo,mat);
+  mesh.position.copy(mid);
+  mesh.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),dir.clone().normalize());
+  S.scene.add(mesh);return mesh;
+}
+
+export function createPoint(pos,{color=0x69ff9a,surfaceNormal=null,id=null,name=null}={}){
+  if(!pos||![pos.x,pos.y,pos.z].every(Number.isFinite))throw new Error("Ongeldige puntpositie.");
   const fixed=pos.clone();
+  const finalName=name||pointName(S.pointCounter++);
   const p={
-    id:"p"+crypto.randomUUID(),
-    name:pointName(S.pointCounter++),
+    id:id||"p"+crypto.randomUUID(),name:finalName,
     position:fixed.clone(),
     locked:Object.freeze({x:fixed.x,y:fixed.y,z:fixed.z}),
-    surfaceNormal:S.drawEngine?.hoverSurfaceNormal?.clone?.()||null,
-    marker:marker(color),
-    label:makePointLabel(pointName(S.pointCounter-1))
+    surfaceNormal:surfaceNormal?.clone?.()||null,
+    marker:makePointMarker(color),
+    label:makePointLabel(finalName)
   };
-  p.marker.position.copy(fixed);
-  S.points.push(p);
-  return p;
+  p.marker.position.copy(fixed);S.points.push(p);return p;
 }
+
 export function enforceLocked(){
   for(const p of S.points){
-    const q=p.locked;
-    if(!q)continue;
-
-    // The authoritative position is the immutable snapshot taken at placement time.
-    // Neither reticle movement, constraint previews, zoom nor later hit-tests may alter it.
-    if(
-      p.position.x!==q.x ||
-      p.position.y!==q.y ||
-      p.position.z!==q.z
-    ){
-      p.position.set(q.x,q.y,q.z);
-    }
+    const q=p.locked;if(!q)continue;
+    p.position.set(q.x,q.y,q.z);
     p.marker?.position.set(q.x,q.y,q.z);
   }
 }
-function makeLabel(text){const el=document.createElement("div");el.className="lineLabel";el.textContent=text;$("lineLabels").appendChild(el);return el;}
 
-function makePointLabel(text){
-  const el=document.createElement("div");
-  el.className="pointLabel";
-  el.textContent=text;
-  $("pointLabels").appendChild(el);
-  return el;
+export function findLineBetween(aId,bId){
+  return S.lines.find(l=>(l.startId===aId&&l.endId===bId)||(l.startId===bId&&l.endId===aId))||null;
 }
 
-export function createLine(a,b,{undo=true}={}){
-  const d=a.position.distanceTo(b.position);if(!Number.isFinite(d)||d<1e-4)throw new Error("Lijn te kort.");
-  const T=S.THREE,geo=new T.BufferGeometry().setFromPoints([a.position,b.position]),mat=new T.LineBasicMaterial({color:0xffffff}),obj=new T.Line(geo,mat);S.scene.add(obj);
-  const l={id:"l"+crypto.randomUUID(),name:a.name+b.name,startId:a.id,endId:b.id,distance:d,object:obj,label:makeLabel(`${a.name+b.name} · ${fmt(d)}`)};
-  S.lines.push(l);if(undo)S.undo.push({type:"createdLine",lineId:l.id,endId:b.id});return l;
+export function createLine(a,b,{color="#ffffff",thickness=null,ownerType=null,ownerId=null,id=null}={}){
+  if(!a||!b)throw new Error("Start- of eindpunt ontbreekt.");
+  if(a.id===b.id)throw new Error("Begin- en eindpunt mogen niet hetzelfde zijn.");
+  if(findLineBetween(a.id,b.id))throw new Error("Deze lijn bestaat al.");
+  const distance=a.position.distanceTo(b.position);
+  if(!Number.isFinite(distance)||distance<.001)throw new Error("De lijn is te kort.");
+  const t=Number(thickness||S.defaults.lineThickness)||2;
+  const l={
+    id:id||"l"+crypto.randomUUID(),name:a.name+b.name,
+    startId:a.id,endId:b.id,distance,
+    thickness:t,color,ownerType,ownerId,
+    labelsVisible:true,
+    object:makeLineMesh(a.position,b.position,color,t),
+    label:makeLineLabel(`${a.name+b.name} · ${fmt(distance)}`)
+  };
+  S.lines.push(l);return l;
 }
+
+export function setLineStyle(line,{color=line.color,thickness=line.thickness,labels=true}={}){
+  if(!line)return;
+  line.color=color;line.thickness=Number(thickness)||2;
+  if(line.object)dispose(line.object);
+  const a=getPoint(line.startId),b=getPoint(line.endId);
+  if(a&&b)line.object=makeLineMesh(a.position,b.position,line.color,line.thickness);
+  line.labelsVisible=labels!==false;if(line.label)line.label.style.display=line.labelsVisible?"block":"none";
+}
+
 export function deleteLineRaw(id){
-  const i=S.lines.findIndex(l=>l.id===id);if(i<0)return;const l=S.lines[i];dispose(l.object);l.label?.remove();S.lines.splice(i,1);
+  const i=S.lines.findIndex(l=>l.id===id);if(i<0)return;
+  const l=S.lines[i];dispose(l.object);l.label?.remove();S.lines.splice(i,1);
 }
 export function deletePointRaw(id){
   const i=S.points.findIndex(p=>p.id===id);if(i<0)return;
-  const p=S.points[i];
-  dispose(p.marker);
-  p.label?.remove();
-  S.points.splice(i,1);
+  const p=S.points[i];dispose(p.marker);p.label?.remove();S.points.splice(i,1);
 }
+
+export function lineDependencies(id){
+  return {
+    walls:S.walls.filter(w=>w.lineId===id),
+    shapes:S.shapes.filter(s=>s.lineIds?.includes(id)),
+    contours:S.contours.filter(c=>c.lineIds?.includes(id))
+  };
+}
+export function pointDependencies(id){
+  const lines=S.lines.filter(l=>l.startId===id||l.endId===id);
+  return {
+    lines,
+    walls:S.walls.filter(w=>lines.some(l=>l.id===w.lineId)),
+    shapes:S.shapes.filter(s=>s.pointIds?.includes(id)),
+    contours:S.contours.filter(c=>c.pointIds?.includes(id))
+  };
+}
+export function canDeleteLine(id){
+  const d=lineDependencies(id);return !d.walls.length&&!d.shapes.length&&!d.contours.length;
+}
+export function canDeletePoint(id){
+  const d=pointDependencies(id);return !d.walls.length&&!d.shapes.length&&!d.contours.length;
+}
+
+export function createContour(pointIds,lineIds,{closed=false,kind="polyline"}={}){
+  if(pointIds.length<2)throw new Error("Contour heeft te weinig punten.");
+  const c={id:"c"+crypto.randomUUID(),name:`Contour ${S.contourCounter++}`,pointIds:[...pointIds],lineIds:[...lineIds],closed,kind};
+  S.contours.push(c);return c;
+}
+
+function contourPlane(pointIds){
+  const T=S.THREE,pts=pointIds.map(getPoint).filter(Boolean).map(p=>p.position);
+  if(pts.length<3)throw new Error("Minstens 3 punten nodig.");
+  const normal=new T.Vector3();
+  for(let i=0;i<pts.length;i++){
+    const a=pts[i],b=pts[(i+1)%pts.length];
+    normal.x+=(a.y-b.y)*(a.z+b.z);
+    normal.y+=(a.z-b.z)*(a.x+b.x);
+    normal.z+=(a.x-b.x)*(a.y+b.y);
+  }
+  if(normal.lengthSq()<1e-10){
+    const e1=pts[1].clone().sub(pts[0]),e2=pts[2].clone().sub(pts[0]);
+    normal.crossVectors(e1,e2);
+  }
+  if(normal.lengthSq()<1e-10)throw new Error("De vormpunten liggen niet in een bruikbaar vlak.");
+  normal.normalize();
+  const origin=pts[0].clone();
+  let u=null;
+  for(let i=1;i<pts.length;i++){
+    const e=pts[i].clone().sub(origin);
+    e.sub(normal.clone().multiplyScalar(e.dot(normal)));
+    if(e.lengthSq()>1e-8){u=e.normalize();break;}
+  }
+  if(!u)throw new Error("Kon geen tekenbasis bepalen.");
+  const v=normal.clone().cross(u).normalize();
+  return {origin,normal,u,v,pts};
+}
+
+function shapeNameExists(name,excludeId=null){
+  const k=String(name||"").trim().toLocaleLowerCase("nl");
+  return S.shapes.some(s=>s.id!==excludeId&&s.name.toLocaleLowerCase("nl")===k);
+}
+
+export function createShape(contour,{name,fill="#4caf50",opacity=.30,border="#ffffff",thickness=2,labels=true}){
+  name=String(name||"").trim();
+  if(!name)throw new Error("Naam is verplicht.");
+  if(shapeNameExists(name))throw new Error("Deze vormnaam bestaat al.");
+  if(!contour?.closed)throw new Error("Een vorm vereist een gesloten contour.");
+  const T=S.THREE,plane=contourPlane(contour.pointIds);
+  const pts2=plane.pts.map(p=>{
+    const d=p.clone().sub(plane.origin);return new T.Vector2(d.dot(plane.u),d.dot(plane.v));
+  });
+  let signed=0;for(let i=0;i<pts2.length;i++){const a=pts2[i],b=pts2[(i+1)%pts2.length];signed+=a.x*b.y-b.x*a.y;}
+  const area=Math.abs(signed)/2;if(area<1e-6)throw new Error("De vormoppervlakte is te klein.");
+  const tris=T.ShapeUtils.triangulateShape(pts2,[]),arr=[];
+  for(const tri of tris)for(const idx of tri){const p=plane.pts[idx];arr.push(p.x,p.y,p.z);}
+  const geo=new T.BufferGeometry();geo.setAttribute("position",new T.Float32BufferAttribute(arr,3));geo.computeVertexNormals();
+  const mat=new T.MeshBasicMaterial({color:fill,transparent:true,opacity:Number(opacity),side:T.DoubleSide,depthWrite:false});
+  const mesh=new T.Mesh(geo,mat);S.scene.add(mesh);
+  const s={
+    id:"s"+crypto.randomUUID(),name,contourId:contour.id,
+    pointIds:[...contour.pointIds],lineIds:[...contour.lineIds],
+    mesh,area,fill,opacity:Number(opacity),border,thickness:Number(thickness)||2,labels:labels!==false,
+    plane:{origin:plane.origin.clone(),normal:plane.normal.clone(),u:plane.u.clone(),v:plane.v.clone()}
+  };
+  S.shapes.push(s);
+  for(const lid of s.lineIds)setLineStyle(getLine(lid),{color:border,thickness:s.thickness,labels:s.labels});
+  return s;
+}
+
+export function updateShape(shape,opts={}){
+  if(!shape)return;
+  const newName=String(opts.name??shape.name).trim();
+  if(!newName)throw new Error("Naam is verplicht.");
+  if(shapeNameExists(newName,shape.id))throw new Error("Deze vormnaam bestaat al.");
+  shape.name=newName;shape.fill=opts.fill??shape.fill;shape.opacity=Number(opts.opacity??shape.opacity);
+  shape.border=opts.border??shape.border;shape.thickness=Number(opts.thickness??shape.thickness)||2;shape.labels=opts.labels??shape.labels;
+  if(shape.mesh?.material){shape.mesh.material.color.set(shape.fill);shape.mesh.material.opacity=shape.opacity;}
+  for(const lid of shape.lineIds)setLineStyle(getLine(lid),{color:shape.border,thickness:shape.thickness,labels:shape.labels});
+}
+
+export function deleteShapeOnly(id){
+  const i=S.shapes.findIndex(s=>s.id===id);if(i<0)return;
+  dispose(S.shapes[i].mesh);S.shapes.splice(i,1);
+  if(S.selectedShapeId===id)S.selectedShapeId=null;
+}
+export function deleteShapeWithContour(id){
+  const s=getShape(id);if(!s)return;
+  const lineIds=[...s.lineIds],pointIds=[...s.pointIds],contourId=s.contourId;
+  deleteShapeOnly(id);
+  const ci=S.contours.findIndex(c=>c.id===contourId);if(ci>=0)S.contours.splice(ci,1);
+  for(const lid of lineIds){
+    const deps=lineDependencies(lid);
+    if(!deps.walls.length&&!deps.shapes.length)deleteLineRaw(lid);
+  }
+  for(const pid of pointIds){
+    if(!S.lines.some(l=>l.startId===pid||l.endId===pid))deletePointRaw(pid);
+  }
+}
+
 export function updateLabels(){
   if(!S.renderer||!S.camera)return;
-  const show=$("defaultLabels").checked,xrCam=S.renderer.xr.getCamera(S.camera),w=innerWidth,h=innerHeight;
+  const show=S.defaults.labels,xrCam=S.renderer.xr.getCamera(S.camera),w=innerWidth,h=innerHeight;
   for(const l of S.lines){
-    if(!show){l.label.style.display="none";continue;}
+    if(!l.label)continue;
+    if(!show||l.labelsVisible===false){l.label.style.display="none";continue;}
     const a=getPoint(l.startId),b=getPoint(l.endId);if(!a||!b){l.label.style.display="none";continue;}
     const pa=a.position.clone().project(xrCam),pb=b.position.clone().project(xrCam);
     if(pa.z<-1||pa.z>1||pb.z<-1||pb.z>1){l.label.style.display="none";continue;}
@@ -100,57 +232,28 @@ export function updateLabels(){
     l.label.style.top=(-(pa.y+pb.y)*.25+.5)*h-18+"px";
   }
 }
-
 export function updatePointLabels(){
   if(!S.renderer||!S.camera)return;
   const xrCam=S.renderer.xr.getCamera(S.camera),w=innerWidth,h=innerHeight;
   for(const p of S.points){
     if(!p.label)continue;
+    if(!S.defaults.labels){p.label.style.display="none";continue;}
     const q=p.position.clone().project(xrCam);
-    if(q.z<-1||q.z>1||Math.abs(q.x)>1.2||Math.abs(q.y)>1.2){
-      p.label.style.display="none";
-      continue;
-    }
-    p.label.style.display="block";
-    p.label.style.left=(q.x*.5+.5)*w+"px";
-    p.label.style.top=(-q.y*.5+.5)*h-20+"px";
+    if(q.z<-1||q.z>1||Math.abs(q.x)>1.2||Math.abs(q.y)>1.2){p.label.style.display="none";continue;}
+    p.label.style.display="block";p.label.style.left=(q.x*.5+.5)*w+"px";p.label.style.top=(-q.y*.5+.5)*h-20+"px";
   }
 }
-
 export function updateMarkerScale(){
-  if(!S.renderer||!S.camera)return;const cam=S.renderer.xr.getCamera(S.camera),p=new S.THREE.Vector3();cam.getWorldPosition(p);
+  if(!S.renderer||!S.camera)return;
+  const cam=S.renderer.xr.getCamera(S.camera),p=new S.THREE.Vector3();cam.getWorldPosition(p);
   for(const x of S.points){const d=Math.max(.05,x.position.distanceTo(p));x.marker.scale.setScalar(Math.min(4,Math.max(.55,.48+d*.28)));}
 }
-export function closeContour(){
-  if(S.draw.pointIds.length<3)throw new Error("Minstens 3 punten nodig.");
-  const first=getPoint(S.draw.startId),last=getPoint(S.draw.lastId),closing=createLine(last,first,{undo:false});
-  S.draw.lineIds.push(closing.id);
-  const c={id:"c"+crypto.randomUUID(),name:`Contour ${S.contourCounter++}`,pointIds:[...S.draw.pointIds],lineIds:[...S.draw.lineIds],closed:true};
-  S.contours.push(c);return {contour:c,closing};
-}
-function shapeNameExists(name){const k=name.trim().toLowerCase();return S.shapes.some(s=>s.name.toLowerCase()===k);}
-export function createShape(contour,{name,fill,opacity,border}){
-  name=name.trim();if(!name)throw new Error("Naam is verplicht.");if(shapeNameExists(name))throw new Error("Deze vormnaam bestaat al.");
-  const T=S.THREE,pts=contour.pointIds.map(getPoint).map(p=>p.position);
-  const origin=pts[0].clone(),normal=new T.Vector3(0,1,0);
-  let u=pts[1].clone().sub(origin).normalize();if(Math.abs(u.dot(normal))>.98)u=new T.Vector3(1,0,0);
-  let v=normal.clone().cross(u).normalize();u=v.clone().cross(normal).normalize();
-  const pts2=pts.map(p=>{const d=p.clone().sub(origin);return new T.Vector2(d.dot(u),d.dot(v));});
-  let area=0;for(let i=0;i<pts2.length;i++){const a=pts2[i],b=pts2[(i+1)%pts2.length];area+=a.x*b.y-b.x*a.y;}area=Math.abs(area)/2;
-  const tris=T.ShapeUtils.triangulateShape(pts2,[]),arr=[];for(const tri of tris)for(const i of tri){const p=pts[i];arr.push(p.x,p.y,p.z);}
-  const geo=new T.BufferGeometry();geo.setAttribute("position",new T.Float32BufferAttribute(arr,3));
-  const mat=new T.MeshBasicMaterial({color:fill,transparent:true,opacity:Number(opacity),side:T.DoubleSide,depthWrite:false}),mesh=new T.Mesh(geo,mat);S.scene.add(mesh);
-  const s={id:"s"+crypto.randomUUID(),name,contourId:contour.id,mesh,area,fill,border};S.shapes.push(s);
-  for(const lid of contour.lineIds){const l=getLine(lid);l?.object?.material?.color?.set(border);}
-  return s;
-}
+
 export function clearAllGeometry(){
-  for(const s of S.shapes)dispose(s.mesh);for(const l of [...S.lines])deleteLineRaw(l.id);for(const p of [...S.points])deletePointRaw(p.id);
-  S.shapes.length=S.contours.length=S.undo.length=0;S.pointCounter=0;S.contourCounter=1;
+  for(const s of S.shapes)dispose(s.mesh);
+  for(const l of [...S.lines])deleteLineRaw(l.id);
+  for(const p of [...S.points])deletePointRaw(p.id);
+  S.shapes.length=0;S.contours.length=0;S.lines.length=0;S.points.length=0;
+  S.pointCounter=0;S.contourCounter=1;
+  S.selectedLineId=S.selectedPointId=S.selectedShapeId=null;
 }
-
-export function enforceLockedPoints(){for(const p of S.points){if(!p.lockedPosition)continue;const q=p.lockedPosition;p.position.set(q.x,q.y,q.z);if(p.marker)p.marker.position.set(q.x,q.y,q.z);}}
-
-export {getPoint};
-
-export {getLine};
