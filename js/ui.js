@@ -4,14 +4,26 @@ import {setConstraint,setReferenceLine,updateReferenceStatus} from "./constraint
 import {startMeasureNew,startMeasureFrom,startStake,startContinuous,undoContinuous,finishContinuous,placePoint,resetCurrent} from "./drawing.js";
 import {createShape,deleteLineRaw,deletePointRaw,clearAllGeometry,dispose} from "./geometry.js";
 import {startAR,leaveAR,applyZoom} from "./ar.js";
+import {updatePlacementUI,placeParametricNext} from "./placement.js";
 import {createWall,getWall,deleteWall,toggleWall,wallsUsingLine,clearWalls} from "./walls.js";
 
-const pages=["home","measure","stake","newline","constraint","objects","line","point","wallcreate","wall","shapecreate","clear"];
+const pages=["home","measure","stake","newline","constraint","placement","objects","line","point","wallcreate","wall","shapecreate","clear"];
 let menuStack=["home"];
 function showPage(name,push=true){pages.forEach(p=>$("page-"+p).classList.remove("active"));$("page-"+name).classList.add("active");$("menuTitle").textContent=name==="home"?"Measure AR":name;if(push&&menuStack.at(-1)!==name)menuStack.push(name);$("menuBackBtn").style.visibility=name==="home"?"hidden":"visible";if(name==="objects")renderObjects();}
 function openMenu(){menuStack=["home"];showPage("home",false);$("menuPanel").classList.add("open");updateMeta();}
 function closeMenu(){$("menuPanel").classList.remove("open");S.objectPickMode=null;}
 function updateMeta(){$("menuMeta").textContent=`${S.points.length}p · ${S.lines.length}l · v${S.version}`;}
+
+function openPlacementPage(){
+  const startId=S.draw?.active?S.draw.lastId:S.activeStartId;
+  const p=getPoint(startId);
+  $("placementContextInfo").textContent=p?`Vertrekpunt: ${p.name}`:"Plaats of selecteer eerst een vast vertrekpunt.";
+  $("placementUnit").value=$("defaultUnit").value||"cm";
+  if($("placementUnit").value==="cm" && Number($("placementDistance").value)<10) $("placementDistance").value="100";
+  updatePlacementUI();
+  showPage("placement");
+}
+
 function readStake(){const n=Number($("stakeDistance").value);return Number.isFinite(n)&&n>0?($("stakeUnit").value==="cm"?n/100:n):null;}
 function renderObjects(){
   const box=$("objectsList");box.innerHTML="";
@@ -40,10 +52,18 @@ export function initUI(){
   document.querySelectorAll(".constraintBtn").forEach(b=>b.onclick=()=>setConstraint(b.dataset.constraint));
   $("constraintAngle").onchange=()=>{S.constraint.angle=Number($("constraintAngle").value)||45;if(S.constraint.mode==="angle")setConstraint("angle");};
   $("constraintHudBtn").onclick=()=>{openMenu();showPage("constraint");};
-  $("measureNewBtn").onclick=()=>{startMeasureNew();closeMenu();};$("measureLastBtn").onclick=()=>{const p=S.points.at(-1);if(p){startMeasureFrom(p.id);closeMenu();}};$("measureExistingBtn").onclick=()=>{S.objectPickMode="measure";showPage("objects");};
-  $("newIndependentBtn").onclick=()=>{startMeasureNew();closeMenu();};$("newFromLastBtn").onclick=()=>{const p=S.points.at(-1);if(p){startMeasureFrom(p.id);closeMenu();}};
-  $("stakeNewBtn").onclick=()=>{const m=readStake();if(m){startStake(null,m);closeMenu();}};$("stakeLastBtn").onclick=()=>{const p=S.points.at(-1),m=readStake();if(p&&m){startStake(p.id,m);closeMenu();}};$("stakeExistingBtn").onclick=()=>{S.objectPickMode="stake";showPage("objects");};
-  $("continuousBtn").onclick=()=>{startContinuous();closeMenu();};$("drawUndoBtn").onclick=undoContinuous;$("drawFinishBtn").onclick=()=>{try{const c=finishContinuous();$("shapeCreateInfo").textContent=`${c.pointIds.length} punten · ${c.lineIds.length} lijnen`;openMenu();showPage("shapecreate");}catch(e){$("detail").textContent=e.message;}};
+  $("measureNewBtn").onclick=()=>{S.placementMode="manual";startMeasureNew();closeMenu();};
+  $("measureParamBtn").onclick=openPlacementPage;$("measureLastBtn").onclick=()=>{const p=S.points.at(-1);if(p){startMeasureFrom(p.id);closeMenu();}};$("measureExistingBtn").onclick=()=>{S.objectPickMode="measure";showPage("objects");};
+  $("newIndependentBtn").onclick=()=>{S.placementMode="manual";startMeasureNew();closeMenu();};
+  $("newParamBtn").onclick=openPlacementPage;$("newFromLastBtn").onclick=()=>{const p=S.points.at(-1);if(p){startMeasureFrom(p.id);closeMenu();}};
+  $("stakeNewBtn").onclick=()=>{S.placementMode="manual";const m=readStake();if(m){startStake(null,m);closeMenu();}};
+  $("stakeParamBtn").onclick=openPlacementPage;$("stakeLastBtn").onclick=()=>{const p=S.points.at(-1),m=readStake();if(p&&m){startStake(p.id,m);closeMenu();}};$("stakeExistingBtn").onclick=()=>{S.objectPickMode="stake";showPage("objects");};
+  $("continuousBtn").onclick=()=>{S.placementMode="manual";startContinuous();closeMenu();};
+  $("continuousParamBtn").onclick=()=>{
+    if(!S.draw.active)startContinuous();
+    openMenu();
+    openPlacementPage();
+  };$("drawUndoBtn").onclick=undoContinuous;$("drawFinishBtn").onclick=()=>{try{const c=finishContinuous();$("shapeCreateInfo").textContent=`${c.pointIds.length} punten · ${c.lineIds.length} lijnen`;openMenu();showPage("shapecreate");}catch(e){$("detail").textContent=e.message;}};
   $("captureBtn").onclick=placePoint;
   $("lineFromStartBtn").onclick=()=>{const l=getLine(S.selectedLineId);if(l){startMeasureFrom(l.startId);closeMenu();}};$("lineFromEndBtn").onclick=()=>{const l=getLine(S.selectedLineId);if(l){startMeasureFrom(l.endId);closeMenu();}};
   $("useReferenceBtn").onclick=()=>{setReferenceLine(S.selectedLineId);closeMenu();};
@@ -87,6 +107,17 @@ export function initUI(){
   $("toggleWallBtn").onclick=()=>{toggleWall(S.selectedWallId);renderObjects();};
   $("deleteWallBtn").onclick=()=>{deleteWall(S.selectedWallId);showPage("objects");renderObjects();};
 
+
+  $("placementConstraint").onchange=updatePlacementUI;
+  $("placementApplyBtn").onclick=()=>{
+    try{
+      placeParametricNext();
+      closeMenu();
+    }catch(e){
+      $("placementHelp").textContent=e.message||String(e);
+    }
+  };
+
   $("createShapeBtn").onclick=()=>{try{const c=getContour(S.pendingContourId),s=createShape(c,{name:$("shapeName").value,fill:$("shapeFill").value,opacity:$("shapeOpacity").value,border:$("shapeBorder").value});S.pendingContourId=null;S.draw.active=false;resetCurrent();closeMenu();$("stage").textContent=`Vorm ${s.name}`;$("detail").textContent=`${s.area.toFixed(2)} m²`;}catch(e){$("shapeError").style.display="block";$("shapeError").textContent=e.message;}};
   $("cancelShapeBtn").onclick=()=>{S.pendingContourId=null;S.draw.active=false;resetCurrent();closeMenu();};
   $("undoBtn").onclick=()=>{
@@ -98,5 +129,5 @@ export function initUI(){
   $("clearAllBtn").onclick=()=>showPage("clear");$("cancelClearBtn").onclick=()=>showPage("home",false);$("confirmClearBtn").onclick=()=>{clearWalls();clearAllGeometry();S.draw.active=false;resetCurrent();closeMenu();$("stage").textContent="Alles gewist";$("hint").textContent="AR blijft actief. Plaats opnieuw punt A.";};
   $("exitBtn").onclick=leaveAR;$("menuSettingsBtn").onclick=async()=>{closeMenu();await leaveAR();$("settingsPanel").classList.add("open");};
   $("zoomInBtn").onclick=()=>applyZoom(S.zoom+.25);$("zoomOutBtn").onclick=()=>applyZoom(S.zoom-.25);$("zoomResetBtn").onclick=()=>applyZoom(1);
-  setConstraint("free");updateReferenceStatus();updateMeta();
+  $("defaultUnit").value="cm";$("stakeUnit").value="cm";setConstraint("free");updateReferenceStatus();updateMeta();
 }

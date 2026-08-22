@@ -26,30 +26,17 @@ export function refreshPlacementReferences(){
   if(S.lines.some(l=>l.id===old))e.value=old;
 }
 export function updatePlacementUI(){
-  const param=S.placementMode==="parametric";
-  $("placementHud")?.classList.add("visible");
-  $("placementModeBtn").textContent=param?"Plaatsing: Op maat":"Plaatsing: Handmatig";
-  $("placementParamPanel").classList.toggle("open",param);
-  const c=$("placementConstraint").value;
-  $("placementAngleWrap").style.display=c==="angle"?"block":"none";
-  $("placementReferenceWrap").style.display=["parallel","perpendicular","angle"].includes(c)?"block":"none";
+  const c=$("placementConstraint")?.value||"free";
+  const a=$("placementAngleWrap"),r=$("placementReferenceWrap");
+  if(a)a.style.display=c==="angle"?"block":"none";
+  if(r)r.style.display=["parallel","perpendicular","angle"].includes(c)?"block":"none";
   refreshPlacementReferences();
 }
-export function togglePlacementMode(){S.placementMode=S.placementMode==="manual"?"parametric":"manual";updatePlacementUI();}
-export function computeNext(start){
-  if(!start)throw new Error("Plaats/selecteer eerst een vertrekpunt.");
-  const d=distanceMeters(),c=$("placementConstraint").value;let dir=cameraDir();
-  if(c==="horizontal")dir=horizontal(dir);
-  else if(c==="vertical")dir=new S.THREE.Vector3(0,dir.y<0?-1:1,0);
-  else if(["parallel","perpendicular","angle"].includes(c)){
-    dir=referenceDir();if(!dir)throw new Error("Kies een geldige referentielijn.");
-    dir=horizontal(dir);
-    if(c==="perpendicular")dir=rotY(dir,90);
-    if(c==="angle")dir=rotY(dir,Number($("placementAngle").value)||0);
-  }
-  return start.position.clone().add(dir.normalize().multiplyScalar(d));
+export function togglePlacementMode(){
+  S.placementMode=S.placementMode==="manual"?"parametric":"manual";
 }
 export function placeParametricNext(){
+  S.placementMode="parametric";
   const start=getPoint(S.draw?.active?S.draw.lastId:S.activeStartId);
   if(!start)throw new Error("Plaats/selecteer eerst een vertrekpunt.");
   const b=createPoint(computeNext(start),0xffd166),l=createLine(start,b,{undo:!S.draw?.active});
