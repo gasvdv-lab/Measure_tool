@@ -1,8 +1,8 @@
-import {startAR} from "./ar.js?v=0.8.9.2-20260822-1840";
-import {$} from "./state.js?v=0.8.9.2-20260822-1840";
+import {startAR} from "./ar.js?v=0.8.9.3-20260822-1835";
+import {$} from "./state.js?v=0.8.9.3-20260822-1835";
 
-const VERSION="0.8.9.2";
-const BUILD="20260822-1840";
+const VERSION="0.8.9.3";
+const BUILD="20260822-1835";
 
 function showFatal(message){
   const status=$("launchStatus");
@@ -15,7 +15,7 @@ function showFatal(message){
 
 async function lazyInitUI(){
   try{
-    const mod=await import("./ui.js?v=0.8.9.2-20260822-1840");
+    const mod=await import("./ui.js?v=0.8.9.3-20260822-1835");
     mod.initUI();
     if(document.documentElement.dataset.uiReady!=="1"){
       throw new Error("UI initialisatie voltooid zonder geldige menu-binding.");

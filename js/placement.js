@@ -1,6 +1,6 @@
-import {S,$,fmt} from "./state.js?v=0.8.9.2-20260822-1840";
-import {getActivePoint,setActivePoint,setPlacementMode,setDistanceCm,setDirection,setAngleDeg,setReferenceLine,previewSummary,placeMetricPoint} from "./drawing-engine.js?v=0.8.9.2-20260822-1840";
-import {setConstraint,updateReferenceStatus,constraintNeedsReference} from "./constraints.js?v=0.8.9.2-20260822-1840";
+import {S,$,fmt} from "./state.js?v=0.8.9.3-20260822-1835";
+import {getActivePoint,setActivePoint,setPlacementMode,setDistanceCm,setDirection,setAngleDeg,setReferenceLine,previewSummary,placeMetricPoint} from "./drawing-engine.js?v=0.8.9.3-20260822-1835";
+import {setConstraint,updateReferenceStatus,constraintNeedsReference} from "./constraints.js?v=0.8.9.3-20260822-1835";
 
 export function getParametricStartPoint(){return getActivePoint();}
 export function setParametricStartPoint(id){return setActivePoint(id);}

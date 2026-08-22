@@ -1,7 +1,7 @@
-import {setHoverSurfaceNormal} from "./drawing-engine.js?v=0.8.9.2-20260822-1840";
+import {setHoverSurfaceNormal} from "./drawing-engine.js?v=0.8.9.3-20260822-1835";
 
-import {S,$} from "./state.js?v=0.8.9.2-20260822-1840";
-import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.9.2-20260822-1840";
+import {S,$} from "./state.js?v=0.8.9.3-20260822-1835";
+import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.9.3-20260822-1835";
 let samples=[],tmpPos,tmpQuat,up,camPos,camQuat,forward;
 
 function withTimeout(promise,ms,label){

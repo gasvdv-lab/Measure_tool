@@ -1,5 +1,5 @@
-import {S,$,getPoint} from "./state.js?v=0.8.9.2-20260822-1840";
-import {setDirection,setReferenceLine as setEngineReference,constrainManualTarget} from "./drawing-engine.js?v=0.8.9.2-20260822-1840";
+import {S,$,getPoint} from "./state.js?v=0.8.9.3-20260822-1835";
+import {setDirection,setReferenceLine as setEngineReference,constrainManualTarget} from "./drawing-engine.js?v=0.8.9.3-20260822-1835";
 
 const REFERENCE_MODES=new Set(["parallel","perpendicular","angle"]);
 

@@ -1,11 +1,11 @@
-import {getActivePoint,setActivePoint,setAngleDeg,setReferenceLine as setUnifiedReference} from "./drawing-engine.js?v=0.8.9.2-20260822-1840";
-import {S,$,fmt,getPoint,getLine,getContour} from "./state.js?v=0.8.9.2-20260822-1840";
-import {setConstraint,setReferenceLine,updateReferenceStatus} from "./constraints.js?v=0.8.9.2-20260822-1840";
-import {startMeasureNew,startMeasureFrom,startStake,startContinuous,undoContinuous,finishContinuous,placePoint,resetCurrent} from "./drawing.js?v=0.8.9.2-20260822-1840";
-import {createShape,deleteLineRaw,deletePointRaw,clearAllGeometry,dispose} from "./geometry.js?v=0.8.9.2-20260822-1840";
-import {startAR,leaveAR,applyZoom} from "./ar.js?v=0.8.9.2-20260822-1840";
-import {cancelParametricMode,placeParametricNext,setParametricStartPoint,updatePlacementUI} from "./placement.js?v=0.8.9.2-20260822-1840";
-import {createWall,getWall,deleteWall,toggleWall,wallsUsingLine,clearWalls} from "./walls.js?v=0.8.9.2-20260822-1840";
+import {getActivePoint,setActivePoint,setAngleDeg,setReferenceLine as setUnifiedReference} from "./drawing-engine.js?v=0.8.9.3-20260822-1835";
+import {S,$,fmt,getPoint,getLine,getContour} from "./state.js?v=0.8.9.3-20260822-1835";
+import {setConstraint,setReferenceLine,updateReferenceStatus} from "./constraints.js?v=0.8.9.3-20260822-1835";
+import {startMeasureNew,startMeasureFrom,startStake,startContinuous,undoContinuous,finishContinuous,placePoint,resetCurrent} from "./drawing.js?v=0.8.9.3-20260822-1835";
+import {createShape,deleteLineRaw,deletePointRaw,clearAllGeometry,dispose} from "./geometry.js?v=0.8.9.3-20260822-1835";
+import {startAR,leaveAR,applyZoom} from "./ar.js?v=0.8.9.3-20260822-1835";
+import {cancelParametricMode,placeParametricNext,setParametricStartPoint,updatePlacementUI} from "./placement.js?v=0.8.9.3-20260822-1835";
+import {createWall,getWall,deleteWall,toggleWall,wallsUsingLine,clearWalls} from "./walls.js?v=0.8.9.3-20260822-1835";
 
 const pages=["home","measure","stake","newline","constraint","placement","objects","line","point","wallcreate","wall","shapecreate","shape","settings","clear"];
 let menuStack=["home"];
@@ -16,6 +16,36 @@ function actionMessage(message,isError=false){
   const detail=el("detail"),hint=el("hint");
   if(detail)detail.textContent=message;
   if(hint && isError)hint.textContent=message;
+}
+function setResultStatus({stageText,detailText,hintText,distanceText}={}){
+  if(stageText&&el("stage"))el("stage").textContent=stageText;
+  if(detailText&&el("detail"))el("detail").textContent=detailText;
+  if(hintText&&el("hint"))el("hint").textContent=hintText;
+  if(distanceText&&el("distance"))el("distance").textContent=distanceText;
+}
+async function runActionOnce(actionName,buttonId,fn,{closeAfter=false,result}={}){
+  const now=Date.now();
+  if(S.actionLock?.busy)return null;
+  if(S.actionLock?.lastAction===actionName && now-(S.actionLock?.lastAt||0)<650)return null;
+  S.actionLock.busy=true;
+  S.actionLock.lastAction=actionName;
+  S.actionLock.lastAt=now;
+  const btn=buttonId?el(buttonId):null;
+  if(btn)btn.disabled=true;
+  try{
+    const value=await fn();
+    if(result){
+      const data=typeof result==="function"?result(value):result;
+      setResultStatus(data||{});
+    }
+    if(closeAfter)closeMenu();
+    return value;
+  }finally{
+    setTimeout(()=>{
+      S.actionLock.busy=false;
+      if(btn)btn.disabled=false;
+    },450);
+  }
 }
 function bind(id,event,handler){
   const node=el(id);
@@ -195,51 +225,84 @@ export function initUI(){
 
   bind("lineFromStartBtn","click",()=>{const l=getLine(S.selectedLineId);if(l){startMeasureFrom(l.startId);closeMenu();}});
   bind("lineFromEndBtn","click",()=>{const l=getLine(S.selectedLineId);if(l){startMeasureFrom(l.endId);closeMenu();}});
-  bind("useReferenceBtn","click",()=>{if(!getLine(S.selectedLineId))throw new Error("Geen lijn geselecteerd.");setReferenceLine(S.selectedLineId);setUnifiedReference(S.selectedLineId);updateReferenceStatus();actionMessage("Referentielijn ingesteld.");closeMenu();});
+  bind("useReferenceBtn","click",async()=>{
+    const l=getLine(S.selectedLineId);if(!l)throw new Error("Geen lijn geselecteerd.");
+    await runActionOnce("reference-line","useReferenceBtn",()=>{
+      setReferenceLine(l.id);setUnifiedReference(l.id);updateReferenceStatus();return l;
+    },{
+      closeAfter:true,
+      result:l=>({
+        stageText:`Referentielijn ${l.name} actief`,
+        detailText:`${l.name} · ${fmt(l.distance)}`,
+        hintText:"De referentielijn is ingesteld. Open het menu om verder te werken."
+      })
+    });
+  });
   bind("createWallBtn","click",()=>{
     const l=getLine(S.selectedLineId);if(!l)throw new Error("Geen lijn geselecteerd.");
     el("wallCreateInfo").textContent=`Basislijn ${l.name} · ${fmt(l.distance)}`;
     el("wallName").value="";el("wallCreateError").style.display="none";
     showPage("wallcreate");
   });
-  bind("deleteLineBtn","click",()=>{
-    const deps=wallsUsingLine(S.selectedLineId);
-    if(deps.length){el("detail").textContent=`Lijn wordt gebruikt door muur: ${deps.map(w=>w.name).join(", ")}`;closeMenu();return;}
-    deleteLineRaw(S.selectedLineId);showPage("objects");
+  bind("deleteLineBtn","click",async()=>{
+    const l=getLine(S.selectedLineId);if(!l)throw new Error("Geen lijn geselecteerd.");
+    const deps=wallsUsingLine(l.id);
+    if(deps.length)throw new Error(`Lijn wordt gebruikt door muur: ${deps.map(w=>w.name).join(", ")}`);
+    await runActionOnce("line-delete","deleteLineBtn",()=>{deleteLineRaw(l.id);renderObjects();return l;},{
+      closeAfter:true,
+      result:l=>({stageText:`Lijn ${l.name} verwijderd`,hintText:"AR blijft actief."})
+    });
   });
 
   bind("pointNewLineBtn","click",()=>{if(S.selectedPointId){startMeasureFrom(S.selectedPointId);closeMenu();}});
   bind("pointStakeBtn","click",()=>{if(!S.selectedPointId)throw new Error("Geen punt geselecteerd.");setActivePoint(S.selectedPointId);showPage("stake");});
-  bind("deletePointBtn","click",()=>{
-    const id=S.selectedPointId;if(!id)return;
-    for(const l of [...S.lines])if(l.startId===id||l.endId===id)deleteLineRaw(l.id);
-    deletePointRaw(id);showPage("objects");
+  bind("deletePointBtn","click",async()=>{
+    const id=S.selectedPointId;const p=getPoint(id);if(!p)throw new Error("Geen punt geselecteerd.");
+    await runActionOnce("point-delete","deletePointBtn",()=>{
+      for(const l of [...S.lines])if(l.startId===id||l.endId===id)deleteLineRaw(l.id);
+      deletePointRaw(id);renderObjects();return p;
+    },{
+      closeAfter:true,
+      result:p=>({stageText:`Punt ${p.name} verwijderd`,hintText:"AR blijft actief."})
+    });
   });
 
-  bind("confirmWallBtn","click",()=>{
+  bind("confirmWallBtn","click",async()=>{
     const line=getLine(S.selectedLineId);if(!line)throw new Error("Geen basislijn geselecteerd.");
-    try{
-      const w=createWall(line,{
-        name:el("wallName").value,height:el("wallHeight").value,thickness:el("wallThickness").value,
-        side:el("wallSide").value,orientation:el("wallOrientation").value,angle:el("wallAngle").value,
-        color:el("wallColor").value,opacity:el("wallOpacity").value
-      });
-      el("wallCreateError").style.display="none";
-      S.selectedWallId=w.id;el("wallInfo").textContent=`${w.name} · hoogte ${w.height.toFixed(2)} m · dikte ${w.thickness.toFixed(2)} m`;
-      showPage("wall");renderObjects();
-    }catch(e){el("wallCreateError").style.display="block";el("wallCreateError").textContent=e.message||String(e);}
+    const w=await runActionOnce("wall-create","confirmWallBtn",()=>createWall(line,{
+      name:el("wallName").value,height:el("wallHeight").value,thickness:el("wallThickness").value,
+      side:el("wallSide").value,orientation:el("wallOrientation").value,angle:el("wallAngle").value,
+      color:el("wallColor").value,opacity:el("wallOpacity").value
+    }),{
+      closeAfter:true,
+      result:w=>({
+        stageText:`Muur ${w.name} aangemaakt`,
+        detailText:`${w.height.toFixed(2)} m hoog · ${w.thickness.toFixed(2)} m dik`,
+        hintText:"Controleer de muur in AR. Open het menu om verder te werken."
+      })
+    });
+    if(!w)return;
+    el("wallCreateError").style.display="none";
+    S.selectedWallId=w.id;
+    renderObjects();
   });
   bind("cancelWallBtn","click",()=>showPage("line",false));
   bind("wallOrientation","change",()=>{if(el("wallAngleWrap"))el("wallAngleWrap").style.display=el("wallOrientation").value==="angle"?"block":"none";});
   bind("toggleWallBtn","click",()=>{toggleWall(S.selectedWallId);renderObjects();});
-  bind("deleteWallBtn","click",()=>{deleteWall(S.selectedWallId);showPage("objects");renderObjects();});
+  bind("deleteWallBtn","click",async()=>{
+    const w=S.walls.find(x=>x.id===S.selectedWallId);if(!w)throw new Error("Geen muur geselecteerd.");
+    await runActionOnce("wall-delete","deleteWallBtn",()=>{deleteWall(w.id);renderObjects();return w;},{
+      closeAfter:true,
+      result:w=>({stageText:`Muur ${w.name} verwijderd`,hintText:"AR blijft actief."})
+    });
+  });
 
   bind("placementConstraint","change",()=>{setConstraint(el("placementConstraint").value);updatePlacementUI();});
   bind("placementDistance","input",updatePlacementUI);
   bind("placementUnit","change",updatePlacementUI);
   bind("placementAngle","input",()=>{setAngleDeg(Number(el("placementAngle").value)||45);if(el("constraintAngle"))el("constraintAngle").value=el("placementAngle").value;updatePlacementUI();});
   bind("placementReference","change",()=>{setUnifiedReference(el("placementReference").value||null);updateReferenceStatus();updatePlacementUI();});
-  bind("placementApplyBtn","click",()=>{
+  bind("placementApplyBtn","click",async()=>{
     const start=getActivePoint();
     if(!start){
       pendingPlacementStart=true;
@@ -251,24 +314,48 @@ export function initUI(){
       closeMenu();
       return;
     }
-    const r=placeParametricNext();
-    if(el("placementHelp"))el("placementHelp").textContent=`${r.line.name} geplaatst. ${r.point.name} is nu vertrekpunt.`;
-    updatePlacementUI();
+
+    const r=await runActionOnce("placement","placementApplyBtn",()=>placeParametricNext(),{
+      closeAfter:true,
+      result:r=>({
+        stageText:`Punt ${r.point.name} vastgezet`,
+        detailText:`${r.line.name} · ${fmt(r.line.distance)}`,
+        hintText:`Vertrekpunt ${r.point.name} actief. Controleer het resultaat en open het menu voor de volgende stap.`,
+        distanceText:fmt(r.line.distance)
+      })
+    });
+    if(!r)return;
   });
 
-  bind("createShapeBtn","click",()=>{
+  bind("createShapeBtn","click",async()=>{
     try{
       const c=getContour(S.pendingContourId);
-      const s=createShape(c,{name:el("shapeName").value,fill:el("shapeFill").value,opacity:el("shapeOpacity").value,border:el("shapeBorder").value});
-      S.pendingContourId=null;S.draw.active=false;resetCurrent();closeMenu();
-      el("stage").textContent=`Vorm ${s.name}`;el("detail").textContent=`${s.area.toFixed(2)} m²`;
-    }catch(e){el("shapeError").style.display="block";el("shapeError").textContent=e.message||String(e);}
+      const s=await runActionOnce("shape-create","createShapeBtn",()=>createShape(c,{
+        name:el("shapeName").value,fill:el("shapeFill").value,opacity:el("shapeOpacity").value,border:el("shapeBorder").value
+      }),{
+        closeAfter:true,
+        result:s=>({
+          stageText:`Vorm ${s.name} aangemaakt`,
+          detailText:`${s.area.toFixed(2)} m²`,
+          hintText:"Controleer de vorm in AR. Open het menu om verder te werken."
+        })
+      });
+      if(!s)return;
+      S.pendingContourId=null;S.draw.active=false;
+    }catch(e){
+      el("shapeError").style.display="block";
+      el("shapeError").textContent=e.message||String(e);
+    }
   });
   bind("cancelShapeBtn","click",()=>{S.pendingContourId=null;S.draw.active=false;resetCurrent();closeMenu();});
-  bind("deleteShapeBtn","click",()=>{
-    const s=S.shapes.find(x=>x.id===S.selectedShapeId);
-    if(!s)throw new Error("Geen vorm geselecteerd.");
-    dispose(s.mesh);S.shapes.splice(S.shapes.indexOf(s),1);S.selectedShapeId=null;showPage("objects");renderObjects();
+  bind("deleteShapeBtn","click",async()=>{
+    const s=S.shapes.find(x=>x.id===S.selectedShapeId);if(!s)throw new Error("Geen vorm geselecteerd.");
+    await runActionOnce("shape-delete","deleteShapeBtn",()=>{
+      dispose(s.mesh);S.shapes.splice(S.shapes.indexOf(s),1);S.selectedShapeId=null;renderObjects();return s;
+    },{
+      closeAfter:true,
+      result:s=>({stageText:`Vorm ${s.name} verwijderd`,hintText:"AR blijft actief."})
+    });
   });
 
   bind("undoBtn","click",()=>{
@@ -281,9 +368,13 @@ export function initUI(){
 
   bind("clearAllBtn","click",()=>showPage("clear"));
   bind("cancelClearBtn","click",()=>showPage("home",false));
-  bind("confirmClearBtn","click",()=>{
-    clearWalls();clearAllGeometry();S.draw.active=false;resetCurrent();closeMenu();
-    el("stage").textContent="Alles gewist";el("hint").textContent="AR blijft actief. Plaats opnieuw punt A.";
+  bind("confirmClearBtn","click",async()=>{
+    await runActionOnce("clear-all","confirmClearBtn",()=>{
+      clearWalls();clearAllGeometry();S.draw.active=false;resetCurrent();return true;
+    },{
+      closeAfter:true,
+      result:()=>({stageText:"Alles gewist",detailText:"",hintText:"AR blijft actief. Plaats opnieuw punt A.",distanceText:"—"})
+    });
   });
 
     bind("menuSettingsBtn","click",()=>showPage("settings"));
