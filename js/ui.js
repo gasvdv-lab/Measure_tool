@@ -7,7 +7,7 @@ import {startAR,leaveAR,applyZoom} from "./ar.js";
 import {updatePlacementUI,placeParametricNext} from "./placement.js";
 import {createWall,getWall,deleteWall,toggleWall,wallsUsingLine,clearWalls} from "./walls.js";
 
-const pages=["home","measure","stake","newline","constraint","placement","objects","line","point","wallcreate","wall","shapecreate","clear"];
+const pages=["home","measure","stake","newline","constraint","placement","objects","line","point","wallcreate","wall","shapecreate","settings","clear"];
 let menuStack=["home"];
 function showPage(name,push=true){pages.forEach(p=>$("page-"+p).classList.remove("active"));$("page-"+name).classList.add("active");$("menuTitle").textContent=name==="home"?"Measure AR":name;if(push&&menuStack.at(-1)!==name)menuStack.push(name);$("menuBackBtn").style.visibility=name==="home"?"hidden":"visible";if(name==="objects")renderObjects();}
 function openMenu(){menuStack=["home"];showPage("home",false);$("menuPanel").classList.add("open");updateMeta();}
@@ -44,8 +44,6 @@ function renderObjects(){
   if(S.points.length){box.insertAdjacentHTML("beforeend","<h3>Punten</h3>");for(const p of S.points){const r=document.createElement("div");r.className="objectRow";const a=document.createElement("button"),d=document.createElement("button");a.className="secondary";a.textContent=`Punt ${p.name}`;d.className="danger";d.textContent="Wis";a.onclick=()=>{if(S.objectPickMode==="measure"){startMeasureFrom(p.id);closeMenu();return;}if(S.objectPickMode==="stake"){const m=readStake();if(m)startStake(p.id,m);closeMenu();return;}S.selectedPointId=p.id;$("pointInfo").textContent=a.textContent;showPage("point");};d.onclick=()=>{for(const l of [...S.lines])if(l.startId===p.id||l.endId===p.id)deleteLineRaw(l.id);deletePointRaw(p.id);renderObjects();};r.append(a,d);box.append(r);}}
 }
 export function initUI(){
-  $("settingsBtn").onclick=()=>$("settingsPanel").classList.toggle("open");
-  $("startBtn").onclick=async()=>{try{await startAR();}catch(e){$("error").style.display="block";$("error").textContent=e.message;}};
   $("menuBtn").onclick=()=>$("menuPanel").classList.contains("open")?closeMenu():openMenu();
   $("menuCloseBtn").onclick=closeMenu;$("menuBackBtn").onclick=()=>{if(menuStack.length<=1)return closeMenu();menuStack.pop();showPage(menuStack.at(-1),false);};
   document.querySelectorAll("[data-page]").forEach(b=>b.onclick=()=>showPage(b.dataset.page));
@@ -127,7 +125,8 @@ export function initUI(){
     closeMenu();renderObjects();
   };
   $("clearAllBtn").onclick=()=>showPage("clear");$("cancelClearBtn").onclick=()=>showPage("home",false);$("confirmClearBtn").onclick=()=>{clearWalls();clearAllGeometry();S.draw.active=false;resetCurrent();closeMenu();$("stage").textContent="Alles gewist";$("hint").textContent="AR blijft actief. Plaats opnieuw punt A.";};
-  $("exitBtn").onclick=leaveAR;$("menuSettingsBtn").onclick=async()=>{closeMenu();await leaveAR();$("settingsPanel").classList.add("open");};
+  $("exitBtn").onclick=leaveAR;
+  $("menuSettingsBtn").onclick=()=>showPage("settings");
   $("zoomInBtn").onclick=()=>applyZoom(S.zoom+.25);$("zoomOutBtn").onclick=()=>applyZoom(S.zoom-.25);$("zoomResetBtn").onclick=()=>applyZoom(1);
   $("defaultUnit").value="cm";$("stakeUnit").value="cm";setConstraint("free");updateReferenceStatus();updateMeta();
 }
