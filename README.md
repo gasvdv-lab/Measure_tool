@@ -1,20 +1,42 @@
-# Measure AR v0.8.14 — Snapping & References
-Build: 20260822-2130
+# Measure AR v0.8.15 — Objectbeheer & Undo/Redo
+Build: 20260822-2215
 
-Deze release bouwt verder op de stabiele Unified Drawing Core en verfijnt snapping en referentielijnen.
+Deze release introduceert één centrale projecthistorie en breidt objectbeheer uit.
 
-## Nieuw in v0.8.14
-- `Smart` snapping is nu de standaard.
-- Smart-prioriteit: bestaand punt → lijnmidden → dichtstbijzijnde positie op lijn.
-- Afzonderlijke snapmodi: Smart, Alleen punten, Alleen middelpunten, Alleen lijnen, Uit.
-- Snapping respecteert de actieve constraint; een snap mag Horizontaal/Verticaal/Op oppervlak/Parallel/Loodrecht/Eigen hoek niet verbreken.
-- Exacte-afstandsmodus blijft exact: alleen een bestaand punt binnen 5 mm van de exact berekende positie mag hergebruikt worden.
-- Preview toont welk snaptype actief is.
-- Compacte HUD toont tijdelijk `Snap: punt`, `Snap: midden` of `Snap: lijn`.
-- Referentielijn blijft rechtstreeks in de HUD selecteerbaar.
-- Nieuwe knop `Gebruik laatste lijn` voor snelle referentiekeuze.
-- Zijde/Richting-chip is rechtstreeks aanklikbaar om de richting om te keren.
-- Parallel toont `voor/tegen`; Loodrecht en Eigen hoek tonen `links/rechts`.
+## Nieuw in v0.8.15
+- Centrale snapshot-gebaseerde Undo/Redo-engine in `js/history.js`.
+- Undo en Redo werken op volledige consistente projectstates, niet op losse halve objecten.
+- Nieuwe actie wist de Redo-stack, zoals in CAD-software gebruikelijk.
+- Historie bewaart maximaal 80 projectacties.
+- Undo/Redo beschikbaar in hoofdmenu én compacte AR-HUD.
+- Tekenen van punten/lijnen wordt in dezelfde centrale historie opgenomen.
+- Voltooien van polyline en sluiten van vorm wordt als historie-actie geregistreerd.
+- Muur aanmaken, wijzigen, zichtbaar/verbergen en verwijderen zijn historie-acties.
+- Vorm aanmaken, stijl wijzigen, alleen opvulling verwijderen en vorm+contour verwijderen zijn historie-acties.
+- Losse lijnen en punten verwijderen zijn historie-acties.
+- `Alles wissen` kan ongedaan worden gemaakt.
+- Projectstate wordt na herstel opnieuw op gebroken references gecontroleerd.
+
+## Objectbeheer
+### Punt
+- Puntnaam achteraf wijzigen.
+- Puntnamen blijven uniek.
+- Automatisch benoemde lijnen worden mee bijgewerkt wanneer een punt wordt hernoemd.
+
+### Lijn
+- Naam wijzigen.
+- Kleur wijzigen.
+- Dikte wijzigen.
+- Label aan/uit.
+- Een handmatig aangepaste lijnnaam blijft behouden wanneer later een puntnaam verandert.
+
+### Vorm
+- Naam, opvulling, transparantie, randkleur, randdikte en labels blijven achteraf bewerkbaar.
+- Alleen vorm/opvulling verwijderen blijft gescheiden van vorm + contour verwijderen.
+
+### Muur
+- Naam, hoogte, dikte, zijde, oriëntatie, hoek, kleur en transparantie kunnen achteraf gewijzigd worden.
+- Muur blijft gekoppeld aan zijn basislijn.
 
 ## Tests automatisch uitgevoerd na genereren — PASS
 ### Statische applicatietests
@@ -24,91 +46,79 @@ Deze release bouwt verder op de stabiele Unified Drawing Core en verfijnt snappi
 - Alle UI-ID-referenties bestaan.
 - Alle statische knoppen hebben een handler.
 - Oude tekenmodules blijven verwijderd.
-- Nieuwe snapkeuzes bestaan in UI en state.
-- Laatste-referentielijnknop is gekoppeld.
-- Klikbare zijde-chip is gekoppeld.
-- Snapstatus-chip is gekoppeld.
+- Nieuwe `history.js` is gekoppeld.
+- Undo/Redo-knoppen bestaan in menu en HUD.
+- Punt-, lijn- en muurbewerkingsknoppen zijn gekoppeld.
 
-### Algoritmische snappingtests — PASS
-- Dichtstbijzijnde punt op een lijnsegment wordt correct berekend.
-- Middelpuntberekening is correct.
-- Smart snap geeft een punt voorrang op middenpunt/lijn.
-- Exacte afstand gebruikt de 5-mm-hergebruikgrens correct.
-- Horizontale snapping weigert kandidaten buiten de tolerantie.
-- Verticale snapping controleert X/Z-afwijking correct.
-- Lijnsnap wordt correct begrensd tot het segment en loopt niet voorbij een eindpunt.
+### Historie-algoritmetests — PASS
+- Undo brengt de vorige state terug.
+- Redo brengt de volgende state terug.
+- Een nieuwe actie na Undo wist de Redo-stack.
+- Historie wordt begrensd op 80 acties.
+- No-op wijzigingen maken geen historie-entry.
+
+### Architectuur/regressie — PASS
+- Snapshot bevat punten, lijnen, contouren, vormen en muren.
+- Tekensegmenten registreren centrale historie.
+- Wall-module schrijft niet meer rechtstreeks losse oude undo-records.
+- Puntnaam-editing bestaat.
+- Lijnstijl/editing bestaat.
+- Muur-editing bestaat.
+- Vorm-editing loopt via historie.
+- Projectvalidator blijft actief na Undo/Redo.
 
 ## Eerder automatisch uitgevoerd — PASS
-De regressiebasis uit v0.8.12/v0.8.13 blijft geldig:
-- Gewone lijn A→B stopt correct.
-- B wordt actief eindpunt.
-- Polyline A→B→C→D schuift het vertrekpunt door.
-- Undo herstelt vorig vertrekpunt.
-- Polyline Voltooien blijft open.
-- Vorm Sluiten maakt laatste→A.
-- Exacte horizontale afstand.
-- Exacte verticale plaatsing.
-- Parallel zonder referentie wordt geweigerd.
-- Parallel met referentie.
-- Loodrecht 90°.
-- Eigen hoek 45°.
-- Dubbele lijn wordt geweigerd.
-- Dependencybescherming voor contour/vorm/muur.
-- Projectvalidator detecteert gebroken referenties.
-- Mislukte lijncreatie ruimt tijdelijk punt op.
-- Afgewerkte contour wordt niet beschadigd door late Undo.
-- Alle HUD-elementen uit v0.8.13 bestaan en zijn gekoppeld.
+Alle eerder geslaagde automatische tests uit v0.8.12–v0.8.14 blijven regressie-eisen:
+- Gewone lijn A→B.
+- Actief eindpunt.
+- Polyline A→B→C→D.
+- Undo van tekenstap.
+- Open Voltooien van polyline.
+- Sluiten van vorm.
+- Exacte horizontale/verticale afstanden.
+- Parallel/Loodrecht/Eigen hoek.
+- Dependencybescherming.
+- Projectvalidator.
+- Mislukte lijn rollback.
+- Smart snapping punt/midden/lijn.
+- 5-mm-regel bij exacte afstand.
+- Constraint-safe snapping.
+- HUD/reference/snap-controls.
 
 ## Nog fysiek te testen — cumulatief
 Deze tests vereisen echte WebXR/ARCore en blijven open.
 
-### AR-sessie en tracking
+### AR-sessie/tracking
 - AR starten.
 - Menu openen/sluiten zonder trackingverlies.
-- App naar achtergrond en terug.
+- Achtergrond → terug.
 - AR opnieuw starten.
 - Alles wissen terwijl AR actief blijft.
 - Drift gedurende 1–5 minuten.
-- Bevestigd punt blijft visueel op dezelfde fysieke positie.
+- Bevestigd punt blijft op fysieke locatie.
 
 ### Hit-test / tekenvlakken
 - Vloer.
 - Verticale muur.
-- Schuin vlak indien beschikbaar.
-- Wisselen tussen oppervlakken zonder sprong.
-- Op oppervlak blijft in het actieve vlak.
+- Schuin vlak.
+- Wisselen tussen oppervlakken.
+- Op oppervlak blijft in actief vlak.
 
-### Gewone lijn
-- A plaatsen.
-- B plaatsen.
+### Lijn / polyline / vorm
+- Gewone A→B en stop.
 - A blijft vast.
-- Tool stopt na B.
-- Label/afstand visueel controleren.
-- Nieuwe lijn vanaf A en B.
-
-### Doorlopende lijn
-- A→B→C→D.
-- B wordt start van C.
-- C wordt start van D.
-- Undo D herstelt C.
-- Voltooien laat polyline open.
-
-### Vorm
-- Horizontale driehoek.
-- Horizontale vierhoek.
-- Verticale vorm.
-- Schuine vorm.
-- Niet-vlakke vorm >3 cm wordt geweigerd.
-- Sluiten maakt laatste→A.
-- Opvulling blijft in vlak.
+- A→B→C→D met doorschuivend vertrekpunt.
+- Undo en Redo tijdens een polyline.
+- Voltooien houdt polyline open.
+- Horizontale/verticale/schuine vorm.
+- Vorm Sluiten.
+- Vlakheidscontrole >3 cm.
 - Oppervlakte plausibel.
 
 ### AUTO / exacte afstand
 - AUTO op meerdere afstanden.
-- 50 cm.
-- 100 cm.
-- 250 cm.
-- 1.50 m.
+- Exact 50 / 100 / 250 cm.
+- Exact 1.50 m.
 - Preview vóór bevestiging.
 - Alleen witte ronde knop bevestigt.
 
@@ -120,76 +130,78 @@ Deze tests vereisen echte WebXR/ARCore en blijven open.
 - Parallel.
 - Loodrecht.
 - Eigen hoek 30/45/90°.
-- Links/rechts of voor/tegen omkeren.
+- Links/rechts en voor/tegen.
 
-### Snapping — uitgebreid voor v0.8.14
-- Smart snap naar bestaand punt.
-- Smart snap naar lijnmidden.
-- Smart snap naar lijn.
-- Alleen punten.
-- Alleen middelpunten.
-- Alleen lijnen.
+### Snapping
+- Smart punt.
+- Smart midden.
+- Smart lijn.
+- Modi afzonderlijk.
 - Snapping uit.
-- Punt heeft zichtbaar voorrang boven lijn/midden wanneer meerdere kandidaten in bereik zijn.
-- Horizontale constraint blijft behouden na snap.
-- Verticale constraint blijft behouden na snap.
-- Op-oppervlak constraint blijft behouden na snap.
-- Parallel/Loodrecht/Eigen hoek blijven behouden na snap.
-- Exacte afstand verandert niet merkbaar door Smart snap.
-- Exact punt op berekende plaats kan worden hergebruikt.
-- Snapstatus-chip verschijnt en verdwijnt correct.
-- Geen ongewenste snap naar het actieve vertrekpunt.
+- Prioriteit punt > midden > lijn.
+- Constraints blijven behouden.
+- Exacte afstand blijft exact.
+- Snapstatus-chip.
 
-### Referentielijnen — uitgebreid voor v0.8.14
-- Referentielijn via dropdown kiezen.
-- `Gebruik laatste lijn`.
-- Parallel gebruikt gekozen referentie.
-- Loodrecht gebruikt gekozen referentie.
-- Eigen hoek gebruikt gekozen referentie.
-- Referentiechip toont juiste lijn.
-- Richting/Zijde-chip omkeren via chip.
-- Parallel voor/tegen omschakelen.
-- Loodrecht links/rechts omschakelen.
-- Eigen hoek links/rechts omschakelen.
-- Geen referentie beschikbaar → duidelijke fout.
+### Referenties
+- Dropdown.
+- Gebruik laatste lijn.
+- Parallel/Loodrecht/Eigen hoek.
+- Ref-chip.
+- Zijde/Richting-chip.
 
-### Objecten / dependencies
-- Los punt wissen.
-- Losse lijn wissen.
-- Punt uit vorm blokkeren.
+### Objectbeheer — nieuw voor v0.8.15
+- Punt hernoemen en label controleren.
+- Automatische lijnnaam verandert mee na punt-hernoeming.
+- Lijn handmatig hernoemen en daarna punt hernoemen: custom lijnnaam moet blijven.
+- Lijnkleur wijzigen.
+- Lijndikte 1/2/3/4 visueel vergelijken.
+- Lijnlabel aan/uit.
+- Vormstijl aanpassen en visueel controleren.
+- Muurhoogte achteraf wijzigen.
+- Muurdikte achteraf wijzigen.
+- Muur links/rechts/gecentreerd wijzigen.
+- Muurkleur/transparantie wijzigen.
+- Muurhoek wijzigen.
+- Objectbeheer mag tracking niet verstoren.
+
+### Undo/Redo — nieuw voor v0.8.15
+- Punt plaatsen → Undo → Redo.
+- Lijn A→B → Undo → Redo.
+- Polyline meerdere stappen achteruit en opnieuw vooruit.
+- Vorm sluiten → Undo → Redo.
+- Puntnaam aanpassen → Undo → Redo.
+- Lijnstijl aanpassen → Undo → Redo.
+- Vormstijl aanpassen → Undo → Redo.
+- Muur maken → Undo → Redo.
+- Muur aanpassen → Undo → Redo.
+- Muur verwijderen → Undo → Redo.
+- Alles wissen → Undo moet volledig project terugbrengen.
+- Na Undo een nieuwe actie uitvoeren → Redo moet verdwijnen.
+- Na minimaal 20 afwisselende acties blijft project consistent.
+
+### Dependencies
+- Los punt/lijn wissen.
+- Punt uit contour/vorm blokkeren.
 - Muur-basislijn blokkeren.
-- Alleen vorm/opvulling wissen.
-- Vorm + contour wissen.
-
-### Muren
-- Muur uit lijn.
-- Hoogte/dikte.
-- Links/rechts/gecentreerd.
-- Kleur/transparantie.
-- Eigen hoek.
-- zichtbaar/verborgen.
-- verwijderen.
+- Alleen vorm verwijderen.
+- Vorm + contour verwijderen.
+- Undo/Redo van bovenstaande verwijderacties.
 
 ### HUD
-- Neemt weinig camerabeeld in.
-- Actief vertrekpunt leesbaar.
-- Referentiechip contextueel.
-- Zijdechip contextueel.
-- Snapchip contextueel.
-- Popovers openen/sluiten.
-- Exacte afstand blijft zichtbaar.
+- Geen overlap.
 - Compact/Meer info.
-- Geen overlap met shutter/zoom/hint.
-- Portrait en rotatie.
+- Undo/Redo-knoppen bruikbaar zonder camerabeeld te blokkeren.
+- Disabled-state klopt wanneer Undo/Redo niet beschikbaar is.
 
 ## Bekend nog niet opgelost
 - Definitieve labeloriëntatie/collision avoidance.
-- Volledige Redo-interface.
 - Deur/raam/openingen.
-- Muur als volledig zelfstandig tekengereedschap.
-- Lijnintersectie-snapping is nog niet toegevoegd; dat kan later bij geavanceerde snapping.
+- Muur nog niet als volledig zelfstandig tekengereedschap.
+- Lijnintersectie-snapping komt later.
+- Persistente opslag van historie over een browserherstart is nog niet voorzien.
 
 Vaste app-link:
 https://gasvdv-lab.github.io/Measure_tool/
 
-Upload alle bestanden uit deze ZIP. Oude tekenmodules mogen niet terugkomen.
+Upload alle bestanden uit deze ZIP. `js/history.js` is nieuw en moet mee naar GitHub.

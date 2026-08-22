@@ -4,15 +4,15 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#111111">
-  <title>Measure AR v0.8.14</title>
-  <link rel="stylesheet" href="./css/app.css?v=0.8.14-20260822-2130">
+  <title>Measure AR v0.8.15</title>
+  <link rel="stylesheet" href="./css/app.css?v=0.8.15-20260822-2215">
 </head>
 <body>
 <div id="app">
   <main class="startCard directFallback">
     <div class="logo">⌖</div><h1>Measure AR</h1>
     <p id="launchStatus">Tik om AR te starten.</p>
-    <div id="buildInfo" class="build">v0.8.14 · stability build 20260822-2130</div>
+    <div id="buildInfo" class="build">v0.8.15 · stability build 20260822-2215</div>
     <button id="startArBtn" class="primary">AR starten</button>
     <div id="error" class="error"></div>
   </main>
@@ -32,7 +32,7 @@
   <aside id="menuPanel">
     <div class="menuHead">
       <button id="menuBackBtn" class="secondary">‹</button>
-      <div><strong id="menuTitle">Measure AR</strong><small id="menuMeta">v0.8.14</small></div>
+      <div><strong id="menuTitle">Measure AR</strong><small id="menuMeta">v0.8.15</small></div>
       <button id="menuCloseBtn" class="secondary">✕</button>
     </div>
     <div class="menuBody">
@@ -48,7 +48,11 @@
         <h3>Project</h3>
         <div class="menuCard navList"><button data-page="objects">Objecten <small>vormen, muren, lijnen en punten</small></button></div>
         <h3>Bewerken</h3>
-        <div class="menuCard"><button id="clearAllBtn" class="danger">Alles wissen</button></div>
+        <div class="menuCard editHistory">
+  <div class="grid2"><button id="globalUndoBtn" class="secondary">↶ Ongedaan</button><button id="globalRedoBtn" class="secondary">↷ Opnieuw</button></div>
+  <div id="historyInfo" class="help">Geen bewerkingen in historie.</div>
+  <button id="clearAllBtn" class="danger">Alles wissen</button>
+</div>
       </section>
 
       <section id="page-objects" class="page"><h3>Objecten</h3><div id="objectsList" class="menuCard"></div></section>
@@ -56,6 +60,13 @@
       <section id="page-line" class="page">
         <h3>Lijn</h3><div class="menuCard">
           <div id="lineInfo" class="help">—</div>
+          <label>Naam<input id="editLineName" maxlength="40"></label>
+          <div class="grid2">
+            <label>Kleur<input id="editLineColor" type="color" value="#ffffff"></label>
+            <label>Dikte<select id="editLineThickness"><option value="1">1 · fijn</option><option value="2">2 · normaal</option><option value="3">3 · duidelijk</option><option value="4">4 · zwaar</option></select></label>
+          </div>
+          <label class="check"><input id="editLineLabels" type="checkbox" checked> Label tonen</label>
+          <button id="saveLineBtn" class="primary">Lijn opslaan</button>
           <button id="lineFromStartBtn" class="secondary">Nieuwe lijn vanaf start</button>
           <button id="lineFromEndBtn" class="secondary">Nieuwe lijn vanaf einde</button>
           <button id="useReferenceBtn" class="secondary">Gebruik als referentielijn</button>
@@ -67,6 +78,8 @@
       <section id="page-point" class="page">
         <h3>Punt</h3><div class="menuCard">
           <div id="pointInfo" class="help">—</div>
+          <label>Naam<input id="editPointName" maxlength="20"></label>
+          <button id="savePointBtn" class="primary">Puntnaam opslaan</button>
           <button id="pointNewLineBtn" class="primary">Nieuwe lijn vanaf punt</button>
           <button id="pointPolylineBtn" class="secondary">Doorlopende lijn vanaf punt</button>
           <button id="pointStakeBtn" class="secondary">Uitzetten vanaf punt</button>
@@ -94,6 +107,16 @@
 
       <section id="page-wall" class="page">
         <h3>Muur</h3><div class="menuCard"><div id="wallInfo" class="help">—</div>
+          <label>Naam<input id="editWallName" maxlength="40"></label>
+          <div class="grid2">
+            <label>Hoogte (m)<input id="editWallHeight" type="number" min=".05" step=".05"></label>
+            <label>Dikte (m)<input id="editWallThickness" type="number" min=".01" step=".01"></label>
+          </div>
+          <label>Zijde<select id="editWallSide"><option value="center">Gecentreerd</option><option value="left">Links</option><option value="right">Rechts</option></select></label>
+          <label>Oriëntatie<select id="editWallOrientation"><option value="vertical">Verticaal</option><option value="angle">Eigen hoek</option></select></label>
+          <div id="editWallAngleWrap" style="display:none"><label>Hoek (°)<input id="editWallAngle" type="number" min="-180" max="180" step=".5"></label></div>
+          <div class="grid2"><label>Kleur<input id="editWallColor" type="color"></label><label>Transparantie<input id="editWallOpacity" type="number" min=".05" max="1" step=".05"></label></div>
+          <button id="saveWallBtn" class="primary">Muur opslaan</button>
           <button id="toggleWallBtn" class="secondary">Zichtbaar / verborgen</button>
           <button id="deleteWallBtn" class="danger">Muur wissen</button>
         </div>
@@ -161,7 +184,8 @@
     </div>
     <div id="hudContext" class="hudContext">Kies eerst een tekenfunctie.</div>
     <div id="hudActions" class="hudActions">
-      <button id="hudUndoBtn" class="secondary">↶</button>
+      <button id="hudUndoBtn" class="secondary" aria-label="Ongedaan">↶</button>
+      <button id="hudRedoBtn" class="secondary" aria-label="Opnieuw">↷</button>
       <button id="hudFinishBtn" class="primary">Voltooien</button>
       <button id="hudCancelBtn" class="secondary">Stop</button>
     </div>
@@ -201,6 +225,6 @@
   <div id="hint">Open ☰ en kies wat je wilt tekenen.</div>
 </div>
 
-<script type="module" src="./js/bootstrap.js?v=0.8.14-20260822-2130"></script>
+<script type="module" src="./js/bootstrap.js?v=0.8.15-20260822-2215"></script>
 </body>
 </html>
