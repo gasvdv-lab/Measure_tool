@@ -76,3 +76,10 @@ button.actionError{outline:2px solid #ff8a8a}
 /* v0.8.9.3 action/result flow */
 button:disabled{cursor:not-allowed}
 #detail.resultFlash{font-weight:800}
+
+/* v0.8.10 compact Drawing HUD */
+#constraintHud{display:none!important}
+.drawingHud{position:absolute;left:50%;bottom:max(154px,calc(env(safe-area-inset-bottom) + 154px));transform:translateX(-50%);display:grid;grid-template-columns:auto minmax(86px,1fr) minmax(82px,1fr) 44px;gap:5px;width:min(94vw,470px);padding:5px;border:1px solid #ffffff1f;border-radius:14px;background:#080808d9;backdrop-filter:blur(10px);pointer-events:auto;z-index:40}
+.drawingHud button{min-height:42px;padding:6px 9px;background:#ffffff10;color:#fff;white-space:nowrap}.drawingHud .hudTool{color:#79ff9f;text-align:left}.drawingHud .hudIcon{font-size:1.05rem;padding:0}
+.hudPopover{position:absolute;left:50%;bottom:max(204px,calc(env(safe-area-inset-bottom) + 204px));transform:translateX(-50%);display:none;width:min(92vw,360px);padding:7px;border:1px solid #ffffff24;border-radius:14px;background:#0b0b0bf2;backdrop-filter:blur(12px);pointer-events:auto;z-index:60;grid-template-columns:1fr 1fr;gap:5px}.hudPopover.open{display:grid}.hudPopover button{background:#ffffff12;color:#fff}.hudPopover button.active{background:#f5f5f5;color:#111}.distancePopover{grid-template-columns:1fr}.hudDistanceRow{display:grid;grid-template-columns:1fr 86px auto;gap:5px;align-items:center}.hudDistanceRow input,.hudDistanceRow select,.hudDistanceRow button{min-height:40px}.hudDistanceRow span{text-align:center;color:#ddd}.distancePopover .help{padding:3px 4px}
+@media(max-width:390px){.drawingHud{grid-template-columns:auto 1fr 1fr 40px;font-size:.82rem}.drawingHud button{padding:5px 6px}}
