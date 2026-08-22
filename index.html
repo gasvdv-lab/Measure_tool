@@ -4,27 +4,16 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#111111">
-  <title>Measure AR v0.8.4</title>
+  <title>Measure AR v0.8.5</title>
   <link rel="stylesheet" href="./css/app.css">
 </head>
 <body>
 <div id="app">
-  <main class="startCard">
+  <main class="startCard directFallback">
     <div class="logo">⌖</div>
     <h1>Measure AR</h1>
-    <p>AR meten, uitzetten en geometrie bouwen.</p>
-    <button id="startBtn" class="primary">Start AR</button>
-    <button id="settingsBtn" class="secondary">Instellingen</button>
-    <section id="settingsPanel" class="settingsPanel">
-      <label>Eenheid
-        <select id="defaultUnit"><option value="cm" selected>centimeter</option><option value="m">meter</option></select>
-      </label>
-      <label>Lijndikte
-        <select id="defaultThickness"><option value="1">1 · fijn</option><option value="2" selected>2 · normaal</option><option value="3">3 · duidelijk</option><option value="4">4 · zwaar</option></select>
-      </label>
-      <label class="check"><input id="defaultLabels" type="checkbox" checked> Labels tonen</label>
-    </section>
-    <div class="build">v0.8.4 · placement ui fix</div>
+    <p id="launchStatus">AR wordt gestart…</p>
+    <button id="retryArBtn" class="primary" style="display:none">AR opnieuw starten</button>
     <div id="error" class="error"></div>
   </main>
 </div>
@@ -43,7 +32,7 @@
   <aside id="menuPanel">
     <div class="menuHead">
       <button id="menuBackBtn" class="secondary">‹</button>
-      <div><strong id="menuTitle">Measure AR</strong><small id="menuMeta">v0.8.4</small></div>
+      <div><strong id="menuTitle">Measure AR</strong><small id="menuMeta">v0.8.5</small></div>
       <button id="menuCloseBtn" class="secondary">✕</button>
     </div>
     <div class="menuBody">
@@ -240,6 +229,28 @@
         </div>
       </section>
 
+
+      <section id="page-settings" class="page">
+        <h3>Instellingen</h3>
+        <div class="menuCard">
+          <label>Eenheid
+            <select id="defaultUnit">
+              <option value="cm" selected>centimeter</option>
+              <option value="m">meter</option>
+            </select>
+          </label>
+          <label>Lijndikte
+            <select id="defaultThickness">
+              <option value="1">1 · fijn</option>
+              <option value="2" selected>2 · normaal</option>
+              <option value="3">3 · duidelijk</option>
+              <option value="4">4 · zwaar</option>
+            </select>
+          </label>
+          <label class="check"><input id="defaultLabels" type="checkbox" checked> Labels tonen</label>
+        </div>
+      </section>
+
       <section id="page-clear" class="page">
         <h3>Alles wissen</h3>
         <div class="menuCard">
@@ -251,7 +262,7 @@
     </div>
     <div class="menuFoot">
       <button id="menuSettingsBtn" class="secondary">Instellingen</button>
-      <button id="exitBtn" class="secondary">Startscherm</button>
+      <button id="exitBtn" class="secondary">AR afsluiten</button>
     </div>
   </aside>
 
