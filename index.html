@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="theme-color" content="#111111">
+  <title>Measure AR v0.8.8.2</title>
+  <link rel="stylesheet" href="./css/app.css?v=0.8.8.2-20260822-1625">
+</head>
+<body>
+<div id="app">
+  <main class="startCard directFallback">
+    <div class="logo">⌖</div>
+    <h1>Measure AR</h1>
+    <p id="launchStatus">Tik om AR te starten.</p>
+    <div id="buildInfo" class="build">v0.8.8.2 · build 20260822-1625</div>
+    <button id="startArBtn" class="primary">AR starten</button>
+    <div id="error" class="error"></div>
+  </main>
+</div>
+<div id="overlay">
+  <header id="topbar">
+    <div class="status">
+      <div id="stage">Zoek een oppervlak</div>
+      <div id="distance">—</div>
+      <div id="detail"></div>
+      <div id="stability">Stabiliteit: —</div>
+    </div>
+    <button id="menuBtn" class="menuBtn">☰</button>
+  </header>
+
+  <aside id="menuPanel">
+    <div class="menuHead">
+      <button id="menuBackBtn" class="secondary">‹</button>
+      <div><strong id="menuTitle">Measure AR</strong><small id="menuMeta">v0.8.8.2</small></div>
+      <button id="menuCloseBtn" class="secondary">✕</button>
+    </div>
+    <div class="menuBody">
+      <section id="page-home" class="page active">
+        <h3>Werken</h3>
+        <div class="menuCard navList">
+          <button data-page="measure">Meten <small>afstand A → B</small></button>
+          <button data-page="stake">Uitzetten <small>vaste afstand</small></button>
+          <button data-page="newline">Nieuwe lijn <small>nieuw / laatste / bestaand punt</small></button>
+          <button id="continuousBtn">Doorlopend tekenen <small>A → B → C → …</small></button>
+          <button id="continuousParamBtn">Doorlopend op maat <small>exacte segmenten vanaf actief punt</small></button>
+          <button data-page="constraint">Richting / tekenvlak <small>geldt voor alle tekenfuncties</small></button>
+        </div>
+        <h3>Project</h3>
+        <div class="menuCard navList">
+          <button data-page="objects">Objecten <small>vormen, lijnen en punten</small></button>
+        </div>
+        <h3>Bewerken</h3>
+        <div class="menuCard">
+          <button id="undoBtn" class="secondary">Ongedaan maken</button>
+          <button id="clearAllBtn" class="danger">Alles wissen</button>
+        </div>
+      </section>
+
+      <section id="page-measure" class="page">
+        <h3>Meten</h3>
+        <div class="menuCard">
+          <button id="measureNewBtn" class="primary">Nieuw startpunt</button>
+          <button id="measureLastBtn" class="secondary">Vanaf laatste punt</button>
+          <button id="measureExistingBtn" class="secondary">Bestaand punt kiezen</button>
+          <button id="measureParamBtn" class="secondary">Volgend punt op maat</button>
+        </div>
+      </section>
+
+      <section id="page-stake" class="page">
+        <h3>Uitzetten</h3>
+        <div class="menuCard">
+          <label>Afstand <input id="stakeDistance" type="number" min=".01" step=".1" value="100"></label>
+          <label>Eenheid <select id="stakeUnit"><option value="cm" selected>cm</option><option value="m">m</option></select></label>
+          <button id="stakeNewBtn" class="primary">Nieuw startpunt</button>
+          <button id="stakeLastBtn" class="secondary">Vanaf laatste punt</button>
+          <button id="stakeExistingBtn" class="secondary">Bestaand punt kiezen</button>
+          <button id="stakeParamBtn" class="secondary">Volgend punt op maat</button>
+        </div>
+      </section>
+
+      <section id="page-newline" class="page">
+        <h3>Nieuwe lijn</h3>
+        <div class="menuCard">
+          <button id="newIndependentBtn" class="primary">Nieuw → nieuw</button>
+          <button id="newFromLastBtn" class="secondary">Vanaf laatste punt</button>
+          <button id="newParamBtn" class="secondary">Volgend punt op maat</button>
+        </div>
+      </section>
+
+      <section id="page-constraint" class="page">
+        <h3>Universele richting</h3>
+        <div class="menuCard">
+          <div class="grid2">
+            <button class="constraintBtn" data-constraint="free">Vrij</button>
+            <button class="constraintBtn" data-constraint="horizontal">Horizontaal</button>
+            <button class="constraintBtn" data-constraint="vertical">Verticaal</button>
+            <button class="constraintBtn" data-constraint="surface">Op oppervlak</button>
+            <button class="constraintBtn" data-constraint="parallel">Parallel</button>
+            <button class="constraintBtn" data-constraint="perpendicular">Loodrecht 90°</button>
+            <button class="constraintBtn" data-constraint="angle">Eigen hoek</button>
+          </div>
+          <label>Hoek in graden <input id="constraintAngle" type="number" min="-180" max="180" step=".5" value="45"></label>
+          <div id="referenceStatus" class="help">Referentie: geen</div>
+          <p class="help">Parallel, loodrecht en eigen hoek gebruiken een geselecteerde referentielijn.</p>
+        </div>
+      </section>
+
+
+      <section id="page-placement" class="page">
+        <h3>Punt op maat</h3>
+        <div class="menuCard">
+          <div id="placementContextInfo" class="help">Gebruik het huidige actieve startpunt.</div>
+<div id="placementStartInfo" class="help" style="color:#d8ffd8">Vertrekpunt: geen</div>
+<div id="placementPreviewInfo" class="help" style="color:#ffe6a3">Preview: —</div>
+          <div class="grid2">
+            <label>Afstand
+              <input id="placementDistance" type="number" min="0.01" step="0.1" value="100">
+            </label>
+            <label>Eenheid
+              <select id="placementUnit"><option value="cm" selected>cm</option><option value="m">m</option></select>
+            </label>
+          </div>
+          <label>Richting
+            <select id="placementConstraint">
+              <option value="free">Vrij</option>
+              <option value="horizontal">Horizontaal</option>
+              <option value="vertical">Verticaal</option>
+              <option value="surface">Op oppervlak</option>
+              <option value="parallel">Parallel aan referentielijn</option>
+              <option value="perpendicular">Loodrecht (90°) op referentielijn</option>
+              <option value="angle">Eigen hoek t.o.v. referentielijn</option>
+            </select>
+          </label>
+          <div id="placementAngleWrap" style="display:none">
+            <label>Hoek (°)<input id="placementAngle" type="number" min="-360" max="360" step="1" value="90"></label>
+          </div>
+          <div id="placementReferenceWrap" style="display:none">
+            <label>Referentielijn<select id="placementReference"></select></label>
+          </div>
+          <div id="placementHelp" class="help">Plaats of selecteer eerst een vast vertrekpunt.</div>
+          <button id="placementApplyBtn" class="primary">Punt op maat plaatsen</button>
+        </div>
+      </section>
+
+      <section id="page-objects" class="page">
+        <h3>Objecten</h3>
+        <div id="objectsList" class="menuCard"></div>
+      </section>
+
+      <section id="page-line" class="page">
+        <h3>Lijn</h3>
+        <div class="menuCard">
+          <div id="lineInfo" class="help">—</div>
+          <button id="lineFromStartBtn" class="secondary">Nieuwe lijn vanaf start</button>
+          <button id="lineFromEndBtn" class="secondary">Nieuwe lijn vanaf einde</button>
+          <button id="useReferenceBtn" class="secondary">Gebruik als referentielijn</button>
+          <button id="createWallBtn" class="primary">Maak muur van lijn</button>
+          <button id="deleteLineBtn" class="danger">Lijn wissen</button>
+        </div>
+      </section>
+
+      <section id="page-point" class="page">
+        <h3>Punt</h3>
+        <div class="menuCard">
+          <div id="pointInfo" class="help">—</div>
+          <button id="pointNewLineBtn" class="primary">Nieuwe lijn vanaf punt</button>
+          <button id="pointStakeBtn" class="secondary">Uitzetten vanaf punt</button>
+          <button id="deletePointBtn" class="danger">Punt wissen</button>
+        </div>
+      </section>
+
+
+      <section id="page-wallcreate" class="page">
+        <h3>Muur aanmaken</h3>
+        <div class="menuCard">
+          <div id="wallCreateInfo" class="help">—</div>
+          <label>Unieke naam <input id="wallName" maxlength="40" placeholder="bv. Voorgevel"></label>
+          <div class="grid2">
+            <label>Hoogte (m) <input id="wallHeight" type="number" min=".05" step=".05" value="2.40"></label>
+            <label>Dikte (m) <input id="wallThickness" type="number" min=".01" step=".01" value=".14"></label>
+          </div>
+          <label>Zijde
+            <select id="wallSide">
+              <option value="center">Gecentreerd</option>
+              <option value="left">Links van lijn</option>
+              <option value="right">Rechts van lijn</option>
+            </select>
+          </label>
+          <label>Oriëntatie
+            <select id="wallOrientation">
+              <option value="vertical">Verticaal</option>
+              <option value="perpendicular">Loodrecht 90°</option>
+              <option value="angle">Eigen hoek</option>
+            </select>
+          </label>
+          <label>Hoek (°) <input id="wallAngle" type="number" min="-180" max="180" step=".5" value="90"></label>
+          <div class="grid2">
+            <label>Kleur <input id="wallColor" type="color" value="#d7d2c8"></label>
+            <label>Transparantie <input id="wallOpacity" type="range" min=".05" max="1" step=".05" value=".45"></label>
+          </div>
+          <div id="wallCreateError" class="error"></div>
+          <button id="confirmWallBtn" class="primary">Muur maken</button>
+          <button id="cancelWallBtn" class="secondary">Annuleren</button>
+        </div>
+      </section>
+
+      <section id="page-wall" class="page">
+        <h3>Muur</h3>
+        <div class="menuCard">
+          <div id="wallInfo" class="help">—</div>
+          <button id="toggleWallBtn" class="secondary">Zichtbaar / verborgen</button>
+          <button id="deleteWallBtn" class="danger">Muur wissen</button>
+        </div>
+      </section>
+
+      <section id="page-shapecreate" class="page">
+        <h3>Vorm aanmaken</h3>
+        <div class="menuCard">
+          <div id="shapeCreateInfo" class="help">—</div>
+          <label>Unieke naam <input id="shapeName" maxlength="40" placeholder="bv. Hut vloer"></label>
+          <div class="grid2">
+            <label>Opvulling <input id="shapeFill" type="color" value="#4caf50"></label>
+            <label>Randkleur <input id="shapeBorder" type="color" value="#ffffff"></label>
+          </div>
+          <label>Transparantie <input id="shapeOpacity" type="range" min="0" max=".8" step=".05" value=".30"></label>
+          <label>Randdikte <select id="shapeThickness"><option value="1">1</option><option value="2" selected>2</option><option value="3">3</option><option value="4">4</option></select></label>
+          <div id="shapeError" class="error"></div>
+          <button id="createShapeBtn" class="primary">Vorm aanmaken</button>
+          <button id="cancelShapeBtn" class="secondary">Alleen contour bewaren</button>
+        </div>
+      </section>
+
+
+      <section id="page-settings" class="page">
+        <h3>Instellingen</h3>
+        <div class="menuCard">
+          <label>Eenheid
+            <select id="defaultUnit">
+              <option value="cm" selected>centimeter</option>
+              <option value="m">meter</option>
+            </select>
+          </label>
+          <label>Lijndikte
+            <select id="defaultThickness">
+              <option value="1">1 · fijn</option>
+              <option value="2" selected>2 · normaal</option>
+              <option value="3">3 · duidelijk</option>
+              <option value="4">4 · zwaar</option>
+            </select>
+          </label>
+          <label class="check"><input id="defaultLabels" type="checkbox" checked> Labels tonen</label>
+        </div>
+      </section>
+
+      <section id="page-clear" class="page">
+        <h3>Alles wissen</h3>
+        <div class="menuCard">
+          <p>Alle punten, lijnen, contouren en vormen wissen? AR blijft actief.</p>
+          <button id="confirmClearBtn" class="danger">Alles wissen</button>
+          <button id="cancelClearBtn" class="secondary">Annuleren</button>
+        </div>
+      </section>
+    </div>
+    <div class="menuFoot">
+      <button id="menuSettingsBtn" class="secondary">Instellingen</button>
+      <button id="exitBtn" class="secondary">AR afsluiten</button>
+    </div>
+  </aside>
+
+  <div id="pointLabels"></div>
+  <div id="lineLabels"></div>
+  <div id="aim"></div>
+
+  <div id="constraintHud">
+    <button id="constraintHudBtn">Vrij ▾</button>
+  </div>
+  <div id="drawControls">
+    <button id="drawUndoBtn" class="secondary">↶ Laatste</button>
+    <button id="drawFinishBtn" class="primary" disabled>Voltooien</button>
+  </div>
+
+  <div id="zoomHud">
+    <button id="zoomInBtn">＋</button>
+    <div id="zoomValue">1.0×</div>
+    <button id="zoomOutBtn">−</button>
+    <button id="zoomResetBtn">1×</button>
+  </div>
+
+  <button id="captureBtn" disabled aria-label="Punt vastleggen"></button>
+  <div id="hint">Beweeg rustig zodat ARCore een oppervlak kan herkennen.</div>
+</div>
+
+<script type="module" src="./js/bootstrap.js?v=0.8.8.2-20260822-1625"></script>
+</body>
+</html>
