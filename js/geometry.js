@@ -1,4 +1,4 @@
-import {S,$,fmt,pointName,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.15-20260822-2215";
+import {S,$,fmt,pointName,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.16-20260822-2349";
 
 export function dispose(obj){
   if(!obj||!S.scene)return;
@@ -199,6 +199,24 @@ function contourPlane(pointIds){
   return {origin,normal,u,v,pts};
 }
 
+
+const SHAPE_MIN_SEGMENT=.01,SHAPE_DUPLICATE_TOL=.005,SHAPE_PLANE_TOL=.03,SHAPE_MIN_AREA=.0001;
+function orient2(a,b,c){return (b.x-a.x)*(c.y-a.y)-(b.y-a.y)*(c.x-a.x);}
+function onSeg2(a,b,p,e=1e-8){return Math.abs(orient2(a,b,p))<=e&&p.x>=Math.min(a.x,b.x)-e&&p.x<=Math.max(a.x,b.x)+e&&p.y>=Math.min(a.y,b.y)-e&&p.y<=Math.max(a.y,b.y)+e;}
+function segmentsIntersect2(a,b,c,d,e=1e-8){const o1=orient2(a,b,c),o2=orient2(a,b,d),o3=orient2(c,d,a),o4=orient2(c,d,b);if(((o1>e&&o2<-e)||(o1<-e&&o2>e))&&((o3>e&&o4<-e)||(o3<-e&&o4>e)))return true;return onSeg2(a,b,c,e)||onSeg2(a,b,d,e)||onSeg2(c,d,a,e)||onSeg2(c,d,b,e);}
+export function analyzeShapePoints(pointIds){
+ const T=S.THREE,plane=contourPlane(pointIds),pts=plane.pts,n=pts.length;if(n<3)throw new Error("Een vorm vereist minstens 3 punten.");
+ const maxPlaneError=Math.max(...pts.map(p=>Math.abs(p.clone().sub(plane.origin).dot(plane.normal))));if(maxPlaneError>SHAPE_PLANE_TOL)throw new Error(`De vorm is niet vlak genoeg (afwijking ${(maxPlaneError*100).toFixed(1)} cm; max. 3,0 cm).`);
+ const pts2=pts.map(p=>{const d=p.clone().sub(plane.origin);return new T.Vector2(d.dot(plane.u),d.dot(plane.v));});
+ for(let i=0;i<n;i++)for(let j=i+1;j<n;j++)if(pts[i].distanceTo(pts[j])<SHAPE_DUPLICATE_TOL)throw new Error(`Punten ${i+1} en ${j+1} vallen bijna samen (< 5 mm).`);
+ let perimeter=0;for(let i=0;i<n;i++){const len=pts[i].distanceTo(pts[(i+1)%n]);if(len<SHAPE_MIN_SEGMENT)throw new Error(`Segment ${i+1} is te kort (${(len*100).toFixed(1)} cm; min. 1 cm).`);perimeter+=len;}
+ for(let i=0;i<n;i++){const a=pts2[i],b=pts2[(i+1)%n];for(let j=i+1;j<n;j++){if(j===i||j===(i+1)%n||(i===0&&j===n-1))continue;const c=pts2[j],d=pts2[(j+1)%n];if(segmentsIntersect2(a,b,c,d))throw new Error(`De vorm kruist zichzelf tussen segment ${i+1} en ${j+1}.`);}}
+ let twice=0;for(let i=0;i<n;i++){const a=pts2[i],b=pts2[(i+1)%n];twice+=a.x*b.y-b.x*a.y;}const signedArea=twice/2,area=Math.abs(signedArea);if(area<SHAPE_MIN_AREA)throw new Error("De vormoppervlakte is te klein.");
+ const triangles=T.ShapeUtils.triangulateShape(pts2,[]);if(triangles.length!==n-2)throw new Error(`Triangulatie mislukt: ${triangles.length} driehoeken voor ${n} punten.`);if(new Set(triangles.flat()).size!==n)throw new Error("Triangulatie gebruikt niet alle hoekpunten.");
+ return {plane,pts2,area,perimeter,winding:signedArea>=0?"ccw":"cw",triangles,maxPlaneError};
+}
+export function analyzeContour(contour){if(!contour?.closed)throw new Error("Een vorm vereist een gesloten contour.");return analyzeShapePoints(contour.pointIds);}
+
 function shapeNameExists(name,excludeId=null){
   const k=String(name||"").trim().toLocaleLowerCase("nl");
   return S.shapes.some(s=>s.id!==excludeId&&s.name.toLocaleLowerCase("nl")===k);
@@ -208,16 +226,8 @@ export function createShape(contour,{name,fill="#4caf50",opacity=.30,border="#ff
   name=String(name||"").trim();
   if(!name)throw new Error("Naam is verplicht.");
   if(shapeNameExists(name))throw new Error("Deze vormnaam bestaat al.");
-  if(!contour?.closed)throw new Error("Een vorm vereist een gesloten contour.");
-  const T=S.THREE,plane=contourPlane(contour.pointIds);
-  const maxPlaneError=Math.max(...plane.pts.map(p=>Math.abs(p.clone().sub(plane.origin).dot(plane.normal))));
-  if(maxPlaneError>.03)throw new Error(`De vorm is niet vlak genoeg (afwijking ${(maxPlaneError*100).toFixed(1)} cm).`);
-  const pts2=plane.pts.map(p=>{
-    const d=p.clone().sub(plane.origin);return new T.Vector2(d.dot(plane.u),d.dot(plane.v));
-  });
-  let signed=0;for(let i=0;i<pts2.length;i++){const a=pts2[i],b=pts2[(i+1)%pts2.length];signed+=a.x*b.y-b.x*a.y;}
-  const area=Math.abs(signed)/2;if(area<1e-6)throw new Error("De vormoppervlakte is te klein.");
-  const tris=T.ShapeUtils.triangulateShape(pts2,[]),arr=[];
+  const T=S.THREE,analysis=analyzeContour(contour),plane=analysis.plane,area=analysis.area,perimeter=analysis.perimeter;
+  const tris=analysis.triangles,arr=[];
   for(const tri of tris)for(const idx of tri){const p=plane.pts[idx];arr.push(p.x,p.y,p.z);}
   const geo=new T.BufferGeometry();geo.setAttribute("position",new T.Float32BufferAttribute(arr,3));geo.computeVertexNormals();
   const mat=new T.MeshBasicMaterial({color:fill,transparent:true,opacity:Number(opacity),side:T.DoubleSide,depthWrite:false});
@@ -225,7 +235,7 @@ export function createShape(contour,{name,fill="#4caf50",opacity=.30,border="#ff
   const s={
     id:id||"s"+crypto.randomUUID(),name,contourId:contour.id,
     pointIds:[...contour.pointIds],lineIds:[...contour.lineIds],
-    mesh,area,fill,opacity:Number(opacity),border,thickness:Number(thickness)||2,labels:labels!==false,
+    mesh,area,perimeter,winding:analysis.winding,maxPlaneError:analysis.maxPlaneError,fill,opacity:Number(opacity),border,thickness:Number(thickness)||2,labels:labels!==false,
     plane:{origin:plane.origin.clone(),normal:plane.normal.clone(),u:plane.u.clone(),v:plane.v.clone()}
   };
   S.shapes.push(s);

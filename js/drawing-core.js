@@ -1,6 +1,6 @@
-import {S,$,fmt,getPoint,getLine} from "./state.js?v=0.8.15-20260822-2215";
-import {createPoint,createLine,deleteLineRaw,deletePointRaw,createContour,dispose} from "./geometry.js?v=0.8.15-20260822-2215";
-import {snapshotProject,commitSnapshot,undoHistory} from "./history.js?v=0.8.15-20260822-2215";
+import {S,$,fmt,getPoint,getLine} from "./state.js?v=0.8.16-20260822-2349";
+import {createPoint,createLine,deleteLineRaw,deletePointRaw,createContour,dispose,analyzeShapePoints} from "./geometry.js?v=0.8.16-20260822-2349";
+import {snapshotProject,commitSnapshot,undoHistory} from "./history.js?v=0.8.16-20260822-2349";
 
 const REF_MODES=new Set(["parallel","perpendicular","angle"]);
 const TOOL_NAMES={line:"LIJN",polyline:"POLYLIJN",shape:"VORM",stake:"UITZETTEN"};
@@ -404,6 +404,7 @@ export function finishTool(){
   }
   if(S.tool.kind==="shape"){
     if(S.tool.pointIds.length<3)throw new Error("Een vorm vereist minstens 3 punten.");
+    analyzeShapePoints(S.tool.pointIds);
     const first=getPoint(S.tool.firstPointId),last=getActivePoint();if(!first||!last)throw new Error("Vormpunten ontbreken.");
     if(last.id!==first.id){
       const existing=S.lines.find(l=>(l.startId===last.id&&l.endId===first.id)||(l.startId===first.id&&l.endId===last.id));

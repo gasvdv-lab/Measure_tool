@@ -1,15 +1,15 @@
-import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.15-20260822-2215";
+import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.16-20260822-2349";
 import {
   startTool,cancelTool,setPlacement,setDistance,setConstraint,setAngle,flipSide,setReferenceLine,setSnapMode,
   confirmCandidate,undoToolStep,finishTool,toolLabel,constraintLabel,getActivePoint,referenceRequired,resetDrawingCore
-} from "./drawing-core.js?v=0.8.15-20260822-2215";
+} from "./drawing-core.js?v=0.8.16-20260822-2349";
 import {
-  createShape,updateShape,deleteShapeOnly,deleteShapeWithContour,deleteLineRaw,deletePointRaw,renamePoint,updateLine,
+  createShape,updateShape,deleteShapeOnly,deleteShapeWithContour,deleteLineRaw,deletePointRaw,renamePoint,updateLine,analyzeContour,
   lineDependencies,pointDependencies,canDeleteLine,canDeletePoint,clearAllGeometry,validateGeometryState,dispose
-} from "./geometry.js?v=0.8.15-20260822-2215";
-import {startAR,applyZoom} from "./ar.js?v=0.8.15-20260822-2215";
-import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls} from "./walls.js?v=0.8.15-20260822-2215";
-import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.15-20260822-2215";
+} from "./geometry.js?v=0.8.16-20260822-2349";
+import {startAR,applyZoom} from "./ar.js?v=0.8.16-20260822-2349";
+import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls} from "./walls.js?v=0.8.16-20260822-2349";
+import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.16-20260822-2349";
 
 const pages=["home","objects","line","point","wallcreate","wall","shapecreate","shape","settings","clear"];
 let menuStack=["home"];
@@ -162,7 +162,7 @@ function renderObjects(){
   }}
 }
 function openShape(id){
-  const s=getShape(id);if(!s)return;S.selectedShapeId=id;el("shapeInfo").textContent=`${s.name} · ${s.area.toFixed(2)} m²`;
+  const s=getShape(id);if(!s)return;S.selectedShapeId=id;el("shapeInfo").textContent=`${s.name} · ${s.area.toFixed(2)} m² · omtrek ${s.perimeter.toFixed(2)} m`;
   el("editShapeName").value=s.name;el("editShapeFill").value=s.fill;el("editShapeBorder").value=s.border;el("editShapeOpacity").value=s.opacity;el("editShapeThickness").value=String(s.thickness);el("editShapeLabels").checked=s.labels;showPage("shape");
 }
 
@@ -218,7 +218,7 @@ export function initUI(){
   bind("hudFinishBtn","click",()=>{
     const result=finishTool();syncHud();syncHistoryControls();
     if(result.type==="polyline"){el("hint").textContent="Doorlopende lijn voltooid en open gebleven.";}
-    if(result.type==="shape"){el("shapeCreateInfo").textContent=`${result.contour.pointIds.length} punten · gesloten contour`;openMenu();showPage("shapecreate");}
+    if(result.type==="shape"){const a=analyzeContour(result.contour);el("shapeCreateInfo").textContent=`${result.contour.pointIds.length} punten · ${a.area.toFixed(2)} m² · omtrek ${a.perimeter.toFixed(2)} m`;openMenu();showPage("shapecreate");}
   });
   bind("hudCancelBtn","click",()=>{runHistoryAction("Tekenfunctie stoppen",()=>cancelTool());syncHud();syncHistoryControls();showStatus("Tekenfunctie gestopt. Bevestigde geometrie blijft bestaan.");});
 
@@ -260,7 +260,7 @@ export function initUI(){
   bind("cancelWallBtn","click",()=>showPage("line",false));bind("wallOrientation","change",()=>{el("wallAngleWrap").style.display=el("wallOrientation").value==="angle"?"block":"none";});
   bind("toggleWallBtn","click",()=>{const w=S.walls.find(x=>x.id===S.selectedWallId);if(!w)throw new Error("Geen muur geselecteerd.");runHistoryAction(`Muur ${w.name} zichtbaarheid`,()=>toggleWall(w.id));afterProjectChange(`Muur ${w.name} ${w.visible?"zichtbaar":"verborgen"}.`);});bind("deleteWallBtn","click",()=>{const w=S.walls.find(x=>x.id===S.selectedWallId);if(!w)throw new Error("Geen muur geselecteerd.");runHistoryAction(`Muur ${w.name} verwijderen`,()=>deleteWall(w.id));showPage("objects");afterProjectChange(`Muur ${w.name} verwijderd.`);});
 
-  bind("createShapeBtn","click",()=>{const c=getContour(S.pendingContourId);if(!c)throw new Error("Gesloten contour ontbreekt.");const s=runHistoryAction("Vorm aanmaken",()=>createShape(c,{name:el("shapeName").value,fill:el("shapeFill").value,opacity:el("shapeOpacity").value,border:el("shapeBorder").value,thickness:el("shapeThickness").value,labels:el("shapeLabels").checked}));S.pendingContourId=null;closeMenu();cancelTool();syncHud();showStatus(`Vorm ${s.name} aangemaakt · ${s.area.toFixed(2)} m².`);});
+  bind("createShapeBtn","click",()=>{const c=getContour(S.pendingContourId);if(!c)throw new Error("Gesloten contour ontbreekt.");const s=runHistoryAction("Vorm aanmaken",()=>createShape(c,{name:el("shapeName").value,fill:el("shapeFill").value,opacity:el("shapeOpacity").value,border:el("shapeBorder").value,thickness:el("shapeThickness").value,labels:el("shapeLabels").checked}));S.pendingContourId=null;closeMenu();cancelTool();syncHud();showStatus(`Vorm ${s.name} aangemaakt · ${s.area.toFixed(2)} m² · omtrek ${s.perimeter.toFixed(2)} m.`);});
   bind("cancelShapeBtn","click",()=>{S.pendingContourId=null;closeMenu();cancelTool();syncHud();showStatus("Gesloten contour bewaard zonder opvulling.");});
   bind("saveShapeBtn","click",()=>{const s=getShape(S.selectedShapeId);if(!s)throw new Error("Geen vorm geselecteerd.");runHistoryAction(`Vorm ${s.name} bewerken`,()=>updateShape(s,{name:el("editShapeName").value,fill:el("editShapeFill").value,border:el("editShapeBorder").value,opacity:el("editShapeOpacity").value,thickness:el("editShapeThickness").value,labels:el("editShapeLabels").checked}));afterProjectChange(`Vorm ${s.name} opgeslagen.`);openShape(s.id);});
   bind("deleteShapeOnlyBtn","click",()=>{const s=getShape(S.selectedShapeId);if(!s)throw new Error("Geen vorm geselecteerd.");runHistoryAction(`Vorm ${s.name} verwijderen`,()=>deleteShapeOnly(s.id));showPage("objects");afterProjectChange(`Vorm ${s.name} verwijderd; contour bewaard.`);});
