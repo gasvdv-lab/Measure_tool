@@ -1,5 +1,5 @@
-import {S,$,fmt,getPoint,getLine} from "./state.js?v=0.8.9.1-20260822-1715";
-import {createPoint,createLine,deletePointRaw} from "./geometry.js?v=0.8.9.1-20260822-1715";
+import {S,$,fmt,getPoint,getLine} from "./state.js?v=0.8.9.2-20260822-1840";
+import {createPoint,createLine,deletePointRaw} from "./geometry.js?v=0.8.9.2-20260822-1840";
 
 export function getActivePoint(){
   const id=S.draw?.active ? S.draw.lastId : S.drawEngine.activePointId;
@@ -13,6 +13,7 @@ export function setActivePoint(id){
   S.activeStartId=id;
   S.pointA=p.position.clone();
   S.drawEngine.surfaceNormal=p.surfaceNormal?.clone?.() || S.drawEngine.hoverSurfaceNormal?.clone?.() || null;
+  document.dispatchEvent(new CustomEvent("measurear:active-point-changed",{detail:{pointId:id}}));
   return p;
 }
 
