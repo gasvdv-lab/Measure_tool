@@ -1,11 +1,11 @@
 
 export const S={
-  version:"0.8.0",
+  version:"0.8.1",
   THREE:null,renderer:null,scene:null,camera:null,reticle:null,xrSession:null,hitSource:null,hitRequested:false,
   mode:"measure",targetMeters:2,
   pointA:null,activeStartId:null,currentTarget:null,targetSource:"none",lineFinished:false,placing:false,
-  points:[],lines:[],contours:[],shapes:[],undo:[],
-  pointCounter:0,contourCounter:1,selectedLineId:null,selectedPointId:null,pendingContourId:null,objectPickMode:null,
+  points:[],lines:[],contours:[],shapes:[],walls:[],undo:[],
+  pointCounter:0,contourCounter:1,selectedLineId:null,selectedPointId:null,selectedWallId:null,pendingContourId:null,objectPickMode:null,
   draw:{active:false,startId:null,lastId:null,pointIds:[],lineIds:[]},
   samples:[],
   constraint:{mode:"free",angle:45,referenceLineId:null,verticalPlane:null},
