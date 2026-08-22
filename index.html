@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#111111">
-<title>Measure AR v0.7.4</title>
+<title>Measure AR v0.7.5</title>
 <style>
 :root{color-scheme:dark;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 *{box-sizing:border-box}
@@ -166,6 +166,13 @@ input[type="color"]{height:42px;padding:4px}
 .objectGroupTitle{font-size:.62rem;color:#999;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin:9px 2px 5px}
 .shapeSwatch{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;border:1px solid rgba(255,255,255,.5)}
 
+
+#constraintHud{position:absolute;left:12px;bottom:max(152px,calc(env(safe-area-inset-bottom) + 152px));display:flex;gap:5px;align-items:center;pointer-events:auto;max-width:calc(100vw - 78px)}
+#constraintHud button{min-height:36px;padding:6px 9px;border-radius:10px;background:rgba(0,0,0,.72);color:#fff;border:1px solid rgba(255,255,255,.16);font-size:.65rem}
+#constraintPanel{position:absolute;left:12px;bottom:max(196px,calc(env(safe-area-inset-bottom) + 196px));width:min(88vw,330px);display:none;padding:8px;border-radius:12px;background:rgba(0,0,0,.88);border:1px solid rgba(255,255,255,.15);pointer-events:auto}
+#constraintPanel.open{display:block}.constraintGrid{display:grid;grid-template-columns:1fr 1fr;gap:5px}.constraintGrid button{min-height:34px;font-size:.65rem}.constraintModeActive{background:#fff!important;color:#111!important}
+#referenceStatus{font-size:.62rem;color:#aaa;margin-top:6px}.wallSwatch{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;border:1px solid rgba(255,255,255,.5)}
+
 </style>
 </head>
 <body>
@@ -192,7 +199,7 @@ input[type="color"]{height:42px;padding:4px}
       <label class="check"><input id="defaultLabels" type="checkbox" checked> Labels op lijnen tonen</label>
     </div>
 
-    <div class="build">v0.7.4 · shapes + fill</div>
+    <div class="build">v0.7.5 · constraints + walls</div>
     <div id="error"></div>
   </div>
 </div>
@@ -211,7 +218,7 @@ input[type="color"]{height:42px;padding:4px}
   <div id="menuPanel">
     <div class="menuHead">
       <button id="menuBackBtn" class="secondary" aria-label="Terug">‹</button>
-      <div class="menuTitle"><strong id="menuTitle">Measure AR</strong><span id="menuMeta">Meten · 0p · 0l · v0.7.4</span></div>
+      <div class="menuTitle"><strong id="menuTitle">Measure AR</strong><span id="menuMeta">Meten · 0p · 0l · v0.7.5</span></div>
       <button id="menuCloseBtn" class="secondary" aria-label="Sluiten">✕</button>
     </div>
 
@@ -223,6 +230,7 @@ input[type="color"]{height:42px;padding:4px}
           <div class="navRow" data-page="stake"><div><strong>Uitzetten</strong><span>Punt op vaste afstand plaatsen</span></div><div class="chev">›</div></div>
           <div class="navRow" data-page="newline"><div><strong>Nieuwe lijn</strong><span>Verder bouwen aan bestaande geometrie</span></div><div class="chev">›</div></div>
           <div class="navRow" id="continuousDrawRow"><div><strong>Doorlopend tekenen</strong><span>A → B → C → D zonder terug naar menu</span></div><div class="chev">›</div></div>
+          <div class="navRow" data-page="constraint"><div><strong>Richting / tekenvlak</strong><span>Vrij, horizontaal, verticaal, oppervlak, hoek…</span></div><div class="chev">›</div></div>
         </div>
         <div class="sectionTitle">Project</div>
         <div class="menuCard"><div class="navRow" data-page="objects"><div><strong>Objecten</strong><span>Punten en lijnen beheren</span></div><div class="chev">›</div></div></div>
@@ -277,6 +285,8 @@ input[type="color"]{height:42px;padding:4px}
           <select id="lineThickness"><option value="1">1 · fijn</option><option value="2">2 · normaal</option><option value="3">3 · duidelijk</option><option value="4">4 · zwaar</option></select>
           <button id="applyLineLengthBtn" class="secondary" disabled>Punten vergrendeld</button>
           <div class="choice"><button id="lineFromStartBtn" class="secondary">Vanaf start</button><button id="lineFromEndBtn" class="secondary">Vanaf einde</button></div>
+          <button id="useLineReferenceBtn" class="secondary">Gebruik als referentielijn</button>
+          <button id="createWallFromLineBtn" class="primary">Maak muur vanaf lijn</button>
           <button id="deleteLineBtn" class="danger">Lijn wissen</button>
         </div>
       </section>
@@ -291,6 +301,33 @@ input[type="color"]{height:42px;padding:4px}
         </div>
       </section>
 
+
+
+      <section id="page-constraint" class="page">
+        <div class="sectionTitle">Richting / tekenvlak</div><div class="menuCard">
+          <div class="constraintGrid">
+            <button class="secondary constraintModeBtn" data-constraint="free">Vrij</button><button class="secondary constraintModeBtn" data-constraint="horizontal">Horizontaal</button>
+            <button class="secondary constraintModeBtn" data-constraint="vertical">Verticaal</button><button class="secondary constraintModeBtn" data-constraint="surface">Op oppervlak</button>
+            <button class="secondary constraintModeBtn" data-constraint="parallel">Parallel</button><button class="secondary constraintModeBtn" data-constraint="perpendicular">Loodrecht 90°</button>
+            <button class="secondary constraintModeBtn" data-constraint="angle">Eigen hoek</button>
+          </div>
+          <label for="constraintAngle">Hoek</label><div class="fields"><input id="constraintAngle" type="number" min="-180" max="180" step="0.5" value="45"><div class="help" style="align-self:center">graden</div></div>
+          <div id="referenceStatus">Referentie: geen</div><p class="help">Parallel, 90° en eigen hoek gebruiken een geselecteerde referentielijn.</p>
+        </div>
+      </section>
+
+      <section id="page-wallcreate" class="page"><div class="sectionTitle">Muur aanmaken</div><div class="menuCard">
+        <div id="wallCreateInfo" class="help">—</div><label for="wallNameInput">Naam</label><input id="wallNameInput" type="text" maxlength="40" placeholder="bv. Voorgevel">
+        <div class="shapeGrid"><div><label for="wallHeightInput">Hoogte (m)</label><input id="wallHeightInput" type="number" min=".05" step=".05" value="2.40"></div><div><label for="wallThicknessInput">Dikte (m)</label><input id="wallThicknessInput" type="number" min=".01" step=".01" value=".14"></div><div><label for="wallColorInput">Kleur</label><input id="wallColorInput" type="color" value="#d9d2c3"></div><div><label for="wallOpacityInput">Transparantie</label><input id="wallOpacityInput" type="number" min=".05" max="1" step=".05" value=".45"></div></div>
+        <label for="wallSideSelect">Zijde</label><select id="wallSideSelect"><option value="center">Gecentreerd op lijn</option><option value="left">Links van lijn</option><option value="right">Rechts van lijn</option></select>
+        <div id="wallCreateError" class="help" style="color:#ff9c9c;display:none"></div><div class="choice"><button id="cancelWallCreateBtn" class="secondary">Annuleren</button><button id="confirmWallCreateBtn" class="primary">Muur maken</button></div>
+      </div></section>
+
+      <section id="page-wall" class="page"><div class="sectionTitle">Muur</div><div class="menuCard"><div id="wallInfo" class="help">—</div><button id="addOpeningBtn" class="primary">Opening toevoegen</button><button id="hideWallBtn" class="secondary">Zichtbaar / verborgen</button><button id="deleteWallBtn" class="danger">Muur wissen</button></div><div class="sectionTitle">Openingen</div><div id="wallOpeningsList" class="menuCard"></div></section>
+
+      <section id="page-openingcreate" class="page"><div class="sectionTitle">Opening toevoegen</div><div class="menuCard"><div id="openingWallInfo" class="help">—</div><label for="openingNameInput">Naam</label><input id="openingNameInput" type="text" maxlength="40" placeholder="bv. Raam links"><label for="openingTypeSelect">Type</label><select id="openingTypeSelect"><option value="opening">Vrije opening</option><option value="door">Deur</option><option value="window">Raam</option></select><div class="shapeGrid"><div><label for="openingOffsetInput">Vanaf A (m)</label><input id="openingOffsetInput" type="number" min="0" step=".05" value=".50"></div><div><label for="openingBottomInput">Onderkant (m)</label><input id="openingBottomInput" type="number" min="0" step=".05" value="0"></div><div><label for="openingWidthInput">Breedte (m)</label><input id="openingWidthInput" type="number" min=".05" step=".05" value=".90"></div><div><label for="openingHeightInput">Hoogte (m)</label><input id="openingHeightInput" type="number" min=".05" step=".05" value="2.10"></div></div><div id="openingCreateError" class="help" style="color:#ff9c9c;display:none"></div><div class="choice"><button id="cancelOpeningBtn" class="secondary">Annuleren</button><button id="confirmOpeningBtn" class="primary">Opening maken</button></div></div></section>
+
+      <section id="page-opening" class="page"><div class="sectionTitle">Opening</div><div class="menuCard"><div id="openingInfo" class="help">—</div><button id="drawInOpeningBtn" class="primary">Tekenen in opening</button><button id="deleteOpeningBtn" class="danger">Opening wissen</button></div></section>
 
       <section id="page-shapecreate" class="page">
         <div class="sectionTitle">Vorm aanmaken</div>
@@ -387,6 +424,9 @@ input[type="color"]{height:42px;padding:4px}
     <button id="drawFinishBtn" class="primary" disabled>Voltooien</button>
   </div>
 
+  <div id="constraintHud"><button id="constraintHudBtn">Vrij ▾</button></div>
+  <div id="constraintPanel"><div class="constraintGrid"><button class="secondary constraintQuickBtn" data-constraint="free">Vrij</button><button class="secondary constraintQuickBtn" data-constraint="horizontal">Horizontaal</button><button class="secondary constraintQuickBtn" data-constraint="vertical">Verticaal</button><button class="secondary constraintQuickBtn" data-constraint="surface">Op oppervlak</button><button class="secondary constraintQuickBtn" data-constraint="parallel">Parallel</button><button class="secondary constraintQuickBtn" data-constraint="perpendicular">90°</button><button class="secondary constraintQuickBtn" data-constraint="angle">Hoek</button></div></div>
+
   <div id="zoomHud">
     <button id="zoomInBtn" aria-label="Inzoomen">＋</button>
     <div id="zoomValue">1.0×</div>
@@ -408,9 +448,10 @@ const defaultUnit=$("defaultUnit"), defaultThickness=$("defaultThickness"), defa
 const stage=$("stage"), distanceEl=$("distance"), detail=$("detail"), stability=$("stability"), hint=$("hint"), aim=$("aim"), captureBtn=$("captureBtn");
 const lineLabels=$("lineLabels"), drawControls=$("drawControls"), drawUndoBtn=$("drawUndoBtn"), drawFinishBtn=$("drawFinishBtn");
 const zoomInBtn=$("zoomInBtn"), zoomOutBtn=$("zoomOutBtn"), zoomResetBtn=$("zoomResetBtn"), zoomValue=$("zoomValue");
+const constraintHudBtn=$("constraintHudBtn"), constraintPanel=$("constraintPanel"), constraintAngle=$("constraintAngle"), referenceStatus=$("referenceStatus"), wallOpeningsList=$("wallOpeningsList");
 const menuBtn=$("menuBtn"), menuPanel=$("menuPanel"), menuBackBtn=$("menuBackBtn"), menuCloseBtn=$("menuCloseBtn"), menuTitle=$("menuTitle"), menuMeta=$("menuMeta");
 const stakeDistance=$("stakeDistance"), stakeUnit=$("stakeUnit"), stakeDirection=$("stakeDirection"), objectsList=$("objectsList");
-const pages=["home","measure","stake","newline","objects","line","point","shapecreate","shape","deleteconfirm","clearconfirm"];
+const pages=["home","measure","stake","newline","objects","line","point","constraint","wallcreate","wall","openingcreate","opening","shapecreate","shape","deleteconfirm","clearconfirm"];
 
 let THREE=null;
 let renderer=null, scene=null, camera=null, reticle=null, xrSession=null, hitSource=null, hitRequested=false;
@@ -423,8 +464,9 @@ let pointA=null, normalA=null, activeStartId=null, currentTarget=null, targetSou
 let placingPoint=false;
 let temporaryDirectionMarker=null;
 
-const points=[], lines=[], undoStack=[], contours=[], shapes=[];
-let pointCounter=0, contourCounter=1, selectedLineId=null, selectedPointId=null, selectedShapeId=null, pendingStakePointId=null, objectPickMode=null, pendingContourId=null, pendingDelete=null;
+const points=[], lines=[], undoStack=[], contours=[], shapes=[], walls=[], openings=[];
+let pointCounter=0, contourCounter=1, selectedLineId=null, selectedPointId=null, selectedShapeId=null, selectedWallId=null, selectedOpeningId=null, pendingStakePointId=null, objectPickMode=null, pendingContourId=null, pendingDelete=null;
+let constraintMode="free", constraintReferenceLineId=null, constraintPlane=null, constraintAngleDeg=45, openingDrawContext=null;
 
 let drawSession={
   active:false,
@@ -479,11 +521,24 @@ function touchDistance(touches){
   return Math.hypot(dx,dy);
 }
 
-function updateMeta(){ menuMeta.textContent=`${mode==="measure"?"Meten":"Uitzetten"} · ${points.length}p · ${lines.length}l · v0.7.4`; }
+
+const CONSTRAINT_LABELS={free:"Vrij",horizontal:"Horizontaal",vertical:"Verticaal",surface:"Op oppervlak",parallel:"Parallel",perpendicular:"90°",angle:"Hoek"};
+function setConstraintMode(mode){constraintMode=mode;constraintAngleDeg=Number(constraintAngle?.value)||constraintAngleDeg;constraintHudBtn.textContent=(CONSTRAINT_LABELS[mode]||mode)+" ▾";constraintPanel.classList.remove("open");document.querySelectorAll(".constraintModeBtn,.constraintQuickBtn").forEach(b=>b.classList.toggle("constraintModeActive",b.dataset.constraint===mode));updateReferenceStatus();}
+function updateReferenceStatus(){const l=getLine(constraintReferenceLineId);referenceStatus.textContent=l?`Referentie: lijn ${l.name}`:"Referentie: geen";}
+function activeAnchorPoint(){if(drawSession.active&&drawSession.lastPointId)return getPoint(drawSession.lastPointId);if(activeStartId)return getPoint(activeStartId);return null;}
+function ensureConstraintPlane(anchor){if(constraintPlane||!anchor||!THREE)return;const ray=cameraRay();if(constraintMode==="vertical"){const n=new THREE.Vector3(ray.direction.x,0,ray.direction.z);if(n.lengthSq()<1e-6)n.set(0,0,1);constraintPlane={point:anchor.position.clone(),normal:n.normalize()};}}
+function rotateAroundY(vec,degrees){const r=THREE.MathUtils.degToRad(degrees),c=Math.cos(r),s=Math.sin(r);return new THREE.Vector3(vec.x*c-vec.z*s,vec.y,vec.x*s+vec.z*c);}
+function projectToLineDirection(anchor,raw,dir){const delta=raw.clone().sub(anchor.position),len=delta.length();if(len<1e-6)return raw.clone();let d=dir.clone().normalize();if(d.dot(delta)<0)d.multiplyScalar(-1);return anchor.position.clone().add(d.multiplyScalar(len));}
+function constrainTarget(raw){if(!raw||!THREE)return raw;const anchor=activeAnchorPoint();if(!anchor)return raw.clone();if(openingDrawContext){const wall=getWall(openingDrawContext.wallId),op=getOpening(openingDrawContext.openingId);if(wall&&op)return projectToOpening(raw,wall,op);}if(constraintMode==="free"||constraintMode==="surface")return raw.clone();if(constraintMode==="horizontal"){const p=raw.clone();p.y=anchor.position.y;return p;}if(constraintMode==="vertical"){ensureConstraintPlane(anchor);if(constraintPlane){const n=constraintPlane.normal,p0=constraintPlane.point,d=raw.clone().sub(p0);return raw.clone().sub(n.clone().multiplyScalar(d.dot(n)));}return raw.clone();}const ref=getLine(constraintReferenceLineId);if(ref&&["parallel","perpendicular","angle"].includes(constraintMode)){const a=getPoint(ref.startId),b=getPoint(ref.endId);if(!a||!b)return raw.clone();let dir=b.position.clone().sub(a.position);if(constraintMode==="parallel")return projectToLineDirection(anchor,raw,dir);if(constraintMode==="perpendicular")return projectToLineDirection(anchor,raw,rotateAroundY(dir,90));return projectToLineDirection(anchor,raw,rotateAroundY(dir,constraintAngleDeg));}return raw.clone();}
+function nearestPointOnSegment(p,a,b){const ab=b.clone().sub(a),denom=ab.lengthSq();if(denom<1e-10)return a.clone();const t=Math.max(0,Math.min(1,p.clone().sub(a).dot(ab)/denom));return a.clone().add(ab.multiplyScalar(t));}
+function applySnap(p){if(!p)return p;const radius=.08;let best=null,bestD=radius;for(const pt of points){const d=p.distanceTo(pt.position);if(d<bestD){best=pt.position.clone();bestD=d;}}if(best){detail.textContent=`SNAP · bestaand punt · ${(bestD*100).toFixed(1)} cm`;return best;}for(const l of lines){const a=getPoint(l.startId),b=getPoint(l.endId);if(!a||!b)continue;const q=nearestPointOnSegment(p,a.position,b.position),d=p.distanceTo(q);if(d<bestD){best=q;bestD=d;}}if(best){detail.textContent=`SNAP · lijn · ${(bestD*100).toFixed(1)} cm`;return best;}return p;}
+function constrainedFilteredTarget(){const p=constrainedFilteredTarget();return p?applySnap(constrainTarget(p)):null;}
+
+function updateMeta(){ menuMeta.textContent=`${mode==="measure"?"Meten":"Uitzetten"} · ${points.length}p · ${lines.length}l · v0.7.5`; }
 function showPage(name,push=true){
   pages.forEach(p=>$("page-"+p).classList.remove("active"));
   $("page-"+name).classList.add("active");
-  const titles={home:"Measure AR",measure:"Meten",stake:"Uitzetten",newline:"Nieuwe lijn",objects:"Objecten",line:"Lijn",point:"Punt",shapecreate:"Vorm aanmaken",shape:"Vorm",deleteconfirm:"Object wissen",clearconfirm:"Alles wissen"};
+  const titles={home:"Measure AR",measure:"Meten",stake:"Uitzetten",newline:"Nieuwe lijn",objects:"Objecten",line:"Lijn",point:"Punt",constraint:"Richting / tekenvlak",wallcreate:"Muur aanmaken",wall:"Muur",openingcreate:"Opening toevoegen",opening:"Opening",shapecreate:"Vorm aanmaken",shape:"Vorm",deleteconfirm:"Object wissen",clearconfirm:"Alles wissen"};
   menuTitle.textContent=titles[name]||"Measure AR";
   if(push && menuStack[menuStack.length-1]!==name) menuStack.push(name);
   menuBackBtn.style.visibility=name==="home"?"hidden":"visible";
@@ -717,6 +772,7 @@ function refreshLine(l){
 function deleteLine(id){ requestDelete("line",id); }
 function deletePoint(id){ requestDelete("point",id); }
 function clearAll(){
+  walls.forEach(w=>clearWallGroup(w)); walls.length=0; openings.length=0;
   shapes.forEach(s=>dispose(s.mesh)); shapes.length=0;
   [...lines].forEach(l=>deleteLineRaw(l.id));
   [...points].forEach(p=>deletePointRaw(p.id));
@@ -730,6 +786,11 @@ function renderObjects(){
   updateMeta();
   objectsList.innerHTML="";
   if(!points.length&&!lines.length&&!shapes.length){ objectsList.innerHTML='<div class="help">Nog geen objecten.</div>'; return; }
+
+  if(walls.length){
+    const title=document.createElement("div"); title.className="objectGroupTitle"; title.textContent="Muren"; objectsList.append(title);
+    walls.forEach(w=>{const row=document.createElement("div");row.className="objectRow";const open=document.createElement("button");open.className="secondary";open.innerHTML=`<span class="wallSwatch" style="background:${w.color}"></span>${w.name} · ${wallLength(w).toFixed(2)} m`;open.onclick=()=>openWallEditor(w.id);const del=document.createElement("button");del.className="danger";del.textContent="Wis";del.onclick=()=>deleteWall(w.id);row.append(open,del);objectsList.append(row);});
+  }
 
   if(shapes.length){
     const title=document.createElement("div"); title.className="objectGroupTitle"; title.textContent="Vormen"; objectsList.append(title);
@@ -918,9 +979,11 @@ function deletePointRaw(id){
 }
 function requestDelete(kind,id){
   const linked=kind==="line"?linkedShapesForLine(id):linkedShapesForPoint(id);
-  if(linked.length){
+  const linkedWalls=kind==="line"?walls.filter(w=>w.lineId===id):[];
+  if(linked.length||linkedWalls.length){
     pendingDelete={kind,id};
-    $("deleteDependencyInfo").textContent=`Dit ${kind==="line"?"lijn":"punt"} maakt deel uit van: ${linked.map(s=>s.name).join(", ")}. Wissen verbreekt/verwijdert de gekoppelde vorm(en).`;
+    const deps=[...linked.map(s=>s.name),...linkedWalls.map(w=>w.name)];
+    $("deleteDependencyInfo").textContent=`Dit ${kind==="line"?"lijn":"punt"} wordt gebruikt door: ${deps.join(", ")}. Wissen verwijdert/verbreekt gekoppelde objecten.`;
     showPage("deleteconfirm");
     return;
   }
@@ -936,6 +999,7 @@ function forceDeletePending(){
   const {kind,id}=pendingDelete;
   const linked=kind==="line"?linkedShapesForLine(id):linkedShapesForPoint(id);
   linked.forEach(s=>deleteShapeOnly(s.id));
+  if(kind==="line") walls.filter(w=>w.lineId===id).map(w=>w.id).forEach(deleteWall);
   contours.forEach(c=>{
     if((kind==="line"&&c.lineIds.includes(id))||(kind==="point"&&c.pointIds.includes(id))) c.closed=false;
   });
@@ -947,7 +1011,27 @@ function forceDeletePending(){
   pendingDelete=null; renderObjects(); showPage("objects");
 }
 
-function resetDrawSession(){
+
+function normalizeObjectName(name){return String(name||"").trim().replace(/\s+/g," ");}
+function getWall(id){return walls.find(w=>w.id===id)||null;}function getOpening(id){return openings.find(o=>o.id===id)||null;}
+function objectNameExists(name,excludeId=null){const k=normalizeObjectName(name).toLocaleLowerCase("nl");return [...shapes,...walls,...openings].some(o=>o.id!==excludeId&&String(o.name).toLocaleLowerCase("nl")===k);}
+function wallLength(wall){const l=getLine(wall.lineId);return l?l.distance:0;}
+function wallFrame(wall){const l=getLine(wall.lineId),a=l&&getPoint(l.startId),b=l&&getPoint(l.endId);if(!a||!b)return null;const start=a.position.clone(),end=b.position.clone(),x=end.clone().sub(start);x.y=0;if(x.lengthSq()<1e-8)x.set(1,0,0);x.normalize();const y=new THREE.Vector3(0,1,0),z=new THREE.Vector3(-x.z,0,x.x).normalize();return{start,x,y,z,length:a.position.distanceTo(b.position)};}
+function clearWallGroup(wall){if(wall.group){dispose(wall.group);wall.group=null;}}
+function cellInsideOpening(cx,cy,ops){return ops.some(o=>cx>o.offset+1e-6&&cx<o.offset+o.width-1e-6&&cy>o.bottom+1e-6&&cy<o.bottom+o.height-1e-6);}
+function rebuildWall(wall){clearWallGroup(wall);const f=wallFrame(wall);if(!f)return;const len=f.length,h=wall.height,t=wall.thickness,ops=openings.filter(o=>o.wallId===wall.id),xs=[0,len],ys=[0,h];ops.forEach(o=>{xs.push(Math.max(0,o.offset),Math.min(len,o.offset+o.width));ys.push(Math.max(0,o.bottom),Math.min(h,o.bottom+o.height));});const ux=[...new Set(xs.map(v=>+v.toFixed(6)))].sort((a,b)=>a-b),uy=[...new Set(ys.map(v=>+v.toFixed(6)))].sort((a,b)=>a-b),group=new THREE.Group(),q=new THREE.Quaternion(),basis=new THREE.Matrix4().makeBasis(f.x,f.y,f.z),sideOffset=wall.side==="left"?t/2:wall.side==="right"?-t/2:0;q.setFromRotationMatrix(basis);for(let ix=0;ix<ux.length-1;ix++)for(let iy=0;iy<uy.length-1;iy++){const x0=ux[ix],x1=ux[ix+1],y0=uy[iy],y1=uy[iy+1];if(x1-x0<1e-5||y1-y0<1e-5)continue;const cx=(x0+x1)/2,cy=(y0+y1)/2;if(cellInsideOpening(cx,cy,ops))continue;const geo=new THREE.BoxGeometry(x1-x0,y1-y0,t),mat=new THREE.MeshBasicMaterial({color:wall.color,transparent:true,opacity:wall.opacity,side:THREE.DoubleSide,depthWrite:false}),mesh=new THREE.Mesh(geo,mat);mesh.quaternion.copy(q);mesh.position.copy(f.start).add(f.x.clone().multiplyScalar(cx)).add(f.y.clone().multiplyScalar(cy)).add(f.z.clone().multiplyScalar(sideOffset));group.add(mesh);}group.visible=wall.visible!==false;scene.add(group);wall.group=group;}
+function createWall(line,opts){const wall={id:"w"+Date.now()+Math.random(),name:normalizeObjectName(opts.name),lineId:line.id,height:Number(opts.height),thickness:Number(opts.thickness),color:opts.color,opacity:Number(opts.opacity),side:opts.side||"center",visible:true,group:null};walls.push(wall);rebuildWall(wall);undoStack.push({type:"wallCreated",wallId:wall.id});return wall;}
+function deleteWall(id){const wall=getWall(id);if(!wall)return;openings.filter(o=>o.wallId===id).slice().forEach(o=>deleteOpening(o.id,false));clearWallGroup(wall);walls.splice(walls.indexOf(wall),1);if(selectedWallId===id)selectedWallId=null;renderObjects();}
+function createOpening(wall,opts){const op={id:"o"+Date.now()+Math.random(),wallId:wall.id,name:normalizeObjectName(opts.name),type:opts.type,offset:Number(opts.offset),bottom:Number(opts.bottom),width:Number(opts.width),height:Number(opts.height)};openings.push(op);rebuildWall(wall);undoStack.push({type:"openingCreated",openingId:op.id});return op;}
+function deleteOpening(id,rebuild=true){const op=getOpening(id);if(!op)return;const wall=getWall(op.wallId);openings.splice(openings.indexOf(op),1);if(selectedOpeningId===id)selectedOpeningId=null;if(rebuild&&wall)rebuildWall(wall);renderObjects();}
+function validateOpening(wall,offset,bottom,width,height){const len=wallLength(wall);if(![offset,bottom,width,height].every(Number.isFinite))return"Ongeldige maat.";if(width<=0||height<=0)return"Breedte en hoogte moeten groter dan nul zijn.";if(offset<0||bottom<0||offset+width>len+1e-6||bottom+height>wall.height+1e-6)return"Opening valt buiten de muur.";const overlap=openings.filter(o=>o.wallId===wall.id).some(o=>!(offset+width<=o.offset||o.offset+o.width<=offset||bottom+height<=o.bottom||o.bottom+o.height<=bottom));if(overlap)return"Opening overlapt een bestaande opening.";return null;}
+function openWallEditor(id){const w=getWall(id);if(!w)return;selectedWallId=id;selectedOpeningId=null;selectedLineId=null;selectedPointId=null;selectedShapeId=null;$("wallInfo").textContent=`${w.name} · ${wallLength(w).toFixed(2)} m × ${w.height.toFixed(2)} m · dikte ${w.thickness.toFixed(2)} m`;renderWallOpenings(w);showPage("wall");}
+function renderWallOpenings(wall){wallOpeningsList.innerHTML="";const ops=openings.filter(o=>o.wallId===wall.id);if(!ops.length){wallOpeningsList.innerHTML='<div class="help">Nog geen openingen.</div>';return;}ops.forEach(o=>{const row=document.createElement("div");row.className="objectRow";const b=document.createElement("button");b.className="secondary";b.textContent=`${o.name} · ${o.width.toFixed(2)}×${o.height.toFixed(2)} m`;b.onclick=()=>openOpeningEditor(o.id);const d=document.createElement("button");d.className="danger";d.textContent="Wis";d.onclick=()=>deleteOpening(o.id);row.append(b,d);wallOpeningsList.append(row);});}
+function openOpeningEditor(id){const o=getOpening(id),w=o&&getWall(o.wallId);if(!o||!w)return;selectedOpeningId=id;selectedWallId=w.id;$("openingInfo").textContent=`${o.name} · ${o.type} · vanaf A ${o.offset.toFixed(2)} m · ${o.width.toFixed(2)}×${o.height.toFixed(2)} m`;showPage("opening");}
+function projectToOpening(raw,wall,op){const f=wallFrame(wall);if(!f)return raw.clone();const rel=raw.clone().sub(f.start);let x=rel.dot(f.x),y=rel.dot(f.y);x=Math.max(op.offset,Math.min(op.offset+op.width,x));y=Math.max(op.bottom,Math.min(op.bottom+op.height,y));return f.start.clone().add(f.x.clone().multiplyScalar(x)).add(f.y.clone().multiplyScalar(y));}
+function startDrawingInOpening(openingId){const op=getOpening(openingId),wall=op&&getWall(op.wallId);if(!op||!wall)return;startContinuousDrawing();openingDrawContext={openingId:op.id,wallId:wall.id};constraintMode="vertical";constraintHudBtn.textContent=`Opening: ${op.name} ▾`;hint.textContent=`Teken binnen ${op.name}. Punten blijven op het openingsvlak.`;}
+
+function resetDrawSession(){ constraintPlane=null; openingDrawContext=null;
   drawSession={
     active:false,
     startPointId:null,
@@ -1090,7 +1174,7 @@ function filteredTarget(){
   if(samples.length<5) return currentTarget.clone();
   const mean=new THREE.Vector3(); samples.forEach(s=>mean.add(s.p)); return mean.multiplyScalar(1/samples.length);
 }
-function resetCurrent(){
+function resetCurrent(){ constraintPlane=null;
   pointA=null; normalA=null; activeStartId=null; currentTarget=null; targetSource="none"; lineFinished=false;
   if(temporaryDirectionMarker){ dispose(temporaryDirectionMarker); temporaryDirectionMarker=null; }
   distanceEl.textContent="—"; detail.textContent=""; resetSamples();
@@ -1140,7 +1224,7 @@ function setAim(src){ aim.className=src==="hit"?"hit":src==="virtual"?"virtual":
 function placePoint(){
   if(drawSession.active){
     if(placingPoint) return;
-    const p=filteredTarget();
+    const p=constrainedFilteredTarget();
     if(!p) return;
 
     placingPoint=true;
@@ -1196,7 +1280,7 @@ function placePoint(){
       distanceEl.textContent=fmt(line.distance);
       stage.textContent=`Lijn ${line.name}`;
       detail.textContent=`Doorlopend · ${drawSession.lineIds.length} lijnen`;
-      hint.textContent="Plaats het volgende punt, of kies Voltooien / Sluiten naar A.";
+      hint.textContent="Plaats het volgende punt, of kies Voltooien.";
       resetSamples();
 
     }catch(err){
@@ -1212,7 +1296,7 @@ function placePoint(){
   }
 
 
-  if(placingPoint||lineFinished)return;const p=filteredTarget();if(!p)return;placingPoint=true;captureBtn.disabled=true;
+  if(placingPoint||lineFinished)return;const p=constrainedFilteredTarget();if(!p)return;placingPoint=true;captureBtn.disabled=true;
   try{
     if(!pointA){const a=createPoint(p);activeStartId=a.id;pointA=a.position.clone();normalA=targetSource==="hit"?reticleNormal():up.clone();resetSamples();stage.textContent=`Punt ${a.name} geplaatst`;distanceEl.textContent=mode==="stake"?fmt(targetMeters):"—";hint.textContent=mode==="measure"?"Richt op het eindpunt en druk opnieuw.":"Richt in de gewenste richting en druk opnieuw.";return;}
     const a=getPoint(activeStartId);if(!a)throw new Error("Actief startpunt ontbreekt.");
@@ -1241,7 +1325,7 @@ async function startAR(){
     });
     await renderer.xr.setSession(xrSession);
 
-    mode="measure"; directionMode="horizontal"; resetCurrent(); renderObjects();
+    mode="measure"; directionMode="horizontal"; setConstraintMode(constraintMode); resetCurrent(); renderObjects();
     app.style.display="none"; overlay.style.display="block";
     xrSession.addEventListener("end",cleanup,{once:true});
     renderer.setAnimationLoop(render);
@@ -1299,7 +1383,7 @@ function render(t,frame){
   renderer.render(scene,camera);
 }
 
-function coreSelfCheck(){const req=["startBtn","menuBtn","captureBtn","continuousDrawRow","drawControls","drawUndoBtn","drawFinishBtn","lineLabels","zoomInBtn","zoomOutBtn","zoomResetBtn","zoomValue","cancelClearBtn","confirmClearBtn","shapeNameInput","createShapeBtn","cancelShapeBtn","shapeInfo","saveShapeBtn","deleteShapeFillBtn","deleteShapeContourBtn","cancelDeleteBtn","confirmDeleteBtn","measureNewBtn","measureLastBtn","measureExistingBtn","stakeNewBtn","stakeLastBtn","stakeExistingBtn","newIndependentBtn","newFromLastBtn","stakeFromLastBtn","objectsList","lineLength","lineThickness","applyLineLengthBtn","undoBtn","clearAllBtn","exitArBtn"];const missing=req.filter(id=>!$(id));console.info("core self-check",{ok:!missing.length,missing,version:"0.7.4"});if(missing.length)showError("Interne UI-fout: "+missing.join(", "));return !missing.length;}
+function coreSelfCheck(){const req=["startBtn","menuBtn","captureBtn","continuousDrawRow","drawControls","drawUndoBtn","drawFinishBtn","lineLabels","zoomInBtn","zoomOutBtn","zoomResetBtn","zoomValue","cancelClearBtn","confirmClearBtn","constraintHudBtn","constraintAngle","referenceStatus","wallNameInput","confirmWallCreateBtn","addOpeningBtn","openingNameInput","confirmOpeningBtn","drawInOpeningBtn","shapeNameInput","createShapeBtn","cancelShapeBtn","shapeInfo","saveShapeBtn","deleteShapeFillBtn","deleteShapeContourBtn","cancelDeleteBtn","confirmDeleteBtn","measureNewBtn","measureLastBtn","measureExistingBtn","stakeNewBtn","stakeLastBtn","stakeExistingBtn","newIndependentBtn","newFromLastBtn","stakeFromLastBtn","objectsList","lineLength","lineThickness","applyLineLengthBtn","undoBtn","clearAllBtn","exitArBtn"];const missing=req.filter(id=>!$(id));console.info("core self-check",{ok:!missing.length,missing,version:"0.7.5"});if(missing.length)showError("Interne UI-fout: "+missing.join(", "));return !missing.length;}
 function undoLast(){
   const a=undoStack.pop();
   if(!a){ stage.textContent="Niets om ongedaan te maken"; closeMenu(); return; }
@@ -1315,6 +1399,10 @@ function undoLast(){
     if(i>=0) contours.splice(i,1);
   }else if(a.type==="shapeCreated"){
     deleteShapeOnly(a.shapeId);
+  }else if(a.type==="wallCreated"){
+    deleteWall(a.wallId);
+  }else if(a.type==="openingCreated"){
+    deleteOpening(a.openingId);
   }
   renderObjects(); closeMenu();
 }
@@ -1388,6 +1476,22 @@ $("pointNewLineBtn").addEventListener("click",()=>{ if(selectedPointId) startMea
 $("pointStakeBtn").addEventListener("click",()=>{ if(selectedPointId){ pendingStakePointId=selectedPointId; $("stakeSelectedBtn").style.display="block"; showPage("stake"); } });
 $("deletePointBtn").addEventListener("click",()=>{ if(selectedPointId) requestDelete("point",selectedPointId); });
 
+
+
+constraintHudBtn.addEventListener("click",()=>constraintPanel.classList.toggle("open"));
+document.querySelectorAll(".constraintModeBtn,.constraintQuickBtn").forEach(btn=>btn.addEventListener("click",()=>{setConstraintMode(btn.dataset.constraint);if(btn.classList.contains("constraintModeBtn"))closeMenu();}));
+constraintAngle.addEventListener("change",()=>{constraintAngleDeg=Number(constraintAngle.value)||45;if(constraintMode==="angle")setConstraintMode("angle");});
+$("useLineReferenceBtn").addEventListener("click",()=>{const l=getLine(selectedLineId);if(!l)return;constraintReferenceLineId=l.id;updateReferenceStatus();stage.textContent=`Referentie: ${l.name}`;hint.textContent="Parallel, loodrecht en eigen hoek kunnen nu deze lijn gebruiken.";closeMenu();});
+$("createWallFromLineBtn").addEventListener("click",()=>{const l=getLine(selectedLineId);if(!l)return;$("wallCreateInfo").textContent=`Basislijn ${l.name} · ${l.distance.toFixed(2)} m`;$("wallNameInput").value="";$("wallCreateError").style.display="none";showPage("wallcreate");});
+$("cancelWallCreateBtn").addEventListener("click",()=>showPage("line",false));
+$("confirmWallCreateBtn").addEventListener("click",()=>{const line=getLine(selectedLineId);if(!line)return;const name=normalizeObjectName($("wallNameInput").value),height=Number($("wallHeightInput").value),thickness=Number($("wallThicknessInput").value),opacity=Number($("wallOpacityInput").value);const err=!name?"Naam is verplicht.":objectNameExists(name)?"Deze naam bestaat al.":(!Number.isFinite(height)||height<=0)?"Ongeldige hoogte.":(!Number.isFinite(thickness)||thickness<=0)?"Ongeldige dikte.":null;if(err){$("wallCreateError").textContent=err;$("wallCreateError").style.display="block";return;}const w=createWall(line,{name,height,thickness,color:$("wallColorInput").value,opacity,side:$("wallSideSelect").value});renderObjects();openWallEditor(w.id);});
+$("addOpeningBtn").addEventListener("click",()=>{const w=getWall(selectedWallId);if(!w)return;$("openingWallInfo").textContent=`${w.name} · ${wallLength(w).toFixed(2)} m × ${w.height.toFixed(2)} m`;$("openingNameInput").value="";$("openingCreateError").style.display="none";showPage("openingcreate");});
+$("cancelOpeningBtn").addEventListener("click",()=>showPage("wall",false));
+$("confirmOpeningBtn").addEventListener("click",()=>{const w=getWall(selectedWallId);if(!w)return;const name=normalizeObjectName($("openingNameInput").value),offset=Number($("openingOffsetInput").value),bottom=Number($("openingBottomInput").value),width=Number($("openingWidthInput").value),height=Number($("openingHeightInput").value);const err=!name?"Naam is verplicht.":objectNameExists(name)?"Deze naam bestaat al.":validateOpening(w,offset,bottom,width,height);if(err){$("openingCreateError").textContent=err;$("openingCreateError").style.display="block";return;}createOpening(w,{name,type:$("openingTypeSelect").value,offset,bottom,width,height});openWallEditor(w.id);});
+$("hideWallBtn").addEventListener("click",()=>{const w=getWall(selectedWallId);if(w){w.visible=!w.visible;if(w.group)w.group.visible=w.visible;}});
+$("deleteWallBtn").addEventListener("click",()=>{if(selectedWallId){deleteWall(selectedWallId);showPage("objects");}});
+$("drawInOpeningBtn").addEventListener("click",()=>{if(selectedOpeningId)startDrawingInOpening(selectedOpeningId);});
+$("deleteOpeningBtn").addEventListener("click",()=>{const o=getOpening(selectedOpeningId);if(o){const wid=o.wallId;deleteOpening(o.id);openWallEditor(wid);}});
 
 $("shapeOpacity").addEventListener("input",()=>{$("shapeOpacityValue").textContent=Math.round(Number($("shapeOpacity").value)*100)+"%";});
 $("editShapeOpacity").addEventListener("input",()=>{$("editShapeOpacityValue").textContent=Math.round(Number($("editShapeOpacity").value)*100)+"%";});

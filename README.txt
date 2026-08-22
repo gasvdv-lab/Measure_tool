@@ -1,46 +1,29 @@
-MEASURE AR v0.7.4 — SHAPES + FILL
+MEASURE AR v0.7.5 — CONSTRAINTS + WALLS + OPENINGS
 
 NIEUW
-- Voltooien sluit de contour zoals in v0.7.3 en opent daarna 'Vorm aanmaken'.
-- Naam is verplicht en uniek binnen dezelfde AR-sessie.
-- Hoofdletters tellen niet als verschil: Hut / hut / HUT is dezelfde naam.
-- Bij aanmaken kiest de gebruiker meteen:
-  * vulkleur
-  * transparantie
-  * randkleur
-  * randdikte
-  * randlabels zichtbaar/verborgen
-- Gesloten contour wordt als transparant 3D-vlak getrianguleerd.
-- Oppervlakte wordt berekend in m².
-- Objecten bevat nu aparte groepen: Vormen, Lijnen, Punten.
-- Vormeditor: naam, vulkleur, randkleur, transparantie, randdikte,
-  opvulling zichtbaar/verborgen en labels zichtbaar/verborgen.
-- Vorm verwijderen:
-  * alleen vorm/opvulling verwijderen; contour blijft
-  * vorm + contour verwijderen
-- Lijn of punt apart wissen blijft mogelijk.
-- Als lijn/punt onderdeel is van een vorm verschijnt eerst een interne
-  waarschuwing. Geen native browser-confirm.
-- Alles wissen blijft in dezelfde AR-sessie.
-
-ANNULEREN BIJ VORM AANMAKEN
-- De reeds gesloten contour blijft veilig bestaan.
-- Alleen de shape/vulling wordt niet aangemaakt.
+- Algemene tekenrichting vanaf het begin: Vrij, Horizontaal, Verticaal, Op oppervlak, Parallel, 90°, Eigen hoek.
+- Referentielijn instellen via Objecten > Lijn > Gebruik als referentielijn.
+- Basis snapping naar bestaande punten en lijnen.
+- Muur vanaf lijn met unieke naam, hoogte, dikte, kleur, transparantie en zijde.
+- Echte rechthoekige openingen/deuren/ramen door de muur op te delen rond het gat.
+- Opening met unieke naam, positie vanaf A, onderhoogte, breedte en hoogte.
+- Tekenen in opening: doorlopend tekenen wordt op het lokale openingsvlak geprojecteerd.
+- Nieuwe objectgroep Muren; openingen worden per muur beheerd.
+- Dependency-waarschuwing blijft actief bij gekoppelde basislijnen.
 
 BEHOUDEN
-- vaste/immutable punten
-- meten
-- uitzetten
-- doorlopend tekenen
-- Voltooien -> sluitlijn naar A
+- v0.7.4 shapes/fill/oppervlakte
+- immutable punten
+- meten/uitzetten
+- doorlopend tekenen + Voltooien
 - zoom
-- objectbeheer
 - Alles wissen zonder AR te verlaten
+- selectief wissen
 
-BEKEND / BEWUST UITGESTELD
-- Het label-oriëntatieprobleem is NIET opgelost in v0.7.4.
-  Dit wordt later afzonderlijk aangepakt.
+BEKEND
+- Label-oriëntatieprobleem blijft bewust uitgesteld.
+- WebGL-lijndikte blijft toestelafhankelijk.
 
-TECHNISCHE CONTROLES
+CONTROLE
 - JavaScript node --check: OK
 - dubbele HTML IDs: geen
