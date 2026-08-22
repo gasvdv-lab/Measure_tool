@@ -1,37 +1,47 @@
-# Measure AR v0.8.1 — Walls on Modular Core
+# Measure AR v0.8.2 — Fixed Points Core Fix
 
-## Nieuw
-- aparte module `js/walls.js`
-- vanuit Objecten > Lijn: **Maak muur van lijn**
-- unieke muurnaam binnen de sessie
-- hoogte
-- dikte
-- links / rechts / gecentreerd op de basislijn
-- oriëntatie: verticaal, loodrecht 90°, eigen hoek
-- kleur
-- transparantie
-- Objecten bevat nu categorie **Muren**
-- muur zichtbaar/verbergen
-- muur verwijderen zonder basislijn te verwijderen
-- lijn kan niet stilzwijgend gewist worden zolang een muur ervan afhangt
-- undo voor nieuw aangemaakte muur
-- Alles wissen wist ook muren en blijft in AR
+Deze release bouwt verder op v0.8.1 en behoudt `js/walls.js`.
 
-## Structuur
-- index.html
-- css/app.css
-- js/app.js
-- js/ar.js
-- js/constraints.js
-- js/drawing.js
-- js/geometry.js
-- js/state.js
-- js/ui.js
-- js/walls.js
+## Fix: punt A lijkt te verschuiven wanneer B wordt gezocht
+De puntworkflow is aangescherpt:
 
-## Nog niet
-Openingen/deuren/ramen komen in v0.8.2.
-Het bekende label-oriëntatieprobleem blijft apart geparkeerd.
+- ieder geplaatst punt krijgt één immutable world-space snapshot;
+- die snapshot is de enige autoritatieve positie van het punt;
+- markerpositie wordt elke render opnieuw aan die snapshot gekoppeld;
+- het bewegende AR-richtpunt blijft volledig los van permanente punten;
+- na het plaatsen van A wordt de tracking/stabiliteitsbuffer onmiddellijk leeggemaakt;
+- samples waarmee A werd bepaald kunnen B dus niet meer beïnvloeden;
+- hetzelfde gebeurt na ieder nieuw bevestigd punt;
+- ieder plaatsingsmoment gebruikt een eigen `Vector3.clone()` snapshot.
 
-## Upload naar GitHub
-Upload de volledige mapstructuur. Niet alleen `index.html`.
+## Visuele verbetering
+Permanente punten zien er nu bewust anders uit dan de reticle:
+- grotere vaste pin/halo;
+- eigen schermlabel A, B, C, ...;
+- reticle blijft het bewegende groene/witte richtinstrument.
+
+Hierdoor is visueel direct duidelijk wat vast staat en wat nog beweegt.
+
+## Behouden uit v0.8.1
+- modulaire structuur
+- universele constraints
+- meten
+- uitzetten
+- doorlopend tekenen
+- vormen
+- muren via `js/walls.js`
+- zoom
+- Alles wissen zonder AR te verlaten
+
+## Test
+1. Start AR.
+2. Plaats A.
+3. Beweeg de telefoon links/rechts en dichter/verder.
+4. De reticle moet bewegen, A + label A moeten op hun wereldpositie blijven.
+5. Plaats B.
+6. Controleer AB.
+7. Selecteer AB > Maak muur van lijn.
+8. Controleer dat de muurfunctie uit v0.8.1 nog werkt.
+
+## Bekend
+Het eerder gemelde label-oriëntatieprobleem van lijnlabels blijft apart geparkeerd.
