@@ -1,17 +1,32 @@
-# Measure AR v0.8.3 — Universal Point Placement
+# Measure AR v0.8.4 — Placement UI Fix
 
-Nieuw: universele keuze tussen handmatig en op maat plaatsen voor de actieve tekenworkflow.
+## Fix
+De Universal Point Placement-engine uit v0.8.3 blijft bestaan, maar het grote
+plaatsingspaneel staat niet langer permanent over de AR-camera.
 
-Op maat:
-- afstand in m/cm
-- vrij
-- horizontaal
-- verticaal
-- op oppervlak
-- parallel aan referentielijn
-- loodrecht (90°)
-- eigen hoek
+## Nieuwe workflow
+- Camera blijft schoon.
+- De compacte richtingknop links onderaan blijft beschikbaar.
+- Handmatig blijft standaard.
+- Op maat plaatsen open je alleen vanuit de relevante tekenfunctie/menu.
+- Meten, Nieuwe lijn, Uitzetten en Doorlopend tekenen hebben een contextuele
+  knop voor op-maat plaatsing.
 
-Doorlopend tekenen ondersteunt opeenvolgende exacte segmenten. De fixed-point core uit v0.8.2 en walls.js blijven behouden.
+## Standaardeenheid
+De standaard is nu centimeter.
+- Instellingen: cm geselecteerd
+- Uitzetten: cm geselecteerd
+- Op maat: cm geselecteerd
+- standaard invoer: 100 cm
 
-Let op: lijnlabel-oriëntatie blijft bewust een apart later verbeterpunt.
+## Behouden
+- v0.8.2 fixed points
+- universele constraints
+- vormen
+- muren.js
+- zoom
+- objectbeheer
+- Alles wissen zonder AR te verlaten
+
+## Bekend
+Het lijnlabel-oriëntatieprobleem blijft apart geparkeerd.

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#111111">
-  <title>Measure AR v0.8.3</title>
+  <title>Measure AR v0.8.4</title>
   <link rel="stylesheet" href="./css/app.css">
 </head>
 <body>
@@ -17,14 +17,14 @@
     <button id="settingsBtn" class="secondary">Instellingen</button>
     <section id="settingsPanel" class="settingsPanel">
       <label>Eenheid
-        <select id="defaultUnit"><option value="m">meter</option><option value="cm">centimeter</option></select>
+        <select id="defaultUnit"><option value="cm" selected>centimeter</option><option value="m">meter</option></select>
       </label>
       <label>Lijndikte
         <select id="defaultThickness"><option value="1">1 · fijn</option><option value="2" selected>2 · normaal</option><option value="3">3 · duidelijk</option><option value="4">4 · zwaar</option></select>
       </label>
       <label class="check"><input id="defaultLabels" type="checkbox" checked> Labels tonen</label>
     </section>
-    <div class="build">v0.8.3 · universal point placement</div>
+    <div class="build">v0.8.4 · placement ui fix</div>
     <div id="error" class="error"></div>
   </main>
 </div>
@@ -43,7 +43,7 @@
   <aside id="menuPanel">
     <div class="menuHead">
       <button id="menuBackBtn" class="secondary">‹</button>
-      <div><strong id="menuTitle">Measure AR</strong><small id="menuMeta">v0.8.3</small></div>
+      <div><strong id="menuTitle">Measure AR</strong><small id="menuMeta">v0.8.4</small></div>
       <button id="menuCloseBtn" class="secondary">✕</button>
     </div>
     <div class="menuBody">
@@ -54,6 +54,7 @@
           <button data-page="stake">Uitzetten <small>vaste afstand</small></button>
           <button data-page="newline">Nieuwe lijn <small>nieuw / laatste / bestaand punt</small></button>
           <button id="continuousBtn">Doorlopend tekenen <small>A → B → C → …</small></button>
+          <button id="continuousParamBtn">Doorlopend op maat <small>exacte segmenten vanaf actief punt</small></button>
           <button data-page="constraint">Richting / tekenvlak <small>geldt voor alle tekenfuncties</small></button>
         </div>
         <h3>Project</h3>
@@ -73,17 +74,19 @@
           <button id="measureNewBtn" class="primary">Nieuw startpunt</button>
           <button id="measureLastBtn" class="secondary">Vanaf laatste punt</button>
           <button id="measureExistingBtn" class="secondary">Bestaand punt kiezen</button>
+          <button id="measureParamBtn" class="secondary">Volgend punt op maat</button>
         </div>
       </section>
 
       <section id="page-stake" class="page">
         <h3>Uitzetten</h3>
         <div class="menuCard">
-          <label>Afstand <input id="stakeDistance" type="number" min=".01" step=".01" value="2.00"></label>
-          <label>Eenheid <select id="stakeUnit"><option value="m">m</option><option value="cm">cm</option></select></label>
+          <label>Afstand <input id="stakeDistance" type="number" min=".01" step=".1" value="100"></label>
+          <label>Eenheid <select id="stakeUnit"><option value="cm" selected>cm</option><option value="m">m</option></select></label>
           <button id="stakeNewBtn" class="primary">Nieuw startpunt</button>
           <button id="stakeLastBtn" class="secondary">Vanaf laatste punt</button>
           <button id="stakeExistingBtn" class="secondary">Bestaand punt kiezen</button>
+          <button id="stakeParamBtn" class="secondary">Volgend punt op maat</button>
         </div>
       </section>
 
@@ -92,6 +95,7 @@
         <div class="menuCard">
           <button id="newIndependentBtn" class="primary">Nieuw → nieuw</button>
           <button id="newFromLastBtn" class="secondary">Vanaf laatste punt</button>
+          <button id="newParamBtn" class="secondary">Volgend punt op maat</button>
         </div>
       </section>
 
@@ -110,6 +114,41 @@
           <label>Hoek in graden <input id="constraintAngle" type="number" min="-180" max="180" step=".5" value="45"></label>
           <div id="referenceStatus" class="help">Referentie: geen</div>
           <p class="help">Parallel, loodrecht en eigen hoek gebruiken een geselecteerde referentielijn.</p>
+        </div>
+      </section>
+
+
+      <section id="page-placement" class="page">
+        <h3>Punt op maat</h3>
+        <div class="menuCard">
+          <div id="placementContextInfo" class="help">Gebruik het huidige actieve startpunt.</div>
+          <div class="grid2">
+            <label>Afstand
+              <input id="placementDistance" type="number" min="0.01" step="0.1" value="100">
+            </label>
+            <label>Eenheid
+              <select id="placementUnit"><option value="cm" selected>cm</option><option value="m">m</option></select>
+            </label>
+          </div>
+          <label>Richting
+            <select id="placementConstraint">
+              <option value="free">Vrij</option>
+              <option value="horizontal">Horizontaal</option>
+              <option value="vertical">Verticaal</option>
+              <option value="surface">Op oppervlak</option>
+              <option value="parallel">Parallel aan referentielijn</option>
+              <option value="perpendicular">Loodrecht (90°) op referentielijn</option>
+              <option value="angle">Eigen hoek t.o.v. referentielijn</option>
+            </select>
+          </label>
+          <div id="placementAngleWrap" style="display:none">
+            <label>Hoek (°)<input id="placementAngle" type="number" min="-360" max="360" step="1" value="90"></label>
+          </div>
+          <div id="placementReferenceWrap" style="display:none">
+            <label>Referentielijn<select id="placementReference"></select></label>
+          </div>
+          <div id="placementHelp" class="help">Plaats of selecteer eerst een vast vertrekpunt.</div>
+          <button id="placementApplyBtn" class="primary">Punt op maat plaatsen</button>
         </div>
       </section>
 
@@ -223,27 +262,6 @@
   <div id="constraintHud">
     <button id="constraintHudBtn">Vrij ▾</button>
   </div>
-
-
-  <div id="placementHud">
-    <button id="placementModeBtn" class="secondary">Plaatsing: Handmatig</button>
-    <div id="placementParamPanel">
-      <div class="placementGrid">
-        <div><label for="placementDistance">Afstand</label><input id="placementDistance" type="number" min="0.01" step="0.01" value="1.00"></div>
-        <div><label for="placementUnit">Eenheid</label><select id="placementUnit"><option value="m">m</option><option value="cm">cm</option></select></div>
-        <div class="full"><label for="placementConstraint">Richting</label><select id="placementConstraint">
-          <option value="free">Vrij</option><option value="horizontal">Horizontaal</option><option value="vertical">Verticaal</option>
-          <option value="surface">Op oppervlak</option><option value="parallel">Parallel aan referentielijn</option>
-          <option value="perpendicular">Loodrecht (90°) op referentielijn</option><option value="angle">Eigen hoek t.o.v. referentielijn</option>
-        </select></div>
-        <div id="placementAngleWrap" class="full" style="display:none"><label for="placementAngle">Hoek (°)</label><input id="placementAngle" type="number" step="1" value="90"></div>
-        <div id="placementReferenceWrap" class="full" style="display:none"><label for="placementReference">Referentielijn</label><select id="placementReference"></select></div>
-        <button id="placementApplyBtn" class="primary full">Punt op maat plaatsen</button>
-      </div>
-      <div id="placementHelp" class="help">Plaats of selecteer eerst een vast vertrekpunt.</div>
-    </div>
-  </div>
-
   <div id="drawControls">
     <button id="drawUndoBtn" class="secondary">↶ Laatste</button>
     <button id="drawFinishBtn" class="primary" disabled>Voltooien</button>
