@@ -1,8 +1,8 @@
 
-import {S,$,fmt,getPoint} from "./state.js?v=0.8.6-20260822-1506";
-import {applyConstraint,nearestSnap} from "./constraints.js?v=0.8.6-20260822-1506";
-import {createPoint,createLine,closeContour,deleteLineRaw,deletePointRaw} from "./geometry.js?v=0.8.6-20260822-1506";
-import {cameraRay,getFilteredTarget,resetTrackingSamples} from "./ar.js?v=0.8.6-20260822-1506";
+import {S,$,fmt,getPoint} from "./state.js?v=0.8.7-20260822-0830";
+import {applyConstraint,nearestSnap} from "./constraints.js?v=0.8.7-20260822-0830";
+import {createPoint,createLine,closeContour,deleteLineRaw,deletePointRaw} from "./geometry.js?v=0.8.7-20260822-0830";
+import {cameraRay,getFilteredTarget,resetTrackingSamples} from "./ar.js?v=0.8.7-20260822-0830";
 
 function target(){const p=getFilteredTarget();return p?nearestSnap(applyConstraint(p,cameraRay)):null;}
 export function resetCurrent(){

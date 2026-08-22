@@ -1,8 +1,8 @@
-import {startAR} from "./ar.js?v=0.8.6-20260822-1506";
-import {$} from "./state.js?v=0.8.6-20260822-1506";
+import {startAR} from "./ar.js?v=0.8.7-20260822-0830";
+import {$} from "./state.js?v=0.8.7-20260822-0830";
 
-const VERSION="0.8.6";
-const BUILD="20260822-1506";
+const VERSION="0.8.7";
+const BUILD="20260822-0830";
 
 function showFatal(message){
   const status=$("launchStatus");
@@ -15,7 +15,7 @@ function showFatal(message){
 
 async function lazyInitUI(){
   try{
-    const mod=await import("./ui.js?v=0.8.6-20260822-1506");
+    const mod=await import("./ui.js?v=0.8.7-20260822-0830");
     mod.initUI();
     return true;
   }catch(err){

@@ -1,11 +1,31 @@
 
-import {S,$,fmt,getPoint,getLine,getContour} from "./state.js?v=0.8.6-20260822-1506";
-import {setConstraint,setReferenceLine,updateReferenceStatus} from "./constraints.js?v=0.8.6-20260822-1506";
-import {startMeasureNew,startMeasureFrom,startStake,startContinuous,undoContinuous,finishContinuous,placePoint,resetCurrent} from "./drawing.js?v=0.8.6-20260822-1506";
-import {createShape,deleteLineRaw,deletePointRaw,clearAllGeometry,dispose} from "./geometry.js?v=0.8.6-20260822-1506";
-import {startAR,leaveAR,applyZoom} from "./ar.js?v=0.8.6-20260822-1506";
-import {updatePlacementUI,placeParametricNext} from "./placement.js?v=0.8.6-20260822-1506";
-import {createWall,getWall,deleteWall,toggleWall,wallsUsingLine,clearWalls} from "./walls.js?v=0.8.6-20260822-1506";
+function syncPlacementHud(){
+ const h=$("placementHud"),b=$("placementModeBtn");if(!h||!b)return;
+ h.classList.toggle("metric",placementState.mode==="metric");h.classList.toggle("angle",placementState.direction==="angle");
+ b.textContent=placementState.mode==="metric"?"Op maat":"Handmatig";
+ const r=S.lines.find(l=>l.id===placementState.referenceLineId);
+ if($("placementReferenceInfo"))$("placementReferenceInfo").textContent="Referentie: "+(r?r.name:"geen");
+}
+function bindPlacementHud(){
+ const b=$("placementModeBtn");if(!b||b.dataset.bound)return;b.dataset.bound="1";
+ b.addEventListener("click",()=>{setPlacementMode(placementState.mode==="manual"?"metric":"manual");syncPlacementHud();});
+ $("placementCancelBtn")?.addEventListener("click",()=>{setPlacementMode("manual");syncPlacementHud();});
+ $("placementDirection")?.addEventListener("change",e=>{setPlacementOptions({direction:e.target.value});syncPlacementHud();});
+ $("placementAngle")?.addEventListener("input",e=>setPlacementOptions({angleDeg:Number(e.target.value)}));
+ const distance=()=>{const n=Number($("placementDistance")?.value),u=$("placementUnit")?.value||"cm";if(Number.isFinite(n))setPlacementOptions({distanceCm:u==="m"?n*100:n});};
+ $("placementDistance")?.addEventListener("input",distance);$("placementUnit")?.addEventListener("change",distance);
+ $("placementConfirmBtn")?.addEventListener("click",()=>document.dispatchEvent(new CustomEvent("measurear:metric-confirm")));
+ syncPlacementHud();
+}
+import {placementState,setPlacementMode,setPlacementOptions} from "./universal-placement.js?v=0.8.7-20260822-0830";
+
+import {S,$,fmt,getPoint,getLine,getContour} from "./state.js?v=0.8.7-20260822-0830";
+import {setConstraint,setReferenceLine,updateReferenceStatus} from "./constraints.js?v=0.8.7-20260822-0830";
+import {startMeasureNew,startMeasureFrom,startStake,startContinuous,undoContinuous,finishContinuous,placePoint,resetCurrent} from "./drawing.js?v=0.8.7-20260822-0830";
+import {createShape,deleteLineRaw,deletePointRaw,clearAllGeometry,dispose} from "./geometry.js?v=0.8.7-20260822-0830";
+import {startAR,leaveAR,applyZoom} from "./ar.js?v=0.8.7-20260822-0830";
+import {updatePlacementUI,placeParametricNext} from "./placement.js?v=0.8.7-20260822-0830";
+import {createWall,getWall,deleteWall,toggleWall,wallsUsingLine,clearWalls} from "./walls.js?v=0.8.7-20260822-0830";
 
 const pages=["home","measure","stake","newline","constraint","placement","objects","line","point","wallcreate","wall","shapecreate","settings","clear"];
 let menuStack=["home"];
@@ -44,6 +64,7 @@ function renderObjects(){
   if(S.points.length){box.insertAdjacentHTML("beforeend","<h3>Punten</h3>");for(const p of S.points){const r=document.createElement("div");r.className="objectRow";const a=document.createElement("button"),d=document.createElement("button");a.className="secondary";a.textContent=`Punt ${p.name}`;d.className="danger";d.textContent="Wis";a.onclick=()=>{if(S.objectPickMode==="measure"){startMeasureFrom(p.id);closeMenu();return;}if(S.objectPickMode==="stake"){const m=readStake();if(m)startStake(p.id,m);closeMenu();return;}S.selectedPointId=p.id;$("pointInfo").textContent=a.textContent;showPage("point");};d.onclick=()=>{for(const l of [...S.lines])if(l.startId===p.id||l.endId===p.id)deleteLineRaw(l.id);deletePointRaw(p.id);renderObjects();};r.append(a,d);box.append(r);}}
 }
 export function initUI(){
+ bindPlacementHud();
   $("menuBtn").onclick=()=>$("menuPanel").classList.contains("open")?closeMenu():openMenu();
   $("menuCloseBtn").onclick=closeMenu;$("menuBackBtn").onclick=()=>{if(menuStack.length<=1)return closeMenu();menuStack.pop();showPage(menuStack.at(-1),false);};
   document.querySelectorAll("[data-page]").forEach(b=>b.onclick=()=>showPage(b.dataset.page));

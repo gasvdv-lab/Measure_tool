@@ -1,5 +1,5 @@
 
-import {S,$,fmt,pointName,getPoint,getLine,getContour} from "./state.js?v=0.8.6-20260822-1506";
+import {S,$,fmt,pointName,getPoint,getLine,getContour} from "./state.js?v=0.8.7-20260822-0830";
 
 export function dispose(obj){
   if(!obj||!S.scene)return; S.scene.remove(obj);
@@ -147,3 +147,5 @@ export function clearAllGeometry(){
   for(const s of S.shapes)dispose(s.mesh);for(const l of [...S.lines])deleteLineRaw(l.id);for(const p of [...S.points])deletePointRaw(p.id);
   S.shapes.length=S.contours.length=S.undo.length=0;S.pointCounter=0;S.contourCounter=1;
 }
+
+export function enforceLockedPoints(){for(const p of S.points){if(!p.lockedPosition)continue;const q=p.lockedPosition;p.position.set(q.x,q.y,q.z);if(p.marker)p.marker.position.set(q.x,q.y,q.z);}}
