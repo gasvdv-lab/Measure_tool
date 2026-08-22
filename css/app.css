@@ -67,3 +67,8 @@ canvas{position:fixed;inset:0;width:100%;height:100%}
 }
 #constraintAngleWrap,#constraintReferenceWrap{margin-top:8px}
 #constraintModeHelp{margin-top:10px;color:#bbb}
+
+/* v0.8.9.2 actionable menu states */
+button.actionError{outline:2px solid #ff8a8a}
+#placementApplyBtn:disabled{opacity:.5}
+#shapeInfo{font-size:.78rem;color:#ddd}
