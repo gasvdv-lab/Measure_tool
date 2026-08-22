@@ -1,6 +1,6 @@
 
 import {S,$} from "./state.js";
-import {enforceLocked,updateLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js";
+import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js";
 let samples=[],tmpPos,tmpQuat,up,camPos,camQuat,forward;
 export async function loadThree(){
   if(S.THREE)return;S.THREE=await import("https://esm.sh/three@0.167.1");
@@ -17,6 +17,11 @@ export function getFilteredTarget(){
   if(!S.currentTarget)return null;if(samples.length<5)return S.currentTarget.clone();const m=new S.THREE.Vector3();samples.forEach(p=>m.add(p));return m.multiplyScalar(1/samples.length);
 }
 function addSample(p){samples.push(p.clone());if(samples.length>16)samples.shift();}
+export function resetTrackingSamples(){
+  samples.length=0;
+  S.pointPlacementEpoch++;
+  $("stability").textContent="Stabiliteit: opnieuw meten…";
+}
 function virtualTarget(){
   if(!S.pointA)return null;const ray=cameraRay(),n=up.clone(),den=n.dot(ray.dir);if(Math.abs(den)<.015)return null;const t=n.dot(S.pointA.clone().sub(ray.origin))/den;if(t<=0||t>40)return null;return ray.origin.clone().add(ray.dir.clone().multiplyScalar(t));
 }
@@ -27,7 +32,7 @@ export async function startAR(){
   S.renderer.domElement.style.display="block";$("app").style.display="none";$("overlay").style.display="block";S.xrSession.addEventListener("end",cleanup,{once:true});S.renderer.setAnimationLoop(render);
 }
 export async function leaveAR(){if(S.xrSession){await S.xrSession.end();return;}cleanup();}
-function cleanup(){S.renderer?.setAnimationLoop(null);if(S.renderer?.domElement)S.renderer.domElement.style.display="none";S.xrSession=null;S.hitSource=null;S.hitRequested=false;clearAllGeometry();$("overlay").style.display="none";$("app").style.display="grid";}
+function cleanup(){resetTrackingSamples();S.renderer?.setAnimationLoop(null);if(S.renderer?.domElement)S.renderer.domElement.style.display="none";S.xrSession=null;S.hitSource=null;S.hitRequested=false;clearAllGeometry();$("overlay").style.display="none";$("app").style.display="grid";}
 function render(_,frame){
   if(!frame)return;const ref=S.renderer.xr.getReferenceSpace(),session=S.renderer.xr.getSession();
   if(!S.hitRequested){session.requestReferenceSpace("viewer").then(v=>session.requestHitTestSource({space:v}).then(s=>S.hitSource=s));S.hitRequested=true;}
@@ -35,6 +40,6 @@ function render(_,frame){
   if(hit&&pose){S.reticle.visible=true;S.reticle.matrix.fromArray(pose.transform.matrix);S.currentTarget=hit;S.targetSource="hit";addSample(hit);$("aim").className="hit";$("captureBtn").disabled=S.lineFinished;}
   else if(S.pointA){const v=virtualTarget();if(v){S.reticle.visible=true;S.reticle.matrix.identity();S.reticle.matrix.setPosition(v);S.currentTarget=v;S.targetSource="virtual";addSample(v);$("aim").className="virtual";$("captureBtn").disabled=S.lineFinished;}else{$("captureBtn").disabled=true;}}
   else{S.reticle.visible=false;S.currentTarget=null;$("captureBtn").disabled=true;$("stage").textContent="Zoek een oppervlak";}
-  enforceLocked();updateMarkerScale();updateLabels();S.renderer.render(S.scene,S.camera);
+  enforceLocked();updateMarkerScale();updatePointLabels();updateLabels();S.renderer.render(S.scene,S.camera);
 }
 window.addEventListener("resize",()=>{S.renderer?.setSize(innerWidth,innerHeight);if(S.camera){S.camera.aspect=innerWidth/innerHeight;S.camera.updateProjectionMatrix();}});

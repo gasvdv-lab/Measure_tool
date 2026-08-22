@@ -7,18 +7,69 @@ export function dispose(obj){
 }
 function marker(color){
   const T=S.THREE,g=new T.Group();
-  const s=new T.Mesh(new T.SphereGeometry(.011,18,12),new T.MeshBasicMaterial({color}));
-  const r=new T.Mesh(new T.RingGeometry(.017,.022,32),new T.MeshBasicMaterial({color,side:T.DoubleSide}));r.rotation.x=-Math.PI/2;
-  g.add(s,r);S.scene.add(g);return g;
+
+  // Permanent point marker: deliberately NOT the same visual language as the moving reticle.
+  const pin=new T.Mesh(
+    new T.SphereGeometry(.014,20,14),
+    new T.MeshBasicMaterial({color})
+  );
+  const halo=new T.Mesh(
+    new T.RingGeometry(.022,.029,36),
+    new T.MeshBasicMaterial({color,side:T.DoubleSide,transparent:true,opacity:.95})
+  );
+  halo.rotation.x=-Math.PI/2;
+
+  const stem=new T.Mesh(
+    new T.CylinderGeometry(.0025,.0025,.045,10),
+    new T.MeshBasicMaterial({color})
+  );
+  stem.position.y=.0225;
+
+  g.add(pin,halo,stem);
+  S.scene.add(g);
+  return g;
 }
 export function createPoint(pos,color=0x69ff9a){
-  const fixed=pos.clone(),p={id:"p"+crypto.randomUUID(),name:pointName(S.pointCounter++),position:fixed.clone(),locked:{x:fixed.x,y:fixed.y,z:fixed.z},marker:marker(color)};
-  p.marker.position.copy(fixed);S.points.push(p);return p;
+  const fixed=pos.clone();
+  const p={
+    id:"p"+crypto.randomUUID(),
+    name:pointName(S.pointCounter++),
+    position:fixed.clone(),
+    locked:Object.freeze({x:fixed.x,y:fixed.y,z:fixed.z}),
+    marker:marker(color),
+    label:makePointLabel(pointName(S.pointCounter-1))
+  };
+  p.marker.position.copy(fixed);
+  S.points.push(p);
+  return p;
 }
 export function enforceLocked(){
-  for(const p of S.points){const q=p.locked;p.position.set(q.x,q.y,q.z);p.marker?.position.set(q.x,q.y,q.z);}
+  for(const p of S.points){
+    const q=p.locked;
+    if(!q)continue;
+
+    // The authoritative position is the immutable snapshot taken at placement time.
+    // Neither reticle movement, constraint previews, zoom nor later hit-tests may alter it.
+    if(
+      p.position.x!==q.x ||
+      p.position.y!==q.y ||
+      p.position.z!==q.z
+    ){
+      p.position.set(q.x,q.y,q.z);
+    }
+    p.marker?.position.set(q.x,q.y,q.z);
+  }
 }
 function makeLabel(text){const el=document.createElement("div");el.className="lineLabel";el.textContent=text;$("lineLabels").appendChild(el);return el;}
+
+function makePointLabel(text){
+  const el=document.createElement("div");
+  el.className="pointLabel";
+  el.textContent=text;
+  $("pointLabels").appendChild(el);
+  return el;
+}
+
 export function createLine(a,b,{undo=true}={}){
   const d=a.position.distanceTo(b.position);if(!Number.isFinite(d)||d<1e-4)throw new Error("Lijn te kort.");
   const T=S.THREE,geo=new T.BufferGeometry().setFromPoints([a.position,b.position]),mat=new T.LineBasicMaterial({color:0xffffff}),obj=new T.Line(geo,mat);S.scene.add(obj);
@@ -29,7 +80,11 @@ export function deleteLineRaw(id){
   const i=S.lines.findIndex(l=>l.id===id);if(i<0)return;const l=S.lines[i];dispose(l.object);l.label?.remove();S.lines.splice(i,1);
 }
 export function deletePointRaw(id){
-  const i=S.points.findIndex(p=>p.id===id);if(i<0)return;dispose(S.points[i].marker);S.points.splice(i,1);
+  const i=S.points.findIndex(p=>p.id===id);if(i<0)return;
+  const p=S.points[i];
+  dispose(p.marker);
+  p.label?.remove();
+  S.points.splice(i,1);
 }
 export function updateLabels(){
   if(!S.renderer||!S.camera)return;
@@ -44,6 +99,23 @@ export function updateLabels(){
     l.label.style.top=(-(pa.y+pb.y)*.25+.5)*h-18+"px";
   }
 }
+
+export function updatePointLabels(){
+  if(!S.renderer||!S.camera)return;
+  const xrCam=S.renderer.xr.getCamera(S.camera),w=innerWidth,h=innerHeight;
+  for(const p of S.points){
+    if(!p.label)continue;
+    const q=p.position.clone().project(xrCam);
+    if(q.z<-1||q.z>1||Math.abs(q.x)>1.2||Math.abs(q.y)>1.2){
+      p.label.style.display="none";
+      continue;
+    }
+    p.label.style.display="block";
+    p.label.style.left=(q.x*.5+.5)*w+"px";
+    p.label.style.top=(-q.y*.5+.5)*h-20+"px";
+  }
+}
+
 export function updateMarkerScale(){
   if(!S.renderer||!S.camera)return;const cam=S.renderer.xr.getCamera(S.camera),p=new S.THREE.Vector3();cam.getWorldPosition(p);
   for(const x of S.points){const d=Math.max(.05,x.position.distanceTo(p));x.marker.scale.setScalar(Math.min(4,Math.max(.55,.48+d*.28)));}
