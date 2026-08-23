@@ -1,8 +1,8 @@
-import {S,getPoint,getLine,getContour} from "./state.js?v=0.8.17-20260823-0005";
+import {S,getPoint,getLine,getContour} from "./state.js?v=0.8.18-20260823-0035";
 import {
   createPoint,createLine,createShape,clearAllGeometry,validateGeometryState
-} from "./geometry.js?v=0.8.17-20260823-0005";
-import {createWall,clearWalls} from "./walls.js?v=0.8.17-20260823-0005";
+} from "./geometry.js?v=0.8.18-20260823-0035";
+import {createWall,createOpening,clearWalls} from "./walls.js?v=0.8.18-20260823-0035";
 
 function vec(v){return v?{x:v.x,y:v.y,z:v.z}:null;}
 function vec3(v){return v?new S.THREE.Vector3(v.x,v.y,v.z):null;}
@@ -13,7 +13,7 @@ function cloneTx(tx){return tx?JSON.parse(JSON.stringify(tx)):tx;}
 export function snapshotProject(){
   return {
     pointCounter:S.pointCounter,contourCounter:S.contourCounter,
-    selected:{line:S.selectedLineId,point:S.selectedPointId,shape:S.selectedShapeId,wall:S.selectedWallId},
+    selected:{line:S.selectedLineId,point:S.selectedPointId,shape:S.selectedShapeId,wall:S.selectedWallId,opening:S.selectedOpeningId},
     wallTool:{...S.wallTool},
     points:S.points.map(p=>({id:p.id,name:p.name,position:vec(p.position),surfaceNormal:vec(p.surfaceNormal)})),
     lines:S.lines.map(l=>({
@@ -28,6 +28,7 @@ export function snapshotProject(){
       id:w.id,name:w.name,lineId:w.lineId,height:w.height,thickness:w.thickness,side:w.side,
       orientation:w.orientation,angle:w.angle,color:w.color,opacity:w.opacity,visible:w.visible!==false
     })),
+    openings:S.openings.map(o=>({id:o.id,name:o.name,wallId:o.wallId,type:o.type,x:o.x,bottom:o.bottom,width:o.width,height:o.height})),
     tool:{
       kind:S.tool.kind,status:S.tool.status,activePointId:S.tool.activePointId,firstPointId:S.tool.firstPointId,
       pointIds:[...S.tool.pointIds],lineIds:[...S.tool.lineIds],transactions:S.tool.transactions.map(cloneTx),
@@ -90,12 +91,17 @@ export function restoreProject(snap){
       const l=getLine(w.lineId);if(!l)throw new Error(`Historie: basislijn van muur ${w.name} ontbreekt.`);
       createWall(l,{...w,id:w.id});
     }
+    for(const o of (snap.openings||[])){
+      const w=S.walls.find(x=>x.id===o.wallId);if(!w)throw new Error(`Historie: muur van opening ${o.name} ontbreekt.`);
+      createOpening(w,{...o,id:o.id});
+    }
 
     S.pointCounter=snap.pointCounter;S.contourCounter=snap.contourCounter;
     S.selectedLineId=getLine(snap.selected.line)?.id||null;
     S.selectedPointId=getPoint(snap.selected.point)?.id||null;
     S.selectedShapeId=S.shapes.find(x=>x.id===snap.selected.shape)?.id||null;
     S.selectedWallId=S.walls.find(x=>x.id===snap.selected.wall)?.id||null;
+    S.selectedOpeningId=S.openings.find(x=>x.id===snap.selected.opening)?.id||null;
 
     if(snap.wallTool)Object.assign(S.wallTool,snap.wallTool);
     const t=snap.tool;

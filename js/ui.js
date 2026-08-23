@@ -1,17 +1,17 @@
-import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.17-20260823-0005";
+import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.18-20260823-0035";
 import {
   startTool,cancelTool,setPlacement,setDistance,setConstraint,setAngle,flipSide,setReferenceLine,setSnapMode,
   confirmCandidate,undoToolStep,finishTool,toolLabel,constraintLabel,getActivePoint,referenceRequired,resetDrawingCore
-} from "./drawing-core.js?v=0.8.17-20260823-0005";
+} from "./drawing-core.js?v=0.8.18-20260823-0035";
 import {
   createShape,updateShape,deleteShapeOnly,deleteShapeWithContour,deleteLineRaw,deletePointRaw,renamePoint,updateLine,analyzeContour,
   lineDependencies,pointDependencies,canDeleteLine,canDeletePoint,clearAllGeometry,validateGeometryState,dispose
-} from "./geometry.js?v=0.8.17-20260823-0005";
-import {startAR,applyZoom} from "./ar.js?v=0.8.17-20260823-0005";
-import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls} from "./walls.js?v=0.8.17-20260823-0005";
-import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.17-20260823-0005";
+} from "./geometry.js?v=0.8.18-20260823-0035";
+import {startAR,applyZoom} from "./ar.js?v=0.8.18-20260823-0035";
+import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.18-20260823-0035";
+import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.18-20260823-0035";
 
-const pages=["home","objects","line","point","walltool","wallcreate","wall","shapecreate","shape","settings","clear"];
+const pages=["home","objects","line","point","walltool","wallcreate","wall","openingcreate","opening","shapecreate","shape","settings","clear"];
 let menuStack=["home"];
 
 const el=id=>$(id);
@@ -39,7 +39,7 @@ function togglePopover(id){
 }
 function showPage(name,push=true){
   pages.forEach(p=>el("page-"+p)?.classList.remove("active"));const page=el("page-"+name);if(!page)throw new Error(`Menupagina ontbreekt: ${name}`);page.classList.add("active");
-  const titles={home:"Measure AR",objects:"Objecten",line:"Lijn",point:"Punt",walltool:"Muur tekenen",wallcreate:"Muur maken",wall:"Muur",shapecreate:"Vorm opslaan",shape:"Vorm",settings:"Instellingen",clear:"Alles wissen"};
+  const titles={home:"Measure AR",objects:"Objecten",line:"Lijn",point:"Punt",walltool:"Muur tekenen",wallcreate:"Muur maken",wall:"Muur",openingcreate:"Opening toevoegen",opening:"Opening",shapecreate:"Vorm opslaan",shape:"Vorm",settings:"Instellingen",clear:"Alles wissen"};
   el("menuTitle").textContent=titles[name]||name;if(push&&menuStack.at(-1)!==name)menuStack.push(name);el("menuBackBtn").style.visibility=name==="home"?"hidden":"visible";if(name==="objects")renderObjects();
 }
 function openMenu(){menuStack=["home"];showPage("home",false);el("menuPanel").classList.add("open");el("menuMeta").textContent=`${S.points.length}p · ${S.lines.length}l · v${S.version}`;closePopovers();}
@@ -130,18 +130,44 @@ function begin(kind,startPointId=null){
   el("hint").textContent=startPointId?`Vertrekpunt ${getPoint(startPointId)?.name} actief. Stel richting/afstand in of richt handmatig.`:"Richt op een oppervlak en bevestig punt A.";
 }
 
+
+function typeLabel(type){return type==="door"?"Deur":type==="window"?"Raam":"Opening";}
+function openWall(id){
+  const w=S.walls.find(x=>x.id===id);if(!w)return;
+  S.selectedWallId=w.id;el("wallInfo").textContent=`${w.name} · hoogte ${w.height.toFixed(2)} m · dikte ${w.thickness.toFixed(2)} m`;
+  el("editWallName").value=w.name;el("editWallHeight").value=w.height;el("editWallThickness").value=w.thickness;
+  el("editWallSide").value=w.side;el("editWallOrientation").value=w.orientation;el("editWallAngle").value=w.angle;
+  el("editWallAngleWrap").style.display=w.orientation==="angle"?"block":"none";el("editWallColor").value=w.color;el("editWallOpacity").value=w.opacity;
+  const openings=openingsForWall(w.id);
+  el("wallOpeningsInfo").textContent=openings.length?`${openings.length} opening(en): ${openings.map(o=>o.name).join(", ")}`:"Geen openingen.";
+  showPage("wall");
+}
+function beginOpening(type){
+  const w=S.walls.find(x=>x.id===S.selectedWallId);if(!w)throw new Error("Geen muur geselecteerd.");
+  const presets=type==="door"?{width:.90,height:2.10,bottom:0}:type==="window"?{width:1.20,height:1.10,bottom:.90}:{width:1,height:1,bottom:.50};
+  el("openingType").value=type;el("openingName").value=nextOpeningName(type);
+  el("openingX").value=.50;el("openingWidth").value=presets.width;el("openingHeight").value=presets.height;el("openingBottom").value=presets.bottom;
+  el("openingCreateInfo").textContent=`In ${w.name} · positie X gemeten vanaf begin van de muur.`;
+  el("openingError").style.display="none";showPage("openingcreate");
+}
+function openOpening(id){
+  const o=getOpening(id);if(!o)return;S.selectedOpeningId=o.id;S.selectedWallId=o.wallId;
+  el("openingInfo").textContent=`${typeLabel(o.type)} in ${S.walls.find(w=>w.id===o.wallId)?.name||"muur"}`;
+  el("editOpeningType").value=o.type;el("editOpeningName").value=o.name;el("editOpeningX").value=o.x;
+  el("editOpeningWidth").value=o.width;el("editOpeningHeight").value=o.height;el("editOpeningBottom").value=o.bottom;
+  showPage("opening");
+}
+
 function renderObjects(){
   const box=el("objectsList");box.innerHTML="";
   if(!S.walls.length&&!S.shapes.length&&!S.lines.length&&!S.points.length){box.innerHTML='<div class="help">Nog geen objecten.</div>';return;}
   if(S.walls.length){box.insertAdjacentHTML("beforeend","<h3>Muren</h3>");for(const w of S.walls){
     const row=document.createElement("div");row.className="objectRow";const open=document.createElement("button");open.className="secondary";open.textContent=`${w.name} · ${w.height.toFixed(2)} m`;
-    const del=document.createElement("button");del.className="danger";del.textContent="Wis";open.onclick=()=>{
-      S.selectedWallId=w.id;el("wallInfo").textContent=`${w.name} · hoogte ${w.height.toFixed(2)} m · dikte ${w.thickness.toFixed(2)} m`;
-      el("editWallName").value=w.name;el("editWallHeight").value=w.height;el("editWallThickness").value=w.thickness;
-      el("editWallSide").value=w.side;el("editWallOrientation").value=w.orientation;el("editWallAngle").value=w.angle;
-      el("editWallAngleWrap").style.display=w.orientation==="angle"?"block":"none";el("editWallColor").value=w.color;el("editWallOpacity").value=w.opacity;
-      showPage("wall");
-    };del.onclick=()=>{runHistoryAction(`Muur ${w.name} verwijderen`,()=>deleteWall(w.id));afterProjectChange(`Muur ${w.name} verwijderd.`);};row.append(open,del);box.append(row);
+    const del=document.createElement("button");del.className="danger";del.textContent="Wis";open.onclick=()=>openWall(w.id);del.onclick=()=>{runHistoryAction(`Muur ${w.name} verwijderen`,()=>deleteWall(w.id));afterProjectChange(`Muur ${w.name} verwijderd.`);};row.append(open,del);box.append(row);
+  }}
+  if(S.openings.length){box.insertAdjacentHTML("beforeend","<h3>Openingen</h3>");for(const o of S.openings){
+    const row=document.createElement("div");row.className="objectRow";const open=document.createElement("button");open.className="secondary";open.textContent=`${o.name} · ${o.width.toFixed(2)} × ${o.height.toFixed(2)} m`;
+    const del=document.createElement("button");del.className="danger";del.textContent="Wis";open.onclick=()=>openOpening(o.id);del.onclick=()=>{runHistoryAction(`${o.name} verwijderen`,()=>deleteOpening(o.id));afterProjectChange(`${o.name} verwijderd.`);};row.append(open,del);box.append(row);
   }}
   if(S.shapes.length){box.insertAdjacentHTML("beforeend","<h3>Vormen</h3>");for(const s of S.shapes){
     const row=document.createElement("div");row.className="objectRow";const open=document.createElement("button");open.className="secondary";open.textContent=`${s.name} · ${s.area.toFixed(2)} m²`;
@@ -255,9 +281,34 @@ export function initUI(){
     const old=p.name;runHistoryAction(`Punt ${old} hernoemen`,()=>renamePoint(p,el("editPointName").value));
     afterProjectChange(`Punt ${p.name} opgeslagen.`);el("pointInfo").textContent=`Punt ${p.name}`;
   });
-  bind("saveWallBtn","click",()=>{
+  
+  bind("addDoorBtn","click",()=>beginOpening("door"));
+  bind("addWindowBtn","click",()=>beginOpening("window"));
+  bind("addOpeningBtn","click",()=>beginOpening("free"));
+  bind("confirmOpeningBtn","click",()=>{
     const w=S.walls.find(x=>x.id===S.selectedWallId);if(!w)throw new Error("Geen muur geselecteerd.");
-    runHistoryAction(`Muur ${w.name} bewerken`,()=>updateWall(w,{name:el("editWallName").value,height:el("editWallHeight").value,thickness:el("editWallThickness").value,side:el("editWallSide").value,orientation:el("editWallOrientation").value,angle:el("editWallAngle").value,color:el("editWallColor").value,opacity:el("editWallOpacity").value}));
+    try{
+      const o=runHistoryAction("Opening aanmaken",()=>createOpening(w,{type:el("openingType").value,name:el("openingName").value,x:el("openingX").value,width:el("openingWidth").value,height:el("openingHeight").value,bottom:el("openingBottom").value}));
+      el("openingError").style.display="none";afterProjectChange(`${o.name} aangemaakt.`);openWall(w.id);
+    }catch(err){el("openingError").style.display="block";el("openingError").textContent=err.message||String(err);throw err;}
+  });
+  bind("cancelOpeningBtn","click",()=>openWall(S.selectedWallId));
+  bind("saveOpeningBtn","click",()=>{
+    const o=getOpening(S.selectedOpeningId);if(!o)throw new Error("Geen opening geselecteerd.");
+    runHistoryAction(`${o.name} bewerken`,()=>updateOpening(o,{type:el("editOpeningType").value,name:el("editOpeningName").value,x:el("editOpeningX").value,width:el("editOpeningWidth").value,height:el("editOpeningHeight").value,bottom:el("editOpeningBottom").value}));
+    afterProjectChange(`${o.name} opgeslagen.`);openOpening(o.id);
+  });
+  bind("deleteOpeningBtn","click",()=>{
+    const o=getOpening(S.selectedOpeningId);if(!o)throw new Error("Geen opening geselecteerd.");const wallId=o.wallId,name=o.name;
+    runHistoryAction(`${name} verwijderen`,()=>deleteOpening(o.id));afterProjectChange(`${name} verwijderd.`);openWall(wallId);
+  });
+bind("saveWallBtn","click",()=>{
+    const w=S.walls.find(x=>x.id===S.selectedWallId);if(!w)throw new Error("Geen muur geselecteerd.");
+    runHistoryAction(`Muur ${w.name} bewerken`,()=>{
+      const newHeight=Number(el("editWallHeight").value);
+      for(const o of openingsForWall(w.id))if(o.bottom+o.height>newHeight+.0005)throw new Error(`Nieuwe muurhoogte is te laag voor ${o.name}.`);
+      return updateWall(w,{name:el("editWallName").value,height:newHeight,thickness:el("editWallThickness").value,side:el("editWallSide").value,orientation:el("editWallOrientation").value,angle:el("editWallAngle").value,color:el("editWallColor").value,opacity:el("editWallOpacity").value});
+    });
     afterProjectChange(`Muur ${w.name} opgeslagen.`);el("wallInfo").textContent=`${w.name} · hoogte ${w.height.toFixed(2)} m · dikte ${w.thickness.toFixed(2)} m`;
   });
   bind("editWallOrientation","change",()=>{el("editWallAngleWrap").style.display=el("editWallOrientation").value==="angle"?"block":"none";});

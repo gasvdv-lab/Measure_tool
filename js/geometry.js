@@ -1,4 +1,4 @@
-import {S,$,fmt,pointName,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.17-20260823-0005";
+import {S,$,fmt,pointName,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.18-20260823-0035";
 
 export function dispose(obj){
   if(!obj||!S.scene)return;
@@ -338,6 +338,14 @@ export function validateGeometryState(){
   }
   for(const w of S.walls){
     if(!lineIds.has(w.lineId))errors.push(`Muur ${w.name||w.id} verwijst naar ontbrekende basislijn.`);
+  }
+  for(const o of S.openings){
+    const w=S.walls.find(x=>x.id===o.wallId);
+    if(!w)errors.push(`Opening ${o.name||o.id} verwijst naar ontbrekende muur.`);
+    else{
+      if(!(o.width>0&&o.height>0))errors.push(`Opening ${o.name||o.id} heeft ongeldige afmetingen.`);
+      if(o.x<0||o.bottom<0||o.bottom+o.height>w.height+.001)errors.push(`Opening ${o.name||o.id} valt buiten de muur.`);
+    }
   }
   return {ok:errors.length===0,errors};
 }
