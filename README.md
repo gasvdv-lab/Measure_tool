@@ -1,47 +1,70 @@
-# Measure AR v0.8.19 — Smart Snapping & Geometrische Intelligentie
-Build: 20260823-0105
+# Measure AR v0.8.20 — Projecten opslaan, herstellen & beheren
+Build: 20260823-0310
 
-## Nieuw in v0.8.19
-- Centrale Smart Snap-volgorde: bestaand punt → snijpunt → middelpunt → projectie op lijn → opening/muur.
-- Exacte bestaande punten hebben hoogste prioriteit.
-- 3D-lijnintersecties worden herkend wanneer segmenten elkaar binnen 2,5 cm werkelijk kruisen.
-- Middelpunten van bestaande lijnen blijven snapbaar.
-- Projectie op een bestaande lijn blijft beschikbaar.
-- Hoeken + middelpunt van deur/raam/vrije opening zijn snapreferenties.
-- Midden van een muursegment is een aanvullende referentie.
-- Alle snaps respecteren de actieve richting/constraint.
-- Exacte afstand blijft exact: metric placement springt alleen naar een bestaand punt binnen 5 mm.
-- Compacte HUD-knop `SNAP ● / SNAP ○` schakelt snappen onmiddellijk uit of terug aan zonder menu.
-- Snapmodus van vóór tijdelijk uitschakelen wordt hersteld.
+## Nieuw in v0.8.20
+- Eerste echte projectlaag met `schemaVersion: 1`.
+- Projecten worden lokaal in Chrome opgeslagen via browseropslag.
+- Meerdere projecten met naam, project-ID, aanmaakdatum en wijzigingsdatum.
+- `Opslaan`, `Opslaan als nieuw project`, `Nieuw project` en `Mijn projecten`.
+- Opgeslagen projecten kunnen worden geopend, hernoemd, gekopieerd en verwijderd.
+- Automatische Recovery State na iedere historie-wijziging.
+- Bij een latere browserstart wordt aangegeven dat hersteldata aanwezig is.
+- Handmatig opslaan wist de Recovery State; nieuwe wijzigingen maken opnieuw hersteldata.
+- Export naar leesbaar `.measurear.json`.
+- Import van `.measurear.json`/JSON met validatie vóór het huidige project wordt vervangen.
+- Ongeldige import laat de bestaande scène intact.
+- Projectstatistieken: punten, lijnen, vormen, muren en openingen.
+- Alleen brondata wordt bewaard. Three.js meshes, camera, preview en XR-runtime worden niet opgeslagen.
+- Bij laden worden punten → lijnen → contouren → vormen → muren → openingen opnieuw opgebouwd.
+- Undo/Redo-history wordt bij het openen van een project opnieuw schoon gestart.
 
-## Automatisch getest na genereren — PASS
+## Belangrijke beperking van v0.8.20
+Projectopslag bewaart de geometrie betrouwbaar, maar WebXR-wereldcoördinaten zijn sessiegebonden. Een project dat een week later wordt geopend, staat daarom nog niet automatisch opnieuw exact op dezelfde fysieke plek. Dat probleem wordt bewust behandeld in v0.8.21 — AR Project Relocalization.
+
+## Automatische tests na genereren — PASS
 - JavaScript-syntax van alle modules.
 - Named imports/exports.
-- Unieke HTML-ID's en bestaande UI-referenties.
+- Geen dubbele HTML-ID's.
+- Alle UI-ID-referenties bestaan.
 - Alle statische knoppen hebben handlers.
-- Snap-prioriteiten punt=0, snijpunt=1, midden=2, lijn=3, opening=4, muur=5.
-- 3D segment-intersectie-engine aanwezig.
-- Opening-snapreferenties aanwezig.
-- Muurreferentie aanwezig.
-- Constraintcontrole wordt op snapkandidaten toegepast.
-- Metric placement behoudt 5-mm exactheidsregel.
-- SNAP HUD-toggle aanwezig en gekoppeld.
+- `project-storage.js` aanwezig en gekoppeld.
+- SchemaVersion 1 aanwezig.
+- Lokale projectindex en individuele projectopslag aanwezig.
+- Autosave/Recovery gekoppeld aan historie-wijzigingen.
+- Handmatig Opslaan en Opslaan als aanwezig.
+- Import en export aanwezig.
+- Import valideert referenties vóór laden.
+- Foute load heeft rollback naar vorige scène.
+- Opslagmodel bevat geen runtime meshes/camera.
+- Projectstatistieken aanwezig.
+- Project- en projectlijstpagina gekoppeld.
+- Schema/JSON roundtriptest PASS.
+- Punt→lijn, lijn→muur en muur→opening referentietests PASS.
 
-## Nieuwe fysieke tests v0.8.19
-- Start nieuwe lijn nabij bestaand punt B: `SNAP ● · punt` en exact B hergebruiken.
-- Richt nabij middelpunt AB: midden moet worden gekozen als geen punt dichterbij is.
-- Richt op binnenzijde AB: projectie moet exact op AB liggen.
-- Maak twee kruisende lijnen en snap op hun snijpunt.
-- Test twee lijnen die in 3D over elkaar heen lopen maar >2,5 cm verschillen: geen vals snijpunt.
-- Snap op vier raamhoeken en raammidden.
-- Snap op deurhoeken.
-- Snap op midden van muursegment.
-- Test snaps met horizontaal, verticaal, parallel en loodrecht actief.
-- Exact 100 cm: snap mag de afstand niet ongemerkt wijzigen.
-- Tik `SNAP ●`: moet `SNAP ○` worden en geen geometrie aantrekken.
-- Tik opnieuw: vorige snapmodus moet terugkomen.
-- Test lijn, polyline, vorm en muur met Smart Snap.
-- Undo/Redo na een segment dat een bestaand snappunt hergebruikt.
+## Nieuwe fysieke/browser-tests v0.8.20
+- Start AR, teken A→B en sla project op.
+- Herlaad browser, start AR en open opgeslagen project: geometrie moet reconstrueren.
+- Project met vorm, muur, deur en raam opslaan en opnieuw laden.
+- Controleer projectstatistieken vóór en na laden.
+- Maak twee afzonderlijke projecten en wissel tussen beide.
+- Project hernoemen.
+- Project dupliceren.
+- Project verwijderen.
+- `Opslaan als nieuw project`: origineel moet intact blijven.
+- Teken zonder handmatig opslaan, herlaad Chrome en controleer Recovery-melding.
+- Open Recovery State na starten van AR.
+- Handmatig opslaan → recovery moet verdwijnen.
+- Nieuwe wijziging → recovery moet opnieuw verschijnen.
+- Export `.measurear.json`.
+- Importeer hetzelfde bestand en vergelijk alle objecten/maten.
+- Importeer bewust beschadigde JSON: huidige project mag niet verdwijnen.
+- Alles wissen → autosave/recovery → Undo testen.
+- Undo/Redo na projectload: history hoort schoon te starten.
+- Chrome naar achtergrond en terug: recovery mag niet beschadigen.
+- Project met minstens 50 punten en meerdere muren/openingen opslaan/herladen.
+
+## Gepland — v0.8.21 AR Project Relocalization
+Doel: een opgeslagen project dagen/weken later opnieuw op dezelfde reële locatie en oriëntatie kunnen plaatsen. Daarvoor wordt een nieuw AR-coördinatenstelsel gekoppeld aan het opgeslagen project via referentiepunten/referentielijn en waar zinvol locatie-informatie. GPS alleen wordt niet als centimeter-nauwkeurig anker behandeld.
 
 ## Gepland — uitgebreide functie Meten
 De huidige meetfunctie is nog niet de definitieve meetmodule en wordt later aanzienlijk uitgebreid. Minstens voorzien:
@@ -52,13 +75,9 @@ De huidige meetfunctie is nog niet de definitieve meetmodule en wordt later aanz
 - hoogteverschil;
 - hoek en helling;
 - oppervlakte en omtrek;
-- koppeling aan de Smart Snap-engine, referentielijnen en tekenvlakken;
+- koppeling aan Smart Snap, referentielijnen, tekenvlakken en opgeslagen projecten;
 - aanvullende meetfuncties die tijdens verdere ontwikkeling worden bepaald.
 Deze roadmapsectie blijft in iedere volgende README staan.
-
-## Volgende ontwikkelrichting
-- v0.8.20: projecten persistent opslaan en herladen.
-- Daarna keuze tussen verdere constructie-objecten en de grote uitbreiding van Meten.
 
 ## Nog fysiek te testen — cumulatief
 Deze tests vereisen echte WebXR/ARCore en blijven open.
@@ -125,7 +144,7 @@ Deze tests vereisen echte WebXR/ARCore en blijven open.
 - Ref-chip.
 - Zijde/Richting-chip.
 
-### Objectbeheer — nieuw voor v0.8.19
+### Objectbeheer — nieuw voor v0.8.20
 - Punt hernoemen en label controleren.
 - Automatische lijnnaam verandert mee na punt-hernoeming.
 - Lijn handmatig hernoemen en daarna punt hernoemen: custom lijnnaam moet blijven.
@@ -140,7 +159,7 @@ Deze tests vereisen echte WebXR/ARCore en blijven open.
 - Muurhoek wijzigen.
 - Objectbeheer mag tracking niet verstoren.
 
-### Undo/Redo — nieuw voor v0.8.19
+### Undo/Redo — nieuw voor v0.8.20
 - Punt plaatsen → Undo → Redo.
 - Lijn A→B → Undo → Redo.
 - Polyline meerdere stappen achteruit en opnieuw vooruit.
@@ -197,3 +216,9 @@ Upload de volledige inhoud van deze ZIP naar GitHub.
 
 Vaste app-link:
 https://gasvdv-lab.github.io/Measure_tool/
+
+
+Vaste app-link:
+https://gasvdv-lab.github.io/Measure_tool/
+
+Upload de volledige inhoud van deze ZIP naar GitHub. `js/project-storage.js` is nieuw en moet mee.

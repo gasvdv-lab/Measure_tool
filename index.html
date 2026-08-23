@@ -4,15 +4,16 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#111111">
-  <title>Measure AR v0.8.19</title>
-  <link rel="stylesheet" href="./css/app.css?v=0.8.19-20260823-0105">
+  <title>Measure AR v0.8.20</title>
+  <link rel="stylesheet" href="./css/app.css?v=0.8.20-20260823-0310">
 </head>
 <body>
 <div id="app">
   <main class="startCard directFallback">
     <div class="logo">⌖</div><h1>Measure AR</h1>
     <p id="launchStatus">Tik om AR te starten.</p>
-    <div id="buildInfo" class="build">v0.8.19 · stability build 20260823-0105</div>
+    <div id="startupRecovery" class="help" style="display:none"></div>
+    <div id="buildInfo" class="build">v0.8.20 · stability build 20260823-0310</div>
     <button id="startArBtn" class="primary">AR starten</button>
     <div id="error" class="error"></div>
   </main>
@@ -32,7 +33,7 @@
   <aside id="menuPanel">
     <div class="menuHead">
       <button id="menuBackBtn" class="secondary">‹</button>
-      <div><strong id="menuTitle">Measure AR</strong><small id="menuMeta">v0.8.19</small></div>
+      <div><strong id="menuTitle">Measure AR</strong><small id="menuMeta">v0.8.20</small></div>
       <button id="menuCloseBtn" class="secondary">✕</button>
     </div>
     <div class="menuBody">
@@ -46,13 +47,44 @@
           <button id="quickWallBtn">Muur <small>A → B → C → … rechtstreeks muren tekenen</small></button>
         </div>
         <h3>Project</h3>
-        <div class="menuCard navList"><button data-page="objects">Objecten <small>vormen, muren, lijnen en punten</small></button></div>
+        <div class="menuCard navList">
+      <button data-page="project">Project beheren <small>opslaan, openen, exporteren en herstel</small></button>
+      <button data-page="objects">Objecten <small>vormen, muren, lijnen en punten</small></button>
+    </div>
         <h3>Bewerken</h3>
         <div class="menuCard editHistory">
   <div class="grid2"><button id="globalUndoBtn" class="secondary">↶ Ongedaan</button><button id="globalRedoBtn" class="secondary">↷ Opnieuw</button></div>
   <div id="historyInfo" class="help">Geen bewerkingen in historie.</div>
   <button id="clearAllBtn" class="danger">Alles wissen</button>
 </div>
+      </section>
+
+
+      <section id="page-project" class="page">
+        <h3>Project</h3>
+        <div class="menuCard">
+          <label>Projectnaam<input id="projectName" maxlength="80" value="Nieuw project"></label>
+          <div id="projectStats" class="help">0 punten · 0 lijnen</div>
+          <div id="projectSaveState" class="help">Nog niet opgeslagen.</div>
+          <button id="saveProjectBtn" class="primary">Opslaan</button>
+          <button id="saveProjectAsBtn" class="secondary">Opslaan als nieuw project</button>
+          <button id="newProjectBtn" class="secondary">Nieuw leeg project</button>
+          <button id="projectListBtn" class="secondary">Mijn projecten</button>
+          <button id="exportProjectBtn" class="secondary">Projectbestand exporteren</button>
+          <button id="importProjectBtn" class="secondary">Projectbestand importeren</button>
+          <input id="importProjectFile" type="file" accept=".json,.measurear.json,application/json" hidden>
+          <div id="recoveryBox" class="recoveryBox">
+            <strong>Herstel</strong>
+            <div id="recoveryInfo" class="help">Geen hersteldata.</div>
+            <button id="restoreRecoveryBtn" class="secondary">Herstelproject openen</button>
+            <button id="discardRecoveryBtn" class="danger">Hersteldata verwijderen</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="page-projects" class="page">
+        <h3>Mijn projecten</h3>
+        <div id="projectsList" class="menuCard"></div>
       </section>
 
       <section id="page-objects" class="page"><h3>Objecten</h3><div id="objectsList" class="menuCard"></div></section>
@@ -284,6 +316,6 @@
   <div id="hint">Open ☰ en kies wat je wilt tekenen.</div>
 </div>
 
-<script type="module" src="./js/bootstrap.js?v=0.8.19-20260823-0105"></script>
+<script type="module" src="./js/bootstrap.js?v=0.8.20-20260823-0310"></script>
 </body>
 </html>
