@@ -1,15 +1,15 @@
-import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.18-20260823-0035";
+import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.19-20260823-0105";
 import {
   startTool,cancelTool,setPlacement,setDistance,setConstraint,setAngle,flipSide,setReferenceLine,setSnapMode,
   confirmCandidate,undoToolStep,finishTool,toolLabel,constraintLabel,getActivePoint,referenceRequired,resetDrawingCore
-} from "./drawing-core.js?v=0.8.18-20260823-0035";
+} from "./drawing-core.js?v=0.8.19-20260823-0105";
 import {
   createShape,updateShape,deleteShapeOnly,deleteShapeWithContour,deleteLineRaw,deletePointRaw,renamePoint,updateLine,analyzeContour,
   lineDependencies,pointDependencies,canDeleteLine,canDeletePoint,clearAllGeometry,validateGeometryState,dispose
-} from "./geometry.js?v=0.8.18-20260823-0035";
-import {startAR,applyZoom} from "./ar.js?v=0.8.18-20260823-0035";
-import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.18-20260823-0035";
-import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.18-20260823-0035";
+} from "./geometry.js?v=0.8.19-20260823-0105";
+import {startAR,applyZoom} from "./ar.js?v=0.8.19-20260823-0105";
+import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.19-20260823-0105";
+import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.19-20260823-0105";
 
 const pages=["home","objects","line","point","walltool","wallcreate","wall","openingcreate","opening","shapecreate","shape","settings","clear"];
 let menuStack=["home"];
@@ -92,7 +92,8 @@ function syncHudStatus(){
   const c=S.tool.candidate;
   const snapVisible=Boolean(c?.valid&&c.snapType);
   el("hudSnapChip").classList.toggle("optional",!snapVisible);
-  el("hudSnapChip").textContent=snapVisible?`Snap: ${c.snapType==="point"?"punt":c.snapType==="midpoint"?"midden":"lijn"}`:"Snap: —";
+  const names={point:"punt",intersection:"snijpunt",midpoint:"midden",line:"lijn",opening:"opening",wall:"muur"};
+  el("hudSnapChip").textContent=S.tool.snapMode==="off"?"SNAP ○":snapVisible?`SNAP ● · ${names[c.snapType]||c.snapType}`:"SNAP ●";
 }
 function syncCandidateContext(){
   if(!S.tool.kind||!el("hudContext"))return;
@@ -239,6 +240,11 @@ export function initUI(){
   });
   bind("hudAutoBtn","click",()=>{setPlacement("manual");closePopovers();syncHud();showStatus("AUTO actief: camera bepaalt het volgende punt.");});
   bind("hudUseDistanceBtn","click",()=>{setDistance(el("hudDistance").value,el("hudUnit").value);setPlacement("metric");closePopovers();syncHud();showStatus("Exacte afstand ingesteld. Bevestig met de witte ronde knop.");});
+  bind("hudSnapChip","click",()=>{
+    if(S.tool.snapMode==="off"){setSnapMode(S.hud.previousSnapMode||"smart");el("hudSnap").value=S.tool.snapMode;showStatus("Snappen ingeschakeld.");}
+    else{S.hud.previousSnapMode=S.tool.snapMode;setSnapMode("off");el("hudSnap").value="off";showStatus("Snappen tijdelijk uitgeschakeld.");}
+    syncHud();
+  });
   bind("hudSnap","change",()=>{
     setSnapMode(el("hudSnap").value);
     const labels={

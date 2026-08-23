@@ -1,7 +1,7 @@
-import {S,$,fmt,getPoint,getLine} from "./state.js?v=0.8.18-20260823-0035";
-import {createPoint,createLine,deleteLineRaw,deletePointRaw,createContour,dispose,analyzeShapePoints} from "./geometry.js?v=0.8.18-20260823-0035";
-import {snapshotProject,commitSnapshot,undoHistory} from "./history.js?v=0.8.18-20260823-0035";
-import {createWall,nextWallName} from "./walls.js?v=0.8.18-20260823-0035";
+import {S,$,fmt,getPoint,getLine} from "./state.js?v=0.8.19-20260823-0105";
+import {createPoint,createLine,deleteLineRaw,deletePointRaw,createContour,dispose,analyzeShapePoints} from "./geometry.js?v=0.8.19-20260823-0105";
+import {snapshotProject,commitSnapshot,undoHistory} from "./history.js?v=0.8.19-20260823-0105";
+import {createWall,nextWallName} from "./walls.js?v=0.8.19-20260823-0105";
 
 const REF_MODES=new Set(["parallel","perpendicular","angle"]);
 const TOOL_NAMES={line:"LIJN",polyline:"POLYLIJN",shape:"VORM",stake:"UITZETTEN",wall:"MUUR"};
@@ -169,43 +169,69 @@ function closestPointOnSegment(pos,a,b){
   return a.clone().add(ab.multiplyScalar(t));
 }
 
+
+function closestPointsOnSegments3D(a0,a1,b0,b1){
+  const T=S.THREE,u=a1.clone().sub(a0),v=b1.clone().sub(b0),w=a0.clone().sub(b0);
+  const A=u.dot(u),B=u.dot(v),C=v.dot(v),D=u.dot(w),E=v.dot(w),den=A*C-B*B;
+  if(A<1e-12||C<1e-12)return null;
+  let s=den<1e-10?0:(B*E-C*D)/den,t=den<1e-10?E/C:(A*E-B*D)/den;
+  s=Math.max(0,Math.min(1,s));t=Math.max(0,Math.min(1,t));
+  const p=a0.clone().add(u.multiplyScalar(s)),q=b0.clone().add(v.multiplyScalar(t));
+  return {p,q,s,t,distance:p.distanceTo(q),mid:p.clone().add(q).multiplyScalar(.5)};
+}
+function lineIntersections(pos,active,tol){
+  const out=[];
+  for(let i=0;i<S.lines.length;i++)for(let j=i+1;j<S.lines.length;j++){
+    const l1=S.lines[i],l2=S.lines[j];
+    if(l1.startId===l2.startId||l1.startId===l2.endId||l1.endId===l2.startId||l1.endId===l2.endId)continue;
+    const a=getPoint(l1.startId),b=getPoint(l1.endId),c=getPoint(l2.startId),d=getPoint(l2.endId);if(!a||!b||!c||!d)continue;
+    const hit=closestPointsOnSegments3D(a.position,b.position,c.position,d.position);if(!hit||hit.distance>.025||hit.mid.distanceTo(pos)>tol)continue;
+    if(!positionSatisfiesConstraint(hit.mid,active))continue;
+    out.push({type:"intersection",priority:1,distance:hit.mid.distanceTo(pos),position:hit.mid,lineId:l1.id,pointId:null,label:`Snijpunt ${l1.name} × ${l2.name}`});
+  }
+  return out;
+}
+function openingSnapOptions(pos,active,tol){
+  const out=[];
+  for(const o of S.openings){
+    const wall=S.walls.find(w=>w.id===o.wallId);if(!wall?.localFrame)continue;
+    const f=wall.localFrame,pts=[
+      [o.x,o.bottom,"linksonder"],[o.x+o.width,o.bottom,"rechtsonder"],
+      [o.x,o.bottom+o.height,"linksboven"],[o.x+o.width,o.bottom+o.height,"rechtsboven"],
+      [o.x+o.width/2,o.bottom+o.height/2,"midden"]
+    ];
+    for(const [x,y,label] of pts){
+      const q=f.start.clone().add(f.x.clone().multiplyScalar(x)).add(f.y.clone().multiplyScalar(y)).add(f.z.clone().multiplyScalar(f.sideOffset||0));
+      const d=q.distanceTo(pos);if(d<=tol&&positionSatisfiesConstraint(q,active))out.push({type:"opening",priority:4,distance:d,position:q,lineId:wall.lineId,pointId:null,label:`${o.name} · ${label}`});
+    }
+  }
+  return out;
+}
+function wallSnapOptions(pos,active,tol){
+  const out=[];
+  for(const w of S.walls){
+    const l=getLine(w.lineId);if(!l)continue;const a=getPoint(l.startId),b=getPoint(l.endId);if(!a||!b)continue;
+    const mid=a.position.clone().add(b.position).multiplyScalar(.5),d=mid.distanceTo(pos);
+    if(d<=tol&&positionSatisfiesConstraint(mid,active))out.push({type:"wall",priority:5,distance:d,position:mid,lineId:l.id,pointId:null,label:`Midden muur ${w.name}`});
+  }
+  return out;
+}
 function candidateSnapOptions(pos,active){
-  const options=[];
-  const pointTol=S.tool.snapTolerance||.08;
-  const lineTol=S.tool.snapLineTolerance||.06;
-
-  if(["smart","points"].includes(S.tool.snapMode)){
-    for(const p of S.points){
-      if(active&&p.id===active.id)continue;
-      const dist=p.position.distanceTo(pos);
-      if(dist<=pointTol&&positionSatisfiesConstraint(p.position,active)){
-        options.push({type:"point",priority:0,distance:dist,position:p.position.clone(),pointId:p.id,lineId:null,label:`Punt ${p.name}`});
-      }
-    }
+  const options=[],pointTol=S.tool.snapTolerance||.08,lineTol=S.tool.snapLineTolerance||.06;
+  if(["smart","points"].includes(S.tool.snapMode))for(const p of S.points){
+    if(active&&p.id===active.id)continue;const dist=p.position.distanceTo(pos);
+    if(dist<=pointTol&&positionSatisfiesConstraint(p.position,active))options.push({type:"point",priority:0,distance:dist,position:p.position.clone(),pointId:p.id,lineId:null,label:`Punt ${p.name}`});
   }
-
-  if(["smart","midpoints"].includes(S.tool.snapMode)){
-    for(const l of S.lines){
-      const a=getPoint(l.startId),b=getPoint(l.endId);if(!a||!b)continue;
-      const mid=a.position.clone().add(b.position).multiplyScalar(.5);
-      const dist=mid.distanceTo(pos);
-      if(dist<=pointTol&&positionSatisfiesConstraint(mid,active)){
-        options.push({type:"midpoint",priority:1,distance:dist,position:mid,lineId:l.id,pointId:null,label:`Midden ${l.name}`});
-      }
-    }
+  if(S.tool.snapMode==="smart")options.push(...lineIntersections(pos,active,S.tool.snapIntersectionTolerance||.08));
+  if(["smart","midpoints"].includes(S.tool.snapMode))for(const l of S.lines){
+    const a=getPoint(l.startId),b=getPoint(l.endId);if(!a||!b)continue;const mid=a.position.clone().add(b.position).multiplyScalar(.5),dist=mid.distanceTo(pos);
+    if(dist<=pointTol&&positionSatisfiesConstraint(mid,active))options.push({type:"midpoint",priority:2,distance:dist,position:mid,lineId:l.id,pointId:null,label:`Midden ${l.name}`});
   }
-
-  if(["smart","lines"].includes(S.tool.snapMode)){
-    for(const l of S.lines){
-      const a=getPoint(l.startId),b=getPoint(l.endId);if(!a||!b)continue;
-      const q=closestPointOnSegment(pos,a.position,b.position);
-      const dist=q.distanceTo(pos);
-      if(dist<=lineTol&&positionSatisfiesConstraint(q,active)){
-        options.push({type:"line",priority:2,distance:dist,position:q,lineId:l.id,pointId:null,label:`Lijn ${l.name}`});
-      }
-    }
+  if(["smart","lines"].includes(S.tool.snapMode))for(const l of S.lines){
+    const a=getPoint(l.startId),b=getPoint(l.endId);if(!a||!b)continue;const q=closestPointOnSegment(pos,a.position,b.position),dist=q.distanceTo(pos);
+    if(dist<=lineTol&&positionSatisfiesConstraint(q,active))options.push({type:"line",priority:3,distance:dist,position:q,lineId:l.id,pointId:null,label:`Op ${l.name}`});
   }
-
+  if(S.tool.snapMode==="smart"){options.push(...openingSnapOptions(pos,active,S.tool.snapOpeningTolerance||.07));options.push(...wallSnapOptions(pos,active,pointTol));}
   return options.sort((x,y)=>x.priority-y.priority||x.distance-y.distance);
 }
 
