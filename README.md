@@ -1,25 +1,27 @@
-# Measure AR v0.8.20 — Projecten opslaan, herstellen & beheren
-Build: 20260823-0310
+# Measure AR v0.8.21 — AR Project Relocalization
+Build: 20260823-0345
 
-## Nieuw in v0.8.20
-- Eerste echte projectlaag met `schemaVersion: 1`.
-- Projecten worden lokaal in Chrome opgeslagen via browseropslag.
-- Meerdere projecten met naam, project-ID, aanmaakdatum en wijzigingsdatum.
-- `Opslaan`, `Opslaan als nieuw project`, `Nieuw project` en `Mijn projecten`.
-- Opgeslagen projecten kunnen worden geopend, hernoemd, gekopieerd en verwijderd.
-- Automatische Recovery State na iedere historie-wijziging.
-- Bij een latere browserstart wordt aangegeven dat hersteldata aanwezig is.
-- Handmatig opslaan wist de Recovery State; nieuwe wijzigingen maken opnieuw hersteldata.
-- Export naar leesbaar `.measurear.json`.
-- Import van `.measurear.json`/JSON met validatie vóór het huidige project wordt vervangen.
-- Ongeldige import laat de bestaande scène intact.
-- Projectstatistieken: punten, lijnen, vormen, muren en openingen.
-- Alleen brondata wordt bewaard. Three.js meshes, camera, preview en XR-runtime worden niet opgeslagen.
-- Bij laden worden punten → lijnen → contouren → vormen → muren → openingen opnieuw opgebouwd.
-- Undo/Redo-history wordt bij het openen van een project opnieuw schoon gestart.
+## Doel
+Een opgeslagen project later opnieuw aan de echte fysieke omgeving koppelen. Omdat WebXR-sessies een nieuw lokaal coördinatenstelsel krijgen, gebruikt v0.8.21 een combinatie van opgeslagen locatie-informatie en door de gebruiker gekozen referentiepunten.
 
-## Belangrijke beperking van v0.8.20
-Projectopslag bewaart de geometrie betrouwbaar, maar WebXR-wereldcoördinaten zijn sessiegebonden. Een project dat een week later wordt geopend, staat daarom nog niet automatisch opnieuw exact op dezelfde fysieke plek. Dat probleem wordt bewust behandeld in v0.8.21 — AR Project Relocalization.
+## Nieuw in v0.8.21
+- Gebruiker kiest zelf 0, 1, 2, 3 of 4+ referentiepunten.
+- 0 punten = automatisch/grof; bedoeld als locatiehulp, niet als centimeteranker.
+- 1 punt = snelle translatiecorrectie.
+- 2 punten = positie + richting.
+- 3 punten = volledige 3D-basis uit drie niet-collineaire punten.
+- 4+ punten = best-fit rigid transform met redundante controle.
+- Referentiepunten zijn bestaande Measure AR-punten met naam en beschrijving.
+- GPS-locatie kan per project worden opgeslagen met browser high-accuracy geolocation en accuracy metadata.
+- Referentiepunten en geo-info worden mee opgeslagen in `.measurear.json` en lokale projectopslag.
+- Heruitlijning toont gemiddelde, maximale en RMS-afwijking.
+- Kwaliteitslabels: zeer goed / goed / matig / zwak.
+- Volledige projectgeometrie wordt als één rigid transform verplaatst; onderlinge maten blijven behouden.
+- Na toepassing worden afgeleide meshes opnieuw uit brondata opgebouwd.
+- Projectreferenties worden bij import gevalideerd op bestaande punt-ID's.
+
+## Belangrijke beperking
+0 referentiepunten geeft in deze webapp geen echte Google VPS/Geospatial centimeterpositionering. Chrome/WebXR exposeert die ARCore Geospatial-functionaliteit momenteel niet rechtstreeks. GPS wordt daarom gebruikt als grove locatiehulp. Voor betrouwbare lokale uitlijning zijn 2, 3 of meer fysieke referenties de aanbevolen methode.
 
 ## Automatische tests na genereren — PASS
 - JavaScript-syntax van alle modules.
@@ -27,44 +29,41 @@ Projectopslag bewaart de geometrie betrouwbaar, maar WebXR-wereldcoördinaten zi
 - Geen dubbele HTML-ID's.
 - Alle UI-ID-referenties bestaan.
 - Alle statische knoppen hebben handlers.
-- `project-storage.js` aanwezig en gekoppeld.
-- SchemaVersion 1 aanwezig.
-- Lokale projectindex en individuele projectopslag aanwezig.
-- Autosave/Recovery gekoppeld aan historie-wijzigingen.
-- Handmatig Opslaan en Opslaan als aanwezig.
-- Import en export aanwezig.
-- Import valideert referenties vóór laden.
-- Foute load heeft rollback naar vorige scène.
-- Opslagmodel bevat geen runtime meshes/camera.
-- Projectstatistieken aanwezig.
-- Project- en projectlijstpagina gekoppeld.
-- Schema/JSON roundtriptest PASS.
-- Punt→lijn, lijn→muur en muur→opening referentietests PASS.
+- `relocalization.js` aanwezig.
+- Modi 0/1/2/3/4+ aanwezig.
+- 1-punts solver aanwezig.
+- 2-punts solver aanwezig.
+- 3-punts solver aanwezig.
+- 4+ best-fit solver aanwezig.
+- Residual/kwaliteitberekening aanwezig.
+- Browser geolocation-provider aanwezig.
+- Referenties + geo worden persistent opgeslagen.
+- Projectimport valideert referentiepunt-ID's.
+- Referentiebeheer- en heruitlijnpagina gekoppeld.
+- Pure regressietest translatie-invariant PASS.
+- Afstanden blijven onder rigid translation identiek.
+- Centroidtranslatie PASS.
+- Niet-collineariteitstest voor 3-puntsbasis PASS.
 
-## Nieuwe fysieke/browser-tests v0.8.20
-- Start AR, teken A→B en sla project op.
-- Herlaad browser, start AR en open opgeslagen project: geometrie moet reconstrueren.
-- Project met vorm, muur, deur en raam opslaan en opnieuw laden.
-- Controleer projectstatistieken vóór en na laden.
-- Maak twee afzonderlijke projecten en wissel tussen beide.
-- Project hernoemen.
-- Project dupliceren.
-- Project verwijderen.
-- `Opslaan als nieuw project`: origineel moet intact blijven.
-- Teken zonder handmatig opslaan, herlaad Chrome en controleer Recovery-melding.
-- Open Recovery State na starten van AR.
-- Handmatig opslaan → recovery moet verdwijnen.
-- Nieuwe wijziging → recovery moet opnieuw verschijnen.
-- Export `.measurear.json`.
-- Importeer hetzelfde bestand en vergelijk alle objecten/maten.
-- Importeer bewust beschadigde JSON: huidige project mag niet verdwijnen.
-- Alles wissen → autosave/recovery → Undo testen.
-- Undo/Redo na projectload: history hoort schoon te starten.
-- Chrome naar achtergrond en terug: recovery mag niet beschadigen.
-- Project met minstens 50 punten en meerdere muren/openingen opslaan/herladen.
-
-## Gepland — v0.8.21 AR Project Relocalization
-Doel: een opgeslagen project dagen/weken later opnieuw op dezelfde reële locatie en oriëntatie kunnen plaatsen. Daarvoor wordt een nieuw AR-coördinatenstelsel gekoppeld aan het opgeslagen project via referentiepunten/referentielijn en waar zinvol locatie-informatie. GPS alleen wordt niet als centimeter-nauwkeurig anker behandeld.
+## Nieuwe fysieke tests v0.8.21
+- Sla project op met GPS-locatie; controleer accuracy-weergave.
+- Maak 1 projectreferentie uit bestaand punt A.
+- Maak 2 referenties A/B en registreer hun echte herkenbare locaties.
+- Maak 3 niet-collineaire referenties.
+- Maak 4+ referenties.
+- Sluit AR volledig en start een nieuwe sessie.
+- Open project opnieuw.
+- 1 punt: wijs A opnieuw aan en controleer translatie.
+- 2 punten: wijs A/B opnieuw aan; controleer positie én richting.
+- 3 punten: wijs A/B/C opnieuw aan; controleer volledige 3D-uitlijning.
+- 4+ punten: controleer best-fit en residuals per set.
+- Wijs expres één verkeerd referentiepunt aan en controleer dat max/mean fout verslechtert.
+- Controleer dat alle afstanden in project vóór/na uitlijning identiek blijven.
+- Controleer muren, vormen en openingen na transform.
+- Undo/Redo en project save na heruitlijning.
+- Exporteer project met referenties en importeer opnieuw.
+- GPS zonder referenties: controleer dat app geen centimeterprecisie claimt.
+- Test project een dag/week later opnieuw op dezelfde locatie.
 
 ## Gepland — uitgebreide functie Meten
 De huidige meetfunctie is nog niet de definitieve meetmodule en wordt later aanzienlijk uitgebreid. Minstens voorzien:
@@ -75,7 +74,7 @@ De huidige meetfunctie is nog niet de definitieve meetmodule en wordt later aanz
 - hoogteverschil;
 - hoek en helling;
 - oppervlakte en omtrek;
-- koppeling aan Smart Snap, referentielijnen, tekenvlakken en opgeslagen projecten;
+- koppeling aan Smart Snap, referentielijnen, tekenvlakken, projectopslag en herlokalisatie;
 - aanvullende meetfuncties die tijdens verdere ontwikkeling worden bepaald.
 Deze roadmapsectie blijft in iedere volgende README staan.
 
@@ -144,7 +143,7 @@ Deze tests vereisen echte WebXR/ARCore en blijven open.
 - Ref-chip.
 - Zijde/Richting-chip.
 
-### Objectbeheer — nieuw voor v0.8.20
+### Objectbeheer — nieuw voor v0.8.21
 - Punt hernoemen en label controleren.
 - Automatische lijnnaam verandert mee na punt-hernoeming.
 - Lijn handmatig hernoemen en daarna punt hernoemen: custom lijnnaam moet blijven.
@@ -159,7 +158,7 @@ Deze tests vereisen echte WebXR/ARCore en blijven open.
 - Muurhoek wijzigen.
 - Objectbeheer mag tracking niet verstoren.
 
-### Undo/Redo — nieuw voor v0.8.20
+### Undo/Redo — nieuw voor v0.8.21
 - Punt plaatsen → Undo → Redo.
 - Lijn A→B → Undo → Redo.
 - Polyline meerdere stappen achteruit en opnieuw vooruit.
@@ -222,3 +221,9 @@ Vaste app-link:
 https://gasvdv-lab.github.io/Measure_tool/
 
 Upload de volledige inhoud van deze ZIP naar GitHub. `js/project-storage.js` is nieuw en moet mee.
+
+
+Vaste app-link:
+https://gasvdv-lab.github.io/Measure_tool/
+
+Upload de volledige inhoud van deze ZIP naar GitHub. `js/relocalization.js` is nieuw en moet mee.

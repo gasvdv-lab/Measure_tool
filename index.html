@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#111111">
-  <title>Measure AR v0.8.20</title>
-  <link rel="stylesheet" href="./css/app.css?v=0.8.20-20260823-0310">
+  <title>Measure AR v0.8.21</title>
+  <link rel="stylesheet" href="./css/app.css?v=0.8.21-20260823-0345">
 </head>
 <body>
 <div id="app">
@@ -13,7 +13,7 @@
     <div class="logo">⌖</div><h1>Measure AR</h1>
     <p id="launchStatus">Tik om AR te starten.</p>
     <div id="startupRecovery" class="help" style="display:none"></div>
-    <div id="buildInfo" class="build">v0.8.20 · stability build 20260823-0310</div>
+    <div id="buildInfo" class="build">v0.8.21 · stability build 20260823-0345</div>
     <button id="startArBtn" class="primary">AR starten</button>
     <div id="error" class="error"></div>
   </main>
@@ -33,7 +33,7 @@
   <aside id="menuPanel">
     <div class="menuHead">
       <button id="menuBackBtn" class="secondary">‹</button>
-      <div><strong id="menuTitle">Measure AR</strong><small id="menuMeta">v0.8.20</small></div>
+      <div><strong id="menuTitle">Measure AR</strong><small id="menuMeta">v0.8.21</small></div>
       <button id="menuCloseBtn" class="secondary">✕</button>
     </div>
     <div class="menuBody">
@@ -70,6 +70,9 @@
           <button id="saveProjectAsBtn" class="secondary">Opslaan als nieuw project</button>
           <button id="newProjectBtn" class="secondary">Nieuw leeg project</button>
           <button id="projectListBtn" class="secondary">Mijn projecten</button>
+          <button id="projectLocationBtn" class="secondary">Project op locatie plaatsen</button>
+          <button id="referenceManagerBtn" class="secondary">Referentiepunten beheren</button>
+          <button id="captureGeoBtn" class="secondary">GPS-locatie opslaan</button>
           <button id="exportProjectBtn" class="secondary">Projectbestand exporteren</button>
           <button id="importProjectBtn" class="secondary">Projectbestand importeren</button>
           <input id="importProjectFile" type="file" accept=".json,.measurear.json,application/json" hidden>
@@ -79,6 +82,38 @@
             <button id="restoreRecoveryBtn" class="secondary">Herstelproject openen</button>
             <button id="discardRecoveryBtn" class="danger">Hersteldata verwijderen</button>
           </div>
+        </div>
+      </section>
+
+
+      <section id="page-references" class="page">
+        <h3>Projectreferenties</h3><div class="menuCard">
+          <div class="help">Kies bestaande projectpunten die je later fysiek opnieuw kunt aanwijzen.</div>
+          <label>Punt<select id="referencePointSelect"></select></label>
+          <label>Naam<input id="referenceName" maxlength="40" placeholder="bv. Hoek platform links"></label>
+          <label>Beschrijving<input id="referenceDescription" maxlength="100" placeholder="optioneel"></label>
+          <button id="addReferenceBtn" class="primary">Referentie toevoegen</button>
+          <div id="referenceList"></div>
+        </div>
+      </section>
+
+      <section id="page-relocalize" class="page">
+        <h3>Project op locatie plaatsen</h3><div class="menuCard">
+          <div id="relocalizeGeoInfo" class="help">GPS: —</div>
+          <label>Methode<select id="relocalizeMode">
+            <option value="auto">0 punten · automatisch/grof</option>
+            <option value="1">1 punt · snel</option>
+            <option value="2" selected>2 punten · standaard</option>
+            <option value="3">3 punten · nauwkeurig</option>
+            <option value="precision">4+ punten · precisie/best fit</option>
+          </select></label>
+          <div id="relocalizeHelp" class="help"></div>
+          <div id="relocalizeRefs"></div>
+          <button id="startRelocalizeBtn" class="primary">Heruitlijning starten</button>
+          <button id="solveRelocalizeBtn" class="secondary">Uitlijning berekenen</button>
+          <div id="relocalizeQuality" class="help">Nog geen berekening.</div>
+          <button id="applyRelocalizeBtn" class="primary">Project uitlijnen</button>
+          <button id="cancelRelocalizeBtn" class="secondary">Annuleren</button>
         </div>
       </section>
 
@@ -316,6 +351,6 @@
   <div id="hint">Open ☰ en kies wat je wilt tekenen.</div>
 </div>
 
-<script type="module" src="./js/bootstrap.js?v=0.8.20-20260823-0310"></script>
+<script type="module" src="./js/bootstrap.js?v=0.8.21-20260823-0345"></script>
 </body>
 </html>
