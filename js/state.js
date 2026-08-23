@@ -1,5 +1,5 @@
 export const S={
-  version:"0.8.20",build:"20260823-0310",
+  version:"0.8.21",build:"20260823-0345",
   THREE:null,renderer:null,scene:null,camera:null,reticle:null,xrSession:null,hitSource:null,hitRequested:false,
   currentTarget:null,targetSource:"none",zoom:1,pointPlacementEpoch:0,
   points:[],lines:[],contours:[],shapes:[],walls:[],openings:[],
@@ -22,7 +22,15 @@ export const S={
   hud:{compact:true,lastPopover:null},
   project:{
     schemaVersion:1,id:null,name:"Nieuw project",createdAt:null,updatedAt:null,lastSavedAt:null,
-    dirty:false,recoveryAvailable:false,loadedFrom:null
+    dirty:false,recoveryAvailable:false,loadedFrom:null,
+    geo:null,
+    relocalization:{
+      references:[],
+      active:false,
+      captured:[],
+      lastResult:null,
+      mode:"auto"
+    }
   }
 };
 

@@ -1,22 +1,26 @@
-import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.20-20260823-0310";
+import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.21-20260823-0345";
 import {
   startTool,cancelTool,setPlacement,setDistance,setConstraint,setAngle,flipSide,setReferenceLine,setSnapMode,
   confirmCandidate,undoToolStep,finishTool,toolLabel,constraintLabel,getActivePoint,referenceRequired,resetDrawingCore
-} from "./drawing-core.js?v=0.8.20-20260823-0310";
+} from "./drawing-core.js?v=0.8.21-20260823-0345";
 import {
   createShape,updateShape,deleteShapeOnly,deleteShapeWithContour,deleteLineRaw,deletePointRaw,renamePoint,updateLine,analyzeContour,
   lineDependencies,pointDependencies,canDeleteLine,canDeletePoint,clearAllGeometry,validateGeometryState,dispose
-} from "./geometry.js?v=0.8.20-20260823-0310";
-import {startAR,applyZoom} from "./ar.js?v=0.8.20-20260823-0310";
-import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.20-20260823-0310";
-import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.20-20260823-0310";
+} from "./geometry.js?v=0.8.21-20260823-0345";
+import {startAR,applyZoom} from "./ar.js?v=0.8.21-20260823-0345";
+import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.21-20260823-0345";
+import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.21-20260823-0345";
 import {
   initProjectStorage,saveCurrentProject,listProjects,loadStoredProject,newProject,duplicateCurrentProject,
   deleteStoredProject,renameStoredProject,projectStats,formatStats,hasRecovery,recoveryInfo,restoreRecovery,clearRecovery,
   exportCurrentProject,importProjectFile
-} from "./project-storage.js?v=0.8.20-20260823-0310";
+} from "./project-storage.js?v=0.8.21-20260823-0345";
+import {
+  captureCurrentGeo,addProjectReference,removeProjectReference,beginRelocalization,cancelRelocalization,
+  captureRelocalizationPoint,solveRelocalization,applyRelocalization,relocalizationSummary
+} from "./relocalization.js?v=0.8.21-20260823-0345";
 
-const pages=["home","project","projects","objects","line","point","walltool","wallcreate","wall","openingcreate","opening","shapecreate","shape","settings","clear"];
+const pages=["home","project","references","relocalize","projects","objects","line","point","walltool","wallcreate","wall","openingcreate","opening","shapecreate","shape","settings","clear"];
 let menuStack=["home"];
 
 const el=id=>$(id);
@@ -44,8 +48,8 @@ function togglePopover(id){
 }
 function showPage(name,push=true){
   pages.forEach(p=>el("page-"+p)?.classList.remove("active"));const page=el("page-"+name);if(!page)throw new Error(`Menupagina ontbreekt: ${name}`);page.classList.add("active");
-  const titles={home:"Measure AR",project:"Project",projects:"Mijn projecten",objects:"Objecten",line:"Lijn",point:"Punt",walltool:"Muur tekenen",wallcreate:"Muur maken",wall:"Muur",openingcreate:"Opening toevoegen",opening:"Opening",shapecreate:"Vorm opslaan",shape:"Vorm",settings:"Instellingen",clear:"Alles wissen"};
-  el("menuTitle").textContent=titles[name]||name;if(push&&menuStack.at(-1)!==name)menuStack.push(name);el("menuBackBtn").style.visibility=name==="home"?"hidden":"visible";if(name==="objects")renderObjects();if(name==="project")renderProjectPage();if(name==="projects")renderProjectsList();
+  const titles={home:"Measure AR",project:"Project",references:"Projectreferenties",relocalize:"Project uitlijnen",projects:"Mijn projecten",objects:"Objecten",line:"Lijn",point:"Punt",walltool:"Muur tekenen",wallcreate:"Muur maken",wall:"Muur",openingcreate:"Opening toevoegen",opening:"Opening",shapecreate:"Vorm opslaan",shape:"Vorm",settings:"Instellingen",clear:"Alles wissen"};
+  el("menuTitle").textContent=titles[name]||name;if(push&&menuStack.at(-1)!==name)menuStack.push(name);el("menuBackBtn").style.visibility=name==="home"?"hidden":"visible";if(name==="objects")renderObjects();if(name==="project")renderProjectPage();if(name==="references")renderReferenceManager();if(name==="relocalize")renderRelocalizePage();if(name==="projects")renderProjectsList();
 }
 function openMenu(){menuStack=["home"];showPage("home",false);el("menuPanel").classList.add("open");el("menuMeta").textContent=`${S.project.name||"Project"} · v${S.version}`;closePopovers();}
 function closeMenu(){el("menuPanel").classList.remove("open");closePopovers();S.objectPickMode=null;}
@@ -168,9 +172,53 @@ function openOpening(id){
 function projectDate(iso){
   if(!iso)return "—";const d=new Date(iso);return Number.isNaN(d.getTime())?"—":d.toLocaleString("nl-BE",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"});
 }
+
+function relocalizeModeText(mode){
+  return mode==="auto"?"Grof: alleen opgeslagen locatie/oriëntatie-hints. Geen centimeterprecisie."
+    :mode==="1"?"Snel: corrigeert positie met één fysiek referentiepunt."
+    :mode==="2"?"Standaard: corrigeert positie en richting met twee referentiepunten."
+    :mode==="3"?"Nauwkeurig: volledige 3D-uitlijning met drie niet-collineaire punten."
+    :"Precisie: 4+ punten met best-fit en foutcontrole.";
+}
+function renderReferenceManager(){
+  const sel=el("referencePointSelect"),current=S.project.relocalization.references||[];sel.innerHTML="";
+  const used=new Set(current.map(r=>r.pointId));
+  for(const p of S.points)if(!used.has(p.id))sel.add(new Option(`Punt ${p.name}`,p.id));
+  el("referenceName").value=sel.options.length?`Referentie ${current.length+1}`:"";
+  const box=el("referenceList");box.innerHTML="";
+  if(!current.length){box.innerHTML='<div class="help">Nog geen referentiepunten.</div>';return;}
+  for(const r of current){
+    const row=document.createElement("div");row.className="objectRow";
+    const info=document.createElement("button");info.className="secondary";info.textContent=`${r.name} · punt ${getPoint(r.pointId)?.name||"?"}`;
+    const del=document.createElement("button");del.className="danger";del.textContent="Wis";
+    del.onclick=()=>{removeProjectReference(r.id);markProjectDirtyFromReference();renderReferenceManager();};
+    row.append(info,del);box.append(row);
+  }
+}
+function markProjectDirtyFromReference(){
+  document.dispatchEvent(new CustomEvent("measurear:history-changed"));
+}
+function renderRelocalizePage(){
+  const mode=el("relocalizeMode").value||"2";el("relocalizeHelp").textContent=relocalizeModeText(mode);
+  const geo=S.project.geo;el("relocalizeGeoInfo").textContent=geo?`Opgeslagen GPS: ${geo.lat.toFixed(6)}, ${geo.lon.toFixed(6)} · nauwkeurigheid ${Number.isFinite(geo.accuracy)?`±${geo.accuracy.toFixed(1)} m`:"onbekend"}`:"Geen GPS-locatie opgeslagen.";
+  const refs=S.project.relocalization.references||[],box=el("relocalizeRefs");box.innerHTML="";
+  if(!refs.length){box.innerHTML='<div class="help">Geen referentiepunten geregistreerd.</div>';return;}
+  for(const r of refs){
+    const row=document.createElement("div");row.className="objectRow";
+    const info=document.createElement("button");info.className="secondary";info.textContent=`${r.name} · ${S.project.relocalization.captured.some(c=>c.refId===r.id)?"✓ opnieuw aangewezen":"nog aanwijzen"}`;
+    const cap=document.createElement("button");cap.className="primary";cap.textContent="Gebruik vizier";
+    cap.onclick=()=>{
+      if(!S.currentTarget)throw new Error("Richt eerst het vizier op het fysieke referentiepunt.");
+      captureRelocalizationPoint(r.id,S.currentTarget);
+      renderRelocalizePage();showStatus(`${r.name} opnieuw aangewezen.`);
+    };
+    row.append(info,cap);box.append(row);
+  }
+}
+
 function renderProjectPage(){
   el("projectName").value=S.project.name||"Nieuw project";
-  el("projectStats").textContent=formatStats(projectStats());
+  el("projectStats").textContent=formatStats(projectStats())+` · ${S.project.relocalization.references.length} refs`;
   el("projectSaveState").textContent=S.project.dirty
     ?`Niet-opgeslagen wijzigingen · herstel ${S.project.recoveryAvailable?"beschikbaar":"nog niet beschikbaar"}`
     :(S.project.lastSavedAt?`Opgeslagen ${projectDate(S.project.lastSavedAt)}`:"Nog niet handmatig opgeslagen.");
@@ -255,6 +303,34 @@ export function initUI(){
     newProject(name);afterProjectChange(`Nieuw project ${S.project.name} gestart.`);renderProjectPage();
   });
   bind("projectListBtn","click",()=>showPage("projects"));
+  
+  bind("captureGeoBtn","click",async()=>{
+    const g=await captureCurrentGeo();markProjectDirtyFromReference();renderProjectPage();showStatus(`GPS opgeslagen · nauwkeurigheid ±${Number.isFinite(g.accuracy)?g.accuracy.toFixed(1):"?"} m.`);
+  });
+  bind("referenceManagerBtn","click",()=>showPage("references"));
+  bind("projectLocationBtn","click",()=>{showPage("relocalize");renderRelocalizePage();});
+  bind("addReferenceBtn","click",()=>{
+    const pid=el("referencePointSelect").value;if(!pid)throw new Error("Geen punt beschikbaar.");
+    addProjectReference(pid,el("referenceName").value,el("referenceDescription").value);
+    markProjectDirtyFromReference();renderReferenceManager();showStatus("Projectreferentie toegevoegd.");
+  });
+  bind("relocalizeMode","change",()=>renderRelocalizePage());
+  bind("startRelocalizeBtn","click",()=>{
+    beginRelocalization(el("relocalizeMode").value);renderRelocalizePage();showStatus("Heruitlijning gestart. Wijs de gewenste referentiepunten opnieuw aan.");
+  });
+  let lastRelocalizationResult=null;
+  bind("solveRelocalizeBtn","click",()=>{
+    lastRelocalizationResult=solveRelocalization();
+    el("relocalizeQuality").textContent=`${lastRelocalizationResult.count} punt(en) · ${lastRelocalizationResult.quality} · gemiddelde ${(lastRelocalizationResult.mean*100).toFixed(1)} cm · max ${(lastRelocalizationResult.max*100).toFixed(1)} cm`;
+  });
+  bind("applyRelocalizeBtn","click",()=>{
+    if(!lastRelocalizationResult)throw new Error("Bereken eerst de uitlijning.");
+    const r=applyRelocalization(lastRelocalizationResult);lastRelocalizationResult=null;
+    markProjectDirtyFromReference();afterProjectChange(`Project uitgelijnd · ${r.quality} · max ${(r.max*100).toFixed(1)} cm.`);
+    closeMenu();
+  });
+  bind("cancelRelocalizeBtn","click",()=>{cancelRelocalization();showPage("project");});
+
   bind("exportProjectBtn","click",()=>{exportCurrentProject();showStatus("Projectbestand geëxporteerd.");});
   bind("importProjectBtn","click",()=>el("importProjectFile").click());
   bind("importProjectFile","change",async()=>{

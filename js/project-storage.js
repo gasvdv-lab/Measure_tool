@@ -1,8 +1,8 @@
-import {S} from "./state.js?v=0.8.20-20260823-0310";
-import {snapshotProject,restoreProject,clearHistory} from "./history.js?v=0.8.20-20260823-0310";
-import {clearAllGeometry,validateGeometryState} from "./geometry.js?v=0.8.20-20260823-0310";
-import {clearWalls} from "./walls.js?v=0.8.20-20260823-0310";
-import {resetDrawingCore} from "./drawing-core.js?v=0.8.20-20260823-0310";
+import {S} from "./state.js?v=0.8.21-20260823-0345";
+import {snapshotProject,restoreProject,clearHistory} from "./history.js?v=0.8.21-20260823-0345";
+import {clearAllGeometry,validateGeometryState} from "./geometry.js?v=0.8.21-20260823-0345";
+import {clearWalls} from "./walls.js?v=0.8.21-20260823-0345";
+import {resetDrawingCore} from "./drawing-core.js?v=0.8.21-20260823-0345";
 
 export const PROJECT_SCHEMA_VERSION=1;
 const INDEX_KEY="measurear.projects.v1.index";
@@ -14,6 +14,14 @@ function nowIso(){return new Date().toISOString();}
 function safeParse(raw){try{return JSON.parse(raw);}catch{return null;}}
 function cleanName(name){return String(name||"").trim().replace(/\s+/g," ").slice(0,80);}
 function newId(){return "prj-"+crypto.randomUUID();}
+function cloneRelocForSave(){
+  return {
+    references:(S.project.relocalization?.references||[]).map(r=>({
+      id:r.id,pointId:r.pointId,name:r.name,description:r.description,projectPosition:{...r.projectPosition}
+    })),
+    lastResult:S.project.relocalization?.lastResult||null
+  };
+}
 
 function readIndex(){
   const x=safeParse(localStorage.getItem(INDEX_KEY));
@@ -36,7 +44,7 @@ function envelope(name,id=null,createdAt=null){
   const n=cleanName(name)||"Nieuw project",ts=nowIso();
   return {
     format:"MeasureARProject",schemaVersion:PROJECT_SCHEMA_VERSION,appVersion:S.version,
-    project:{id:id||newId(),name:n,createdAt:createdAt||ts,updatedAt:ts},
+    project:{id:id||newId(),name:n,createdAt:createdAt||ts,updatedAt:ts,geo:S.project.geo,relocalization:cloneRelocForSave()},
     data:sourceSnapshot()
   };
 }
@@ -62,6 +70,7 @@ export function validateProjectEnvelope(e){
     }
     for(const w of d.walls||[])if(!lineIds.has(w.lineId))errors.push(`Muur ${w.name||w.id} verwijst naar ontbrekende lijn.`);
     for(const o of d.openings||[])if(!wallIds.has(o.wallId))errors.push(`Opening ${o.name||o.id} verwijst naar ontbrekende muur.`);
+    for(const r of e.project?.relocalization?.references||[])if(!pointIds.has(r.pointId))errors.push(`Projectreferentie ${r.name||r.id} verwijst naar ontbrekend punt.`);
   }
   return {ok:errors.length===0,errors};
 }
@@ -70,7 +79,12 @@ function setCurrentMeta(e,source="local"){
   Object.assign(S.project,{
     schemaVersion:e.schemaVersion,id:e.project.id,name:e.project.name,
     createdAt:e.project.createdAt||null,updatedAt:e.project.updatedAt||null,lastSavedAt:e.project.updatedAt||null,
-    dirty:false,recoveryAvailable:hasRecovery(),loadedFrom:source
+    dirty:false,recoveryAvailable:hasRecovery(),loadedFrom:source,
+    geo:e.project.geo||null,
+    relocalization:{
+      references:(e.project.relocalization?.references||[]).map(r=>({...r,projectPosition:{...r.projectPosition}})),
+      active:false,captured:[],lastResult:e.project.relocalization?.lastResult||null,mode:"auto"
+    }
   });
   localStorage.setItem(LAST_PROJECT_KEY,e.project.id);
   document.dispatchEvent(new CustomEvent("measurear:project-meta-changed"));
@@ -140,7 +154,8 @@ export function loadEnvelope(e,source="import"){
 }
 export function newProject(name="Nieuw project"){
   clearWalls();clearAllGeometry();resetDrawingCore();clearHistory();
-  const ts=nowIso();Object.assign(S.project,{schemaVersion:1,id:newId(),name:cleanName(name)||"Nieuw project",createdAt:ts,updatedAt:ts,lastSavedAt:null,dirty:true,recoveryAvailable:false,loadedFrom:"new"});
+  const ts=nowIso();Object.assign(S.project,{schemaVersion:1,id:newId(),name:cleanName(name)||"Nieuw project",createdAt:ts,updatedAt:ts,lastSavedAt:null,dirty:true,recoveryAvailable:false,loadedFrom:"new",geo:null,
+    relocalization:{references:[],active:false,captured:[],lastResult:null,mode:"auto"}});
   clearRecovery();document.dispatchEvent(new CustomEvent("measurear:project-loaded"));document.dispatchEvent(new CustomEvent("measurear:project-meta-changed"));
   return S.project;
 }
