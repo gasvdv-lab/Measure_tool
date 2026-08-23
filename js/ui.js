@@ -1,17 +1,22 @@
-import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.19-20260823-0105";
+import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.20-20260823-0310";
 import {
   startTool,cancelTool,setPlacement,setDistance,setConstraint,setAngle,flipSide,setReferenceLine,setSnapMode,
   confirmCandidate,undoToolStep,finishTool,toolLabel,constraintLabel,getActivePoint,referenceRequired,resetDrawingCore
-} from "./drawing-core.js?v=0.8.19-20260823-0105";
+} from "./drawing-core.js?v=0.8.20-20260823-0310";
 import {
   createShape,updateShape,deleteShapeOnly,deleteShapeWithContour,deleteLineRaw,deletePointRaw,renamePoint,updateLine,analyzeContour,
   lineDependencies,pointDependencies,canDeleteLine,canDeletePoint,clearAllGeometry,validateGeometryState,dispose
-} from "./geometry.js?v=0.8.19-20260823-0105";
-import {startAR,applyZoom} from "./ar.js?v=0.8.19-20260823-0105";
-import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.19-20260823-0105";
-import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.19-20260823-0105";
+} from "./geometry.js?v=0.8.20-20260823-0310";
+import {startAR,applyZoom} from "./ar.js?v=0.8.20-20260823-0310";
+import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.20-20260823-0310";
+import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.20-20260823-0310";
+import {
+  initProjectStorage,saveCurrentProject,listProjects,loadStoredProject,newProject,duplicateCurrentProject,
+  deleteStoredProject,renameStoredProject,projectStats,formatStats,hasRecovery,recoveryInfo,restoreRecovery,clearRecovery,
+  exportCurrentProject,importProjectFile
+} from "./project-storage.js?v=0.8.20-20260823-0310";
 
-const pages=["home","objects","line","point","walltool","wallcreate","wall","openingcreate","opening","shapecreate","shape","settings","clear"];
+const pages=["home","project","projects","objects","line","point","walltool","wallcreate","wall","openingcreate","opening","shapecreate","shape","settings","clear"];
 let menuStack=["home"];
 
 const el=id=>$(id);
@@ -39,10 +44,10 @@ function togglePopover(id){
 }
 function showPage(name,push=true){
   pages.forEach(p=>el("page-"+p)?.classList.remove("active"));const page=el("page-"+name);if(!page)throw new Error(`Menupagina ontbreekt: ${name}`);page.classList.add("active");
-  const titles={home:"Measure AR",objects:"Objecten",line:"Lijn",point:"Punt",walltool:"Muur tekenen",wallcreate:"Muur maken",wall:"Muur",openingcreate:"Opening toevoegen",opening:"Opening",shapecreate:"Vorm opslaan",shape:"Vorm",settings:"Instellingen",clear:"Alles wissen"};
-  el("menuTitle").textContent=titles[name]||name;if(push&&menuStack.at(-1)!==name)menuStack.push(name);el("menuBackBtn").style.visibility=name==="home"?"hidden":"visible";if(name==="objects")renderObjects();
+  const titles={home:"Measure AR",project:"Project",projects:"Mijn projecten",objects:"Objecten",line:"Lijn",point:"Punt",walltool:"Muur tekenen",wallcreate:"Muur maken",wall:"Muur",openingcreate:"Opening toevoegen",opening:"Opening",shapecreate:"Vorm opslaan",shape:"Vorm",settings:"Instellingen",clear:"Alles wissen"};
+  el("menuTitle").textContent=titles[name]||name;if(push&&menuStack.at(-1)!==name)menuStack.push(name);el("menuBackBtn").style.visibility=name==="home"?"hidden":"visible";if(name==="objects")renderObjects();if(name==="project")renderProjectPage();if(name==="projects")renderProjectsList();
 }
-function openMenu(){menuStack=["home"];showPage("home",false);el("menuPanel").classList.add("open");el("menuMeta").textContent=`${S.points.length}p · ${S.lines.length}l · v${S.version}`;closePopovers();}
+function openMenu(){menuStack=["home"];showPage("home",false);el("menuPanel").classList.add("open");el("menuMeta").textContent=`${S.project.name||"Project"} · v${S.version}`;closePopovers();}
 function closeMenu(){el("menuPanel").classList.remove("open");closePopovers();S.objectPickMode=null;}
 function menuBack(){if(menuStack.length<=1){closeMenu();return;}menuStack.pop();showPage(menuStack.at(-1),false);}
 
@@ -58,7 +63,7 @@ function syncHistoryControls(){
   }
 }
 function afterProjectChange(message=""){
-  verifyState();renderObjects();syncHud();syncHistoryControls();
+  verifyState();renderObjects();syncHud();syncHistoryControls();syncProjectMeta();
   if(message)showStatus(message);
 }
 
@@ -159,6 +164,45 @@ function openOpening(id){
   showPage("opening");
 }
 
+
+function projectDate(iso){
+  if(!iso)return "—";const d=new Date(iso);return Number.isNaN(d.getTime())?"—":d.toLocaleString("nl-BE",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"});
+}
+function renderProjectPage(){
+  el("projectName").value=S.project.name||"Nieuw project";
+  el("projectStats").textContent=formatStats(projectStats());
+  el("projectSaveState").textContent=S.project.dirty
+    ?`Niet-opgeslagen wijzigingen · herstel ${S.project.recoveryAvailable?"beschikbaar":"nog niet beschikbaar"}`
+    :(S.project.lastSavedAt?`Opgeslagen ${projectDate(S.project.lastSavedAt)}`:"Nog niet handmatig opgeslagen.");
+  const info=recoveryInfo(),box=el("recoveryBox");
+  box.style.display=info?"block":"none";
+  if(info)el("recoveryInfo").textContent=`${info.name} · ${projectDate(info.updatedAt)} · ${info.stats.points}p/${info.stats.lines}l/${info.stats.walls}m/${info.stats.openings}o`;
+  el("restoreRecoveryBtn").disabled=!info;el("discardRecoveryBtn").disabled=!info;
+}
+function renderProjectsList(){
+  const box=el("projectsList"),items=listProjects();box.innerHTML="";
+  if(!items.length){box.innerHTML='<div class="help">Nog geen opgeslagen projecten.</div>';return;}
+  for(const p of items){
+    const row=document.createElement("div");row.className="projectRow";
+    const main=document.createElement("button");main.className="secondary projectOpen";main.textContent=`${p.name} · ${projectDate(p.updatedAt)}`;
+    const duplicate=document.createElement("button");duplicate.className="secondary";duplicate.textContent="Kopie";
+    const rename=document.createElement("button");rename.className="secondary";rename.textContent="Naam";
+    const del=document.createElement("button");del.className="danger";del.textContent="Wis";
+    main.onclick=()=>{loadStoredProject(p.id);afterProjectChange(`Project ${p.name} geopend.`);renderProjectPage();showPage("project");};
+    duplicate.onclick=()=>{const n=prompt("Naam voor kopie",`${p.name} kopie`);if(!n)return;loadStoredProject(p.id);const e=duplicateCurrentProject(n);showStatus(`Kopie ${e.project.name} opgeslagen.`);renderProjectsList();};
+    rename.onclick=()=>{const n=prompt("Nieuwe projectnaam",p.name);if(!n)return;renameStoredProject(p.id,n);renderProjectsList();};
+    del.onclick=()=>{if(!confirm(`Project "${p.name}" verwijderen?`))return;deleteStoredProject(p.id);renderProjectsList();};
+    row.append(main,duplicate,rename,del);box.append(row);
+  }
+}
+function syncProjectMeta(){
+  if(el("projectName")&&document.getElementById("page-project")?.classList.contains("active"))renderProjectPage();
+  if(el("startupRecovery")){
+    const info=recoveryInfo();el("startupRecovery").style.display=info?"block":"none";
+    if(info)el("startupRecovery").textContent=`Herstelproject gevonden: ${info.name}. Start AR en open Project → Herstel.`;
+  }
+}
+
 function renderObjects(){
   const box=el("objectsList");box.innerHTML="";
   if(!S.walls.length&&!S.shapes.length&&!S.lines.length&&!S.points.length){box.innerHTML='<div class="help">Nog geen objecten.</div>';return;}
@@ -198,6 +242,28 @@ export function initUI(){
   bind("globalUndoBtn","click",()=>{const e=undoHistory();afterProjectChange(`Ongedaan: ${e.label}`);});
   bind("globalRedoBtn","click",()=>{const e=redoHistory();afterProjectChange(`Opnieuw: ${e.label}`);});
   document.querySelectorAll("[data-page]").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.page)));
+
+  bind("saveProjectBtn","click",()=>{
+    const e=saveCurrentProject(el("projectName").value,false);renderProjectPage();showStatus(`Project ${e.project.name} opgeslagen.`);
+  });
+  bind("saveProjectAsBtn","click",()=>{
+    const e=saveCurrentProject(el("projectName").value,true);renderProjectPage();showStatus(`Nieuw project ${e.project.name} opgeslagen.`);
+  });
+  bind("newProjectBtn","click",()=>{
+    const name=el("projectName").value||"Nieuw project";
+    if((S.points.length||S.lines.length||S.walls.length||S.shapes.length)&&!confirm("Huidige scène leegmaken en een nieuw project starten? Niet-opgeslagen werk kan verloren gaan."))return;
+    newProject(name);afterProjectChange(`Nieuw project ${S.project.name} gestart.`);renderProjectPage();
+  });
+  bind("projectListBtn","click",()=>showPage("projects"));
+  bind("exportProjectBtn","click",()=>{exportCurrentProject();showStatus("Projectbestand geëxporteerd.");});
+  bind("importProjectBtn","click",()=>el("importProjectFile").click());
+  bind("importProjectFile","change",async()=>{
+    const file=el("importProjectFile").files?.[0];if(!file)return;
+    await importProjectFile(file);el("importProjectFile").value="";afterProjectChange(`Project ${S.project.name} geïmporteerd.`);renderProjectPage();
+  });
+  bind("restoreRecoveryBtn","click",()=>{restoreRecovery();afterProjectChange(`Herstelproject ${S.project.name} geopend.`);renderProjectPage();});
+  bind("discardRecoveryBtn","click",()=>{clearRecovery();renderProjectPage();syncProjectMeta();showStatus("Hersteldata verwijderd.");});
+
 
   bind("quickLineBtn","click",()=>begin("line"));bind("quickPolylineBtn","click",()=>begin("polyline"));bind("quickShapeBtn","click",()=>begin("shape"));bind("quickStakeBtn","click",()=>begin("stake"));
   bind("quickWallBtn","click",()=>{
@@ -349,8 +415,11 @@ bind("saveWallBtn","click",()=>{
 
   document.addEventListener("measurear:tool-changed",syncHud);document.addEventListener("measurear:tool-settings",syncHud);document.addEventListener("measurear:candidate-changed",syncCandidateContext);
   document.addEventListener("measurear:history-changed",syncHistoryControls);
-  document.addEventListener("measurear:project-restored",()=>{syncHud();syncHistoryControls();renderObjects();});
+  document.addEventListener("measurear:project-restored",()=>{syncHud();syncHistoryControls();renderObjects();syncProjectMeta();});
+  document.addEventListener("measurear:project-meta-changed",syncProjectMeta);
+  document.addEventListener("measurear:project-loaded",()=>{syncProjectMeta();renderObjects();syncHistoryControls();});
 
+  initProjectStorage();
   S.defaults.unit="cm";S.defaults.lineThickness=2;S.defaults.labels=true;S.hud.compact=true;S.tool.snapMode="smart";el("hudDensity").value="compact";el("hudSnap").value="smart";el("defaultUnit").value="cm";el("hudUnit").value="cm";el("defaultThickness").value="2";el("defaultLabels").checked=true;
   syncHud();syncHistoryControls();document.documentElement.dataset.uiReady="1";console.info("Measure AR unified drawing UI ready",S.version,S.build);
 }

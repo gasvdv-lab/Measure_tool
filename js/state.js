@@ -1,5 +1,5 @@
 export const S={
-  version:"0.8.19",build:"20260823-0105",
+  version:"0.8.20",build:"20260823-0310",
   THREE:null,renderer:null,scene:null,camera:null,reticle:null,xrSession:null,hitSource:null,hitRequested:false,
   currentTarget:null,targetSource:"none",zoom:1,pointPlacementEpoch:0,
   points:[],lines:[],contours:[],shapes:[],walls:[],openings:[],
@@ -19,7 +19,11 @@ export const S={
   history:{undo:[],redo:[],limit:80,restoring:false},
   preview:{point:null,line:null,label:null},
   diagnostics:{lastError:"",lastCheck:null,confirmBusy:false},
-  hud:{compact:true,lastPopover:null}
+  hud:{compact:true,lastPopover:null},
+  project:{
+    schemaVersion:1,id:null,name:"Nieuw project",createdAt:null,updatedAt:null,lastSavedAt:null,
+    dirty:false,recoveryAvailable:false,loadedFrom:null
+  }
 };
 
 export const $=id=>document.getElementById(id);
