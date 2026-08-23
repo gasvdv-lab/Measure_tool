@@ -1,85 +1,64 @@
-# Measure AR v0.8.18 — Openingen in muren
-Build: 20260823-0035
+# Measure AR v0.8.19 — Smart Snapping & Geometrische Intelligentie
+Build: 20260823-0105
 
-## Nieuw in v0.8.18
-- Deur, raam en vrije opening zijn echte child-objecten van een muur.
-- Iedere opening gebruikt muur-lokale maten:
-  - X = afstand vanaf begin van de muur;
-  - onderkant = hoogte boven de muurvoet;
-  - breedte;
-  - hoogte.
-- De muur wordt werkelijk visueel opgebouwd rond de opening; er staat dus niet enkel een rechthoek vóór de muur.
-- Meerdere niet-overlappende openingen per muur zijn mogelijk.
-- Opening wordt gevalideerd tegen muurlengte en muurhoogte.
-- Negatieve of ongeldige maten worden geweigerd.
-- Overlappende openingen worden geweigerd.
-- Deurpreset: 0,90 × 2,10 m vanaf vloer.
-- Raampreset: 1,20 × 1,10 m met onderkant 0,90 m.
-- Opening kan achteraf volledig worden gewijzigd.
-- Opening verwijderen bouwt de massieve muur automatisch terug op.
-- Muur verwijderen verwijdert zijn child-openingen mee.
-- Muurhoogte kan niet worden verkleind als een bestaande opening er dan buiten zou vallen.
-- Openingen zitten in de centrale Undo/Redo-snapshot en projectvalidator.
+## Nieuw in v0.8.19
+- Centrale Smart Snap-volgorde: bestaand punt → snijpunt → middelpunt → projectie op lijn → opening/muur.
+- Exacte bestaande punten hebben hoogste prioriteit.
+- 3D-lijnintersecties worden herkend wanneer segmenten elkaar binnen 2,5 cm werkelijk kruisen.
+- Middelpunten van bestaande lijnen blijven snapbaar.
+- Projectie op een bestaande lijn blijft beschikbaar.
+- Hoeken + middelpunt van deur/raam/vrije opening zijn snapreferenties.
+- Midden van een muursegment is een aanvullende referentie.
+- Alle snaps respecteren de actieve richting/constraint.
+- Exacte afstand blijft exact: metric placement springt alleen naar een bestaand punt binnen 5 mm.
+- Compacte HUD-knop `SNAP ● / SNAP ○` schakelt snappen onmiddellijk uit of terug aan zonder menu.
+- Snapmodus van vóór tijdelijk uitschakelen wordt hersteld.
 
-## Automatische tests na genereren — PASS
-- JavaScript-syntax: alle modules.
+## Automatisch getest na genereren — PASS
+- JavaScript-syntax van alle modules.
 - Named imports/exports.
-- Geen dubbele HTML-ID's.
-- Alle UI-ID-referenties bestaan.
-- Alle statische knoppen hebben een handler.
-- Opening-engine create/update/delete/validate aanwezig.
-- Muur-geometrie wordt rond openingen in deelblokken opgebouwd.
-- Overlapdetectie aanwezig.
-- Openingen zitten in Undo/Redo snapshot/restore.
-- Projectvalidator controleert openingsreferenties.
-- Overlaptest: overlappende rechthoeken correct gedetecteerd.
-- Rand-aan-rand openingen worden niet fout als overlap gezien.
-- Standaarddeur past in 4,00 × 2,40 m muur.
-- Standaardraam past in 4,00 × 2,40 m muur.
-- Te brede opening wordt gedetecteerd.
-- Te hoge opening wordt gedetecteerd.
+- Unieke HTML-ID's en bestaande UI-referenties.
+- Alle statische knoppen hebben handlers.
+- Snap-prioriteiten punt=0, snijpunt=1, midden=2, lijn=3, opening=4, muur=5.
+- 3D segment-intersectie-engine aanwezig.
+- Opening-snapreferenties aanwezig.
+- Muurreferentie aanwezig.
+- Constraintcontrole wordt op snapkandidaten toegepast.
+- Metric placement behoudt 5-mm exactheidsregel.
+- SNAP HUD-toggle aanwezig en gekoppeld.
 
-## Nieuwe fysieke tests v0.8.18
-- Maak muur van minstens 4 m.
-- Voeg standaarddeur toe: controleer echte visuele uitsparing.
-- Voeg standaardraam toe.
-- Controleer muur zichtbaar rondom raam: onderdorpel, bovenstuk, links/rechts.
-- Voeg twee openingen in dezelfde muur toe.
-- Probeer overlappende openingen: moet weigeren.
-- Probeer opening voorbij muureinde: moet weigeren.
-- Probeer opening boven muurhoogte: moet weigeren.
-- Pas breedte/hoogte/positie aan en controleer directe muur-rebuild.
-- Verwijder opening: muur moet volledig herstellen.
-- Undo opening plaatsen → massieve muur.
-- Redo → opening exact terug.
-- Undo/Redo na verplaatsen opening.
-- Verwijder muur met openingen → children moeten mee verdwijnen.
-- Undo muur verwijderen → muur + openingen moeten terugkomen.
-- Verklein muurhoogte onder een raamtop → moet weigeren.
-- Test openingen op muursegmenten AB en BC afzonderlijk.
+## Nieuwe fysieke tests v0.8.19
+- Start nieuwe lijn nabij bestaand punt B: `SNAP ● · punt` en exact B hergebruiken.
+- Richt nabij middelpunt AB: midden moet worden gekozen als geen punt dichterbij is.
+- Richt op binnenzijde AB: projectie moet exact op AB liggen.
+- Maak twee kruisende lijnen en snap op hun snijpunt.
+- Test twee lijnen die in 3D over elkaar heen lopen maar >2,5 cm verschillen: geen vals snijpunt.
+- Snap op vier raamhoeken en raammidden.
+- Snap op deurhoeken.
+- Snap op midden van muursegment.
+- Test snaps met horizontaal, verticaal, parallel en loodrecht actief.
+- Exact 100 cm: snap mag de afstand niet ongemerkt wijzigen.
+- Tik `SNAP ●`: moet `SNAP ○` worden en geen geometrie aantrekken.
+- Tik opnieuw: vorige snapmodus moet terugkomen.
+- Test lijn, polyline, vorm en muur met Smart Snap.
+- Undo/Redo na een segment dat een bestaand snappunt hergebruikt.
 
 ## Gepland — uitgebreide functie Meten
 De huidige meetfunctie is nog niet de definitieve meetmodule en wordt later aanzienlijk uitgebreid. Minstens voorzien:
 - enkele afstand;
 - doorlopend meten;
 - totale lengte;
-- horizontale afstand;
-- verticale afstand;
+- horizontale en verticale afstand;
 - hoogteverschil;
-- hoek;
-- helling;
-- oppervlakte;
-- omtrek;
-- koppeling aan snapping, referentielijnen en tekenvlakken;
+- hoek en helling;
+- oppervlakte en omtrek;
+- koppeling aan de Smart Snap-engine, referentielijnen en tekenvlakken;
 - aanvullende meetfuncties die tijdens verdere ontwikkeling worden bepaald.
 Deze roadmapsectie blijft in iedere volgende README staan.
 
-## Volgende ontwikkelrichtingen
-- Openingen interactief positioneren door rechtstreeks op de muur te richten.
-- Tekenen/snappen op randen en hoekpunten van openingen.
-- Later echte deur-/raamobjecten in de opening.
-- Geavanceerde snapping en lijnintersecties.
-- Projecten persistent opslaan/herladen.
+## Volgende ontwikkelrichting
+- v0.8.20: projecten persistent opslaan en herladen.
+- Daarna keuze tussen verdere constructie-objecten en de grote uitbreiding van Meten.
 
 ## Nog fysiek te testen — cumulatief
 Deze tests vereisen echte WebXR/ARCore en blijven open.
@@ -146,7 +125,7 @@ Deze tests vereisen echte WebXR/ARCore en blijven open.
 - Ref-chip.
 - Zijde/Richting-chip.
 
-### Objectbeheer — nieuw voor v0.8.18
+### Objectbeheer — nieuw voor v0.8.19
 - Punt hernoemen en label controleren.
 - Automatische lijnnaam verandert mee na punt-hernoeming.
 - Lijn handmatig hernoemen en daarna punt hernoemen: custom lijnnaam moet blijven.
@@ -161,7 +140,7 @@ Deze tests vereisen echte WebXR/ARCore en blijven open.
 - Muurhoek wijzigen.
 - Objectbeheer mag tracking niet verstoren.
 
-### Undo/Redo — nieuw voor v0.8.18
+### Undo/Redo — nieuw voor v0.8.19
 - Punt plaatsen → Undo → Redo.
 - Lijn A→B → Undo → Redo.
 - Polyline meerdere stappen achteruit en opnieuw vooruit.
@@ -214,3 +193,7 @@ Vaste app-link:
 https://gasvdv-lab.github.io/Measure_tool/
 
 Upload de volledige inhoud van deze ZIP naar GitHub.
+
+
+Vaste app-link:
+https://gasvdv-lab.github.io/Measure_tool/

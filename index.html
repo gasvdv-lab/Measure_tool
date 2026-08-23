@@ -4,15 +4,15 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#111111">
-  <title>Measure AR v0.8.18</title>
-  <link rel="stylesheet" href="./css/app.css?v=0.8.18-20260823-0035">
+  <title>Measure AR v0.8.19</title>
+  <link rel="stylesheet" href="./css/app.css?v=0.8.19-20260823-0105">
 </head>
 <body>
 <div id="app">
   <main class="startCard directFallback">
     <div class="logo">⌖</div><h1>Measure AR</h1>
     <p id="launchStatus">Tik om AR te starten.</p>
-    <div id="buildInfo" class="build">v0.8.18 · stability build 20260823-0035</div>
+    <div id="buildInfo" class="build">v0.8.19 · stability build 20260823-0105</div>
     <button id="startArBtn" class="primary">AR starten</button>
     <div id="error" class="error"></div>
   </main>
@@ -32,7 +32,7 @@
   <aside id="menuPanel">
     <div class="menuHead">
       <button id="menuBackBtn" class="secondary">‹</button>
-      <div><strong id="menuTitle">Measure AR</strong><small id="menuMeta">v0.8.18</small></div>
+      <div><strong id="menuTitle">Measure AR</strong><small id="menuMeta">v0.8.19</small></div>
       <button id="menuCloseBtn" class="secondary">✕</button>
     </div>
     <div class="menuBody">
@@ -239,7 +239,7 @@
       <span id="hudActivePoint" class="hudChip">Start: —</span>
       <span id="hudReferenceChip" class="hudChip optional">Ref: —</span>
       <button id="hudSideChip" class="hudChip optional chipButton" type="button">Zijde: links</button>
-      <span id="hudSnapChip" class="hudChip optional">Snap: —</span>
+      <button id="hudSnapChip" class="hudChip optional chipButton" type="button">SNAP ●</button>
     </div>
     <div id="hudContext" class="hudContext">Kies eerst een tekenfunctie.</div>
     <div id="hudActions" class="hudActions">
@@ -273,9 +273,9 @@
   </div>
 
   <div id="morePopover" class="hudPopover distancePopover">
-    <label>Snappen<select id="hudSnap"><option value="smart" selected>Smart · punt + midden + lijn</option><option value="points">Alleen punten</option><option value="midpoints">Alleen middelpunten</option><option value="lines">Alleen lijnen</option><option value="off">Uit</option></select></label>
+    <label>Snappen<select id="hudSnap"><option value="smart" selected>Smart · punt + snijpunt + midden + lijn + opening</option><option value="points">Alleen punten</option><option value="midpoints">Alleen middelpunten</option><option value="lines">Alleen lijnen</option><option value="off">Uit</option></select></label>
 <label>HUD<select id="hudDensity"><option value="compact" selected>Compact</option><option value="detailed">Meer info</option></select></label>
-    <div id="hudSnapHelp" class="help">Smart snap: punten hebben voorrang, daarna middelpunten en lijnen. Exacte afstand blijft exact.</div>
+    <div id="hudSnapHelp" class="help">Smart snap: punt → snijpunt → midden → lijn → opening/muur. Tik op SNAP in de HUD om tijdelijk uit/aan te zetten. Exacte afstand blijft exact.</div>
 <div class="help">Een kandidaatpunt is voorlopig. Alleen de witte ronde knop maakt het definitief.</div>
   </div>
 
@@ -284,6 +284,6 @@
   <div id="hint">Open ☰ en kies wat je wilt tekenen.</div>
 </div>
 
-<script type="module" src="./js/bootstrap.js?v=0.8.18-20260823-0035"></script>
+<script type="module" src="./js/bootstrap.js?v=0.8.19-20260823-0105"></script>
 </body>
 </html>
