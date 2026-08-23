@@ -4,15 +4,15 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#111111">
-  <title>Measure AR v0.8.17</title>
-  <link rel="stylesheet" href="./css/app.css?v=0.8.17-20260823-0005">
+  <title>Measure AR v0.8.18</title>
+  <link rel="stylesheet" href="./css/app.css?v=0.8.18-20260823-0035">
 </head>
 <body>
 <div id="app">
   <main class="startCard directFallback">
     <div class="logo">⌖</div><h1>Measure AR</h1>
     <p id="launchStatus">Tik om AR te starten.</p>
-    <div id="buildInfo" class="build">v0.8.17 · stability build 20260823-0005</div>
+    <div id="buildInfo" class="build">v0.8.18 · stability build 20260823-0035</div>
     <button id="startArBtn" class="primary">AR starten</button>
     <div id="error" class="error"></div>
   </main>
@@ -32,7 +32,7 @@
   <aside id="menuPanel">
     <div class="menuHead">
       <button id="menuBackBtn" class="secondary">‹</button>
-      <div><strong id="menuTitle">Measure AR</strong><small id="menuMeta">v0.8.17</small></div>
+      <div><strong id="menuTitle">Measure AR</strong><small id="menuMeta">v0.8.18</small></div>
       <button id="menuCloseBtn" class="secondary">✕</button>
     </div>
     <div class="menuBody">
@@ -138,6 +138,10 @@
           <div id="editWallAngleWrap" style="display:none"><label>Hoek (°)<input id="editWallAngle" type="number" min="-180" max="180" step=".5"></label></div>
           <div class="grid2"><label>Kleur<input id="editWallColor" type="color"></label><label>Transparantie<input id="editWallOpacity" type="number" min=".05" max="1" step=".05"></label></div>
           <button id="saveWallBtn" class="primary">Muur opslaan</button>
+          <button id="addDoorBtn" class="secondary">+ Deur</button>
+          <button id="addWindowBtn" class="secondary">+ Raam</button>
+          <button id="addOpeningBtn" class="secondary">+ Vrije opening</button>
+          <div id="wallOpeningsInfo" class="help"></div>
           <button id="toggleWallBtn" class="secondary">Zichtbaar / verborgen</button>
           <button id="deleteWallBtn" class="danger">Muur wissen</button>
         </div>
@@ -168,6 +172,40 @@
           <button id="saveShapeBtn" class="primary">Wijzigingen opslaan</button>
           <button id="deleteShapeOnlyBtn" class="secondary">Alleen vorm/opvulling verwijderen</button>
           <button id="deleteShapeContourBtn" class="danger">Vorm + contour verwijderen</button>
+        </div>
+      </section>
+
+
+      <section id="page-openingcreate" class="page">
+        <h3>Opening toevoegen</h3><div class="menuCard">
+          <div id="openingCreateInfo" class="help">—</div>
+          <label>Type<select id="openingType"><option value="door">Deur</option><option value="window">Raam</option><option value="free">Vrije opening</option></select></label>
+          <label>Naam<input id="openingName" maxlength="40"></label>
+          <label>Positie vanaf begin muur (m)<input id="openingX" type="number" min="0" step=".01" value="0.50"></label>
+          <div class="grid2">
+            <label>Breedte (m)<input id="openingWidth" type="number" min=".02" step=".01" value=".90"></label>
+            <label>Hoogte (m)<input id="openingHeight" type="number" min=".02" step=".01" value="2.10"></label>
+          </div>
+          <label>Onderkant boven muurvoet (m)<input id="openingBottom" type="number" min="0" step=".01" value="0"></label>
+          <div id="openingError" class="error"></div>
+          <button id="confirmOpeningBtn" class="primary">Opening aanmaken</button>
+          <button id="cancelOpeningBtn" class="secondary">Annuleren</button>
+        </div>
+      </section>
+
+      <section id="page-opening" class="page">
+        <h3>Opening</h3><div class="menuCard">
+          <div id="openingInfo" class="help">—</div>
+          <label>Type<select id="editOpeningType"><option value="door">Deur</option><option value="window">Raam</option><option value="free">Vrije opening</option></select></label>
+          <label>Naam<input id="editOpeningName" maxlength="40"></label>
+          <label>Positie vanaf begin muur (m)<input id="editOpeningX" type="number" min="0" step=".01"></label>
+          <div class="grid2">
+            <label>Breedte (m)<input id="editOpeningWidth" type="number" min=".02" step=".01"></label>
+            <label>Hoogte (m)<input id="editOpeningHeight" type="number" min=".02" step=".01"></label>
+          </div>
+          <label>Onderkant boven muurvoet (m)<input id="editOpeningBottom" type="number" min="0" step=".01"></label>
+          <button id="saveOpeningBtn" class="primary">Opening opslaan</button>
+          <button id="deleteOpeningBtn" class="danger">Opening verwijderen</button>
         </div>
       </section>
 
@@ -246,6 +284,6 @@
   <div id="hint">Open ☰ en kies wat je wilt tekenen.</div>
 </div>
 
-<script type="module" src="./js/bootstrap.js?v=0.8.17-20260823-0005"></script>
+<script type="module" src="./js/bootstrap.js?v=0.8.18-20260823-0035"></script>
 </body>
 </html>

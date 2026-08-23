@@ -1,19 +1,25 @@
-# Measure AR v0.8.17 — Muur als zelfstandig tekengereedschap
-Build: 20260823-0005
+# Measure AR v0.8.18 — Openingen in muren
+Build: 20260823-0035
 
-## Nieuw in v0.8.17
-- `Muur` is nu een zelfstandig gereedschap in het hoofdmenu.
-- Workflow: Muur kiezen → eigenschappen instellen → terug naar AR → A → B → C → D → …
-- Elk nieuw eindpunt wordt automatisch het vertrekpunt van het volgende muursegment.
-- Dezelfde compacte HUD bepaalt AUTO/exacte afstand en alle bestaande constraints.
-- Hoogte, dikte, zijde, oriëntatie, hoek, kleur en transparantie worden vóór het tekenen ingesteld.
-- Ieder muursegment krijgt automatisch een unieke naam.
-- Interne basislijnen worden automatisch aangemaakt en blijven gekoppeld aan de muur.
-- Basislijnlabels zijn verborgen zodat ze het AR-beeld niet onnodig vullen.
-- Aangrenzende muursegmenten krijgen een kleine eind-overlap om zichtbare kieren in AR te vermijden.
-- `Voltooien` maakt een open `wallpath`; er wordt nooit automatisch terug naar A gesloten.
-- Undo/Redo omvat muursegment + basislijn + nieuw punt als één consistente projectstate.
-- De oude methode `Maak muur van lijn` blijft voorlopig beschikbaar voor bestaande workflows.
+## Nieuw in v0.8.18
+- Deur, raam en vrije opening zijn echte child-objecten van een muur.
+- Iedere opening gebruikt muur-lokale maten:
+  - X = afstand vanaf begin van de muur;
+  - onderkant = hoogte boven de muurvoet;
+  - breedte;
+  - hoogte.
+- De muur wordt werkelijk visueel opgebouwd rond de opening; er staat dus niet enkel een rechthoek vóór de muur.
+- Meerdere niet-overlappende openingen per muur zijn mogelijk.
+- Opening wordt gevalideerd tegen muurlengte en muurhoogte.
+- Negatieve of ongeldige maten worden geweigerd.
+- Overlappende openingen worden geweigerd.
+- Deurpreset: 0,90 × 2,10 m vanaf vloer.
+- Raampreset: 1,20 × 1,10 m met onderkant 0,90 m.
+- Opening kan achteraf volledig worden gewijzigd.
+- Opening verwijderen bouwt de massieve muur automatisch terug op.
+- Muur verwijderen verwijdert zijn child-openingen mee.
+- Muurhoogte kan niet worden verkleind als een bestaande opening er dan buiten zou vallen.
+- Openingen zitten in de centrale Undo/Redo-snapshot en projectvalidator.
 
 ## Automatische tests na genereren — PASS
 - JavaScript-syntax: alle modules.
@@ -21,41 +27,39 @@ Build: 20260823-0005
 - Geen dubbele HTML-ID's.
 - Alle UI-ID-referenties bestaan.
 - Alle statische knoppen hebben een handler.
-- Muurtool-pagina en instellingen zijn gekoppeld.
-- Tool `wall` bestaat in de centrale drawing core.
-- Na ieder segment wordt automatisch een muur aangemaakt.
-- Actief eindpunt schuift door naar het volgende segment.
-- Muurtool stopt niet automatisch na AB.
-- `Voltooien` creëert een open wallpath.
-- Basislijnen blijven aanwezig maar hun labels zijn verborgen.
-- Automatische unieke muurnamen zijn aanwezig.
-- Wall-toolinstellingen zitten in Undo/Redo-snapshots.
-- Hoekverbinding heeft AR-vriendelijke overlapcompensatie.
-- Centrale Undo/Redo uit v0.8.15 blijft gekoppeld.
+- Opening-engine create/update/delete/validate aanwezig.
+- Muur-geometrie wordt rond openingen in deelblokken opgebouwd.
+- Overlapdetectie aanwezig.
+- Openingen zitten in Undo/Redo snapshot/restore.
+- Projectvalidator controleert openingsreferenties.
+- Overlaptest: overlappende rechthoeken correct gedetecteerd.
+- Rand-aan-rand openingen worden niet fout als overlap gezien.
+- Standaarddeur past in 4,00 × 2,40 m muur.
+- Standaardraam past in 4,00 × 2,40 m muur.
+- Te brede opening wordt gedetecteerd.
+- Te hoge opening wordt gedetecteerd.
 
-## Nieuwe fysieke tests v0.8.17
-- Kies Muur en controleer dat het menu sluit na `Muur tekenen starten`.
-- A→B: één muur AB verschijnt.
-- B→C: BC verschijnt en B blijft gedeelde hoek.
-- C→D: CD verschijnt.
-- Voltooien: geen automatische D→A muur.
-- AUTO-afstand met muur.
-- Exact 100 cm met muur.
-- Horizontaal met muur.
-- Loodrecht met muur.
-- Eigen hoek met muur.
-- Parallel met muur.
-- Muurdikte 10/14/20 cm vergelijken.
-- Hoogte wijzigen vóór nieuwe muurmodus.
-- Gecentreerd/links/rechts testen.
-- Twee muren onder 90°: controleer visueel op kieren/overlap.
-- Undo na BC: muur BC, lijn BC en eventueel punt C moeten samen verdwijnen.
-- Redo: alles moet terugkomen.
-- Alles wissen → Undo: volledig muurpad moet terugkomen.
-- Bestaande oude `Maak muur van lijn` workflow blijft werken.
+## Nieuwe fysieke tests v0.8.18
+- Maak muur van minstens 4 m.
+- Voeg standaarddeur toe: controleer echte visuele uitsparing.
+- Voeg standaardraam toe.
+- Controleer muur zichtbaar rondom raam: onderdorpel, bovenstuk, links/rechts.
+- Voeg twee openingen in dezelfde muur toe.
+- Probeer overlappende openingen: moet weigeren.
+- Probeer opening voorbij muureinde: moet weigeren.
+- Probeer opening boven muurhoogte: moet weigeren.
+- Pas breedte/hoogte/positie aan en controleer directe muur-rebuild.
+- Verwijder opening: muur moet volledig herstellen.
+- Undo opening plaatsen → massieve muur.
+- Redo → opening exact terug.
+- Undo/Redo na verplaatsen opening.
+- Verwijder muur met openingen → children moeten mee verdwijnen.
+- Undo muur verwijderen → muur + openingen moeten terugkomen.
+- Verklein muurhoogte onder een raamtop → moet weigeren.
+- Test openingen op muursegmenten AB en BC afzonderlijk.
 
 ## Gepland — uitgebreide functie Meten
-De huidige meetfunctie is nog niet de definitieve meetmodule. Deze wordt later aanzienlijk uitgebreid. Minstens voorzien:
+De huidige meetfunctie is nog niet de definitieve meetmodule en wordt later aanzienlijk uitgebreid. Minstens voorzien:
 - enkele afstand;
 - doorlopend meten;
 - totale lengte;
@@ -67,8 +71,15 @@ De huidige meetfunctie is nog niet de definitieve meetmodule. Deze wordt later a
 - oppervlakte;
 - omtrek;
 - koppeling aan snapping, referentielijnen en tekenvlakken;
-- bijkomende meetfuncties die later tijdens ontwikkeling worden bepaald.
-Deze roadmapsectie moet in iedere volgende README behouden blijven.
+- aanvullende meetfuncties die tijdens verdere ontwikkeling worden bepaald.
+Deze roadmapsectie blijft in iedere volgende README staan.
+
+## Volgende ontwikkelrichtingen
+- Openingen interactief positioneren door rechtstreeks op de muur te richten.
+- Tekenen/snappen op randen en hoekpunten van openingen.
+- Later echte deur-/raamobjecten in de opening.
+- Geavanceerde snapping en lijnintersecties.
+- Projecten persistent opslaan/herladen.
 
 ## Nog fysiek te testen — cumulatief
 Deze tests vereisen echte WebXR/ARCore en blijven open.
@@ -135,7 +146,7 @@ Deze tests vereisen echte WebXR/ARCore en blijven open.
 - Ref-chip.
 - Zijde/Richting-chip.
 
-### Objectbeheer — nieuw voor v0.8.17
+### Objectbeheer — nieuw voor v0.8.18
 - Punt hernoemen en label controleren.
 - Automatische lijnnaam verandert mee na punt-hernoeming.
 - Lijn handmatig hernoemen en daarna punt hernoemen: custom lijnnaam moet blijven.
@@ -150,7 +161,7 @@ Deze tests vereisen echte WebXR/ARCore en blijven open.
 - Muurhoek wijzigen.
 - Objectbeheer mag tracking niet verstoren.
 
-### Undo/Redo — nieuw voor v0.8.17
+### Undo/Redo — nieuw voor v0.8.18
 - Punt plaatsen → Undo → Redo.
 - Lijn A→B → Undo → Redo.
 - Polyline meerdere stappen achteruit en opnieuw vooruit.
@@ -191,6 +202,12 @@ https://gasvdv-lab.github.io/Measure_tool/
 
 Upload alle bestanden uit deze ZIP. `js/history.js` is nieuw en moet mee naar GitHub.
 
+
+
+Vaste app-link:
+https://gasvdv-lab.github.io/Measure_tool/
+
+Upload de volledige inhoud van deze ZIP naar GitHub.
 
 
 Vaste app-link:
