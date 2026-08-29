@@ -1,3 +1,7 @@
+# v0.8.23 Spatial Restore
+
+Project Space blijft de geometrische waarheid. Bij het openen van een opgeslagen project met referentiepunten start nu automatisch de positieherstel-flow. De gebruiker wijst dezelfde fysieke referenties opnieuw aan; Measure AR berekent daaruit de transformatie van het permanente Project Origin naar de nieuwe WebXR-sessie. 4+ referenties gebruiken best-fit en residualcontrole.
+
 # Measure AR — Master Roadmap
 
 **Huidige versie:** v0.8.21.6 — Project Manager Stability  
