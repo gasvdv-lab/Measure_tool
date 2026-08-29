@@ -1,4 +1,8 @@
-# v0.8.28.1 gerichte regressietest — CAD file picker lifecycle
+# v0.8.28.2 gerichte regressietest — CAD Home-block
+
+**Kritieke test:** Open actief project → ☰ → CAD → CAD-model importeren → open Android-bestandskiezer → kies GLB. Op geen enkel moment mag het Measure AR-startscherm verschijnen. Bij XR-onderbreking moet CAD-menu/context zichtbaar blijven. Test ook annuleren van de bestandskiezer.
+
+# v0.8.28.2 gerichte regressietest — CAD file picker lifecycle
 
 ## AUTO
 - [x] Alle JS-bestanden syntax geldig.

@@ -1,9 +1,11 @@
-# Measure AR v0.8.28.1 — CAD File Picker Lifecycle Fix
+# Measure AR v0.8.28.2 — CAD File Picker Home-Block Fix
 
 GitHub Pages: https://gasvdv-lab.github.io/Measure_tool/
 
-## Fix in v0.8.28.1
-- CAD-import stuurt de gebruiker niet meer naar het startscherm wanneer Android/Chrome de immersive WebXR-sessie beëindigt bij het openen van de systeem-bestandskiezer.
+## Fix in v0.8.28.2
+- CAD-import heeft nu een persistente Home-block vanaf het openen van de Android-bestandskiezer tot AR hervat/plaatsing afgerond of geannuleerd is.
+- De bescherming blijft actief ná `change`/`cancel`, zodat een vertraagd WebXR `end`-event niet meer door de guard kan glippen.
+- De CAD-importstatus wordt ook in `sessionStorage` bewaard; bij een UI/browser-herinitialisatie wordt direct de CAD-context hersteld in plaats van Home.
 - De CAD-menupagina en huidige projectstate blijven behouden tijdens deze externe file-picker overgang.
 - De destructieve algemene XR-cleanup wordt niet uitgevoerd voor een CAD-file-picker onderbreking.
 - CAD importeren en CAD plaatsen zijn nu technisch losgekoppeld: het GLB/glTF-bestand kan eerst veilig worden ingelezen en lokaal bewaard, ook wanneer de AR-sessie door de bestandskiezer is gestopt.

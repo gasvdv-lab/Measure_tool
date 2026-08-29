@@ -151,7 +151,7 @@ Project Space blijft de geometrische waarheid. Bij het openen van een opgeslagen
 - [x] Vizierplaatsing, rotatie en hoogtecorrectie.
 - [x] CAD-metadata in project en bronbestand lokaal in IndexedDB.
 
-## v0.8.28.1 — CAD File Picker Lifecycle Fix ✅
+## v0.8.28.2 — CAD File Picker Lifecycle Fix ✅
 - [x] Android file-picker mag niet meer naar het startscherm navigeren.
 - [x] CAD-menucontext behouden wanneer WebXR door de systeemkiezer stopt.
 - [x] Projectstate niet destructief leegmaken bij deze externe onderbreking.
