@@ -1,12 +1,7 @@
-# v0.8.29 status — Relocalization Capture Minimal Fix
-
-- [x] v0.8.28-regressie teruggedraaid naar v0.8.27-baseline.
-- [x] Capture-fix opnieuw minimaal geïmplementeerd zonder centrale state-wijziging.
-- [ ] Praktijktest: bestaand project openen.
-- [ ] Praktijktest: nieuw project + lijn tekenen.
-- [ ] Praktijktest: relocalisatieknop bij groen vizier.
-
----
+# Status v0.8.27
+- [x] Project Transform Core: brongeometrie blijft immutable bij relocalisatie.
+- [x] Precision capture basis + referentie-integriteit.
+- [ ] Fysieke regressietest v0.8.27.
 
 # v0.8.23 Spatial Restore
 
@@ -14,26 +9,13 @@ Project Space blijft de geometrische waarheid. Bij het openen van een opgeslagen
 
 # Measure AR — Master Roadmap
 
-**Huidige versie:** v0.8.27 — Relocalization Aim Mode Fix  
-**Huidige gate:** praktisch valideren dat **Gebruik vizier** het herstelmenu volledig verbergt, een fysiek referentiepunt laat opnemen en daarna terugkeert naar dezelfde herstelpagina; vervolgens 4+ best-fit fysiek valideren.
+**Huidige versie:** v0.8.21.6 — Project Manager Stability  
+**Huidige gate:** Project Manager Stability praktisch valideren; World Lock voor eenvoudige en samengestelde geometrie is door de gebruiker positief getest.
 
 ## Testcodes
 `AUTO` · `PC` · `AR-IN/A4` · `AR-IN/ROOM` · `AR-OUT`
 
 ## Nu — Core herstel
-
-
-### v0.8.27 — Relocalization Aim Mode Fix
-- [x] Expliciete relocalization aim-mode toegevoegd.
-- [x] Herstelmenu in aim-mode gegarandeerd verborgen.
-- [x] Vizier + witte opnameknop blijven beschikbaar.
-- [x] Na puntopname automatisch terug naar herstelpagina.
-- [x] ☰ annuleert lopende aanwijzing veilig.
-- [x] Best-fit/Jacobi-fix uit v0.8.26 behouden.
-- [x] AUTO syntax/cache/UI-broncontrole.
-- [ ] **AR-IN/AR-OUT:** tik **Gebruik vizier** → menu verdwijnt onmiddellijk.
-- [ ] **AR-IN/AR-OUT:** richt punt → witte knop → menu keert terug met ✓.
-- [ ] **AR-IN/AR-OUT:** vier referenties opnemen en 4+ best-fit fysiek controleren.
 
 ### v0.8.21.6 — Project Manager Stability
 - [x] Projectkopie loskoppelen van `loadStoredProject()`.
@@ -143,25 +125,12 @@ Project Space blijft de geometrische waarheid. Bij het openen van een opgeslagen
 - [ ] After pass: resume Spatial Restore validation
 
 
-### v0.8.25 — Spatial Restore 2.0
-- [x] World Lock 2.0 fysieke basisgate geslaagd: getekende geometrie blijft op positie.
-- [x] Shape fill regressie hersteld en fysiek bevestigd.
-- [x] Project Origin automatisch vastleggen bij save.
-- [x] Referenties herkenbaar tonen met naam/omschrijving.
-- [x] Minimumaantal referenties per 1/2/3/precision methode afdwingen.
-- [x] RMS/gemiddelde/max fout rapporteren en zwakke oplossing waarschuwen.
-- [x] Project Origin + referentiecoördinaten coherent houden na toegepaste rigid restore.
-- [ ] AR-IN/ROOM: save → volledig sluiten → reopen → 4 refs opnieuw aanwijzen → restore → fysieke positie controleren.
-- [ ] AR-IN/ROOM: afmetingen/hoeken vóór en na restore exact vergelijken.
-- [ ] AR-IN/ROOM: tweede save/reopen/restore uitvoeren om dubbele transformatie uit te sluiten.
-- [ ] Na fysieke gate: Relocalization UX 2.0 / kalibratiewizard verder verfijnen.
-
-
-## v0.8.27 — Relocalization Best-Fit Fix
-- [x] Reproduceerbare 4+ best-fit solverfout uit v0.8.25 geïsoleerd.
-- [x] Quaternion power iteration vervangen door stabiele symmetrische Jacobi-eigenoplosser.
-- [x] Automatische bekende-transformtests voor 10°/30°/60°/90°/135° toegevoegd aan testdocumentatie.
-- [ ] AR-IN/ROOM: 4+ fysieke restore opnieuw uitvoeren.
-- [ ] AR-IN/ROOM: onafhankelijk controlepunt meten.
-- [ ] AR-IN/ROOM: tweede save/reopen/restore uitvoeren.
-- [ ] Na fysieke gate: formele Project Space → Project Transform → AR World Space-laag uitvoeren vóór verdere CAD/Measure Engine-uitbreiding.
+## v0.8.26 — Hybrid Spatial Localization ✅
+- [x] Start vanaf stabiele v0.8.24 baseline
+- [x] GPS als grove geografische projectlocatie
+- [x] Absolute toestelrichting opslaan indien browser/sensor dit levert
+- [x] Hybride locatiecheck met afstand en onzekerheid
+- [x] Referentiepunten behouden als precisielaag
+- [x] Vrij camerabeeld tijdens opnieuw aanwijzen van referenties
+- [ ] Volgende experimentele stap: visual relocalization zonder geprinte marker
+- [ ] Project Space → AR World Space als expliciete sessietransform, zonder brongeometrie te herschrijven

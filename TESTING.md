@@ -1,55 +1,12 @@
-# Testupdate v0.8.29 — regressieherstel + minimale capture-fix
-
-## Automatisch
-- [x] Opnieuw opgebouwd vanaf v0.8.27.
-- [x] Geen `relocalizationAimMode` state-property toegevoegd.
-- [x] JavaScript-syntaxcontrole van alle modules.
-- [x] Relatieve module-imports bestaan.
-- [x] Normale capture-pad gebruikt nog `isCaptureAllowed()`.
-
-## Verplichte praktijktest
-- [ ] Bestaand project opent zonder `Group`-fout.
-- [ ] Nieuw project kan worden gestart.
-- [ ] Lijn: A en B kunnen normaal worden geplaatst.
-- [ ] Relocalisatie: Gebruik vizier → groen vizier → witte knop actief.
-- [ ] Referentie wordt opgeslagen en herstelmenu komt terug.
-
----
-
-# Testupdate v0.8.27 — Relocalization Aim Mode Fix
-
-## Nieuwe UI-regressie v0.8.27
-- [x] Broncontrole: **Gebruik vizier** activeert expliciet `relocalizationAimMode`.
-- [x] Broncontrole: `#menuPanel` is in aim-mode `display:none!important`.
-- [x] Broncontrole: opnameknop beëindigt aim-mode en heropent `relocalize`.
-- [x] Broncontrole: ☰ annuleert een lopende aanwijzing zonder een punt op te slaan.
-
-## Verplichte fysieke UI-test
-- [ ] Open **Projectpositie herstellen**.
-- [ ] Tik **Gebruik vizier** bij Referentie 1.
-- [ ] **PASS:** herstelmenu verdwijnt volledig.
-- [ ] **PASS:** AR-camera, vizier en witte opnameknop blijven zichtbaar/bruikbaar.
-- [ ] Richt op het fysieke referentiepunt en druk op de witte knop.
-- [ ] **PASS:** herstelmenu keert automatisch terug op dezelfde pagina.
-- [ ] **PASS:** Referentie 1 toont `✓ opnieuw aangewezen`.
-- [ ] Herhaal voor alle overige referenties.
-
-
-## Automatische regressietest toegevoegd
-De best-fit wiskunde is gecontroleerd met vier perfecte coplanaire punten, bekende translatie en yaw-rotaties van 10°, 30°, 60°, 90° en 135°. Verwachting: rigid fit zonder schaal en numerieke residual praktisch nul. Resultaat voor de nieuwe Jacobi-solver: PASS voor alle vijf rotaties; maximale numerieke fout bleef op floating-point niveau (< 1e-12 m in de onafhankelijke referentieberekening).
-
-## Openstaande fysieke AR-test
-- [ ] Project met 4 refs opslaan.
-- [ ] AR/browser volledig sluiten en opnieuw starten.
-- [ ] Hetzelfde project openen.
-- [ ] Vier fysieke refs opnieuw aanwijzen.
-- [ ] 4+ precision berekenen en toepassen.
-- [ ] RMS, gemiddelde en max noteren.
-- [ ] Onafhankelijk controlepunt fysiek controleren.
-- [ ] Afstanden en hoeken vóór/na vergelijken.
-- [ ] Nogmaals opslaan, opnieuw openen en herstellen om dubbele transformatie uit te sluiten.
-
----
+# v0.8.27 gerichte test
+1. World Lock: teken lijn/vorm en loop rond.
+2. Shape Fill: sluit vorm; fill moet direct zichtbaar zijn.
+3. Registreer 2-4 refs, save, sluit tab/AR volledig, open opnieuw.
+4. Gebruik vizier voor refs; menu moet weg zijn tijdens mikken.
+5. Gekozen 4+ modus mag niet berekenen met minder dan 4 captures.
+6. Apply restore; afmetingen moeten exact gelijk blijven.
+7. Teken na restore een nieuwe lijn; deze moet correct aansluiten en opslaan.
+8. Save/reopen/restore opnieuw; geen cumulatieve verschuiving van brongeometrie.
 
 # v0.8.23 Spatial Restore
 
@@ -137,5 +94,11 @@ AR-IN: Start AR → Project → Nieuw leeg project → bevestigen. Verwacht: Pro
 AR-IN/ROOM: place A→B on a stable surface, confirm both endpoints, then move the phone 0.5–2 m. The committed geometry must remain fixed relative to the environment. If it moves with the phone, stop further Spatial Restore testing.
 
 
-## v0.8.25 Spatial Restore 2.0 gate
-AR-IN/ROOM: maak 4 vaste fysieke referenties A/B/C/D en geometrie die ertussen ligt. Registreer alle vier, sla het project op en sluit de WebXR-sessie volledig. Open opnieuw en open het project. Verwacht: Spatial Restore wordt aangeboden met de opgeslagen referentienamen. Wijs A/B/C/D opnieuw aan, bereken de uitlijning en noteer RMS/max. Pas toe en controleer vanaf meerdere kijkhoeken dat de geometrie terug op de oorspronkelijke fysieke positie ligt. Controleer alle oorspronkelijke lengtes/hoeken. Sla opnieuw op, herhaal een tweede reopen/restore en controleer dat geen dubbele transformatie ontstaat.
+## v0.8.26 — gerichte fysieke test
+1. Sla bij Project de **Hybride locatie** op. Controleer GPS-nauwkeurigheid en eventueel richting.
+2. Sluit de AR-sessie volledig en start opnieuw op dezelfde locatie.
+3. Open het project en kies **Hybride locatie controleren**. De afstand moet logisch zijn en de GPS-onzekerheid zichtbaar.
+4. Kies een opgeslagen referentie en druk **Gebruik vizier**. Het menu moet sluiten.
+5. Richt het vizier op het fysieke punt en druk de witte knop. Het relocalisatiescherm moet terugkomen met een vinkje.
+6. Herhaal minstens twee referenties en bereken/apply de uitlijning.
+7. Controleer dat bestaande geometrie na toepassing world-locked blijft en afmetingen niet veranderen.

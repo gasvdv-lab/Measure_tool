@@ -1,45 +1,25 @@
-# Measure AR v0.8.29 — Relocalization Capture Minimal Fix
+# Measure AR v0.8.27 — Project Transform Core
 
-**Vaste GitHub Pages-link:** https://gasvdv-lab.github.io/Measure_tool/
+GitHub Pages: https://gasvdv-lab.github.io/Measure_tool/
 
-Deze release is bewust opnieuw opgebouwd vanaf de stabiele v0.8.27-code. De v0.8.28-wijzigingen aan de centrale app-state zijn volledig teruggedraaid. Alleen de witte opnameknop tijdens **Projectpositie herstellen → Gebruik vizier** is aangepast. De bestaande DOM-klasse `relocalizationAimMode` bepaalt of de knop op een geldige AR-hit mag reageren. Project openen, nieuw project en de normale tekenengine blijven daardoor identiek aan v0.8.27.
+## Kernwijzigingen v0.8.27
+- Spatial Restore herschrijft `point.position` niet meer: Project Space blijft de geometrische waarheid.
+- Sessietransform wordt alleen voor de actieve AR-sessie gebruikt en niet als brongeometrie opgeslagen.
+- Nieuwe punten na relocalisatie worden terug naar Project Space omgerekend.
+- Relocalisatiemethodes dwingen nu werkelijk 1/2/3/4+ referenties af.
+- `Gebruik vizier` wist eerst oude tracking-samples en registreert de actuele raw hit-pose.
+- Projectreferentiepunten kunnen niet per ongeluk als gewoon punt worden verwijderd.
+- `Alles wissen` ruimt ook projectreferenties op.
+- GPS/oriëntatie wordt expliciet als grove controle behandeld, niet als centimeter-uitlijning.
+- Versie/buildmetadata is gelijkgetrokken.
+- Geen losse TEST_RESULTS-bestanden in release-ZIP.
 
-## v0.8.29 wijziging
-- v0.8.28 state-wijzigingen volledig verwijderd.
-- Geen nieuwe relocalization-property in `S`.
-- Normale tekenmodus blijft exact `isCaptureAllowed()` gebruiken.
-- Alleen tijdens de reeds bestaande `relocalizationAimMode`-UI wordt de witte knop actief bij `S.currentTarget`.
-- Projectformaat en opgeslagen geometrie zijn niet gewijzigd.
-
-## Eerst testen
-1. Open een bestaand project.
-2. Maak een nieuw project en teken één lijn.
-3. Open daarna Projectpositie herstellen → Gebruik vizier; groen vizier moet de witte knop activeren.
-
----
-
-# Measure AR v0.8.29 — Relocalization Aim Mode Fix
-
-**Vaste GitHub Pages-link:** https://gasvdv-lab.github.io/Measure_tool/
-
-Deze release corrigeert de concrete bediening van **Projectpositie herstellen**: na **Gebruik vizier** verdwijnt het herstelmenu nu gegarandeerd zodat het fysieke referentiepunt vrij in de AR-camera kan worden gericht. De witte opnameknop legt het punt vast en opent daarna automatisch opnieuw dezelfde herstelpagina. De best-fit-correctie uit v0.8.26 blijft behouden.
-
-## v0.8.27 wijzigingen
-- **Gebruik vizier** schakelt nu expliciet naar een aparte relocalization aim-mode.
-- Het volledige herstelmenu wordt in die aim-mode met een harde UI-regel verborgen.
-- Vizier, witte opnameknop en instructieregel blijven zichtbaar en bovenaan de UI-stack.
-- Na een geldige opname wordt aim-mode beëindigd en keert de app automatisch terug naar **Projectpositie herstellen**.
-- Tik op ☰ tijdens het aanwijzen annuleert alleen de lopende aanwijzing en keert veilig terug naar het herstelmenu.
-- De best-fit/Jacobi-correctie van v0.8.26 blijft behouden.
-- Cache-key en zichtbare appversie bijgewerkt.
-- Projectformaat blijft compatibel; geen migratie nodig.
-
-## Belangrijkste praktijktest
-Open **Projectpositie herstellen** en tik bij een referentie op **Gebruik vizier**. **PASS:** het menu verdwijnt onmiddellijk en je ziet vrij de AR-camera, het vizier en de witte opnameknop. Richt op het fysieke punt en druk op de witte knop. **PASS:** dezelfde herstelpagina verschijnt opnieuw en de referentie staat op ✓ opnieuw aangewezen. Herhaal daarna voor de overige referenties en voer de 4+ best-fit test uit.
+## Fysieke gate
+Test eerst World Lock, Shape Fill en daarna één volledige save → sluiten → openen → Spatial Restore-cyclus. Controleer dat afmetingen vóór/na identiek blijven.
 
 ---
 
-# v0.8.23 Spatial Restore
+# Measure AR v0.8.26 — Hybrid Spatial Localization
 
 Project Space blijft de geometrische waarheid. Bij het openen van een opgeslagen project met referentiepunten start nu automatisch de positieherstel-flow. De gebruiker wijst dezelfde fysieke referenties opnieuw aan; Measure AR berekent daaruit de transformatie van het permanente Project Origin naar de nieuwe WebXR-sessie. 4+ referenties gebruiken best-fit en residualcontrole.
 
@@ -66,7 +46,6 @@ Deze versie stabiliseert het volledige projectbeheer. De AR-tekenengine en World
 Vaste app-link: https://gasvdv-lab.github.io/Measure_tool/
 
 ## AUTO teststatus v0.8.21.6
-Zie `TEST_RESULTS_v0.8.21.6.md`. De releasecontrole omvat syntax/imports/cache-key plus gerichte broninvarianten voor save/open/copy/delete/recovery/import.
 
 ## Praktijktest projectbeheer
 1. Sla Project A en Project B op.
@@ -399,15 +378,11 @@ Bij het starten van een nieuw project worden World Lock-koppelingen veilig losge
 - De opvulling blijft gekoppeld aan de world-locked hoekpunten.
 
 
-## v0.8.25 — Spatial Restore 2.0
-- Spatial Restore is opnieuw de actieve roadmapstap na de geslaagde World Lock 2.0-regressietest.
-- Project Origin wordt bij opslaan automatisch afgeleid van de eerste projectreferentie; zonder referentie wordt het eerste projectpunt gebruikt.
-- Bij openen van een opgeslagen project met referenties start positieherstel automatisch in de aanbevolen 1/2/3/4+ methode.
-- De gekozen methode vereist nu effectief het juiste minimumaantal opnieuw aangewezen referenties.
-- Referentienaam en omschrijving worden samen getoond zodat het fysieke punt herkenbaar is.
-- Resultaat toont RMS, gemiddelde en maximale afwijking. Een zwakke oplossing geeft een waarschuwing vóór toepassen.
-- Na een rigid Spatial Restore worden Project Origin en opgeslagen referentiecoördinaten mee getransformeerd zodat een volgende save/reopen geen gemengde coördinatenframes bevat. Lengtes en hoeken blijven ongewijzigd.
-- World Lock 2.0 en de shape-fill hotfix uit v0.8.24 blijven behouden.
+## v0.8.26 — Hybrid Spatial Localization
+Gebouwd vanaf de door gebruiker bevestigde stabiele v0.8.24 World Lock 2.0 + Shape Fill baseline. Deze versie voegt een veilige hybride voorlokalisatielaag toe zonder projectgeometrie automatisch te herschrijven op basis van onnauwkeurige GPS-data.
 
-### Praktijktest v0.8.25
-Maak een project met 4 herkenbare punten, registreer ze als referenties en sla op. Sluit AR volledig, open opnieuw, open het project, wijs dezelfde 4 fysieke punten opnieuw aan, bereken de uitlijning en pas ze toe. Controleer dat geometrie terug op dezelfde plaats komt, World Lock actief blijft en alle afmetingen identiek blijven.
+- **Hybride locatie opslaan** bewaart high-accuracy GPS en, indien beschikbaar, absolute toestelrichting.
+- **Hybride locatie controleren** vergelijkt de actuele positie met de opgeslagen projectlocatie en toont afstand, GPS-onzekerheid en richtingsverschil.
+- GPS/richting zijn bewust alleen een **grove voorlokalisatie**. De bestaande 1–4 projectreferenties blijven de precisielaag.
+- Relocalisatie-UX gefixt: **Gebruik vizier** sluit het menu, laat het volledige AR-beeld zien en de witte knop bevestigt het gekozen fysieke referentiepunt.
+- World Lock 2.0 en automatische shape fill blijven ongewijzigd als stabiele core.
