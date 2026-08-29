@@ -1,9 +1,9 @@
-import {S,$} from "./state.js?v=0.8.28.4-20260829-2145";
-import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.28.4-20260829-2145";
-import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.28.4-20260829-2145";
-import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.28.4-20260829-2145";
-import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.28.4-20260829-2145";
-import {updateCadFrame,clearCadRuntime} from "./cad.js?v=0.8.28.4-20260829-2145";
+import {S,$} from "./state.js?v=0.8.28.5-20260829-2205";
+import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.28.5-20260829-2205";
+import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.28.5-20260829-2205";
+import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.28.5-20260829-2205";
+import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.28.5-20260829-2205";
+import {updateCadFrame,clearCadRuntime} from "./cad.js?v=0.8.28.5-20260829-2205";
 
 let samples=[],sampleSource=null,camPos,camQuat,forward;
 
@@ -82,11 +82,10 @@ function cleanup(){
 
   // Veilige CAD-import: AR is bewust gestopt VOORDAT de native file picker opent.
   // Geen project/runtime wissen en niet naar Home: toon de gewone DOM-importworkspace.
-  if(endIntent==="cad-import-workspace"){
+  if(endIntent==="external-cad-page"){
     S.xrEndIntent=null;S.externalPicker=null;S.cadPickerLifecycle={active:false,returned:false};
     sessionStorage.removeItem("measurear.cadPickerActive");
-    $("overlay").style.display="none";$("app").style.display="grid";
-    document.dispatchEvent(new CustomEvent("measurear:cad-workspace-ready"));
+    if($("overlay"))$("overlay").style.display="none";
     return;
   }
 
@@ -108,12 +107,11 @@ function cleanup(){
 export async function suspendARForCadImport(){
   // Belangrijk: native file picker nooit openen vanuit immersive WebXR.
   // Eerst de XR-sessie gecontroleerd beëindigen en naar gewone DOM-workspace gaan.
-  S.xrEndIntent="cad-import-workspace";
+  S.xrEndIntent="external-cad-page";
   if(S.xrSession){
     await S.xrSession.end();
   }else{
     S.xrEndIntent=null;
-    document.dispatchEvent(new CustomEvent("measurear:cad-workspace-ready"));
   }
 }
 
