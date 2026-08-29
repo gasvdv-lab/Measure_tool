@@ -89,7 +89,12 @@
 - Permanente projectstatus in de AR-topbalk: opgeslagen of gewijzigd.
 - Startscherm wordt niet gebruikt als bestemming van Project Manager-acties.
 
-## v0.8.21.7 — Relocalization Menu Access
+## v0.8.21.8 — Relocalization Menu Access
 - [x] Relocalisatie rechtstreeks bereikbaar maken vanuit het AR-hoofdmenu.
 - [ ] Fysieke 1/2/3/4+ referentiepunttest uitvoeren.
 - [ ] Daarna: v0.8.22 Relocalization 2.0.
+
+### v0.8.21.8 — Relocalization UI Fix
+- [x] Relocalisatie-ingang via standaard menunavigatie gekoppeld.
+- [ ] AR-IN: bevestigen dat `☰ → Relocalisatie` het scherm `Project uitlijnen` opent.
+- [ ] Daarna fysieke 1/2/3/4+ referentiepunttest hervatten.
