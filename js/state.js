@@ -1,5 +1,5 @@
 export const S={
-  version:"0.8.28.3",build:"20260829-2125",
+  version:"0.8.28.4",build:"20260829-2145",
   THREE:null,renderer:null,scene:null,camera:null,reticle:null,xrSession:null,hitSource:null,hitRequested:false,
   currentTarget:null,currentRawTarget:null,currentHitResult:null,currentXRFrame:null,currentReferenceSpace:null,targetSource:"none",zoom:1,pointPlacementEpoch:0,referenceCaptureId:null,
   points:[],lines:[],contours:[],shapes:[],walls:[],openings:[],
@@ -38,7 +38,8 @@ export const S={
   },
   cadRuntime:{objects:new Map(),activeId:null,placing:false,offsetY:0},
   externalPicker:null,
-  cadPickerLifecycle:{active:false,returned:false}
+  cadPickerLifecycle:{active:false,returned:false},
+  xrEndIntent:null
 };
 
 export const $=id=>document.getElementById(id);

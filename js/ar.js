@@ -1,9 +1,9 @@
-import {S,$} from "./state.js?v=0.8.28.3-20260829-2125";
-import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.28.3-20260829-2125";
-import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.28.3-20260829-2125";
-import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.28.3-20260829-2125";
-import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.28.3-20260829-2125";
-import {updateCadFrame,clearCadRuntime} from "./cad.js?v=0.8.28.3-20260829-2125";
+import {S,$} from "./state.js?v=0.8.28.4-20260829-2145";
+import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.28.4-20260829-2145";
+import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.28.4-20260829-2145";
+import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.28.4-20260829-2145";
+import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.28.4-20260829-2145";
+import {updateCadFrame,clearCadRuntime} from "./cad.js?v=0.8.28.4-20260829-2145";
 
 let samples=[],sampleSource=null,camPos,camQuat,forward;
 
@@ -73,13 +73,24 @@ export async function resumeARFromGesture(){
   }catch(err){throw new Error(`AR hervatten mislukt: ${err?.message||err}`);}
 }
 function cleanup(){
+  const endIntent=S.xrEndIntent;
   const externalPicker=S.externalPicker;
   const cadPickerProtected=externalPicker?.kind==="cad"||S.cadPickerLifecycle?.active||sessionStorage.getItem("measurear.cadPickerActive")==="1";
   resetWorldLock();resetTrackingSamples();S.renderer?.setAnimationLoop(null);
   if(S.renderer?.domElement)S.renderer.domElement.style.display="none";
   S.xrSession=null;S.hitSource=null;S.hitRequested=false;S.currentTarget=null;S.currentRawTarget=null;S.currentHitResult=null;S.currentXRFrame=null;S.currentReferenceSpace=null;S.targetSource="none";S.referenceCaptureId=null;
 
-  // Android kan immersive WebXR beëindigen wanneer de systeem-bestandskiezer opent.
+  // Veilige CAD-import: AR is bewust gestopt VOORDAT de native file picker opent.
+  // Geen project/runtime wissen en niet naar Home: toon de gewone DOM-importworkspace.
+  if(endIntent==="cad-import-workspace"){
+    S.xrEndIntent=null;S.externalPicker=null;S.cadPickerLifecycle={active:false,returned:false};
+    sessionStorage.removeItem("measurear.cadPickerActive");
+    $("overlay").style.display="none";$("app").style.display="grid";
+    document.dispatchEvent(new CustomEvent("measurear:cad-workspace-ready"));
+    return;
+  }
+
+  // Compatibiliteit met oudere interrupted-picker status; nieuwe CAD-flow gebruikt dit niet meer.
   // Dat is geen bewuste 'AR verlaten'-actie: projectdata en menucontext moeten behouden blijven.
   if(cadPickerProtected){
     $("app").style.display="none";$("overlay").style.display="block";
@@ -93,6 +104,19 @@ function cleanup(){
   if($("startArBtn")){$("startArBtn").disabled=false;$("startArBtn").textContent="AR starten";}
   if($("launchStatus"))$("launchStatus").textContent="Tik om AR te starten.";
 }
+
+export async function suspendARForCadImport(){
+  // Belangrijk: native file picker nooit openen vanuit immersive WebXR.
+  // Eerst de XR-sessie gecontroleerd beëindigen en naar gewone DOM-workspace gaan.
+  S.xrEndIntent="cad-import-workspace";
+  if(S.xrSession){
+    await S.xrSession.end();
+  }else{
+    S.xrEndIntent=null;
+    document.dispatchEvent(new CustomEvent("measurear:cad-workspace-ready"));
+  }
+}
+
 export async function leaveAR(){if(S.xrSession){await S.xrSession.end();return;}cleanup();}
 
 function render(_,frame){

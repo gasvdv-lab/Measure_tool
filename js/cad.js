@@ -1,4 +1,4 @@
-import {S,projectToWorld,worldToProject} from "./state.js?v=0.8.28.3-20260829-2125";
+import {S,projectToWorld,worldToProject} from "./state.js?v=0.8.28.4-20260829-2145";
 
 const DB_NAME="measurear.cad.v1",STORE="files";
 let loaderPromise=null;
@@ -42,7 +42,7 @@ async function instantiate(m,blob){
 }
 export async function importCadFile(file){
   if(!file)throw new Error("Geen CAD-bestand gekozen.");
-  if(!/\.(glb|gltf)$/i.test(file.name))throw new Error("v0.8.28.3 ondersteunt GLB/glTF. Exporteer FreeCAD eerst als GLB/glTF.");
+  if(!/\.(glb|gltf)$/i.test(file.name))throw new Error("v0.8.28.4 ondersteunt GLB/glTF. Exporteer FreeCAD eerst als GLB/glTF.");
   if(file.size>80*1024*1024)throw new Error("CAD-bestand is groter dan 80 MB.");
   if(!S.THREE||!S.scene)throw new Error("Start eerst AR.");
   const id="cad-"+crypto.randomUUID(),fileKey=id;

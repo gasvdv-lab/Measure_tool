@@ -1,6 +1,6 @@
-import {startAR} from "./ar.js?v=0.8.28.3-20260829-2125";
-import {$} from "./state.js?v=0.8.28.3-20260829-2125";
-const VERSION="0.8.28.2",BUILD="20260829-2125";
+import {startAR} from "./ar.js?v=0.8.28.4-20260829-2145";
+import {$} from "./state.js?v=0.8.28.4-20260829-2145";
+const VERSION="0.8.28.4",BUILD="20260829-2145";
 
 function showFatal(message){
   const status=$("launchStatus"),error=$("error"),btn=$("startArBtn");
@@ -9,7 +9,7 @@ function showFatal(message){
   if(btn){btn.disabled=false;btn.textContent="Opnieuw proberen";}
 }
 async function lazyInitUI(){
-  try{const mod=await import("./ui.js?v=0.8.28.3-20260829-2125");mod.initUI();if(document.documentElement.dataset.uiReady!=="1")throw new Error("UI-binding niet voltooid.");return true;}
+  try{const mod=await import("./ui.js?v=0.8.28.4-20260829-2145");mod.initUI();if(document.documentElement.dataset.uiReady!=="1")throw new Error("UI-binding niet voltooid.");return true;}
   catch(err){console.error("UI init failed",err);showFatal(`UI-fout · v${VERSION} build ${BUILD}\n${err.message||err}`);return false;}
 }
 async function startFromUserGesture(){
