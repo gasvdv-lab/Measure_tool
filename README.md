@@ -1,3 +1,22 @@
+# Measure AR v0.8.28 — Relocalization Capture Button Fix
+
+**Vaste GitHub Pages-link:** https://gasvdv-lab.github.io/Measure_tool/
+
+Deze release corrigeert de witte opnameknop tijdens **Projectpositie herstellen**. In v0.8.27 werd het menu correct verborgen, maar de AR-renderloop gebruikte nog de normale tekenengine-conditie `isCaptureAllowed()`. Omdat relocalisatie bewust geen tekenfunctie activeert, bleef de witte knop daardoor uitgeschakeld.
+
+## v0.8.28 wijzigingen
+- Relocalization aim-mode heeft nu een expliciete state in de centrale app-state.
+- Tijdens aim-mode wordt de witte opnameknop actief zodra er een geldig WebXR hit-testpunt onder het vizier is.
+- De normale tekenfuncties blijven ongewijzigd en gebruiken nog steeds `isCaptureAllowed()`.
+- De AR-status toont tijdens aim-mode of een referentiepunt gevonden is.
+- Na opname blijft de bestaande flow behouden: referentie opslaan, aim-mode afsluiten en terugkeren naar **Projectpositie herstellen**.
+- Geen wijziging aan projectformaat of opgeslagen geometrie.
+
+## Verplichte praktijktest
+Tik **Gebruik vizier** bij Referentie 1. Zodra het vizier groen is op een herkend oppervlak moet de witte knop onderaan **actief** worden. Druk erop: Referentie 1 moet worden vastgelegd en de herstelpagina moet opnieuw openen met `✓ opnieuw aangewezen`.
+
+---
+
 # Measure AR v0.8.27 — Relocalization Aim Mode Fix
 
 **Vaste GitHub Pages-link:** https://gasvdv-lab.github.io/Measure_tool/
