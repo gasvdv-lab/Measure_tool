@@ -618,3 +618,187 @@ label{color:var(--ui-muted);font-size:.68rem;font-weight:600;letter-spacing:.025
   .drawingHud button{font-size:.58rem;padding:3px 4px}
   .hudPopover{bottom:max(158px,calc(env(safe-area-inset-bottom) + 158px))}
 }
+
+
+/* ============================================================
+   v0.8.28.8 — AR Visualization System
+   Pure presentation layer: technical geometry language,
+   focus mode, tracking/snap states and CAD visual semantics.
+   ============================================================ */
+
+:root {
+  --viz-confirmed: #35d07f;
+  --viz-selected: #5ea8ff;
+  --viz-provisional: #ffb84d;
+  --viz-danger: #ff5f6d;
+  --viz-ink: rgba(255,255,255,.96);
+  --viz-panel: rgba(12,18,22,.74);
+  --viz-hairline: rgba(255,255,255,.20);
+}
+
+/* Technical reticle: centre remains precise while state is readable. */
+#reticle {
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,.75));
+}
+#reticle::before,
+#reticle::after {
+  opacity: .82;
+}
+#reticle.hit-valid,
+#reticle.valid {
+  box-shadow: 0 0 0 1px rgba(53,208,127,.22), 0 0 14px rgba(53,208,127,.12);
+}
+#reticle.snap,
+#reticle.snapped {
+  box-shadow: 0 0 0 1px rgba(94,168,255,.35), 0 0 15px rgba(94,168,255,.16);
+}
+
+/* Compact technical measurement tags. */
+.line-label,
+.measure-label,
+.distance-label,
+.point-label {
+  padding: 3px 7px !important;
+  min-height: 0 !important;
+  border: 1px solid rgba(255,255,255,.18) !important;
+  border-radius: 6px !important;
+  background: rgba(8,13,16,.78) !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,.24) !important;
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .01em;
+}
+
+/* Visual semantics for states, ready for current and future classes. */
+.is-confirmed, .state-confirmed, [data-state="confirmed"] {
+  --state-accent: var(--viz-confirmed);
+}
+.is-selected, .state-selected, [data-state="selected"] {
+  --state-accent: var(--viz-selected);
+}
+.is-provisional, .state-provisional, [data-state="provisional"] {
+  --state-accent: var(--viz-provisional);
+}
+.is-error, .state-error, [data-state="error"] {
+  --state-accent: var(--viz-danger);
+}
+
+/* Tracking quality can be represented with a tiny instrument-style meter. */
+.tracking-meter {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 12px;
+  padding: 0 2px;
+}
+.tracking-meter > i {
+  display: block;
+  width: 3px;
+  border-radius: 1px;
+  background: rgba(255,255,255,.25);
+}
+.tracking-meter > i:nth-child(1) { height: 4px; }
+.tracking-meter > i:nth-child(2) { height: 7px; }
+.tracking-meter > i:nth-child(3) { height: 10px; }
+.tracking-meter[data-quality="1"] > i:nth-child(1),
+.tracking-meter[data-quality="2"] > i:nth-child(-n+2),
+.tracking-meter[data-quality="3"] > i {
+  background: var(--viz-confirmed);
+}
+
+/* Active mode reads as an instrument mode, not another large panel. */
+.tool-chip,
+.mode-chip,
+.active-tool-chip {
+  border: 1px solid rgba(53,208,127,.25) !important;
+  background: rgba(9,18,15,.72) !important;
+  box-shadow: none !important;
+  text-transform: uppercase;
+  letter-spacing: .075em;
+  font-size: 10px !important;
+  font-weight: 700;
+}
+.tool-chip::before,
+.mode-chip::before,
+.active-tool-chip::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  display: inline-block;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: var(--viz-confirmed);
+  box-shadow: 0 0 0 3px rgba(53,208,127,.10);
+}
+
+/* Focus mode contract. If current/future code sets one of these classes,
+   secondary chrome disappears and the camera/measurement dominates. */
+body.focus-mode .topbar,
+body.focus-mode .zoom-controls,
+body.focus-mode .secondary-hud,
+body.measure-focus .topbar,
+body.measure-focus .zoom-controls,
+body.measure-focus .secondary-hud {
+  opacity: .12;
+  transition: opacity .18s ease;
+}
+body.focus-mode .draw-hud,
+body.measure-focus .draw-hud {
+  background: rgba(8,13,16,.58) !important;
+  border-color: rgba(255,255,255,.12) !important;
+}
+
+/* CAD visual language: translucent while manipulating, crisp when locked. */
+.cad-active,
+[data-cad-state="placing"],
+[data-cad-state="moving"] {
+  --cad-opacity: .68;
+}
+.cad-locked,
+[data-cad-state="locked"] {
+  --cad-opacity: 1;
+}
+.cad-status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(94,168,255,.28);
+  background: rgba(10,18,28,.68);
+  color: rgba(226,239,255,.96);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+/* Outdoor readability hook, opt-in and harmless when unused. */
+body.outdoor-mode .line-label,
+body.outdoor-mode .measure-label,
+body.outdoor-mode .distance-label,
+body.outdoor-mode .point-label {
+  background: rgba(0,0,0,.90) !important;
+  border-color: rgba(255,255,255,.46) !important;
+  text-shadow: 0 1px 1px #000;
+}
+body.outdoor-mode #reticle {
+  filter: drop-shadow(0 0 2px #000) drop-shadow(0 0 4px #000);
+}
+
+/* Keep the visible controls elegant but preserve comfortable hit targets. */
+@media (pointer: coarse) {
+  .icon-btn,
+  .hud-btn,
+  .zoom-btn {
+    position: relative;
+  }
+  .icon-btn::after,
+  .hud-btn::after,
+  .zoom-btn::after {
+    content: "";
+    position: absolute;
+    inset: -6px;
+  }
+}
