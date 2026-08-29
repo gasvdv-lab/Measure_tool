@@ -1,6 +1,6 @@
-import {S,getPoint} from "./state.js?v=0.8.21.2-20260829-0915";
-import {snapshotProject,restoreProject} from "./history.js?v=0.8.21.2-20260829-0915";
-import {validateGeometryState} from "./geometry.js?v=0.8.21.2-20260829-0915";
+import {S,getPoint} from "./state.js?v=0.8.21.3-20260829-1030";
+import {snapshotProject,restoreProject} from "./history.js?v=0.8.21.3-20260829-1030";
+import {validateGeometryState} from "./geometry.js?v=0.8.21.3-20260829-1030";
 
 const EPS=1e-9;
 function v3(x=0,y=0,z=0){return new S.THREE.Vector3(x,y,z);}
@@ -179,7 +179,9 @@ export function applyRelocalization(result){
     for(const p of S.points){
       p.position.applyMatrix3(result.R).add(result.t);
       p.locked=Object.freeze({x:p.position.x,y:p.position.y,z:p.position.z});
+      if(p.worldPosition)p.worldPosition.copy(p.position);else p.worldPosition=p.position.clone();
       p.marker?.position.copy(p.position);
+      document.dispatchEvent(new CustomEvent("measurear:point-repositioned",{detail:{pointId:p.id}}));
       if(p.surfaceNormal)p.surfaceNormal.applyMatrix3(result.R).normalize();
     }
     // Rebuild entire project through snapshot/restore so all derived meshes follow transformed source points.

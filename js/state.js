@@ -1,5 +1,5 @@
 export const S={
-  version:"0.8.21.2",build:"20260829-0915",
+  version:"0.8.21.3",build:"20260829-1030",
   THREE:null,renderer:null,scene:null,camera:null,reticle:null,xrSession:null,hitSource:null,hitRequested:false,
   currentTarget:null,targetSource:"none",zoom:1,pointPlacementEpoch:0,
   points:[],lines:[],contours:[],shapes:[],walls:[],openings:[],
@@ -19,6 +19,7 @@ export const S={
   history:{undo:[],redo:[],limit:80,restoring:false},
   preview:{point:null,line:null,label:null},
   diagnostics:{lastError:"",lastCheck:null,confirmBusy:false},
+  worldLock:{mode:"unknown",active:false,anchored:0,pending:0,lastError:""},
   hud:{compact:true,lastPopover:null},
   project:{
     schemaVersion:1,id:null,name:"Nieuw project",createdAt:null,updatedAt:null,lastSavedAt:null,

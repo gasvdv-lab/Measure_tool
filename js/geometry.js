@@ -1,4 +1,6 @@
-import {S,$,fmt,pointName,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.21.2-20260829-0915";
+import {S,$,fmt,pointName,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.21.3-20260829-1030";
+
+export function renderPosition(p){return p?.worldPosition||p?.position||null;}
 
 export function dispose(obj){
   if(!obj||!S.scene)return;
@@ -43,20 +45,57 @@ export function createPoint(pos,{color=0x69ff9a,surfaceNormal=null,id=null,name=
   const p={
     id:id||"p"+crypto.randomUUID(),name:finalName,
     position:fixed.clone(),
+    worldPosition:fixed.clone(),
+    worldLock:"pending",
     locked:Object.freeze({x:fixed.x,y:fixed.y,z:fixed.z}),
     surfaceNormal:surfaceNormal?.clone?.()||null,
     marker:makePointMarker(color),
     label:makePointLabel(finalName)
   };
-  p.marker.position.copy(fixed);S.points.push(p);return p;
+  p.marker.position.copy(fixed);S.points.push(p);document.dispatchEvent(new CustomEvent("measurear:point-created",{detail:{pointId:p.id}}));return p;
 }
 
 export function enforceLocked(){
   for(const p of S.points){
     const q=p.locked;if(!q)continue;
+    // Project/source coordinates remain immutable. The visible AR pose may be
+    // corrected by WebXR Anchors in p.worldPosition.
     p.position.set(q.x,q.y,q.z);
-    p.marker?.position.set(q.x,q.y,q.z);
+    if(!p.worldPosition)p.worldPosition=p.position.clone();
+    const r=renderPosition(p);
+    p.marker?.position.copy(r);
   }
+  syncWorldLockedGeometry();
+}
+
+function syncLineObject(line){
+  const a=getPoint(line.startId),b=getPoint(line.endId);if(!a||!b||!line.object)return;
+  const pa=renderPosition(a),pb=renderPosition(b),dir=pb.clone().sub(pa),len=dir.length();
+  if(len<1e-8)return;
+  line.object.position.copy(pa).add(pb).multiplyScalar(.5);
+  line.object.quaternion.setFromUnitVectors(new S.THREE.Vector3(0,1,0),dir.clone().normalize());
+  const base=Math.max(1e-8,line.distance||a.position.distanceTo(b.position));
+  line.object.scale.set(1,len/base,1);
+}
+
+function syncShapeMesh(shape){
+  if(!shape?.mesh?.geometry)return;
+  try{
+    const analysis=analyzeShapePoints(shape.pointIds);
+    const arr=[];
+    for(const tri of analysis.triangles)for(const idx of tri){
+      const p=getPoint(shape.pointIds[idx]),q=renderPosition(p);arr.push(q.x,q.y,q.z);
+    }
+    const attr=shape.mesh.geometry.getAttribute("position");
+    if(attr&&attr.array.length===arr.length){
+      attr.array.set(arr);attr.needsUpdate=true;shape.mesh.geometry.computeVertexNormals();shape.mesh.geometry.computeBoundingSphere();
+    }
+  }catch{}
+}
+
+export function syncWorldLockedGeometry(){
+  for(const l of S.lines)syncLineObject(l);
+  for(const s of S.shapes)syncShapeMesh(s);
 }
 
 export function findLineBetween(aId,bId){
@@ -139,7 +178,7 @@ export function deleteLineRaw(id){
 }
 export function deletePointRaw(id){
   const i=S.points.findIndex(p=>p.id===id);if(i<0)return;
-  const p=S.points[i];dispose(p.marker);p.label?.remove();S.points.splice(i,1);
+  const p=S.points[i];dispose(p.marker);p.label?.remove();S.points.splice(i,1);document.dispatchEvent(new CustomEvent("measurear:point-deleted",{detail:{pointId:id}}));
 }
 
 export function lineDependencies(id){
@@ -280,7 +319,7 @@ export function updateLabels(){
     if(!l.label)continue;
     if(!show||l.labelsVisible===false){l.label.style.display="none";continue;}
     const a=getPoint(l.startId),b=getPoint(l.endId);if(!a||!b){l.label.style.display="none";continue;}
-    const pa=a.position.clone().project(xrCam),pb=b.position.clone().project(xrCam);
+    const pa=renderPosition(a).clone().project(xrCam),pb=renderPosition(b).clone().project(xrCam);
     if(pa.z<-1||pa.z>1||pb.z<-1||pb.z>1){l.label.style.display="none";continue;}
     l.label.style.display="block";
     l.label.style.left=((pa.x+pb.x)*.25+.5)*w+"px";
@@ -293,7 +332,7 @@ export function updatePointLabels(){
   for(const p of S.points){
     if(!p.label)continue;
     if(!S.defaults.labels){p.label.style.display="none";continue;}
-    const q=p.position.clone().project(xrCam);
+    const q=renderPosition(p).clone().project(xrCam);
     if(q.z<-1||q.z>1||Math.abs(q.x)>1.2||Math.abs(q.y)>1.2){p.label.style.display="none";continue;}
     p.label.style.display="block";p.label.style.left=(q.x*.5+.5)*w+"px";p.label.style.top=(-q.y*.5+.5)*h-20+"px";
   }
@@ -301,7 +340,7 @@ export function updatePointLabels(){
 export function updateMarkerScale(){
   if(!S.renderer||!S.camera)return;
   const cam=S.renderer.xr.getCamera(S.camera),p=new S.THREE.Vector3();cam.getWorldPosition(p);
-  for(const x of S.points){const d=Math.max(.05,x.position.distanceTo(p));x.marker.scale.setScalar(Math.min(4,Math.max(.55,.48+d*.28)));}
+  for(const x of S.points){const d=Math.max(.05,renderPosition(x).distanceTo(p));x.marker.scale.setScalar(Math.min(4,Math.max(.55,.48+d*.28)));}
 }
 
 export function clearAllGeometry(){

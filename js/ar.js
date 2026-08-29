@@ -1,7 +1,8 @@
-import {S,$} from "./state.js?v=0.8.21.2-20260829-0915";
-import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.21.2-20260829-0915";
-import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.21.2-20260829-0915";
-import {clearWalls} from "./walls.js?v=0.8.21.2-20260829-0915";
+import {S,$} from "./state.js?v=0.8.21.3-20260829-1030";
+import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.21.3-20260829-1030";
+import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.21.3-20260829-1030";
+import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.21.3-20260829-1030";
+import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.21.3-20260829-1030";
 
 let samples=[],sampleSource=null,camPos,camQuat,forward;
 
@@ -45,13 +46,13 @@ export async function startAR(){
   const supported=await withTimeout(navigator.xr.isSessionSupported("immersive-ar"),6000,"WebXR-ondersteuning controleren");
   if(!supported)throw new Error("Immersive AR is niet beschikbaar op dit toestel.");
   await loadThree();if(!S.renderer)init();
-  const session=await withTimeout(navigator.xr.requestSession("immersive-ar",{requiredFeatures:["hit-test"],optionalFeatures:["dom-overlay"],domOverlay:{root:document.body}}),10000,"AR-sessie starten");
-  S.xrSession=session;await withTimeout(S.renderer.xr.setSession(session),6000,"AR-renderer koppelen");
+  const session=await withTimeout(navigator.xr.requestSession("immersive-ar",{requiredFeatures:["hit-test"],optionalFeatures:["dom-overlay","anchors"],domOverlay:{root:document.body}}),10000,"AR-sessie starten");
+  S.xrSession=session;configureWorldLock(session);await withTimeout(S.renderer.xr.setSession(session),6000,"AR-renderer koppelen");
   S.renderer.domElement.style.display="block";$("app").style.display="none";$("overlay").style.display="block";
   session.addEventListener("end",cleanup,{once:true});S.renderer.setAnimationLoop(render);
 }
 function cleanup(){
-  resetTrackingSamples();S.renderer?.setAnimationLoop(null);
+  resetWorldLock();resetTrackingSamples();S.renderer?.setAnimationLoop(null);
   if(S.renderer?.domElement)S.renderer.domElement.style.display="none";
   S.xrSession=null;S.hitSource=null;S.hitRequested=false;S.currentTarget=null;S.targetSource="none";
   clearWalls();clearAllGeometry();resetDrawingCore();
@@ -81,6 +82,9 @@ function render(_,frame){
     S.reticle.visible=false;S.currentTarget=null;S.targetSource="none";$("aim").className="";
   }
 
+  const worldLockChanged=updateWorldLock(frame,ref);
+  if(worldLockChanged)syncWorldLockedWalls();
+
   updateCandidate({hit,hitNormal:normal,ray:cameraRay()});
   $("captureBtn").disabled=!isCaptureAllowed();
 
@@ -96,3 +100,10 @@ function render(_,frame){
 }
 window.addEventListener("resize",()=>{S.renderer?.setSize(innerWidth,innerHeight);if(S.camera){S.camera.aspect=innerWidth/innerHeight;S.camera.updateProjectionMatrix();}});
 document.addEventListener("measurear:reset-tracking",resetTrackingSamples);
+
+
+document.addEventListener("measurear:world-lock-status",e=>{
+  const d=e.detail||{};if(!$('stability'))return;
+  if(d.mode==='anchors')$('stability').textContent=`World Lock: actief · ${d.anchored||0} anchors`;
+  else $('stability').textContent='World Lock: lokale tracking (anchors niet actief)';
+});

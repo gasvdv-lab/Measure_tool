@@ -1,6 +1,6 @@
 
-import {S,getPoint,getLine} from "./state.js?v=0.8.21.2-20260829-0915";
-import {dispose} from "./geometry.js?v=0.8.21.2-20260829-0915";
+import {S,getPoint,getLine} from "./state.js?v=0.8.21.3-20260829-1030";
+import {dispose,renderPosition} from "./geometry.js?v=0.8.21.3-20260829-1030";
 
 function cleanName(name){return String(name||"").trim().replace(/\s+/g," ");}
 export function wallNameExists(name,excludeId=null){
@@ -14,8 +14,8 @@ function frameFromLine(line){
   const a=getPoint(line.startId),b=getPoint(line.endId);
   if(!a||!b)throw new Error("Basislijn is ongeldig.");
   const T=S.THREE;
-  const start=a.position.clone();
-  const axis=b.position.clone().sub(a.position);
+  const start=renderPosition(a).clone();
+  const axis=renderPosition(b).clone().sub(renderPosition(a));
   const length=axis.length();
   if(length<1e-5)throw new Error("Basislijn is te kort.");
   const x=axis.clone().normalize();
@@ -246,6 +246,17 @@ export function deleteWall(id){
   if(S.selectedOpeningId&&!S.openings.some(o=>o.id===S.selectedOpeningId))S.selectedOpeningId=null;
 }
 
+
+export function syncWorldLockedWalls(){
+  // Rebuild only when the anchored base line changed enough to matter.
+  for(const wall of S.walls){
+    const line=getLine(wall.lineId),a=line&&getPoint(line.startId),b=line&&getPoint(line.endId);if(!a||!b)continue;
+    const pa=renderPosition(a),pb=renderPosition(b);
+    const key=[pa.x,pa.y,pa.z,pb.x,pb.y,pb.z].map(v=>Math.round(v*2000)/2000).join(",");
+    if(wall._worldLockKey===key)continue;
+    wall._worldLockKey=key;rebuildWall(wall);
+  }
+}
 export function clearWalls(){
   for(const w of S.walls)if(w.mesh)dispose(w.mesh);
   S.openings.length=0;S.walls.length=0;S.selectedOpeningId=null;
