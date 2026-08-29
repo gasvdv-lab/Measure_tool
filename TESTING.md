@@ -79,3 +79,6 @@ AR-IN/ROOM: open een opgeslagen project en controleer dat `☰ → Relocalisatie
 
 ### v0.8.22 hotfix test
 AR-IN: Start AR → Project → Nieuw leeg project → bevestigen. Verwacht: Project Manager sluit en camera blijft actief; startscherm verschijnt niet.
+
+## v0.8.24 World Lock 2.0 gate
+AR-IN/ROOM: place A→B on a stable surface, confirm both endpoints, then move the phone 0.5–2 m. The committed geometry must remain fixed relative to the environment. If it moves with the phone, stop further Spatial Restore testing.

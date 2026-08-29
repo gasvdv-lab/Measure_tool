@@ -344,3 +344,9 @@ Upload de volledige inhoud van deze ZIP naar GitHub. `js/relocalization.js` is n
 
 ### v0.8.22 patch — Nieuw project blijft in camera
 Bij het starten van een nieuw project worden World Lock-koppelingen veilig losgemaakt zonder de actieve WebXR-sessie te beheren. De Project Manager sluit en de gebruiker keert terug naar het AR-beeld, niet naar het startscherm.
+
+## v0.8.24 — World Lock 2.0
+- Surface-confirmed points now retain the live `XRHitTestResult` and prefer `XRHitTestResult.createAnchor()` so the anchor is attached directly to the detected real-world surface.
+- Computed/exact-distance points retain the `XRFrame.createAnchor()` fallback in the active local reference space.
+- Stored project geometry remains the source of truth; anchors only control the session-local visible world pose.
+- Current physical gate: a committed A→B line must remain fixed while the phone moves 0.5–2 m.

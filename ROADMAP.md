@@ -112,3 +112,9 @@ Project Space blijft de geometrische waarheid. Bij het openen van een opgeslagen
 - [ ] Volgende: automatische/semi-automatische relocalisatie op deze project-space basis
 
 - [x] v0.8.22 hotfix: Nieuw project → Project Manager sluiten → terug naar actieve AR-camera, nooit naar startscherm.
+
+### v0.8.24 — World Lock 2.0
+- [x] Direct surface-anchor path via XRHitTestResult.createAnchor()
+- [x] Frame-anchor fallback for computed points
+- [ ] Physical AR gate: committed A→B remains fixed while phone moves
+- [ ] After pass: resume Spatial Restore validation
