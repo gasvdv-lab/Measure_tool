@@ -1,9 +1,9 @@
-import {S,$} from "./state.js?v=0.8.28.1-20260829-2045";
-import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.28.1-20260829-2045";
-import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.28.1-20260829-2045";
-import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.28.1-20260829-2045";
-import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.28.1-20260829-2045";
-import {updateCadFrame,clearCadRuntime} from "./cad.js?v=0.8.28.1-20260829-2045";
+import {S,$} from "./state.js?v=0.8.28.2-20260829-2100";
+import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.28.2-20260829-2100";
+import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.28.2-20260829-2100";
+import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.28.2-20260829-2100";
+import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.28.2-20260829-2100";
+import {updateCadFrame,clearCadRuntime} from "./cad.js?v=0.8.28.2-20260829-2100";
 
 let samples=[],sampleSource=null,camPos,camQuat,forward;
 
@@ -55,15 +55,17 @@ export async function startAR(){
 }
 function cleanup(){
   const externalPicker=S.externalPicker;
+  const cadPickerProtected=externalPicker?.kind==="cad"||S.cadPickerLifecycle?.active||sessionStorage.getItem("measurear.cadPickerActive")==="1";
   resetWorldLock();resetTrackingSamples();S.renderer?.setAnimationLoop(null);
   if(S.renderer?.domElement)S.renderer.domElement.style.display="none";
   S.xrSession=null;S.hitSource=null;S.hitRequested=false;S.currentTarget=null;S.currentRawTarget=null;S.currentHitResult=null;S.currentXRFrame=null;S.currentReferenceSpace=null;S.targetSource="none";S.referenceCaptureId=null;
 
   // Android kan immersive WebXR beëindigen wanneer de systeem-bestandskiezer opent.
   // Dat is geen bewuste 'AR verlaten'-actie: projectdata en menucontext moeten behouden blijven.
-  if(externalPicker?.kind==="cad"){
+  if(cadPickerProtected){
     $("app").style.display="none";$("overlay").style.display="block";
-    document.dispatchEvent(new CustomEvent("measurear:xr-interrupted",{detail:{...externalPicker}}));
+    if(S.cadPickerLifecycle){S.cadPickerLifecycle.active=true;S.cadPickerLifecycle.returned=true;}
+    document.dispatchEvent(new CustomEvent("measurear:xr-interrupted",{detail:{kind:"cad",page:"cad"}}));
     return;
   }
 

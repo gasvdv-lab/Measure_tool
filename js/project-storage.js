@@ -1,10 +1,10 @@
-import {S} from "./state.js?v=0.8.28.1-20260829-2045";
-import {snapshotProject,restoreProject,clearHistory} from "./history.js?v=0.8.28.1-20260829-2045";
-import {clearAllGeometry,validateGeometryState} from "./geometry.js?v=0.8.28.1-20260829-2045";
-import {clearWalls} from "./walls.js?v=0.8.28.1-20260829-2045";
-import {resetDrawingCore} from "./drawing-core.js?v=0.8.28.1-20260829-2045";
-import {detachAllPointAnchors} from "./world-lock.js?v=0.8.28.1-20260829-2045";
-import {clearCadRuntime,restoreCadRuntime} from "./cad.js?v=0.8.28.1-20260829-2045";
+import {S} from "./state.js?v=0.8.28.2-20260829-2100";
+import {snapshotProject,restoreProject,clearHistory} from "./history.js?v=0.8.28.2-20260829-2100";
+import {clearAllGeometry,validateGeometryState} from "./geometry.js?v=0.8.28.2-20260829-2100";
+import {clearWalls} from "./walls.js?v=0.8.28.2-20260829-2100";
+import {resetDrawingCore} from "./drawing-core.js?v=0.8.28.2-20260829-2100";
+import {detachAllPointAnchors} from "./world-lock.js?v=0.8.28.2-20260829-2100";
+import {clearCadRuntime,restoreCadRuntime} from "./cad.js?v=0.8.28.2-20260829-2100";
 
 export const PROJECT_SCHEMA_VERSION=1;
 const INDEX_KEY="measurear.projects.v1.index";
