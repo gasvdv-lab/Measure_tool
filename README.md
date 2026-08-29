@@ -1,6 +1,36 @@
-# Measure AR v0.8.21 — AR Project Relocalization
-Build: 20260823-0345
+# Measure AR v0.8.21.1 — Exact-distance Horizontal Fix
+Build: 20260829-0825
 
+Vaste app-link: https://gasvdv-lab.github.io/Measure_tool/
+
+## Bugfix in v0.8.21.1
+Bij **exacte afstand + Horizontaal** werd de richting voorheen rechtstreeks afgeleid van de camera-kijkrichting. Daardoor kon de previewlijn vanuit het actieve vertrekpunt parallel aan de kijkrichting lopen in plaats van naar de positie te wijzen waarop het vizier mikte.
+
+De exacte plaatsing gebruikt nu de geometrische richting **van het actieve vertrekpunt naar de ray/plane-intersectie van het vizier**. Daardoor gelden tegelijk:
+- de ingestelde afstand blijft exact;
+- het eindpunt blijft horizontaal in de AR-wereld;
+- preview en bevestigde geometrie gebruiken dezelfde kandidaatpositie;
+- de richting volgt de bedoelde vizierzijde vanaf het vertrekpunt.
+
+Dezelfde richtingsbasis is ook consistenter gemaakt voor Vrij, Verticaal en Op oppervlak bij exacte afstand. Parallel, Loodrecht en Eigen hoek blijven referentiegestuurd.
+
+## AUTO teststatus v0.8.21.1 — PASS
+- JavaScript syntax van alle modules.
+- Alle relatieve module-importpaden bestaan.
+- Geen dubbele HTML-ID's.
+- Uniforme cache/build-key `0.8.21.1-20260829-0825`.
+- Numerieke regressietest: oude camera-ray richting verschilt aantoonbaar van actieve-punt→vizier-richting.
+- Exacte horizontale afstand blijft wiskundig exact.
+- Verticale component van de horizontale eindpositie blijft gelijk aan het vertrekpunt.
+
+## Eerstvolgende fysieke test
+**AR-IN**: test nu eerst Horizontaal + exacte afstand op korte afstanden (50/100/250 cm) en daarna 5,20 m indien mogelijk. Test daarna Vrij, Verticaal, Op oppervlak, Parallel, Loodrecht en Eigen hoek met exacte afstand.
+
+Zie `TESTING.md` voor de vaste testprocedure en `ROADMAP.md` voor het verdere stappenplan.
+
+---
+
+## Basis waarop deze bugfix voortbouwt
 ## Doel
 Een opgeslagen project later opnieuw aan de echte fysieke omgeving koppelen. Omdat WebXR-sessies een nieuw lokaal coördinatenstelsel krijgen, gebruikt v0.8.21 een combinatie van opgeslagen locatie-informatie en door de gebruiker gekozen referentiepunten.
 
