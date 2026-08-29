@@ -1,3 +1,15 @@
+## v0.8.28.6 — Professional UI Pass ✅
+- [x] UI-only release; functionele JavaScript-modules ongewijzigd.
+- [x] Professioneel compact AR-vizier.
+- [x] Compactere bevestigingsknop en AR-HUD.
+- [x] Hoofdmenu als mobiele bottom sheet.
+- [x] Consistente typografie, spacing, kaarten, formulieren en statuskleuren.
+- [x] Subtielere punt- en lijnlabels en zoomcontrols.
+- [x] Externe CAD-importpagina visueel gelijkgetrokken.
+- [ ] Praktijktest UI op Android in daglicht: leesbaarheid, vizierprecisie en bediening.
+- [ ] CAD-plaatsing bij voldoende licht verder valideren.
+- [ ] Bekende relocalization/reference-capture bug blijft open.
+
 ## v0.8.28.5 — External CAD Import Page ✅
 - [x] File picker uit hetzelfde WebXR-document verwijderen.
 - [x] `cad-import.html` als volledig geïsoleerde importpagina.
@@ -39,7 +51,7 @@ Project Space blijft de geometrische waarheid. Bij het openen van een opgeslagen
 
 # Measure AR — Master Roadmap
 
-**Huidige versie:** v0.8.21.6 — Project Manager Stability  
+**Huidige versie:** v0.8.28.6 — Professional UI Pass  
 **Huidige gate:** Project Manager Stability praktisch valideren; World Lock voor eenvoudige en samengestelde geometrie is door de gebruiker positief getest.
 
 ## Testcodes

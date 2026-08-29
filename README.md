@@ -1,3 +1,22 @@
+# Measure AR v0.8.28.6 — Professional UI Pass
+
+Deze release is bewust een **UI-only upgrade** op v0.8.28.5. De functionele JavaScript-modules zijn byte-for-byte ongewijzigd. De wijziging beperkt zich tot presentatie: compactere AR-HUD, kleiner/nauwkeuriger vizier, lichtere bevestigingsknop, professioneel bottom-sheet menu, rustigere typografie, subtielere labels en een consistente donkergroene technische stijl.
+
+**Belangrijk:** CAD-import, projectopslag, WebXR lifecycle, tekenen, geometrie, relocalisatie en IndexedDB-logica zijn in deze release niet aangepast. De externe `cad-import.html`-flow uit v0.8.28.5 blijft behouden.
+
+GitHub Pages: https://gasvdv-lab.github.io/Measure_tool/
+
+## UI-wijzigingen
+- Vizier teruggebracht van 44 × 44 px naar een subtiele 22 × 22 px technische crosshair met centraal punt.
+- Bevestigingsknop visueel compacter (56 px), met duidelijke groene actieve toestand; bediening blijft ruim genoeg voor mobiel gebruik.
+- AR-topbalk compacter met minder visuele dominantie.
+- Menu omgevormd naar een moderne mobiele bottom sheet met compactere navigatierijen.
+- Teken-HUD smaller en lager in visueel gewicht; functies blijven op dezelfde DOM-id's en events aangesloten.
+- Zoomcontrols verkleind.
+- Lijn-, preview- en puntlabels subtieler gemaakt.
+- Formulieren, kaarten, statusmeldingen en CAD-importpagina krijgen één consistente visuele taal.
+- Geen losse `TEST_RESULTS`-bestanden.
+
 # Measure AR v0.8.28.5 — External CAD Import Page
 
 Deze build vervangt de CAD-importworkspace door een **volledig apart HTML-document (`cad-import.html`)**. De Android-bestandskiezer draait daardoor niet meer in hetzelfde document als WebXR/Measure AR. Na import wordt het model in IndexedDB opgeslagen en aan het recovery-project gekoppeld. Daarna keert de gebruiker terug naar een vers geladen `index.html`, waar één nieuwe tik AR start en de CAD-plaatsing activeert.

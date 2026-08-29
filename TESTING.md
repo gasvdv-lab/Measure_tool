@@ -1,3 +1,24 @@
+# v0.8.28.6 — Professional UI Pass
+
+## AUTO
+- [x] Alle JavaScript-bestanden slagen voor syntaxcontrole.
+- [x] Alle lokale ES-module imports bestaan.
+- [x] JavaScript-modules zijn byte-for-byte gelijk aan v0.8.28.5.
+- [x] Geen dubbele DOM-id's in `index.html` of `cad-import.html`.
+- [x] Release bevat geen `TEST_RESULTS`-bestand.
+
+## ANDROID / AR — UI praktijktest
+- [ ] Start AR: topbalk en menu blokkeren het camerabeeld niet onnodig.
+- [ ] Open hoofdmenu: bottom sheet is compact, scrollbaar en alle bestaande menuacties blijven bereikbaar.
+- [ ] Start Lijn: vizier is duidelijk maar merkbaar kleiner en nauwkeuriger dan in v0.8.28.5.
+- [ ] Bevestigingsknop blijft makkelijk aan te tikken en krijgt een duidelijke actieve toestand bij geldige plaatsing.
+- [ ] Teken een lijn: HUD, afstand, puntlabels en lijnlabels zijn goed leesbaar zonder het doelgebied te domineren.
+- [ ] Undo/Redo/Voltooien/Stop blijven functioneel.
+- [ ] Project openen/opslaan blijft functioneel.
+- [ ] CAD → importeren blijft via de aparte `cad-import.html`-pagina lopen.
+- [ ] CAD-plaatsing wordt later bij voldoende licht hervat.
+- [ ] Openstaande referentie-capturebug afzonderlijk behouden; deze UI-release claimt daar geen fix voor.
+
 # v0.8.28.5 gerichte regressietest — externe CAD-importpagina
 
 - [ ] AR: CAD importeren navigeert naar `cad-import.html`.
