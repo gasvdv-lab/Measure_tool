@@ -1,4 +1,4 @@
-import {S,getPoint} from "./state.js?v=0.8.29-20260829-1900";
+import {S,getPoint} from "./state.js?v=0.8.27-20260829-1935";
 
 // Session-local WebXR anchor manager.
 // Project coordinates remain immutable in point.position/point.locked.
@@ -78,7 +78,7 @@ async function createAnchorForPoint(frame,ref,pointId){
       anchor=await hitResult.createAnchor();
       p.worldLock="hit-anchor";
     }else{
-      const q=p.position;
+      const q=p.worldPosition||p.position;
       const transform=new XRRigidTransform({x:q.x,y:q.y,z:q.z});
       anchor=await frame.createAnchor(transform,ref);
       p.worldLock="frame-anchor";

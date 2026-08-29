@@ -1,4 +1,4 @@
-import {S,$,fmt,pointName,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.29-20260829-1900";
+import {S,$,fmt,pointName,getPoint,getLine,getContour,getShape,projectToWorld} from "./state.js?v=0.8.27-20260829-1935";
 
 export function renderPosition(p){return p?.worldPosition||p?.position||null;}
 
@@ -45,7 +45,7 @@ export function createPoint(pos,{color=0x69ff9a,surfaceNormal=null,id=null,name=
   const p={
     id:id||"p"+crypto.randomUUID(),name:finalName,
     position:fixed.clone(),
-    worldPosition:fixed.clone(),
+    worldPosition:projectToWorld(fixed),
     worldLock:"pending",
     locked:Object.freeze({x:fixed.x,y:fixed.y,z:fixed.z}),
     surfaceNormal:surfaceNormal?.clone?.()||null,
@@ -212,14 +212,15 @@ export function pointDependencies(id){
     lines,
     walls:S.walls.filter(w=>lines.some(l=>l.id===w.lineId)),
     shapes:S.shapes.filter(s=>s.pointIds?.includes(id)),
-    contours:S.contours.filter(c=>c.pointIds?.includes(id))
+    contours:S.contours.filter(c=>c.pointIds?.includes(id)),
+    references:(S.project?.relocalization?.references||[]).filter(r=>r.pointId===id)
   };
 }
 export function canDeleteLine(id){
   const d=lineDependencies(id);return !d.walls.length&&!d.shapes.length&&!d.contours.length;
 }
 export function canDeletePoint(id){
-  const d=pointDependencies(id);return !d.walls.length&&!d.shapes.length&&!d.contours.length;
+  const d=pointDependencies(id);return !d.walls.length&&!d.shapes.length&&!d.contours.length&&!d.references.length;
 }
 
 export function createContour(pointIds,lineIds,{closed=false,kind="polyline",id=null,name=null}={}){

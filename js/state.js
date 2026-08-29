@@ -1,7 +1,7 @@
 export const S={
-  version:"0.8.29",build:"20260829-1845",
+  version:"0.8.27",build:"20260829-1935",
   THREE:null,renderer:null,scene:null,camera:null,reticle:null,xrSession:null,hitSource:null,hitRequested:false,
-  currentTarget:null,currentHitResult:null,currentXRFrame:null,currentReferenceSpace:null,targetSource:"none",zoom:1,pointPlacementEpoch:0,
+  currentTarget:null,currentRawTarget:null,currentHitResult:null,currentXRFrame:null,currentReferenceSpace:null,targetSource:"none",zoom:1,pointPlacementEpoch:0,
   points:[],lines:[],contours:[],shapes:[],walls:[],openings:[],
   wallTool:{height:2.40,thickness:.14,side:"center",orientation:"vertical",angle:90,color:"#d7d2c8",opacity:.65,namePrefix:"Muur"},
   pointCounter:0,contourCounter:1,
@@ -25,7 +25,8 @@ export const S={
     schemaVersion:1,id:null,name:"Nieuw project",createdAt:null,updatedAt:null,lastSavedAt:null,
     dirty:false,recoveryAvailable:false,loadedFrom:null,
     geo:null,
-    spatial:{projectOrigin:{x:0,y:0,z:0},savedWorldPose:null,savedAt:null},
+    hybrid:{savedHeading:null,currentHeading:null,lastAssessment:null,headingSource:null},
+    spatial:{projectOrigin:{x:0,y:0,z:0},savedWorldPose:null,savedAt:null,sessionTransform:null},
     relocalization:{
       references:[],
       active:false,
@@ -44,6 +45,16 @@ export function fmt(m){
 export function pointName(i){
   const c=String.fromCharCode(65+(i%26)),n=Math.floor(i/26);
   return n?c+n:c;
+}
+export function projectToWorld(pos){
+  const tr=S.project?.spatial?.sessionTransform;if(!tr||!S.THREE)return pos.clone();
+  const R=new S.THREE.Matrix3().fromArray(tr.R),t=new S.THREE.Vector3(tr.t.x,tr.t.y,tr.t.z);
+  return pos.clone().applyMatrix3(R).add(t);
+}
+export function worldToProject(pos){
+  const tr=S.project?.spatial?.sessionTransform;if(!tr||!S.THREE)return pos.clone();
+  const R=new S.THREE.Matrix3().fromArray(tr.R),Rt=R.clone().transpose(),t=new S.THREE.Vector3(tr.t.x,tr.t.y,tr.t.z);
+  return pos.clone().sub(t).applyMatrix3(Rt);
 }
 export function getPoint(id){return S.points.find(p=>p.id===id)||null;}
 export function getLine(id){return S.lines.find(l=>l.id===id)||null;}

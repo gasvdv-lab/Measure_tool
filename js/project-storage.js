@@ -1,8 +1,8 @@
-import {S} from "./state.js?v=0.8.29-20260829-1900";
-import {snapshotProject,restoreProject,clearHistory} from "./history.js?v=0.8.29-20260829-1900";
-import {clearAllGeometry,validateGeometryState} from "./geometry.js?v=0.8.29-20260829-1900";
-import {clearWalls} from "./walls.js?v=0.8.29-20260829-1900";
-import {resetDrawingCore} from "./drawing-core.js?v=0.8.29-20260829-1900";
+import {S} from "./state.js?v=0.8.27-20260829-1935";
+import {snapshotProject,restoreProject,clearHistory} from "./history.js?v=0.8.27-20260829-1935";
+import {clearAllGeometry,validateGeometryState} from "./geometry.js?v=0.8.27-20260829-1935";
+import {clearWalls} from "./walls.js?v=0.8.27-20260829-1935";
+import {resetDrawingCore} from "./drawing-core.js?v=0.8.27-20260829-1935";
 
 export const PROJECT_SCHEMA_VERSION=1;
 const INDEX_KEY="measurear.projects.v1.index";
@@ -49,14 +49,8 @@ function sourceSnapshot(){
 function captureSpatialState(){
   const prev=S.project.spatial||{};
   const cam=S.camera?.position;
-  // Stable project origin: prefer the first explicit project reference, then the first project point.
-  // This origin is project metadata; it is not the transient WebXR session origin.
-  const firstRef=S.project.relocalization?.references?.[0];
-  const firstPoint=S.points?.[0];
-  const origin=firstRef?.projectPosition||firstPoint?.position||prev.projectOrigin||{x:0,y:0,z:0};
   return {
-    projectOrigin:{x:Number(origin.x)||0,y:Number(origin.y)||0,z:Number(origin.z)||0},
-    originSource:firstRef?`reference:${firstRef.id}`:(firstPoint?`point:${firstPoint.id}`:(prev.originSource||"default")),
+    projectOrigin:{...(prev.projectOrigin||{x:0,y:0,z:0})},
     savedWorldPose:cam&&[cam.x,cam.y,cam.z].every(Number.isFinite)?{camera:{x:cam.x,y:cam.y,z:cam.z}}:(prev.savedWorldPose||null),
     savedAt:nowIso()
   };
@@ -69,7 +63,8 @@ function envelope(name,id,createdAt,data=sourceSnapshot(),projectExtras=null){
     project:{
       id:id||newId(),name:n,createdAt:createdAt||ts,updatedAt:ts,
       geo:projectExtras?.geo??S.project.geo,
-      spatial:projectExtras?.spatial??captureSpatialState(),
+      hybrid:projectExtras?.hybrid??JSON.parse(JSON.stringify(S.project.hybrid||{})),
+      spatial:(()=>{const q=projectExtras?.spatial??captureSpatialState();return {...q,sessionTransform:null};})(),
       relocalization:projectExtras?.relocalization?cloneReloc(projectExtras.relocalization):cloneReloc()
     },
     data
@@ -109,7 +104,8 @@ function setCurrentMeta(e,source="local"){
     schemaVersion:e.schemaVersion,id:e.project.id,name:e.project.name,
     createdAt:e.project.createdAt||null,updatedAt:e.project.updatedAt||null,lastSavedAt:e.project.updatedAt||null,
     dirty:false,recoveryAvailable:hasRecovery(),loadedFrom:source,geo:e.project.geo||null,
-    spatial:e.project.spatial||{projectOrigin:{x:0,y:0,z:0},savedWorldPose:null,savedAt:null},
+    hybrid:e.project.hybrid||{savedHeading:null,currentHeading:null,lastAssessment:null,headingSource:null},
+    spatial:{...(e.project.spatial||{projectOrigin:{x:0,y:0,z:0},savedWorldPose:null,savedAt:null}),sessionTransform:null},
     relocalization:{references:(e.project.relocalization?.references||[]).map(r=>({...r,projectPosition:{...r.projectPosition}})),active:false,captured:[],lastResult:e.project.relocalization?.lastResult||null,mode:"auto"}
   });
   storageSet(LAST_PROJECT_KEY,e.project.id);
@@ -169,7 +165,7 @@ export function duplicateCurrentProject(name=null){
 }
 export function duplicateStoredProject(id,name=null){
   const src=readStoredEnvelope(id);
-  const copy=envelope(cleanName(name)||`${src.project.name} kopie`,null,null,JSON.parse(JSON.stringify(src.data)),{geo:src.project.geo||null,spatial:src.project.spatial||null,relocalization:src.project.relocalization||null});
+  const copy=envelope(cleanName(name)||`${src.project.name} kopie`,null,null,JSON.parse(JSON.stringify(src.data)),{geo:src.project.geo||null,spatial:src.project.spatial||null,relocalization:src.project.relocalization||null,hybrid:src.project.hybrid||null});
   storageSet(PROJECT_PREFIX+copy.project.id,JSON.stringify(copy));upsertIndex(metaFromEnvelope(copy));return copy;
 }
 export function renameStoredProject(id,name){
@@ -212,7 +208,7 @@ export function newProject(name="Nieuw project"){
   lifecycleBusy=true;
   try{
     clearWalls();clearAllGeometry();resetDrawingCore();clearHistory();
-    const ts=nowIso();Object.assign(S.project,{schemaVersion:1,id:newId(),name:cleanName(name)||"Nieuw project",createdAt:ts,updatedAt:ts,lastSavedAt:null,dirty:true,recoveryAvailable:false,loadedFrom:"new",geo:null,spatial:{projectOrigin:{x:0,y:0,z:0},savedWorldPose:null,savedAt:null},relocalization:{references:[],active:false,captured:[],lastResult:null,mode:"auto"}});
+    const ts=nowIso();Object.assign(S.project,{schemaVersion:1,id:newId(),name:cleanName(name)||"Nieuw project",createdAt:ts,updatedAt:ts,lastSavedAt:null,dirty:true,recoveryAvailable:false,loadedFrom:"new",geo:null,hybrid:{savedHeading:null,currentHeading:null,lastAssessment:null,headingSource:null},spatial:{projectOrigin:{x:0,y:0,z:0},savedWorldPose:null,savedAt:null,sessionTransform:null},relocalization:{references:[],active:false,captured:[],lastResult:null,mode:"auto"}});
     writeRecovery();document.dispatchEvent(new CustomEvent("measurear:project-loaded"));document.dispatchEvent(new CustomEvent("measurear:project-meta-changed"));return S.project;
   }finally{lifecycleBusy=false;}
 }
@@ -240,7 +236,7 @@ export async function importProjectFile(file){
   const raw=await file.text(),src=safeParse(raw);if(!src)throw new Error("Bestand bevat geen geldige JSON.");
   const v=validateProjectEnvelope(src);if(!v.ok)throw new Error("Import geweigerd: "+v.errors[0]);
   const idExists=Boolean(storedEnvelopeOrNull(src.project.id));
-  const imported=envelope(idExists?`${src.project.name} import`:src.project.name,idExists?newId():src.project.id,src.project.createdAt,JSON.parse(JSON.stringify(src.data)),{geo:src.project.geo||null,spatial:src.project.spatial||null,relocalization:src.project.relocalization||null});
+  const imported=envelope(idExists?`${src.project.name} import`:src.project.name,idExists?newId():src.project.id,src.project.createdAt,JSON.parse(JSON.stringify(src.data)),{geo:src.project.geo||null,spatial:src.project.spatial||null,relocalization:src.project.relocalization||null,hybrid:src.project.hybrid||null});
   loadEnvelope(imported,"import");
   storageSet(PROJECT_PREFIX+imported.project.id,JSON.stringify(imported));upsertIndex(metaFromEnvelope(imported));setCurrentMeta(imported,"local");clearRecovery();
   return imported;

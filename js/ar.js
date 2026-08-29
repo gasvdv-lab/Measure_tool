@@ -1,8 +1,8 @@
-import {S,$} from "./state.js?v=0.8.29-20260829-1900";
-import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.29-20260829-1900";
-import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.29-20260829-1900";
-import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.29-20260829-1900";
-import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.29-20260829-1900";
+import {S,$} from "./state.js?v=0.8.27-20260829-1935";
+import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.27-20260829-1935";
+import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.27-20260829-1935";
+import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.27-20260829-1935";
+import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.27-20260829-1935";
 
 let samples=[],sampleSource=null,camPos,camQuat,forward;
 
@@ -79,25 +79,20 @@ function render(_,frame){
   if(hit&&pose){
     S.reticle.visible=true;S.reticle.matrix.fromArray(pose.transform.matrix);
     try{const q=new S.THREE.Quaternion().setFromRotationMatrix(S.reticle.matrix);normal=new S.THREE.Vector3(0,1,0).applyQuaternion(q).normalize();}catch{}
-    addSample(hit,"hit");hit=filteredHit(hit);S.currentTarget=hit;S.targetSource="hit";$("aim").className="hit";
+    addSample(hit,"hit");hit=filteredHit(hit);S.currentRawTarget=new S.THREE.Vector3(pose.transform.position.x,pose.transform.position.y,pose.transform.position.z);S.currentTarget=hit;S.targetSource="hit";$("aim").className="hit";
   }else{
-    S.reticle.visible=false;S.currentTarget=null;S.currentHitResult=null;S.targetSource="none";$("aim").className="";
+    S.reticle.visible=false;S.currentTarget=null;S.currentRawTarget=null;S.currentHitResult=null;S.targetSource="none";$("aim").className="";
   }
 
   const worldLockChanged=updateWorldLock(frame,ref);
   if(worldLockChanged)syncWorldLockedWalls();
 
   updateCandidate({hit,hitNormal:normal,ray:cameraRay()});
-  // Minimal relocalization fix: use the already-existing DOM aim-mode class.
-  // No new central state is introduced, so project loading and drawing remain on the v0.8.27 baseline.
-  const relocalizationAimMode=$("overlay")?.classList.contains("relocalizationAimMode")===true;
-  $("captureBtn").disabled=relocalizationAimMode ? !S.currentTarget : !isCaptureAllowed();
+  $("captureBtn").disabled=!isCaptureAllowed();
 
   const c=S.tool.candidate;
   if(S.tool.kind&&S.tool.status==="drawing"){
     $("stage").textContent=c?.valid?(S.tool.activePointId?`Vanaf ${S.points.find(p=>p.id===S.tool.activePointId)?.name||"?"}`:"Plaats punt A"):(c?.reason||"Zoek een oppervlak");
-  }else if(relocalizationAimMode){
-    $("stage").textContent=S.currentTarget?"Referentiepunt gevonden · bevestig met witte knop":"Zoek een herkend oppervlak";
   }else if(!S.tool.kind){
     $("stage").textContent="Kies een tekenfunctie";
   }
