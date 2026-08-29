@@ -1,29 +1,29 @@
-import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.28-20260829-2035";
+import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.28.1-20260829-2045";
 import {
   startTool,cancelTool,setPlacement,setDistance,setConstraint,setAngle,flipSide,setReferenceLine,setSnapMode,
   confirmCandidate,undoToolStep,finishTool,toolLabel,constraintLabel,getActivePoint,referenceRequired,resetDrawingCore
-} from "./drawing-core.js?v=0.8.28-20260829-2035";
+} from "./drawing-core.js?v=0.8.28.1-20260829-2045";
 import {
   createShape,updateShape,deleteShapeOnly,deleteShapeWithContour,deleteLineRaw,deletePointRaw,renamePoint,updateLine,analyzeContour,
   lineDependencies,pointDependencies,canDeleteLine,canDeletePoint,clearAllGeometry,validateGeometryState,dispose
-} from "./geometry.js?v=0.8.28-20260829-2035";
-import {startAR,applyZoom,resetTrackingSamples} from "./ar.js?v=0.8.28-20260829-2035";
-import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.28-20260829-2035";
-import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.28-20260829-2035";
+} from "./geometry.js?v=0.8.28.1-20260829-2045";
+import {startAR,applyZoom,resetTrackingSamples} from "./ar.js?v=0.8.28.1-20260829-2045";
+import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.28.1-20260829-2045";
+import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.28.1-20260829-2045";
 import {
   initProjectStorage,saveCurrentProject,listProjects,loadStoredProject,newProject,duplicateStoredProject,
   deleteStoredProject,renameStoredProject,projectStats,formatStats,getStoredProjectInfo,hasRecovery,recoveryInfo,restoreRecovery,clearRecovery,
   exportCurrentProject,importProjectFile,markDirtyAndRecover
-} from "./project-storage.js?v=0.8.28-20260829-2035";
+} from "./project-storage.js?v=0.8.28.1-20260829-2045";
 import {
   captureCurrentGeo,addProjectReference,removeProjectReference,clearProjectReferences,beginRelocalization,cancelRelocalization,
   captureRelocalizationPoint,solveRelocalization,applyRelocalization,relocalizationSummary,beginSpatialRestore
-} from "./relocalization.js?v=0.8.28-20260829-2035";
+} from "./relocalization.js?v=0.8.28.1-20260829-2045";
 
-import {captureHybridBaseline,assessHybridLocation,enableHeading} from "./hybrid-localization.js?v=0.8.28-20260829-2035";
+import {captureHybridBaseline,assessHybridLocation,enableHeading} from "./hybrid-localization.js?v=0.8.28.1-20260829-2045";
 
-import {detachAllPointAnchors} from "./world-lock.js?v=0.8.28-20260829-2035";
-import {importCadFile,listCadModels,cadStatus,selectCad,beginCadPlacement,rotateCad,moveCadHeight,confirmCadPlacement,cancelCadPlacement,deleteCadModel,clearCadRuntime} from "./cad.js?v=0.8.28-20260829-2035";
+import {detachAllPointAnchors} from "./world-lock.js?v=0.8.28.1-20260829-2045";
+import {importCadFile,listCadModels,cadStatus,selectCad,beginCadPlacement,rotateCad,moveCadHeight,confirmCadPlacement,cancelCadPlacement,deleteCadModel,clearCadRuntime} from "./cad.js?v=0.8.28.1-20260829-2045";
 
 const pages=["home","project","references","relocalize","projects","cad","objects","line","point","walltool","wallcreate","wall","openingcreate","opening","shapecreate","shape","settings","clear"];
 let menuStack=["home"];
@@ -308,16 +308,17 @@ function syncProjectMeta(){
 
 function renderCadPage(){
   const box=el("cadList"),st=cadStatus(),models=listCadModels();if(!box)return;box.innerHTML="";
-  el("cadStatus").textContent=models.length?`${models.length} CAD-model(len) · ${st.loaded} geladen in AR`:`Nog geen CAD-model geladen.`;
+  el("cadStatus").textContent=models.length?`${models.length} CAD-model(len) · ${st.loaded} geladen in AR${S.xrSession?"":" · AR tijdelijk gestopt"}`:`Nog geen CAD-model geladen.`;
+  if(el("cadResumeArBtn"))el("cadResumeArBtn").style.display=!S.xrSession&&models.length?"block":"none";
   for(const m of models){
     const row=document.createElement("div");row.className="objectRow";
     const b=document.createElement("button");b.className="secondary";b.textContent=`${m.name} · ${(m.dimensions?.x||0).toFixed(2)} × ${(m.dimensions?.z||0).toFixed(2)} × ${(m.dimensions?.y||0).toFixed(2)} m${m.missingFile?" · bestand ontbreekt":""}`;
     const del=document.createElement("button");del.className="danger";del.textContent="Wis";
-    b.onclick=()=>{selectCad(m.id);beginCadPlacement(m.id);renderCadPage();returnToArView();el("hint").textContent=`${m.name}: richt op positie. Open ☰ → CAD om rotatie/hoogte te regelen en te bevestigen.`;};
+    b.onclick=()=>{selectCad(m.id);if(!S.xrSession){renderCadPage();showStatus("Hervat AR om dit CAD-model te plaatsen.");return;}beginCadPlacement(m.id);renderCadPage();returnToArView();el("hint").textContent=`${m.name}: richt op positie. Open ☰ → CAD om rotatie/hoogte te regelen en te bevestigen.`;};
     del.onclick=()=>{deleteCadModel(m.id);markDirtyAndRecover();renderCadPage();showStatus(`CAD ${m.name} verwijderd.`);};
     row.append(b,del);box.append(row);
   }
-  const active=st.active;el("cadPlacementControls").style.display=active?"block":"none";
+  const active=st.active;el("cadPlacementControls").style.display=S.xrSession&&active?"block":"none";
 }
 function renderObjects(){
   const box=el("objectsList");box.innerHTML="";
@@ -415,8 +416,23 @@ export function initUI(){
     const file=el("importProjectFile").files?.[0];if(!file)return;
     await importProjectFile(file);el("importProjectFile").value="";afterProjectChange(`✓ Project ${S.project.name} geïmporteerd.`);renderProjectPage();closeMenu();
   });
-  bind("cadImportBtn","click",()=>el("cadFile").click());
-  bind("cadFile","change",async()=>{const file=el("cadFile").files?.[0];if(!file)return;const m=await importCadFile(file);el("cadFile").value="";markDirtyAndRecover();renderCadPage();returnToArView();el("hint").textContent=`${m.name} geladen op 1:1. Richt het vizier op de gewenste locatie; open CAD-menu voor rotatie/hoogte en bevestigen.`;showStatus(`CAD ${m.name} geladen · 1:1.`);});
+  bind("cadImportBtn","click",()=>{S.externalPicker={kind:"cad",page:"cad"};el("cadFile").click();});
+  bind("cadFile","cancel",()=>{S.externalPicker=null;renderCadPage();if(!S.xrSession)showStatus("CAD-keuze geannuleerd. Hervat AR wanneer je verder wilt.");});
+  bind("cadFile","change",async()=>{
+    const file=el("cadFile").files?.[0];let m=null;
+    try{if(!file)return;m=await importCadFile(file);markDirtyAndRecover();}
+    finally{el("cadFile").value="";S.externalPicker=null;renderCadPage();}
+    if(!m)return;
+    if(S.xrSession){returnToArView();el("hint").textContent=`${m.name} geladen op 1:1. Richt het vizier op de gewenste locatie; open CAD-menu voor rotatie/hoogte en bevestigen.`;showStatus(`CAD ${m.name} geladen · 1:1.`);}
+    else{showPage("cad",false);el("menuPanel").classList.add("open");showStatus(`CAD ${m.name} geladen · 1:1. Hervat AR om het model te plaatsen.`);}
+  });
+  bind("cadResumeArBtn","click",async()=>{
+    const models=listCadModels(),targetId=cadStatus().active?.id||models.find(m=>!m.placed)?.id||models.at(-1)?.id;
+    if(!targetId)throw new Error("Geen CAD-model om te plaatsen.");
+    const restored=new Promise(resolve=>{let done=false;const finish=()=>{if(done)return;done=true;clearTimeout(timer);document.removeEventListener("measurear:cad-changed",finish);resolve();};const timer=setTimeout(finish,2500);document.addEventListener("measurear:cad-changed",finish,{once:true});});
+    await startAR();await restored;selectCad(targetId);beginCadPlacement(targetId);renderCadPage();returnToArView();
+    el("hint").textContent="AR hervat. Richt het vizier op de gewenste CAD-positie; open ☰ → CAD om te draaien/verhogen en te bevestigen.";showStatus("AR hervat · CAD-plaatsing actief.");
+  });
   bind("cadRotateLeftBtn","click",()=>{rotateCad(-5);markDirtyAndRecover();renderCadPage();});
   bind("cadRotateRightBtn","click",()=>{rotateCad(5);markDirtyAndRecover();renderCadPage();});
   bind("cadDownBtn","click",()=>{moveCadHeight(-0.01);markDirtyAndRecover();renderCadPage();});
@@ -593,6 +609,9 @@ bind("saveWallBtn","click",()=>{
   document.addEventListener("measurear:project-meta-changed",syncProjectMeta);
   document.addEventListener("measurear:project-loaded",()=>{syncProjectMeta();renderObjects();renderCadPage();syncHistoryControls();});
   document.addEventListener("measurear:cad-changed",()=>{if(document.getElementById("page-cad")?.classList.contains("active"))renderCadPage();syncProjectMeta();});
+  document.addEventListener("measurear:xr-interrupted",e=>{
+    if(e.detail?.kind!=="cad")return;menuStack=["home","cad"];showPage("cad",false);el("menuPanel").classList.add("open");el("menuMeta").textContent=`${S.project.name||"Project"} · v${S.version}`;renderCadPage();showStatus("Bestandskiezer heeft AR tijdelijk gestopt. Kies je CAD-bestand; daarna hervat je AR vanuit dit scherm.");
+  });
 
   initProjectStorage();
   enableHeading().catch(()=>{});

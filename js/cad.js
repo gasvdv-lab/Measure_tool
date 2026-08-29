@@ -1,4 +1,4 @@
-import {S,projectToWorld,worldToProject} from "./state.js?v=0.8.28-20260829-2035";
+import {S,projectToWorld,worldToProject} from "./state.js?v=0.8.28.1-20260829-2045";
 
 const DB_NAME="measurear.cad.v1",STORE="files";
 let loaderPromise=null;
@@ -42,19 +42,23 @@ async function instantiate(m,blob){
 }
 export async function importCadFile(file){
   if(!file)throw new Error("Geen CAD-bestand gekozen.");
-  if(!/\.(glb|gltf)$/i.test(file.name))throw new Error("v0.8.28 ondersteunt GLB/glTF. Exporteer FreeCAD eerst als GLB/glTF.");
+  if(!/\.(glb|gltf)$/i.test(file.name))throw new Error("v0.8.28.1 ondersteunt GLB/glTF. Exporteer FreeCAD eerst als GLB/glTF.");
   if(file.size>80*1024*1024)throw new Error("CAD-bestand is groter dan 80 MB.");
   if(!S.THREE||!S.scene)throw new Error("Start eerst AR.");
   const id="cad-"+crypto.randomUUID(),fileKey=id;
   await putBlob(fileKey,file);
   const scene=await parseBlob(file),pivot=makePivot(scene),d=dimensionsOf(pivot);
-  S.scene.add(pivot);runtime().objects.set(id,pivot);
   const target=S.currentRawTarget||S.currentTarget;
-  if(!target){disposeObject(pivot);runtime().objects.delete(id);throw new Error("Richt eerst het vizier op een oppervlak en probeer opnieuw.");}
-  const pp=worldToProject(target);
-  const m={id,name:file.name.replace(/\.(glb|gltf)$/i,""),fileName:file.name,fileKey,position:{x:pp.x,y:pp.y,z:pp.z},yaw:0,dimensions:{x:d.x,y:d.y,z:d.z},placed:false,importedAt:new Date().toISOString()};
+  const canPlaceNow=Boolean(S.xrSession&&target);
+  const pp=canPlaceNow?worldToProject(target):null;
+  const m={id,name:file.name.replace(/\.(glb|gltf)$/i,""),fileName:file.name,fileKey,position:pp?{x:pp.x,y:pp.y,z:pp.z}:null,yaw:0,dimensions:{x:d.x,y:d.y,z:d.z},placed:false,importedAt:new Date().toISOString()};
   ensureCadState().models.push(m);
-  const rt=runtime();rt.activeId=id;rt.placing=true;rt.offsetY=0;pivot.position.copy(target);pivot.rotation.y=0;
+  const rt=runtime();rt.activeId=id;rt.offsetY=0;
+  if(canPlaceNow){
+    S.scene.add(pivot);rt.objects.set(id,pivot);rt.placing=true;pivot.position.copy(target);pivot.rotation.y=0;
+  }else{
+    rt.placing=false;disposeObject(pivot);
+  }
   document.dispatchEvent(new CustomEvent("measurear:cad-changed"));return m;
 }
 export function listCadModels(){return ensureCadState().models;}

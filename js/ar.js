@@ -1,9 +1,9 @@
-import {S,$} from "./state.js?v=0.8.28-20260829-2035";
-import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.28-20260829-2035";
-import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.28-20260829-2035";
-import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.28-20260829-2035";
-import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.28-20260829-2035";
-import {updateCadFrame,clearCadRuntime} from "./cad.js?v=0.8.28-20260829-2035";
+import {S,$} from "./state.js?v=0.8.28.1-20260829-2045";
+import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.28.1-20260829-2045";
+import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.28.1-20260829-2045";
+import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.28.1-20260829-2045";
+import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.28.1-20260829-2045";
+import {updateCadFrame,clearCadRuntime} from "./cad.js?v=0.8.28.1-20260829-2045";
 
 let samples=[],sampleSource=null,camPos,camQuat,forward;
 
@@ -54,9 +54,19 @@ export async function startAR(){
   session.addEventListener("end",cleanup,{once:true});S.renderer.setAnimationLoop(render);
 }
 function cleanup(){
+  const externalPicker=S.externalPicker;
   resetWorldLock();resetTrackingSamples();S.renderer?.setAnimationLoop(null);
   if(S.renderer?.domElement)S.renderer.domElement.style.display="none";
   S.xrSession=null;S.hitSource=null;S.hitRequested=false;S.currentTarget=null;S.currentRawTarget=null;S.currentHitResult=null;S.currentXRFrame=null;S.currentReferenceSpace=null;S.targetSource="none";S.referenceCaptureId=null;
+
+  // Android kan immersive WebXR beëindigen wanneer de systeem-bestandskiezer opent.
+  // Dat is geen bewuste 'AR verlaten'-actie: projectdata en menucontext moeten behouden blijven.
+  if(externalPicker?.kind==="cad"){
+    $("app").style.display="none";$("overlay").style.display="block";
+    document.dispatchEvent(new CustomEvent("measurear:xr-interrupted",{detail:{...externalPicker}}));
+    return;
+  }
+
   clearCadRuntime();clearWalls();clearAllGeometry();resetDrawingCore();
   $("overlay").style.display="none";$("app").style.display="grid";
   if($("startArBtn")){$("startArBtn").disabled=false;$("startArBtn").textContent="AR starten";}
