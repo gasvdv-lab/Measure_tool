@@ -1,3 +1,13 @@
+# Measure AR — TESTING
+
+## Huidige verplichte gate — v0.8.21.5 Project Manager Stability
+- `AR-IN`: twee projecten opslaan en kruislings openen.
+- `AR-IN`: project kopiëren zonder actieve scène te wijzigen.
+- `AR-IN`: niet-actief en actief project wissen.
+- `AR-IN`: browser/app herstart met last-project en met recovery.
+- `AR-IN`: export/import roundtrip.
+- World Lock basis is tijdens de huidige praktijktest positief: eenvoudige lijn en samengestelde geometrie blijven op hun fysieke positie.
+
 # TESTING.md — Measure AR
 
 ## Testcodes
@@ -7,7 +17,7 @@
 - **AR-IN/ROOM** — smartphone binnen op meterschaal.
 - **AR-OUT** — smartphone buiten voor terrein/GPS/nauwkeurigheid.
 
-## Huidige verplichte gate — v0.8.21.4 Shape Closure + World Lock
+## Huidige verplichte gate — v0.8.21.5 Shape Closure + World Lock
 Voer deze test **eerst** uit. Stop bij een fout en ga niet verder met Relocalization.
 
 1. Start een volledig nieuwe AR-sessie.

@@ -1,13 +1,29 @@
 # Measure AR — Master Roadmap
 
-**Huidige versie:** v0.8.21.4 — Shape Closure Fix  
-**Huidige gate:** bevestigde AR-geometrie moet fysiek world-locked zijn vóór verdere Relocalization- of featureontwikkeling.
+**Huidige versie:** v0.8.21.5 — Project Manager Stability  
+**Huidige gate:** Project Manager Stability praktisch valideren; World Lock voor eenvoudige en samengestelde geometrie is door de gebruiker positief getest.
 
 ## Testcodes
 `AUTO` · `PC` · `AR-IN/A4` · `AR-IN/ROOM` · `AR-OUT`
 
 ## Nu — Core herstel
-### v0.8.21.4 — Shape Closure Fix
+
+### v0.8.21.5 — Project Manager Stability
+- [x] Projectkopie loskoppelen van `loadStoredProject()`.
+- [x] Wissen van project laat `Mijn projecten` open.
+- [x] Niet-actief project wissen wijzigt actieve scène niet.
+- [x] Actief project wissen bewaart scène als niet-opgeslagen kopie + recovery.
+- [x] Stale `lastProjectId` en recovery opruimen.
+- [x] Last-project pas laden wanneer AR-scène gereed is.
+- [x] Recovery beschermen tegen automatische last-project load.
+- [x] Lifecycle-events rond load/new/save transactioneel maken.
+- [x] Index repareren vanuit valide storage-envelopes.
+- [x] Import ID-conflicten veilig behandelen en lokaal registreren.
+- [x] AUTO gerichte regressiecontrole.
+- [ ] **AR-IN:** A/B save-open-copy-delete workflow praktisch valideren.
+- [ ] **AR-IN:** herstart + recovery + import/export praktisch valideren.
+
+### v0.8.21.5 — Shape Closure Fix
 - [x] WebXR Anchors als optionele sessiefeature toevoegen.
 - [x] Session-local anchor manager toevoegen.
 - [x] Projectpositie en actuele AR-worldpositie scheiden.

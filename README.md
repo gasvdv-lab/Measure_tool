@@ -1,15 +1,37 @@
-# Measure AR v0.8.21.4 — Shape Closure Fix
-Build: 20260829-1030
+# Measure AR v0.8.21.5 — Project Manager Stability
+Build: 20260829-1305
 
-## Doel van deze bugfix
-Deze patch behandelt de gemelde **core-regressie waarbij een reeds bevestigde lijn A→B visueel met de smartphone meebewoog**. Dat gedrag is fout: definitieve projectgeometrie moet aan de echte omgeving gekoppeld blijven.
+## Doel van deze upgrade
+Deze versie stabiliseert het volledige projectbeheer. De AR-tekenengine en World Lock worden bewust niet functioneel uitgebreid.
 
-## Nieuw in v0.8.21.4
-- Vormsluiting hersteld: A-B-C + **Voltooien** levert altijd de zichtbare segmenten **AB + BC + CA** op.
-- De automatische sluitlijn wordt als normale definitieve lijn in `S.lines` opgeslagen en aan de vorm gekoppeld.
-- De sluitlijn gebruikt meteen de actuele World Lock-positie van beide eindpunten.
-- Bestaande sluitlijnen worden opnieuw zichtbaar/synchroon gemaakt indien nodig.
-- Lijncreatie gebruikt voortaan de actuele render/world-positie, zonder de onveranderlijke projectcoördinaten te wijzigen.
+## Nieuw in v0.8.21.5
+- **Kopiëren zonder projectwissel:** een opgeslagen project wordt rechtstreeks uit storage gekopieerd; het bronproject wordt niet eerst geopend.
+- **Veilig wissen:** na wissen blijft `Mijn projecten` geopend. Een niet-actief project wissen verandert de huidige scène niet.
+- **Actief project wissen zonder werkverlies:** de geopende geometrie blijft bestaan als `Niet-opgeslagen kopie van ...`, krijgt een nieuwe ID en recovery.
+- `lastProjectId` en recovery die naar een gewist project verwijzen worden opgeschoond.
+- **Veilige startup:** het laatst opgeslagen project wordt pas volledig geladen wanneer de AR-scène klaar is; alleen metadata wordt nooit meer als actief project gezet.
+- Een bestaande recovery wordt bij startup niet stilzwijgend gewist door last-project autoload.
+- Project load/new onderdrukt foutieve dirty/recovery-events tijdens interne history-reset.
+- **Save As transactioneel:** actieve project-ID verandert pas nadat lokale opslag geslaagd is.
+- Projectindex wordt bij startup herbouwd uit werkelijk aanwezige valide projecten.
+- Import valideert het project, voorkomt lokale ID-conflicten en registreert de import als lokaal project.
+- Duidelijke foutmelding wanneer browseropslag vol is of niet geschreven kan worden.
+- Bij openen van een ander project waarschuwt de UI eerst voor niet-opgeslagen wijzigingen.
+
+Vaste app-link: https://gasvdv-lab.github.io/Measure_tool/
+
+## AUTO teststatus v0.8.21.5
+Zie `TEST_RESULTS_v0.8.21.5.md`. De releasecontrole omvat syntax/imports/cache-key plus gerichte broninvarianten voor save/open/copy/delete/recovery/import.
+
+## Praktijktest projectbeheer
+1. Sla Project A en Project B op.
+2. Open A en controleer de geometrie.
+3. Maak een kopie van B terwijl A actief blijft; A mag niet veranderen.
+4. Wis een niet-actief project; `Mijn projecten` moet open blijven.
+5. Wis het actieve project; de geometrie moet blijven staan als niet-opgeslagen kopie.
+6. Sla die kopie opnieuw op en controleer dat een nieuw project ontstaat.
+7. Herstart de browser/app en controleer last-project + recovery gedrag.
+8. Test export/import met punten, lijnen, vorm, muur en opening.
 
 ## Behouden uit v0.8.21.3
 - Nieuwe module `js/world-lock.js`.
@@ -28,10 +50,10 @@ Deze patch behandelt de gemelde **core-regressie waarbij een reeds bevestigde li
 
 Vaste app-link: https://gasvdv-lab.github.io/Measure_tool/
 
-## AUTO teststatus v0.8.21.4
+## AUTO teststatus v0.8.21.5
 - JavaScript-syntax van alle modules.
 - Alle relatieve ES-module-imports bestaan.
-- Uniforme cache/build-key `0.8.21.4-20260829-1255`.
+- Uniforme cache/build-key `0.8.21.5-20260829-1305`.
 - WebXR `anchors` is optioneel en `hit-test` blijft required.
 - Point create/delete lifecycle is gekoppeld aan World Lock queue/cleanup.
 - Projectpositie en worldPosition zijn gescheiden.
