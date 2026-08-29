@@ -1,4 +1,4 @@
-import {S,getPoint} from "./state.js?v=0.8.21.8-20260829-1425";
+import {S,getPoint} from "./state.js?v=0.8.22-20260829-1535";
 
 // Session-local WebXR anchor manager.
 // Project coordinates remain immutable in point.position/point.locked.
@@ -36,6 +36,14 @@ export function removePointAnchor(pointId){
   try{a?.delete?.();}catch{}
   anchors.delete(pointId);
   if(S.worldLock){S.worldLock.anchored=anchors.size;S.worldLock.pending=pending.size;}
+}
+
+
+export function detachAllPointAnchors(){
+  // Projectwissel binnen een actieve AR-sessie: verbreek alleen onze koppelingen.
+  // WebXR anchors zelf laten we door de sessie opruimen; zo raakt projectbeheer de XR-lifecycle niet.
+  anchors.clear();pending.clear();creating.clear();
+  if(S.worldLock)Object.assign(S.worldLock,{anchored:0,pending:0});
 }
 
 export function resetWorldLock(){

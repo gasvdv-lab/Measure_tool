@@ -1,5 +1,5 @@
 export const S={
-  version:"0.8.21.7",build:"20260829-1415",
+  version:"0.8.22",build:"20260829-1515",
   THREE:null,renderer:null,scene:null,camera:null,reticle:null,xrSession:null,hitSource:null,hitRequested:false,
   currentTarget:null,targetSource:"none",zoom:1,pointPlacementEpoch:0,
   points:[],lines:[],contours:[],shapes:[],walls:[],openings:[],
@@ -25,6 +25,7 @@ export const S={
     schemaVersion:1,id:null,name:"Nieuw project",createdAt:null,updatedAt:null,lastSavedAt:null,
     dirty:false,recoveryAvailable:false,loadedFrom:null,
     geo:null,
+    spatial:{projectOrigin:{x:0,y:0,z:0},savedWorldPose:null,savedAt:null},
     relocalization:{
       references:[],
       active:false,

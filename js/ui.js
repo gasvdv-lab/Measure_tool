@@ -1,24 +1,26 @@
-import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.21.8-20260829-1425";
+import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.22-20260829-1535";
 import {
   startTool,cancelTool,setPlacement,setDistance,setConstraint,setAngle,flipSide,setReferenceLine,setSnapMode,
   confirmCandidate,undoToolStep,finishTool,toolLabel,constraintLabel,getActivePoint,referenceRequired,resetDrawingCore
-} from "./drawing-core.js?v=0.8.21.8-20260829-1425";
+} from "./drawing-core.js?v=0.8.22-20260829-1535";
 import {
   createShape,updateShape,deleteShapeOnly,deleteShapeWithContour,deleteLineRaw,deletePointRaw,renamePoint,updateLine,analyzeContour,
   lineDependencies,pointDependencies,canDeleteLine,canDeletePoint,clearAllGeometry,validateGeometryState,dispose
-} from "./geometry.js?v=0.8.21.8-20260829-1425";
-import {startAR,applyZoom} from "./ar.js?v=0.8.21.8-20260829-1425";
-import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.21.8-20260829-1425";
-import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.21.8-20260829-1425";
+} from "./geometry.js?v=0.8.22-20260829-1535";
+import {startAR,applyZoom} from "./ar.js?v=0.8.22-20260829-1535";
+import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.22-20260829-1535";
+import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.22-20260829-1535";
 import {
   initProjectStorage,saveCurrentProject,listProjects,loadStoredProject,newProject,duplicateStoredProject,
   deleteStoredProject,renameStoredProject,projectStats,formatStats,getStoredProjectInfo,hasRecovery,recoveryInfo,restoreRecovery,clearRecovery,
   exportCurrentProject,importProjectFile
-} from "./project-storage.js?v=0.8.21.8-20260829-1425";
+} from "./project-storage.js?v=0.8.22-20260829-1535";
 import {
   captureCurrentGeo,addProjectReference,removeProjectReference,beginRelocalization,cancelRelocalization,
   captureRelocalizationPoint,solveRelocalization,applyRelocalization,relocalizationSummary
-} from "./relocalization.js?v=0.8.21.8-20260829-1425";
+} from "./relocalization.js?v=0.8.22-20260829-1535";
+
+import {detachAllPointAnchors} from "./world-lock.js?v=0.8.22-20260829-1535";
 
 const pages=["home","project","references","relocalize","projects","objects","line","point","walltool","wallcreate","wall","openingcreate","opening","shapecreate","shape","settings","clear"];
 let menuStack=["home"];
@@ -56,6 +58,15 @@ function showPage(name,push=true){
 }
 function openMenu(){menuStack=["home"];showPage("home",false);el("menuPanel").classList.add("open");el("menuMeta").textContent=`${S.project.name||"Project"} · v${S.version}`;closePopovers();}
 function closeMenu(){el("menuPanel").classList.remove("open");closePopovers();S.objectPickMode=null;}
+function returnToArView(){
+  closeMenu();
+  if(S.xrSession){
+    const app=el("app"),overlay=el("overlay");
+    if(app)app.style.display="none";
+    if(overlay)overlay.style.display="block";
+    if(S.renderer?.domElement)S.renderer.domElement.style.display="block";
+  }
+}
 function menuBack(){if(menuStack.length<=1){closeMenu();return;}menuStack.pop();showPage(menuStack.at(-1),false);}
 
 
@@ -325,7 +336,9 @@ export function initUI(){
   bind("newProjectBtn","click",()=>{
     const name=el("projectName").value||"Nieuw project";
     if((S.points.length||S.lines.length||S.walls.length||S.shapes.length)&&!confirm("Huidige scène leegmaken en een nieuw project starten? Niet-opgeslagen werk kan verloren gaan."))return;
-    newProject(name);afterProjectChange(`Nieuw project ${S.project.name} gestart.`);renderProjectPage();closeMenu();
+    // Ontkoppel World Lock eerst zonder XR-anchors te verwijderen; projectbeheer mag de AR-sessie niet beëindigen.
+    detachAllPointAnchors();
+    newProject(name);afterProjectChange(`Nieuw project ${S.project.name} gestart.`);renderProjectPage();returnToArView();
   });
   bind("projectListBtn","click",()=>showPage("projects"));
   
