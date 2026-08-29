@@ -1,6 +1,6 @@
-import {startAR,resumeARFromGesture} from "./ar.js?v=0.8.28.9-20260829-2238";
-import {$} from "./state.js?v=0.8.28.9-20260829-2238";
-const VERSION="0.8.28.5",BUILD="20260829-2205";
+import {startAR,resumeARFromGesture} from "./ar.js?v=0.8.28.10-20260829-theme";
+import {$} from "./state.js?v=0.8.28.10-20260829-theme";
+const VERSION="0.8.28.10",BUILD="20260829-theme";
 const pendingCadId=sessionStorage.getItem("measurear.pendingCadPlacement");
 let uiReadyPromise;
 
@@ -11,13 +11,13 @@ function showFatal(message){
   if(btn){btn.disabled=false;btn.textContent="Opnieuw proberen";}
 }
 async function lazyInitUI(){
-  try{const mod=await import("./ui.js?v=0.8.28.9-20260829-2238");mod.initUI();if(document.documentElement.dataset.uiReady!=="1")throw new Error("UI-binding niet voltooid.");return true;}
+  try{const mod=await import("./ui.js?v=0.8.28.10-20260829-theme");mod.initUI();if(document.documentElement.dataset.uiReady!=="1")throw new Error("UI-binding niet voltooid.");return true;}
   catch(err){console.error("UI init failed",err);showFatal(`UI-fout · v${VERSION} build ${BUILD}\n${err.message||err}`);return false;}
 }
 async function finishPendingCad(id){
   const [{restoreRecovery},{restoreCadRuntime,selectCad,beginCadPlacement}]=await Promise.all([
-    import("./project-storage.js?v=0.8.28.9-20260829-2238"),
-    import("./cad.js?v=0.8.28.9-20260829-2238")
+    import("./project-storage.js?v=0.8.28.10-20260829-theme"),
+    import("./cad.js?v=0.8.28.10-20260829-theme")
   ]);
   restoreRecovery();
   await restoreCadRuntime();

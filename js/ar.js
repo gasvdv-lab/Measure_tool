@@ -1,9 +1,9 @@
-import {S,$} from "./state.js?v=0.8.28.9-20260829-2238";
-import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.28.9-20260829-2238";
-import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.28.9-20260829-2238";
-import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.28.9-20260829-2238";
-import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.28.9-20260829-2238";
-import {updateCadFrame,clearCadRuntime} from "./cad.js?v=0.8.28.9-20260829-2238";
+import {S,$} from "./state.js?v=0.8.28.10-20260829-theme";
+import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.28.10-20260829-theme";
+import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.28.10-20260829-theme";
+import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.28.10-20260829-theme";
+import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.28.10-20260829-theme";
+import {updateCadFrame,clearCadRuntime} from "./cad.js?v=0.8.28.10-20260829-theme";
 
 let samples=[],sampleSource=null,camPos,camQuat,forward;
 

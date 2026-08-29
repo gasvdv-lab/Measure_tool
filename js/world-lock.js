@@ -1,4 +1,4 @@
-import {S,getPoint} from "./state.js?v=0.8.28.9-20260829-2238";
+import {S,getPoint} from "./state.js?v=0.8.28.10-20260829-theme";
 
 // Session-local WebXR anchor manager.
 // Project coordinates remain immutable in point.position/point.locked.
