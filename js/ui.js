@@ -1,26 +1,26 @@
-import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.27-20260829-1845";
+import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.28-20260829-1850";
 import {
   startTool,cancelTool,setPlacement,setDistance,setConstraint,setAngle,flipSide,setReferenceLine,setSnapMode,
   confirmCandidate,undoToolStep,finishTool,toolLabel,constraintLabel,getActivePoint,referenceRequired,resetDrawingCore
-} from "./drawing-core.js?v=0.8.27-20260829-1845";
+} from "./drawing-core.js?v=0.8.28-20260829-1850";
 import {
   createShape,updateShape,deleteShapeOnly,deleteShapeWithContour,deleteLineRaw,deletePointRaw,renamePoint,updateLine,analyzeContour,
   lineDependencies,pointDependencies,canDeleteLine,canDeletePoint,clearAllGeometry,validateGeometryState,dispose
-} from "./geometry.js?v=0.8.27-20260829-1845";
-import {startAR,applyZoom} from "./ar.js?v=0.8.27-20260829-1845";
-import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.27-20260829-1845";
-import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.27-20260829-1845";
+} from "./geometry.js?v=0.8.28-20260829-1850";
+import {startAR,applyZoom} from "./ar.js?v=0.8.28-20260829-1850";
+import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.28-20260829-1850";
+import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.28-20260829-1850";
 import {
   initProjectStorage,saveCurrentProject,listProjects,loadStoredProject,newProject,duplicateStoredProject,
   deleteStoredProject,renameStoredProject,projectStats,formatStats,getStoredProjectInfo,hasRecovery,recoveryInfo,restoreRecovery,clearRecovery,
   exportCurrentProject,importProjectFile
-} from "./project-storage.js?v=0.8.27-20260829-1845";
+} from "./project-storage.js?v=0.8.28-20260829-1850";
 import {
   captureCurrentGeo,addProjectReference,removeProjectReference,beginRelocalization,cancelRelocalization,
   captureRelocalizationPoint,solveRelocalization,applyRelocalization,relocalizationSummary,beginSpatialRestore
-} from "./relocalization.js?v=0.8.27-20260829-1845";
+} from "./relocalization.js?v=0.8.28-20260829-1850";
 
-import {detachAllPointAnchors} from "./world-lock.js?v=0.8.27-20260829-1845";
+import {detachAllPointAnchors} from "./world-lock.js?v=0.8.28-20260829-1850";
 
 const pages=["home","project","references","relocalize","projects","objects","line","point","walltool","wallcreate","wall","openingcreate","opening","shapecreate","shape","settings","clear"];
 let menuStack=["home"];
@@ -58,6 +58,7 @@ function showPage(name,push=true){
   el("menuTitle").textContent=titles[name]||name;if(push&&menuStack.at(-1)!==name)menuStack.push(name);el("menuBackBtn").style.visibility=name==="home"?"hidden":"visible";if(name==="objects")renderObjects();if(name==="project")renderProjectPage();if(name==="references")renderReferenceManager();if(name==="relocalize")renderRelocalizePage();if(name==="projects")renderProjectsList();
 }
 function openMenu(){
+  S.relocalizationAimMode=false;
   el("overlay")?.classList.remove("relocalizationAimMode");
   menuStack=["home"];
   showPage("home",false);
@@ -68,9 +69,12 @@ function openMenu(){
 function closeMenu(){el("menuPanel").classList.remove("open");closePopovers();S.objectPickMode=null;}
 function enterRelocalizationAimMode(){
   closeMenu();
+  S.relocalizationAimMode=true;
   el("overlay")?.classList.add("relocalizationAimMode");
+  if(el("captureBtn"))el("captureBtn").disabled=!S.currentTarget;
 }
 function exitRelocalizationAimMode(){
+  S.relocalizationAimMode=false;
   el("overlay")?.classList.remove("relocalizationAimMode");
 }
 function returnToArView(){
