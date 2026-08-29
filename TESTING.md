@@ -7,7 +7,7 @@
 - **AR-IN/ROOM** — smartphone binnen op meterschaal.
 - **AR-OUT** — smartphone buiten voor terrein/GPS/nauwkeurigheid.
 
-## Huidige verplichte gate — v0.8.21.3 World Lock
+## Huidige verplichte gate — v0.8.21.4 Shape Closure + World Lock
 Voer deze test **eerst** uit. Stop bij een fout en ga niet verder met Relocalization.
 
 1. Start een volledig nieuwe AR-sessie.

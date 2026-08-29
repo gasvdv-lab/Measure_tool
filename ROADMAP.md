@@ -1,13 +1,13 @@
 # Measure AR — Master Roadmap
 
-**Huidige versie:** v0.8.21.3 — World Lock Core  
+**Huidige versie:** v0.8.21.4 — Shape Closure Fix  
 **Huidige gate:** bevestigde AR-geometrie moet fysiek world-locked zijn vóór verdere Relocalization- of featureontwikkeling.
 
 ## Testcodes
 `AUTO` · `PC` · `AR-IN/A4` · `AR-IN/ROOM` · `AR-OUT`
 
 ## Nu — Core herstel
-### v0.8.21.3 — World Lock Core
+### v0.8.21.4 — Shape Closure Fix
 - [x] WebXR Anchors als optionele sessiefeature toevoegen.
 - [x] Session-local anchor manager toevoegen.
 - [x] Projectpositie en actuele AR-worldpositie scheiden.

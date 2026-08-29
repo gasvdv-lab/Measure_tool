@@ -1,10 +1,10 @@
-# Test Results — Measure AR v0.8.21.3 World Lock Core
+# Test Results — Measure AR v0.8.21.4 World Lock Core
 Build: 20260829-1030
 
 ## AUTO — PASS
 - JavaScript syntax: PASS voor alle modules.
 - Relatieve ES-module-imports: PASS; alle doelen bestaan.
-- Cache/build-key: PASS; `0.8.21.3-20260829-1030` uniform.
+- Cache/build-key: PASS; `0.8.21.4-20260829-1255` uniform.
 - WebXR sessie: `hit-test` required, `anchors` optional: PASS.
 - Point create → anchor queue lifecycle: PASS (statisch).
 - Point delete → anchor cleanup lifecycle: PASS (statisch).

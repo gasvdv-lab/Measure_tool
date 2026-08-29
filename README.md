@@ -1,10 +1,17 @@
-# Measure AR v0.8.21.3 — World Lock Core
+# Measure AR v0.8.21.4 — Shape Closure Fix
 Build: 20260829-1030
 
 ## Doel van deze bugfix
 Deze patch behandelt de gemelde **core-regressie waarbij een reeds bevestigde lijn A→B visueel met de smartphone meebewoog**. Dat gedrag is fout: definitieve projectgeometrie moet aan de echte omgeving gekoppeld blijven.
 
-## Nieuw in v0.8.21.3
+## Nieuw in v0.8.21.4
+- Vormsluiting hersteld: A-B-C + **Voltooien** levert altijd de zichtbare segmenten **AB + BC + CA** op.
+- De automatische sluitlijn wordt als normale definitieve lijn in `S.lines` opgeslagen en aan de vorm gekoppeld.
+- De sluitlijn gebruikt meteen de actuele World Lock-positie van beide eindpunten.
+- Bestaande sluitlijnen worden opnieuw zichtbaar/synchroon gemaakt indien nodig.
+- Lijncreatie gebruikt voortaan de actuele render/world-positie, zonder de onveranderlijke projectcoördinaten te wijzigen.
+
+## Behouden uit v0.8.21.3
 - Nieuwe module `js/world-lock.js`.
 - WebXR-sessie vraagt `anchors` als **optionele** feature; ontbreken van anchors blokkeert de app niet.
 - Elk nieuw definitief Measure AR-punt wordt tijdens de actieve XR-sessie gekoppeld aan een WebXR Anchor wanneer de browser/ARCore dit ondersteunt.
@@ -21,10 +28,10 @@ Deze patch behandelt de gemelde **core-regressie waarbij een reeds bevestigde li
 
 Vaste app-link: https://gasvdv-lab.github.io/Measure_tool/
 
-## AUTO teststatus v0.8.21.3
+## AUTO teststatus v0.8.21.4
 - JavaScript-syntax van alle modules.
 - Alle relatieve ES-module-imports bestaan.
-- Uniforme cache/build-key `0.8.21.3-20260829-1030`.
+- Uniforme cache/build-key `0.8.21.4-20260829-1255`.
 - WebXR `anchors` is optioneel en `hit-test` blijft required.
 - Point create/delete lifecycle is gekoppeld aan World Lock queue/cleanup.
 - Projectpositie en worldPosition zijn gescheiden.
