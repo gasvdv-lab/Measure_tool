@@ -1,24 +1,24 @@
-import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.21.4-20260829-1255";
+import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.21.5-20260829-1305";
 import {
   startTool,cancelTool,setPlacement,setDistance,setConstraint,setAngle,flipSide,setReferenceLine,setSnapMode,
   confirmCandidate,undoToolStep,finishTool,toolLabel,constraintLabel,getActivePoint,referenceRequired,resetDrawingCore
-} from "./drawing-core.js?v=0.8.21.4-20260829-1255";
+} from "./drawing-core.js?v=0.8.21.5-20260829-1305";
 import {
   createShape,updateShape,deleteShapeOnly,deleteShapeWithContour,deleteLineRaw,deletePointRaw,renamePoint,updateLine,analyzeContour,
   lineDependencies,pointDependencies,canDeleteLine,canDeletePoint,clearAllGeometry,validateGeometryState,dispose
-} from "./geometry.js?v=0.8.21.4-20260829-1255";
-import {startAR,applyZoom} from "./ar.js?v=0.8.21.4-20260829-1255";
-import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.21.4-20260829-1255";
-import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.21.4-20260829-1255";
+} from "./geometry.js?v=0.8.21.5-20260829-1305";
+import {startAR,applyZoom} from "./ar.js?v=0.8.21.5-20260829-1305";
+import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.21.5-20260829-1305";
+import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.21.5-20260829-1305";
 import {
-  initProjectStorage,saveCurrentProject,listProjects,loadStoredProject,newProject,duplicateCurrentProject,
+  initProjectStorage,saveCurrentProject,listProjects,loadStoredProject,newProject,duplicateStoredProject,
   deleteStoredProject,renameStoredProject,projectStats,formatStats,hasRecovery,recoveryInfo,restoreRecovery,clearRecovery,
   exportCurrentProject,importProjectFile
-} from "./project-storage.js?v=0.8.21.4-20260829-1255";
+} from "./project-storage.js?v=0.8.21.5-20260829-1305";
 import {
   captureCurrentGeo,addProjectReference,removeProjectReference,beginRelocalization,cancelRelocalization,
   captureRelocalizationPoint,solveRelocalization,applyRelocalization,relocalizationSummary
-} from "./relocalization.js?v=0.8.21.4-20260829-1255";
+} from "./relocalization.js?v=0.8.21.5-20260829-1305";
 
 const pages=["home","project","references","relocalize","projects","objects","line","point","walltool","wallcreate","wall","openingcreate","opening","shapecreate","shape","settings","clear"];
 let menuStack=["home"];
@@ -237,10 +237,10 @@ function renderProjectsList(){
     const duplicate=document.createElement("button");duplicate.className="secondary";duplicate.textContent="Kopie";
     const rename=document.createElement("button");rename.className="secondary";rename.textContent="Naam";
     const del=document.createElement("button");del.className="danger";del.textContent="Wis";
-    main.onclick=()=>{loadStoredProject(p.id);afterProjectChange(`Project ${p.name} geopend.`);renderProjectPage();showPage("project");};
-    duplicate.onclick=()=>{const n=prompt("Naam voor kopie",`${p.name} kopie`);if(!n)return;loadStoredProject(p.id);const e=duplicateCurrentProject(n);showStatus(`Kopie ${e.project.name} opgeslagen.`);renderProjectsList();};
-    rename.onclick=()=>{const n=prompt("Nieuwe projectnaam",p.name);if(!n)return;renameStoredProject(p.id,n);renderProjectsList();};
-    del.onclick=()=>{if(!confirm(`Project "${p.name}" verwijderen?`))return;deleteStoredProject(p.id);renderProjectsList();};
+    main.onclick=()=>{if(S.project.dirty&&(S.points.length||S.lines.length||S.walls.length||S.shapes.length)&&!confirm("Er zijn niet-opgeslagen wijzigingen. Ander project openen en deze wijzigingen verlaten?"))return;loadStoredProject(p.id);afterProjectChange(`Project ${p.name} geopend.`);renderProjectPage();showPage("project");};
+    duplicate.onclick=ev=>{ev.stopPropagation();const n=prompt("Naam voor kopie",`${p.name} kopie`);if(!n)return;const e=duplicateStoredProject(p.id,n);showStatus(`Kopie ${e.project.name} opgeslagen.`);renderProjectsList();showPage("projects",false);};
+    rename.onclick=ev=>{ev.stopPropagation();const n=prompt("Nieuwe projectnaam",p.name);if(!n)return;renameStoredProject(p.id,n);renderProjectsList();showPage("projects",false);};
+    del.onclick=ev=>{ev.stopPropagation();if(!confirm(`Project "${p.name}" verwijderen?`))return;const r=deleteStoredProject(p.id);renderProjectsList();showPage("projects",false);showStatus(r.wasActive?"Opgeslagen project verwijderd. De geopende geometrie blijft behouden als niet-opgeslagen kopie.":`Project ${p.name} verwijderd.`);};
     row.append(main,duplicate,rename,del);box.append(row);
   }
 }

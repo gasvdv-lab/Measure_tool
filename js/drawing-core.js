@@ -1,7 +1,7 @@
-import {S,$,fmt,getPoint,getLine} from "./state.js?v=0.8.21.4-20260829-1255";
-import {createPoint,createLine,ensureLineRendered,deleteLineRaw,deletePointRaw,createContour,dispose,analyzeShapePoints} from "./geometry.js?v=0.8.21.4-20260829-1255";
-import {snapshotProject,commitSnapshot,undoHistory} from "./history.js?v=0.8.21.4-20260829-1255";
-import {createWall,nextWallName} from "./walls.js?v=0.8.21.4-20260829-1255";
+import {S,$,fmt,getPoint,getLine} from "./state.js?v=0.8.21.5-20260829-1305";
+import {createPoint,createLine,ensureLineRendered,deleteLineRaw,deletePointRaw,createContour,dispose,analyzeShapePoints} from "./geometry.js?v=0.8.21.5-20260829-1305";
+import {snapshotProject,commitSnapshot,undoHistory} from "./history.js?v=0.8.21.5-20260829-1305";
+import {createWall,nextWallName} from "./walls.js?v=0.8.21.5-20260829-1305";
 
 const REF_MODES=new Set(["parallel","perpendicular","angle"]);
 const TOOL_NAMES={line:"LIJN",polyline:"POLYLIJN",shape:"VORM",stake:"UITZETTEN",wall:"MUUR"};

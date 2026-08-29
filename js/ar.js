@@ -1,8 +1,8 @@
-import {S,$} from "./state.js?v=0.8.21.4-20260829-1255";
-import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.21.4-20260829-1255";
-import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.21.4-20260829-1255";
-import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.21.4-20260829-1255";
-import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.21.4-20260829-1255";
+import {S,$} from "./state.js?v=0.8.21.5-20260829-1305";
+import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.21.5-20260829-1305";
+import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.21.5-20260829-1305";
+import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.21.5-20260829-1305";
+import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.21.5-20260829-1305";
 
 let samples=[],sampleSource=null,camPos,camQuat,forward;
 
@@ -49,6 +49,7 @@ export async function startAR(){
   const session=await withTimeout(navigator.xr.requestSession("immersive-ar",{requiredFeatures:["hit-test"],optionalFeatures:["dom-overlay","anchors"],domOverlay:{root:document.body}}),10000,"AR-sessie starten");
   S.xrSession=session;configureWorldLock(session);await withTimeout(S.renderer.xr.setSession(session),6000,"AR-renderer koppelen");
   S.renderer.domElement.style.display="block";$("app").style.display="none";$("overlay").style.display="block";
+  document.dispatchEvent(new CustomEvent("measurear:ar-ready"));
   session.addEventListener("end",cleanup,{once:true});S.renderer.setAnimationLoop(render);
 }
 function cleanup(){
