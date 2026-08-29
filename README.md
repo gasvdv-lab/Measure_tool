@@ -1,12 +1,14 @@
-# Measure AR v0.8.28.4 — CAD Safe Import Workspace
+# Measure AR v0.8.28.5 — External CAD Import Page
+
+Deze build vervangt de CAD-importworkspace door een **volledig apart HTML-document (`cad-import.html`)**. De Android-bestandskiezer draait daardoor niet meer in hetzelfde document als WebXR/Measure AR. Na import wordt het model in IndexedDB opgeslagen en aan het recovery-project gekoppeld. Daarna keert de gebruiker terug naar een vers geladen `index.html`, waar één nieuwe tik AR start en de CAD-plaatsing activeert.
 
 Deze build vervangt de instabiele native file-picker-in-WebXR flow. CAD-import gebeurt nu buiten immersive AR in een gewone DOM-workspace: AR wordt eerst bewust gepauzeerd, daarna kiest de gebruiker het bestand, en vervolgens wordt AR via een nieuwe gebruikersactie gestart voor plaatsing. Hiermee wordt voorkomen dat Android Chrome een half-afgesloten XR DOM-overlay achterlaat waarin knoppen niet meer reageren.
 
 GitHub Pages: https://gasvdv-lab.github.io/Measure_tool/
 
-# Measure AR v0.8.28.4 — CAD Resume Fix
+# Measure AR v0.8.28.5 — CAD Resume Fix
 
-## Fix in v0.8.28.4
+## Fix in v0.8.28.5
 - **AR hervatten en CAD plaatsen** vraagt de nieuwe `immersive-ar`-sessie nu direct aan vanuit de gebruiker-tik, vóór enige asynchrone controle. Dit voorkomt verlies van Android/Chrome user activation.
 - Na de nieuwe XR-sessie wordt `restoreCadRuntime()` expliciet uitgevoerd, zodat het geïmporteerde GLB/glTF opnieuw in de Three.js-scène staat vóór de plaatsingsmodus start.
 - De oude kunstmatige wachttijd van 2,5 s op een CAD-event is verwijderd.
@@ -15,7 +17,7 @@ GitHub Pages: https://gasvdv-lab.github.io/Measure_tool/
 
 GitHub Pages: https://gasvdv-lab.github.io/Measure_tool/
 
-## Fix in v0.8.28.4
+## Fix in v0.8.28.5
 - CAD-import heeft nu een persistente Home-block vanaf het openen van de Android-bestandskiezer tot AR hervat/plaatsing afgerond of geannuleerd is.
 - De bescherming blijft actief ná `change`/`cancel`, zodat een vertraagd WebXR `end`-event niet meer door de guard kan glippen.
 - De CAD-importstatus wordt ook in `sessionStorage` bewaard; bij een UI/browser-herinitialisatie wordt direct de CAD-context hersteld in plaats van Home.

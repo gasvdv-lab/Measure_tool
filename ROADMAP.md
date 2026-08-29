@@ -1,4 +1,12 @@
-# Update v0.8.28.4
+## v0.8.28.5 — External CAD Import Page ✅
+- [x] File picker uit hetzelfde WebXR-document verwijderen.
+- [x] `cad-import.html` als volledig geïsoleerde importpagina.
+- [x] CAD-blob bewaren in IndexedDB en metadata in recovery-project.
+- [x] Terugkeer naar vers `index.html` met pending-CAD plaatsingsmodus.
+- [x] Nieuwe AR-sessie uitsluitend vanuit nieuwe gebruikers-tik.
+
+
+# Update v0.8.28.5
 
 - [x] CAD-bestandskiezer uit actieve WebXR-sessie gehaald.
 - [x] Veilige CAD-importworkspace buiten AR toegevoegd.
@@ -8,7 +16,7 @@
 
 # ROADMAP — Measure AR
 
-## v0.8.28.4 — CAD Resume Fix ✅
+## v0.8.28.5 — CAD Resume Fix ✅
 - [x] WebXR `requestSession()` direct vanuit de hervat-tik uitvoeren.
 - [x] CAD-runtime expliciet opnieuw laden na een nieuwe XR-sessie.
 - [x] CAD-context behouden bij resume-fout; Home blijft geblokkeerd.
@@ -166,7 +174,7 @@ Project Space blijft de geometrische waarheid. Bij het openen van een opgeslagen
 - [x] Vizierplaatsing, rotatie en hoogtecorrectie.
 - [x] CAD-metadata in project en bronbestand lokaal in IndexedDB.
 
-## v0.8.28.4 — CAD File Picker Lifecycle Fix ✅
+## v0.8.28.5 — CAD File Picker Lifecycle Fix ✅
 - [x] Android file-picker mag niet meer naar het startscherm navigeren.
 - [x] CAD-menucontext behouden wanneer WebXR door de systeemkiezer stopt.
 - [x] Projectstate niet destructief leegmaken bij deze externe onderbreking.

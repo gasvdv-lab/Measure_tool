@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="theme-color" content="#111111">
+  <title>Measure AR · CAD import</title>
+  <link rel="stylesheet" href="./css/app.css?v=0.8.28.5-20260829-2205">
+  <style>
+    html,body{overflow:auto;min-height:100%;background:#111}
+    #cadStandalone{min-height:100dvh;display:grid;place-items:center;padding:24px}
+    .cadStandaloneCard{width:min(92vw,560px);padding:24px;border:1px solid #ffffff22;border-radius:22px;background:#191919;text-align:left}
+    .cadStandaloneCard h1,.cadStandaloneCard .logo{text-align:center}.cadStandaloneCard button{width:100%;margin-top:10px}
+    .cadStandaloneCard .status{background:transparent;padding:0;margin:14px 0;font-size:1rem;line-height:1.45}
+    .cadStandaloneCard .help{font-size:.78rem}.cadStandaloneCard .error{font-size:.78rem}
+  </style>
+</head>
+<body>
+<main id="cadStandalone">
+  <section class="cadStandaloneCard">
+    <div class="logo">▱</div>
+    <h1>CAD importeren</h1>
+    <p id="cadStandaloneStatus" class="status">Deze pagina staat volledig los van AR. Kies je GLB/glTF-bestand.</p>
+    <button id="cadStandaloneChoose" class="primary">Bestand kiezen</button>
+    <input id="cadStandaloneFile" type="file" accept=".glb,.gltf,model/gltf-binary,model/gltf+json" hidden>
+    <div id="cadStandaloneInfo" class="help"></div>
+    <button id="cadStandaloneReturn" class="primary" style="display:none">Terug naar Measure AR</button>
+    <button id="cadStandaloneCancel" class="secondary">Annuleren en terug</button>
+    <div id="cadStandaloneError" class="error"></div>
+    <div class="build">v0.8.28.5 · External CAD Import</div>
+  </section>
+</main>
+<script type="module" src="./js/cad-import-page.js?v=0.8.28.5-20260829-2205"></script>
+</body>
+</html>
