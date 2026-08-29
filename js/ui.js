@@ -1,27 +1,28 @@
-import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.21.5-20260829-1305";
+import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.21.6-20260829-1408";
 import {
   startTool,cancelTool,setPlacement,setDistance,setConstraint,setAngle,flipSide,setReferenceLine,setSnapMode,
   confirmCandidate,undoToolStep,finishTool,toolLabel,constraintLabel,getActivePoint,referenceRequired,resetDrawingCore
-} from "./drawing-core.js?v=0.8.21.5-20260829-1305";
+} from "./drawing-core.js?v=0.8.21.6-20260829-1408";
 import {
   createShape,updateShape,deleteShapeOnly,deleteShapeWithContour,deleteLineRaw,deletePointRaw,renamePoint,updateLine,analyzeContour,
   lineDependencies,pointDependencies,canDeleteLine,canDeletePoint,clearAllGeometry,validateGeometryState,dispose
-} from "./geometry.js?v=0.8.21.5-20260829-1305";
-import {startAR,applyZoom} from "./ar.js?v=0.8.21.5-20260829-1305";
-import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.21.5-20260829-1305";
-import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.21.5-20260829-1305";
+} from "./geometry.js?v=0.8.21.6-20260829-1408";
+import {startAR,applyZoom} from "./ar.js?v=0.8.21.6-20260829-1408";
+import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.21.6-20260829-1408";
+import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.21.6-20260829-1408";
 import {
   initProjectStorage,saveCurrentProject,listProjects,loadStoredProject,newProject,duplicateStoredProject,
-  deleteStoredProject,renameStoredProject,projectStats,formatStats,hasRecovery,recoveryInfo,restoreRecovery,clearRecovery,
+  deleteStoredProject,renameStoredProject,projectStats,formatStats,getStoredProjectInfo,hasRecovery,recoveryInfo,restoreRecovery,clearRecovery,
   exportCurrentProject,importProjectFile
-} from "./project-storage.js?v=0.8.21.5-20260829-1305";
+} from "./project-storage.js?v=0.8.21.6-20260829-1408";
 import {
   captureCurrentGeo,addProjectReference,removeProjectReference,beginRelocalization,cancelRelocalization,
   captureRelocalizationPoint,solveRelocalization,applyRelocalization,relocalizationSummary
-} from "./relocalization.js?v=0.8.21.5-20260829-1305";
+} from "./relocalization.js?v=0.8.21.6-20260829-1408";
 
 const pages=["home","project","references","relocalize","projects","objects","line","point","walltool","wallcreate","wall","openingcreate","opening","shapecreate","shape","settings","clear"];
 let menuStack=["home"];
+let toastTimer=null;
 
 const el=id=>$(id);
 function bind(id,event,fn){
@@ -38,6 +39,8 @@ function verifyState(){
 function showStatus(msg,error=false){
   if(el("detail"))el("detail").textContent=msg;
   if(error&&el("hint"))el("hint").textContent=msg;
+  const t=el("toast");
+  if(t&&msg){clearTimeout(toastTimer);t.textContent=msg;t.classList.toggle("error",error);t.classList.add("show");toastTimer=setTimeout(()=>t.classList.remove("show"),2600);}
 }
 function closePopovers(){["directionPopover","distancePopover","morePopover"].forEach(id=>el(id)?.classList.remove("open"));S.hud.lastPopover=null;}
 function togglePopover(id){
@@ -220,9 +223,11 @@ function renderRelocalizePage(){
 function renderProjectPage(){
   el("projectName").value=S.project.name||"Nieuw project";
   el("projectStats").textContent=formatStats(projectStats())+` · ${S.project.relocalization.references.length} refs`;
-  el("projectSaveState").textContent=S.project.dirty
-    ?`Niet-opgeslagen wijzigingen · herstel ${S.project.recoveryAvailable?"beschikbaar":"nog niet beschikbaar"}`
-    :(S.project.lastSavedAt?`Opgeslagen ${projectDate(S.project.lastSavedAt)}`:"Nog niet handmatig opgeslagen.");
+  const saveState=el("projectSaveState");
+  saveState.textContent=S.project.dirty
+    ?`● Gewijzigd · ${S.project.recoveryAvailable?"herstel beschikbaar":"nog niet opgeslagen"}`
+    :(S.project.lastSavedAt?`✓ Opgeslagen · ${projectDate(S.project.lastSavedAt)}`:"Nog niet handmatig opgeslagen.");
+  saveState.classList.toggle("dirty",S.project.dirty);saveState.classList.toggle("saved",!S.project.dirty&&Boolean(S.project.lastSavedAt));
   const info=recoveryInfo(),box=el("recoveryBox");
   box.style.display=info?"block":"none";
   if(info)el("recoveryInfo").textContent=`${info.name} · ${projectDate(info.updatedAt)} · ${info.stats.points}p/${info.stats.lines}l/${info.stats.walls}m/${info.stats.openings}o`;
@@ -230,21 +235,40 @@ function renderProjectPage(){
 }
 function renderProjectsList(){
   const box=el("projectsList"),items=listProjects();box.innerHTML="";
-  if(!items.length){box.innerHTML='<div class="help">Nog geen opgeslagen projecten.</div>';return;}
+  if(!items.length){box.innerHTML='<div class="help">Nog geen opgeslagen projecten. Maak of sla eerst een project op.</div>';return;}
   for(const p of items){
-    const row=document.createElement("div");row.className="projectRow";
-    const main=document.createElement("button");main.className="secondary projectOpen";main.textContent=`${p.name} · ${projectDate(p.updatedAt)}`;
-    const duplicate=document.createElement("button");duplicate.className="secondary";duplicate.textContent="Kopie";
-    const rename=document.createElement("button");rename.className="secondary";rename.textContent="Naam";
-    const del=document.createElement("button");del.className="danger";del.textContent="Wis";
-    main.onclick=()=>{if(S.project.dirty&&(S.points.length||S.lines.length||S.walls.length||S.shapes.length)&&!confirm("Er zijn niet-opgeslagen wijzigingen. Ander project openen en deze wijzigingen verlaten?"))return;loadStoredProject(p.id);afterProjectChange(`Project ${p.name} geopend.`);renderProjectPage();showPage("project");};
-    duplicate.onclick=ev=>{ev.stopPropagation();const n=prompt("Naam voor kopie",`${p.name} kopie`);if(!n)return;const e=duplicateStoredProject(p.id,n);showStatus(`Kopie ${e.project.name} opgeslagen.`);renderProjectsList();showPage("projects",false);};
-    rename.onclick=ev=>{ev.stopPropagation();const n=prompt("Nieuwe projectnaam",p.name);if(!n)return;renameStoredProject(p.id,n);renderProjectsList();showPage("projects",false);};
-    del.onclick=ev=>{ev.stopPropagation();if(!confirm(`Project "${p.name}" verwijderen?`))return;const r=deleteStoredProject(p.id);renderProjectsList();showPage("projects",false);showStatus(r.wasActive?"Opgeslagen project verwijderd. De geopende geometrie blijft behouden als niet-opgeslagen kopie.":`Project ${p.name} verwijderd.`);};
-    row.append(main,duplicate,rename,del);box.append(row);
+    let info=null;try{info=getStoredProjectInfo(p.id);}catch{}
+    const card=document.createElement("div");card.className="projectCard";
+    const head=document.createElement("div");head.className="projectCardHead";
+    const text=document.createElement("div");
+    const title=document.createElement("div");title.className="projectCardTitle";title.textContent=p.name;
+    const meta=document.createElement("div");meta.className="projectCardMeta";meta.textContent=`${projectDate(p.updatedAt)}${info?` · ${formatStats(info.stats)}`:""}`;
+    text.append(title,meta);head.append(text);
+    if(S.project.id===p.id){const badge=document.createElement("span");badge.className="projectBadge";badge.textContent="ACTIEF";head.append(badge);}
+    const actions=document.createElement("div");actions.className="projectCardActions";
+    const open=document.createElement("button");open.className="primary";open.textContent=S.project.id===p.id?"Actief project":"Openen";
+    open.disabled=S.project.id===p.id;
+    const more=document.createElement("button");more.className="secondary projectMore";more.textContent="⋮";more.setAttribute("aria-label",`Meer acties voor ${p.name}`);
+    actions.append(open,more);
+    const panel=document.createElement("div");panel.className="projectMorePanel";
+    const duplicate=document.createElement("button");duplicate.className="secondary";duplicate.textContent="Kopiëren";
+    const rename=document.createElement("button");rename.className="secondary";rename.textContent="Hernoemen";
+    const del=document.createElement("button");del.className="danger";del.textContent="Project wissen";
+    panel.append(rename,duplicate,del);
+    open.onclick=()=>{
+      if(S.project.dirty&&(S.points.length||S.lines.length||S.walls.length||S.shapes.length)&&!confirm("Er zijn niet-opgeslagen wijzigingen. Ander project openen en deze wijzigingen verlaten?"))return;
+      const e=loadStoredProject(p.id);afterProjectChange(`✓ Project ${e.project.name} geopend.`);closeMenu();
+    };
+    more.onclick=()=>panel.classList.toggle("open");
+    duplicate.onclick=()=>{const n=prompt("Naam voor kopie",`${p.name} kopie`);if(!n)return;const e=duplicateStoredProject(p.id,n);showStatus(`✓ Kopie ${e.project.name} opgeslagen.`);renderProjectsList();};
+    rename.onclick=()=>{const n=prompt("Nieuwe projectnaam",p.name);if(!n)return;const e=renameStoredProject(p.id,n);showStatus(`✓ Project hernoemd naar ${e.project.name}.`);renderProjectsList();};
+    del.onclick=()=>{if(!confirm(`Project "${p.name}" verwijderen?`))return;const r=deleteStoredProject(p.id);renderProjectsList();showStatus(r.wasActive?"Project verwijderd. De geopende geometrie blijft als niet-opgeslagen kopie.":`Project ${p.name} verwijderd.`);};
+    card.append(head,actions,panel);box.append(card);
   }
 }
 function syncProjectMeta(){
+  if(el("projectQuickState"))el("projectQuickState").textContent=`${S.project.name||"Nieuw project"} · ${S.project.dirty?"gewijzigd":"opgeslagen"}`;
+  if(el("menuMeta"))el("menuMeta").textContent=`${S.project.name||"Project"} · v${S.version}`;
   if(el("projectName")&&document.getElementById("page-project")?.classList.contains("active"))renderProjectPage();
   if(el("startupRecovery")){
     const info=recoveryInfo();el("startupRecovery").style.display=info?"block":"none";
@@ -293,15 +317,15 @@ export function initUI(){
   document.querySelectorAll("[data-page]").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.page)));
 
   bind("saveProjectBtn","click",()=>{
-    const e=saveCurrentProject(el("projectName").value,false);renderProjectPage();showStatus(`Project ${e.project.name} opgeslagen.`);
+    const e=saveCurrentProject(el("projectName").value,false);renderProjectPage();showStatus(`✓ Project ${e.project.name} opgeslagen.`);closeMenu();
   });
   bind("saveProjectAsBtn","click",()=>{
-    const e=saveCurrentProject(el("projectName").value,true);renderProjectPage();showStatus(`Nieuw project ${e.project.name} opgeslagen.`);
+    const e=saveCurrentProject(el("projectName").value,true);renderProjectPage();showStatus(`✓ Nieuw project ${e.project.name} opgeslagen.`);closeMenu();
   });
   bind("newProjectBtn","click",()=>{
     const name=el("projectName").value||"Nieuw project";
     if((S.points.length||S.lines.length||S.walls.length||S.shapes.length)&&!confirm("Huidige scène leegmaken en een nieuw project starten? Niet-opgeslagen werk kan verloren gaan."))return;
-    newProject(name);afterProjectChange(`Nieuw project ${S.project.name} gestart.`);renderProjectPage();
+    newProject(name);afterProjectChange(`Nieuw project ${S.project.name} gestart.`);renderProjectPage();closeMenu();
   });
   bind("projectListBtn","click",()=>showPage("projects"));
   
@@ -336,9 +360,9 @@ export function initUI(){
   bind("importProjectBtn","click",()=>el("importProjectFile").click());
   bind("importProjectFile","change",async()=>{
     const file=el("importProjectFile").files?.[0];if(!file)return;
-    await importProjectFile(file);el("importProjectFile").value="";afterProjectChange(`Project ${S.project.name} geïmporteerd.`);renderProjectPage();
+    await importProjectFile(file);el("importProjectFile").value="";afterProjectChange(`✓ Project ${S.project.name} geïmporteerd.`);renderProjectPage();closeMenu();
   });
-  bind("restoreRecoveryBtn","click",()=>{restoreRecovery();afterProjectChange(`Herstelproject ${S.project.name} geopend.`);renderProjectPage();});
+  bind("restoreRecoveryBtn","click",()=>{restoreRecovery();afterProjectChange(`✓ Herstelproject ${S.project.name} geopend.`);renderProjectPage();closeMenu();});
   bind("discardRecoveryBtn","click",()=>{clearRecovery();renderProjectPage();syncProjectMeta();showStatus("Hersteldata verwijderd.");});
 
 

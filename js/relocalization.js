@@ -1,6 +1,6 @@
-import {S,getPoint} from "./state.js?v=0.8.21.5-20260829-1305";
-import {snapshotProject,restoreProject} from "./history.js?v=0.8.21.5-20260829-1305";
-import {validateGeometryState} from "./geometry.js?v=0.8.21.5-20260829-1305";
+import {S,getPoint} from "./state.js?v=0.8.21.6-20260829-1408";
+import {snapshotProject,restoreProject} from "./history.js?v=0.8.21.6-20260829-1408";
+import {validateGeometryState} from "./geometry.js?v=0.8.21.6-20260829-1408";
 
 const EPS=1e-9;
 function v3(x=0,y=0,z=0){return new S.THREE.Vector3(x,y,z);}
