@@ -1,19 +1,18 @@
-# Testupdate v0.8.28 — Relocalization Capture Button Fix
+# Testupdate v0.8.29 — regressieherstel + minimale capture-fix
 
-## Automatische regressie
-- [x] JavaScript-syntax van alle modules.
-- [x] Alle relatieve ES-module-imports verwijzen naar bestaande bestanden.
-- [x] Broncontrole: aim-mode zet centrale `S.relocalizationAimMode` state.
-- [x] Broncontrole: AR-renderloop gebruikt in aim-mode `S.currentTarget` in plaats van `isCaptureAllowed()`.
-- [x] Broncontrole: normale tekenmodus blijft `isCaptureAllowed()` gebruiken.
+## Automatisch
+- [x] Opnieuw opgebouwd vanaf v0.8.27.
+- [x] Geen `relocalizationAimMode` state-property toegevoegd.
+- [x] JavaScript-syntaxcontrole van alle modules.
+- [x] Relatieve module-imports bestaan.
+- [x] Normale capture-pad gebruikt nog `isCaptureAllowed()`.
 
-## Verplichte fysieke AR-test
-- [ ] Open **Projectpositie herstellen** en tik **Gebruik vizier** bij Referentie 1.
-- [ ] Richt op een oppervlak zonder geldige hit: witte knop blijft inactief.
-- [ ] Richt tot het vizier groen wordt: witte knop wordt actief.
-- [ ] Druk de witte knop: referentie wordt opgeslagen.
-- [ ] Herstelpagina keert terug en toont `✓ opnieuw aangewezen`.
-- [ ] Herhaal voor overige referenties en voer daarna de bestaande 4+ best-fit test uit.
+## Verplichte praktijktest
+- [ ] Bestaand project opent zonder `Group`-fout.
+- [ ] Nieuw project kan worden gestart.
+- [ ] Lijn: A en B kunnen normaal worden geplaatst.
+- [ ] Relocalisatie: Gebruik vizier → groen vizier → witte knop actief.
+- [ ] Referentie wordt opgeslagen en herstelmenu komt terug.
 
 ---
 

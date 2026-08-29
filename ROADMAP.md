@@ -1,27 +1,26 @@
+# v0.8.29 status — Relocalization Capture Minimal Fix
+
+- [x] v0.8.28-regressie teruggedraaid naar v0.8.27-baseline.
+- [x] Capture-fix opnieuw minimaal geïmplementeerd zonder centrale state-wijziging.
+- [ ] Praktijktest: bestaand project openen.
+- [ ] Praktijktest: nieuw project + lijn tekenen.
+- [ ] Praktijktest: relocalisatieknop bij groen vizier.
+
+---
+
 # v0.8.23 Spatial Restore
 
 Project Space blijft de geometrische waarheid. Bij het openen van een opgeslagen project met referentiepunten start nu automatisch de positieherstel-flow. De gebruiker wijst dezelfde fysieke referenties opnieuw aan; Measure AR berekent daaruit de transformatie van het permanente Project Origin naar de nieuwe WebXR-sessie. 4+ referenties gebruiken best-fit en residualcontrole.
 
 # Measure AR — Master Roadmap
 
-**Huidige versie:** v0.8.28 — Relocalization Capture Button Fix  
-**Huidige gate:** praktisch valideren dat de witte opnameknop tijdens relocalization aim-mode actief wordt zodra het vizier een geldige hit heeft; daarna Referentie 1 opnemen en vervolgens 4+ best-fit fysiek valideren.
+**Huidige versie:** v0.8.27 — Relocalization Aim Mode Fix  
+**Huidige gate:** praktisch valideren dat **Gebruik vizier** het herstelmenu volledig verbergt, een fysiek referentiepunt laat opnemen en daarna terugkeert naar dezelfde herstelpagina; vervolgens 4+ best-fit fysiek valideren.
 
 ## Testcodes
 `AUTO` · `PC` · `AR-IN/A4` · `AR-IN/ROOM` · `AR-OUT`
 
 ## Nu — Core herstel
-
-### v0.8.28 — Relocalization Capture Button Fix
-- [x] Aim-mode als centrale state beschikbaar gemaakt voor AR-renderloop.
-- [x] Witte opnameknop in aim-mode losgekoppeld van de tekenengine-gate.
-- [x] Knop wordt actief bij een geldige `S.currentTarget` onder het vizier.
-- [x] Normale tekenfuncties behouden hun bestaande capture-validatie.
-- [x] AUTO syntax/import/cache/broncontrole.
-- [ ] **AR-IN/AR-OUT:** groen vizier → witte knop wordt actief.
-- [ ] **AR-IN/AR-OUT:** witte knop → referentie wordt opgeslagen en herstelpagina keert terug met ✓.
-- [ ] **AR-IN/AR-OUT:** vier referenties opnemen en 4+ best-fit fysiek controleren.
-
 
 
 ### v0.8.27 — Relocalization Aim Mode Fix

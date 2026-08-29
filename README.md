@@ -1,23 +1,24 @@
-# Measure AR v0.8.28 — Relocalization Capture Button Fix
+# Measure AR v0.8.29 — Relocalization Capture Minimal Fix
 
 **Vaste GitHub Pages-link:** https://gasvdv-lab.github.io/Measure_tool/
 
-Deze release corrigeert de witte opnameknop tijdens **Projectpositie herstellen**. In v0.8.27 werd het menu correct verborgen, maar de AR-renderloop gebruikte nog de normale tekenengine-conditie `isCaptureAllowed()`. Omdat relocalisatie bewust geen tekenfunctie activeert, bleef de witte knop daardoor uitgeschakeld.
+Deze release is bewust opnieuw opgebouwd vanaf de stabiele v0.8.27-code. De v0.8.28-wijzigingen aan de centrale app-state zijn volledig teruggedraaid. Alleen de witte opnameknop tijdens **Projectpositie herstellen → Gebruik vizier** is aangepast. De bestaande DOM-klasse `relocalizationAimMode` bepaalt of de knop op een geldige AR-hit mag reageren. Project openen, nieuw project en de normale tekenengine blijven daardoor identiek aan v0.8.27.
 
-## v0.8.28 wijzigingen
-- Relocalization aim-mode heeft nu een expliciete state in de centrale app-state.
-- Tijdens aim-mode wordt de witte opnameknop actief zodra er een geldig WebXR hit-testpunt onder het vizier is.
-- De normale tekenfuncties blijven ongewijzigd en gebruiken nog steeds `isCaptureAllowed()`.
-- De AR-status toont tijdens aim-mode of een referentiepunt gevonden is.
-- Na opname blijft de bestaande flow behouden: referentie opslaan, aim-mode afsluiten en terugkeren naar **Projectpositie herstellen**.
-- Geen wijziging aan projectformaat of opgeslagen geometrie.
+## v0.8.29 wijziging
+- v0.8.28 state-wijzigingen volledig verwijderd.
+- Geen nieuwe relocalization-property in `S`.
+- Normale tekenmodus blijft exact `isCaptureAllowed()` gebruiken.
+- Alleen tijdens de reeds bestaande `relocalizationAimMode`-UI wordt de witte knop actief bij `S.currentTarget`.
+- Projectformaat en opgeslagen geometrie zijn niet gewijzigd.
 
-## Verplichte praktijktest
-Tik **Gebruik vizier** bij Referentie 1. Zodra het vizier groen is op een herkend oppervlak moet de witte knop onderaan **actief** worden. Druk erop: Referentie 1 moet worden vastgelegd en de herstelpagina moet opnieuw openen met `✓ opnieuw aangewezen`.
+## Eerst testen
+1. Open een bestaand project.
+2. Maak een nieuw project en teken één lijn.
+3. Open daarna Projectpositie herstellen → Gebruik vizier; groen vizier moet de witte knop activeren.
 
 ---
 
-# Measure AR v0.8.27 — Relocalization Aim Mode Fix
+# Measure AR v0.8.29 — Relocalization Aim Mode Fix
 
 **Vaste GitHub Pages-link:** https://gasvdv-lab.github.io/Measure_tool/
 
