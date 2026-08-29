@@ -1,3 +1,10 @@
+# Status v0.8.28
+
+- [x] CAD-1 Import & Placement: GLB/glTF import, 1:1 schaal, handmatige AR-plaatsing, lokale IndexedDB-opslag.
+- [ ] CAD-2 Placement/Relocalization: CAD automatisch terugplaatsen na betrouwbare spatial restore.
+- [ ] CAD-3 Inspect: transparantie, objectselectie, visibility en modelinfo.
+- [ ] Open bug: referentie-capture bij Project op locatie plaatsen.
+
 # Status v0.8.27.1
 - [x] Project Transform Core: brongeometrie blijft immutable bij relocalisatie.
 - [x] Precision capture basis + referentie-integriteit.

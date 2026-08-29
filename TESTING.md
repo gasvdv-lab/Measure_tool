@@ -1,3 +1,15 @@
+# v0.8.28 gerichte test
+
+## CAD-1
+- AUTO: alle JS-bestanden syntax geldig.
+- AUTO: alle lokale ES-module imports bestaan.
+- PC: GLB-filepicker en CAD-menu zichtbaar.
+- AR-IN/ROOM of AR-OUT: GLB importeren, vizierplaatsing, rotatie ±5°, hoogte ±1 cm, bevestigen, 1:1 afmetingen visueel controleren.
+- AR: project opslaan, AR volledig sluiten, opnieuw openen en controleren dat CAD via IndexedDB terugkomt.
+
+## Bekend openstaand
+- Project op locatie plaatsen / referentie-capture is nog niet opgelost en blokkeert de CAD-1 test niet.
+
 # v0.8.27.1 gerichte test
 1. World Lock: teken lijn/vorm en loop rond.
 2. Shape Fill: sluit vorm; fill moet direct zichtbaar zijn.
