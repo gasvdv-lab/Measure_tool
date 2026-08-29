@@ -1,7 +1,8 @@
-import {S,$,fmt,getPoint,getLine} from "./state.js?v=0.8.23-20260829-1605";
-import {createPoint,createLine,ensureLineRendered,deleteLineRaw,deletePointRaw,createContour,dispose,analyzeShapePoints} from "./geometry.js?v=0.8.23-20260829-1605";
-import {snapshotProject,commitSnapshot,undoHistory} from "./history.js?v=0.8.23-20260829-1605";
-import {createWall,nextWallName} from "./walls.js?v=0.8.23-20260829-1605";
+import {S,$,fmt,getPoint,getLine} from "./state.js?v=0.8.24-20260829-1745";
+import {createPoint,createLine,ensureLineRendered,deleteLineRaw,deletePointRaw,createContour,dispose,analyzeShapePoints} from "./geometry.js?v=0.8.24-20260829-1745";
+import {snapshotProject,commitSnapshot,undoHistory} from "./history.js?v=0.8.24-20260829-1745";
+import {queuePointHitAnchor} from "./world-lock.js?v=0.8.24-20260829-1745";
+import {createWall,nextWallName} from "./walls.js?v=0.8.24-20260829-1745";
 
 const REF_MODES=new Set(["parallel","perpendicular","angle"]);
 const TOOL_NAMES={line:"LIJN",polyline:"POLYLIJN",shape:"VORM",stake:"UITZETTEN",wall:"MUUR"};
@@ -409,7 +410,7 @@ export function confirmCandidate(){
     if(!active){
       let p,created=false;
       if(c.snappedPointId)p=getPoint(c.snappedPointId);
-      else{p=createPoint(c.position,{surfaceNormal:c.surfaceNormal||S.tool.hoverSurfaceNormal});created=true;}
+      else{p=createPoint(c.position,{surfaceNormal:c.surfaceNormal||S.tool.hoverSurfaceNormal});created=true;if(S.currentHitResult&&S.currentTarget&&c.position.distanceTo(S.currentTarget)<.025)queuePointHitAnchor(p.id,S.currentHitResult);}
       S.tool.activePointId=p.id;S.tool.firstPointId=p.id;S.tool.pointIds=[p.id];S.tool.activePlane=planeFromPoint(p);
       transaction({type:"start",tool:S.tool.kind,pointId:p.id,createdPoint:created});
       S.tool.candidate=null;hidePreview();
@@ -420,7 +421,7 @@ export function confirmCandidate(){
 
     let end,created=false;
     if(c.snappedPointId)end=getPoint(c.snappedPointId);
-    else{end=createPoint(c.position,{color:0xffd166,surfaceNormal:c.surfaceNormal});created=true;}
+    else{end=createPoint(c.position,{color:0xffd166,surfaceNormal:c.surfaceNormal});created=true;if(S.currentHitResult&&S.currentTarget&&c.position.distanceTo(S.currentTarget)<.025)queuePointHitAnchor(end.id,S.currentHitResult);}
     if(!end||end.id===active.id)throw new Error("Het eindpunt valt samen met het vertrekpunt.");
 
     let line;

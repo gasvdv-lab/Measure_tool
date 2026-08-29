@@ -1,26 +1,26 @@
-import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.23-20260829-1605";
+import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.24-20260829-1745";
 import {
   startTool,cancelTool,setPlacement,setDistance,setConstraint,setAngle,flipSide,setReferenceLine,setSnapMode,
   confirmCandidate,undoToolStep,finishTool,toolLabel,constraintLabel,getActivePoint,referenceRequired,resetDrawingCore
-} from "./drawing-core.js?v=0.8.23-20260829-1605";
+} from "./drawing-core.js?v=0.8.24-20260829-1745";
 import {
   createShape,updateShape,deleteShapeOnly,deleteShapeWithContour,deleteLineRaw,deletePointRaw,renamePoint,updateLine,analyzeContour,
   lineDependencies,pointDependencies,canDeleteLine,canDeletePoint,clearAllGeometry,validateGeometryState,dispose
-} from "./geometry.js?v=0.8.23-20260829-1605";
-import {startAR,applyZoom} from "./ar.js?v=0.8.23-20260829-1605";
-import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.23-20260829-1605";
-import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.23-20260829-1605";
+} from "./geometry.js?v=0.8.24-20260829-1745";
+import {startAR,applyZoom} from "./ar.js?v=0.8.24-20260829-1745";
+import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.24-20260829-1745";
+import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.24-20260829-1745";
 import {
   initProjectStorage,saveCurrentProject,listProjects,loadStoredProject,newProject,duplicateStoredProject,
   deleteStoredProject,renameStoredProject,projectStats,formatStats,getStoredProjectInfo,hasRecovery,recoveryInfo,restoreRecovery,clearRecovery,
   exportCurrentProject,importProjectFile
-} from "./project-storage.js?v=0.8.23-20260829-1605";
+} from "./project-storage.js?v=0.8.24-20260829-1745";
 import {
   captureCurrentGeo,addProjectReference,removeProjectReference,beginRelocalization,cancelRelocalization,
   captureRelocalizationPoint,solveRelocalization,applyRelocalization,relocalizationSummary,beginSpatialRestore
-} from "./relocalization.js?v=0.8.23-20260829-1605";
+} from "./relocalization.js?v=0.8.24-20260829-1745";
 
-import {detachAllPointAnchors} from "./world-lock.js?v=0.8.23-20260829-1605";
+import {detachAllPointAnchors} from "./world-lock.js?v=0.8.24-20260829-1745";
 
 const pages=["home","project","references","relocalize","projects","objects","line","point","walltool","wallcreate","wall","openingcreate","opening","shapecreate","shape","settings","clear"];
 let menuStack=["home"];

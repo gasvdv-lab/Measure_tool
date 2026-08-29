@@ -1,7 +1,7 @@
 export const S={
-  version:"0.8.23",build:"20260829-1605",
+  version:"0.8.24",build:"20260829-1745",
   THREE:null,renderer:null,scene:null,camera:null,reticle:null,xrSession:null,hitSource:null,hitRequested:false,
-  currentTarget:null,targetSource:"none",zoom:1,pointPlacementEpoch:0,
+  currentTarget:null,currentHitResult:null,currentXRFrame:null,currentReferenceSpace:null,targetSource:"none",zoom:1,pointPlacementEpoch:0,
   points:[],lines:[],contours:[],shapes:[],walls:[],openings:[],
   wallTool:{height:2.40,thickness:.14,side:"center",orientation:"vertical",angle:90,color:"#d7d2c8",opacity:.65,namePrefix:"Muur"},
   pointCounter:0,contourCounter:1,

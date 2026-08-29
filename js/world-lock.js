@@ -1,4 +1,4 @@
-import {S,getPoint} from "./state.js?v=0.8.23-20260829-1605";
+import {S,getPoint} from "./state.js?v=0.8.24-20260829-1745";
 
 // Session-local WebXR anchor manager.
 // Project coordinates remain immutable in point.position/point.locked.
@@ -6,6 +6,7 @@ import {S,getPoint} from "./state.js?v=0.8.23-20260829-1605";
 const anchors=new Map();
 const pending=new Set();
 const creating=new Set();
+const hitAnchors=new Map();
 let support="unknown";
 let lastError="";
 
@@ -14,12 +15,19 @@ function enabledFeatures(session){
 }
 
 export function configureWorldLock(session){
-  anchors.clear();pending.clear();creating.clear();lastError="";
+  anchors.clear();pending.clear();creating.clear();hitAnchors.clear();hitAnchors.clear();lastError="";
   const enabled=enabledFeatures(session);
   support=enabled.includes("anchors")?"anchors":"fallback";
   S.worldLock={mode:support,active:support==="anchors",anchored:0,pending:0,lastError:""};
   for(const p of S.points)queuePointAnchor(p.id);
   emitStatus();
+}
+
+export function queuePointHitAnchor(pointId,hitResult){
+  if(!pointId||!hitResult||typeof hitResult.createAnchor!=="function")return false;
+  hitAnchors.set(pointId,hitResult);
+  queuePointAnchor(pointId);
+  return true;
 }
 
 export function queuePointAnchor(pointId){
@@ -31,7 +39,7 @@ export function queuePointAnchor(pointId){
 }
 
 export function removePointAnchor(pointId){
-  pending.delete(pointId);creating.delete(pointId);
+  pending.delete(pointId);creating.delete(pointId);hitAnchors.delete(pointId);
   const a=anchors.get(pointId);
   try{a?.delete?.();}catch{}
   anchors.delete(pointId);
@@ -64,18 +72,26 @@ async function createAnchorForPoint(frame,ref,pointId){
   const p=getPoint(pointId);if(!p||!frame?.createAnchor)return;
   creating.add(pointId);pending.delete(pointId);
   try{
-    const q=p.position;
-    const transform=new XRRigidTransform({x:q.x,y:q.y,z:q.z});
-    const anchor=await frame.createAnchor(transform,ref);
+    let anchor=null;
+    const hitResult=hitAnchors.get(pointId);
+    if(hitResult&&typeof hitResult.createAnchor==="function"){
+      anchor=await hitResult.createAnchor();
+      p.worldLock="hit-anchor";
+    }else{
+      const q=p.position;
+      const transform=new XRRigidTransform({x:q.x,y:q.y,z:q.z});
+      anchor=await frame.createAnchor(transform,ref);
+      p.worldLock="frame-anchor";
+    }
+    hitAnchors.delete(pointId);
     if(!getPoint(pointId)){try{anchor?.delete?.();}catch{};return;}
     anchors.set(pointId,anchor);
-    p.worldLock="anchor";
   }catch(err){
     // Never break drawing when anchors are unavailable at runtime.
     support="fallback";lastError=String(err?.message||err||"Anchor kon niet worden aangemaakt.");
     p.worldLock="local";
   }finally{
-    creating.delete(pointId);
+    creating.delete(pointId);hitAnchors.delete(pointId);
     if(S.worldLock){
       S.worldLock.mode=support;S.worldLock.active=support==="anchors";
       S.worldLock.anchored=anchors.size;S.worldLock.pending=pending.size;S.worldLock.lastError=lastError;

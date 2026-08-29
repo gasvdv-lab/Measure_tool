@@ -1,8 +1,8 @@
-import {S,$} from "./state.js?v=0.8.23-20260829-1605";
-import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.23-20260829-1605";
-import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.23-20260829-1605";
-import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.23-20260829-1605";
-import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.23-20260829-1605";
+import {S,$} from "./state.js?v=0.8.24-20260829-1745";
+import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.24-20260829-1745";
+import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.24-20260829-1745";
+import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.24-20260829-1745";
+import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.24-20260829-1745";
 
 let samples=[],sampleSource=null,camPos,camQuat,forward;
 
@@ -55,7 +55,7 @@ export async function startAR(){
 function cleanup(){
   resetWorldLock();resetTrackingSamples();S.renderer?.setAnimationLoop(null);
   if(S.renderer?.domElement)S.renderer.domElement.style.display="none";
-  S.xrSession=null;S.hitSource=null;S.hitRequested=false;S.currentTarget=null;S.targetSource="none";
+  S.xrSession=null;S.hitSource=null;S.hitRequested=false;S.currentTarget=null;S.currentHitResult=null;S.currentXRFrame=null;S.currentReferenceSpace=null;S.targetSource="none";
   clearWalls();clearAllGeometry();resetDrawingCore();
   $("overlay").style.display="none";$("app").style.display="grid";
   if($("startArBtn")){$("startArBtn").disabled=false;$("startArBtn").textContent="AR starten";}
@@ -66,6 +66,7 @@ export async function leaveAR(){if(S.xrSession){await S.xrSession.end();return;}
 function render(_,frame){
   if(!frame)return;
   const ref=S.renderer.xr.getReferenceSpace(),session=S.renderer.xr.getSession();
+  S.currentXRFrame=frame;S.currentReferenceSpace=ref;
   if(!S.hitRequested){
     session.requestReferenceSpace("viewer").then(v=>session.requestHitTestSource({space:v}).then(s=>S.hitSource=s)).catch(()=>{});
     S.hitRequested=true;
@@ -73,14 +74,14 @@ function render(_,frame){
   let hit=null,pose=null,normal=null;
   if(S.hitSource){
     const r=frame.getHitTestResults(S.hitSource);
-    if(r.length){pose=r[0].getPose(ref);if(pose)hit=new S.THREE.Vector3(pose.transform.position.x,pose.transform.position.y,pose.transform.position.z);}
+    if(r.length){S.currentHitResult=r[0];pose=r[0].getPose(ref);if(pose)hit=new S.THREE.Vector3(pose.transform.position.x,pose.transform.position.y,pose.transform.position.z);}
   }
   if(hit&&pose){
     S.reticle.visible=true;S.reticle.matrix.fromArray(pose.transform.matrix);
     try{const q=new S.THREE.Quaternion().setFromRotationMatrix(S.reticle.matrix);normal=new S.THREE.Vector3(0,1,0).applyQuaternion(q).normalize();}catch{}
     addSample(hit,"hit");hit=filteredHit(hit);S.currentTarget=hit;S.targetSource="hit";$("aim").className="hit";
   }else{
-    S.reticle.visible=false;S.currentTarget=null;S.targetSource="none";$("aim").className="";
+    S.reticle.visible=false;S.currentTarget=null;S.currentHitResult=null;S.targetSource="none";$("aim").className="";
   }
 
   const worldLockChanged=updateWorldLock(frame,ref);
