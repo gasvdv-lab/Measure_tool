@@ -143,3 +143,24 @@ Project Space blijft de geometrische waarheid. Bij het openen van een opgeslagen
 - [ ] Project Space → AR World Space als expliciete sessietransform, zonder brongeometrie te herschrijven
 
 - [x] v0.8.27.1 Core Repair: reference capture + project/anchor lifecycle hardening.
+
+
+## v0.8.28 — CAD Import & Placement ✅
+- [x] GLB/glTF import.
+- [x] 1:1 schaal.
+- [x] Vizierplaatsing, rotatie en hoogtecorrectie.
+- [x] CAD-metadata in project en bronbestand lokaal in IndexedDB.
+
+## v0.8.28.1 — CAD File Picker Lifecycle Fix ✅
+- [x] Android file-picker mag niet meer naar het startscherm navigeren.
+- [x] CAD-menucontext behouden wanneer WebXR door de systeemkiezer stopt.
+- [x] Projectstate niet destructief leegmaken bij deze externe onderbreking.
+- [x] Import en plaatsing ontkoppelen zodat bestand eerst veilig geladen kan worden.
+- [x] Expliciete **AR hervatten en CAD plaatsen**-actie na een onderbroken XR-sessie.
+- [x] Annuleren van bestandskeuze blijft in CAD-flow.
+- [ ] AR-ANDROID: bestand kiezen terwijl AR actief is → nooit startscherm.
+- [ ] AR-ANDROID: bestandskeuze annuleren → CAD-scherm behouden.
+- [ ] AR-ANDROID: AR hervatten → model volgt vizier en kan bevestigd worden.
+- [ ] AR-ANDROID: bestaand project met geometrie → CAD importeren → geometrie/project blijven behouden.
+
+Openstaand blijft: `Project op locatie plaatsen` / witte referentie-captureknop.

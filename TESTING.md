@@ -1,3 +1,22 @@
+# v0.8.28.1 gerichte regressietest — CAD file picker lifecycle
+
+## AUTO
+- [x] Alle JS-bestanden syntax geldig.
+- [x] Alle lokale ES-module imports bestaan.
+- [x] Release bevat geen TEST_RESULTS-bestand.
+
+## AR-ANDROID — verplicht
+1. Open een bestaand project met minstens één zichtbare lijn of vorm.
+2. Open ☰ → CAD / 3D-model → CAD-model importeren.
+3. Open Androids bestandskiezer. **PASS:** na terugkeer verschijnt niet het Measure AR-startscherm.
+4. Selecteer een GLB. **PASS:** CAD-scherm blijft actief en meldt dat het model geladen is wanneer XR onderbroken werd.
+5. Kies **AR hervatten en CAD plaatsen**. **PASS:** camera/AR keert terug en model volgt het vizier.
+6. Plaats en bevestig CAD. **PASS:** bestaand project en eerdere geometrie zijn nog aanwezig.
+7. Herhaal en annuleer de bestandskiezer. **PASS:** geen navigatie naar Home/startscherm en geen projectverlies.
+
+## Bekend openstaand
+- Project op locatie plaatsen / referentie-capture blijft nog apart open.
+
 # v0.8.28 gerichte test
 
 ## CAD-1
