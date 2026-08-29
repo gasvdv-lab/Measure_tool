@@ -122,3 +122,309 @@ canvas{position:fixed;inset:0;width:100%;height:100%}#overlay{position:fixed;ins
 
 
 /* v0.8.28.5 - CAD Safe Import Workspace */
+
+/* ========================================================================== */
+/* v0.8.28.6 — PROFESSIONAL UI PASS (PRESENTATION ONLY)                      */
+/* No application logic is changed by this section.                           */
+/* ========================================================================== */
+:root{
+  --ui-bg:#0b0d0c;
+  --ui-panel:rgba(15,18,16,.94);
+  --ui-panel-soft:rgba(20,24,21,.86);
+  --ui-line:rgba(255,255,255,.10);
+  --ui-line-strong:rgba(255,255,255,.16);
+  --ui-text:#f3f6f4;
+  --ui-muted:#9ba59f;
+  --ui-accent:#55c875;
+  --ui-accent-strong:#69db88;
+  --ui-accent-soft:rgba(85,200,117,.14);
+  --ui-danger:#df6a6a;
+  --ui-radius:14px;
+  --ui-shadow:0 18px 60px rgba(0,0,0,.36);
+}
+
+html,body{background:#0b0d0c;color:var(--ui-text)}
+button,input,select{font-family:inherit;-webkit-tap-highlight-color:transparent}
+button{
+  min-height:42px;
+  border:1px solid var(--ui-line);
+  border-radius:10px;
+  padding:8px 11px;
+  font-weight:650;
+  letter-spacing:.005em;
+  transition:background .14s ease,border-color .14s ease,transform .08s ease,opacity .14s ease;
+}
+button:active:not(:disabled){transform:scale(.985)}
+button.primary{
+  background:var(--ui-accent);
+  color:#071109;
+  border-color:rgba(255,255,255,.10);
+  box-shadow:0 5px 18px rgba(43,151,75,.16);
+}
+button.secondary{background:rgba(255,255,255,.055);color:var(--ui-text);border-color:var(--ui-line)}
+button.danger{background:rgba(190,66,66,.16);color:#ffc9c9;border-color:rgba(223,106,106,.28)}
+button:disabled{opacity:.34;box-shadow:none}
+input,select{
+  min-height:42px;
+  border-radius:9px;
+  border:1px solid var(--ui-line-strong);
+  background:rgba(255,255,255,.055);
+  color:var(--ui-text);
+  padding:8px 10px;
+  outline:none;
+}
+input:focus,select:focus{border-color:rgba(105,219,136,.58);box-shadow:0 0 0 2px rgba(85,200,117,.10)}
+label{color:var(--ui-muted);font-size:.68rem;font-weight:600;letter-spacing:.025em;margin:10px 0 5px}
+
+/* Launch / non-AR screen */
+#app{padding:20px 0;background:linear-gradient(180deg,#0b0d0c,#0e110f)}
+.startCard{
+  width:min(90vw,480px);
+  padding:26px 22px 22px;
+  border:1px solid var(--ui-line);
+  border-radius:20px;
+  background:linear-gradient(180deg,rgba(25,29,26,.98),rgba(15,18,16,.98));
+  box-shadow:var(--ui-shadow);
+}
+.logo{font-size:38px;color:var(--ui-accent-strong);font-weight:400}
+.startCard h1{font-size:1.45rem;letter-spacing:-.025em;margin:.35rem 0 .45rem}
+.startCard p{color:#c7ceca;font-size:.84rem;line-height:1.45}
+.build{margin-top:12px;color:#68716c;font-size:.62rem;letter-spacing:.03em}
+
+/* Compact professional project/status bar */
+#topbar{
+  top:max(8px,env(safe-area-inset-top));
+  left:8px;right:8px;
+  gap:6px;
+  align-items:flex-start;
+}
+#topbar .status{
+  flex:0 1 auto;
+  min-width:0;
+  max-width:min(72vw,330px);
+  padding:7px 10px;
+  border:1px solid var(--ui-line);
+  border-radius:11px;
+  background:rgba(8,10,9,.72);
+  backdrop-filter:blur(12px) saturate(120%);
+  box-shadow:0 8px 30px rgba(0,0,0,.14);
+}
+#stage{font-size:.66rem;color:#dfe5e1;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#distance{font-size:1rem;line-height:1.1;font-weight:760;letter-spacing:-.015em;margin-top:1px}
+#detail,#stability{font-size:.56rem;color:#86918a;line-height:1.3}
+.projectQuickState{margin-top:2px;font-size:.56rem;color:#a8b6ae}
+.menuBtn{
+  margin-left:auto;
+  width:42px;height:42px;min-height:42px;padding:0;
+  border-radius:11px;
+  border:1px solid var(--ui-line);
+  background:rgba(8,10,9,.76);
+  color:#f5f7f5;
+  font-size:1.1rem;
+  backdrop-filter:blur(12px);
+}
+
+/* Menu becomes a modern bottom sheet instead of a large floating box */
+#menuPanel{
+  top:auto;
+  right:auto;
+  left:50%;
+  bottom:max(6px,env(safe-area-inset-bottom));
+  transform:translateX(-50%);
+  width:min(calc(100vw - 16px),430px);
+  height:min(74dvh,650px);
+  border:1px solid var(--ui-line-strong);
+  border-radius:20px;
+  background:var(--ui-panel);
+  box-shadow:0 -12px 50px rgba(0,0,0,.34);
+  backdrop-filter:blur(20px) saturate(125%);
+}
+#menuPanel.open{display:grid;grid-template-rows:auto 1fr auto}
+.menuHead{
+  grid-template-columns:34px 1fr 34px;
+  gap:6px;
+  padding:8px 9px;
+  min-height:52px;
+  border-bottom:1px solid var(--ui-line);
+  text-align:left;
+}
+.menuHead:before{
+  content:"";
+  position:absolute;top:5px;left:50%;transform:translateX(-50%);
+  width:34px;height:3px;border-radius:99px;background:rgba(255,255,255,.18)
+}
+.menuHead button{min-height:34px;height:34px;padding:0;background:transparent;border-color:transparent;font-size:1.15rem}
+.menuHead>div{text-align:center;min-width:0}
+.menuHead strong{display:block;font-size:.86rem;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.menuHead small{margin-top:1px;color:#707b74;font-size:.58rem}
+.menuBody{padding:9px 10px 14px;overscroll-behavior:contain}
+.menuFoot{padding:8px 10px;border-top:1px solid var(--ui-line);background:rgba(8,10,9,.34)}
+.menuFoot button{margin:0;min-height:40px;font-size:.76rem}
+.page h3{
+  margin:12px 2px 6px;
+  font-size:.59rem;
+  font-weight:750;
+  letter-spacing:.12em;
+  color:#7f8b84;
+}
+.page h3:first-child{margin-top:3px}
+.menuCard{
+  padding:5px;
+  border:1px solid var(--ui-line);
+  border-radius:12px;
+  background:rgba(255,255,255,.025);
+  margin-bottom:8px;
+}
+.menuCard button{margin-top:4px;font-size:.75rem}
+.navList{padding:0;overflow:hidden}
+.navList button{
+  margin:0;
+  min-height:48px;
+  border:0;
+  border-bottom:1px solid rgba(255,255,255,.075);
+  border-radius:0;
+  background:transparent;
+  padding:8px 11px;
+  font-size:.76rem;
+  font-weight:690;
+}
+.navList button:last-child{border-bottom:0}
+.navList button:active{background:rgba(85,200,117,.08)}
+.navList small{margin-top:2px;color:#7f8983;font-size:.61rem;line-height:1.25}
+.help{font-size:.61rem;color:#89938d;line-height:1.42}
+.grid2{gap:5px}
+.objectRow{padding:6px 4px;border-bottom-color:rgba(255,255,255,.07)}
+.recoveryBox{border-radius:10px;background:rgba(215,178,72,.055)}
+
+/* Precise reticle: visually tiny, no large obstructing cross */
+#aim{
+  width:22px;height:22px;
+  transform:translate(-50%,-50%);
+  border-radius:50%;
+  background:radial-gradient(circle at center,#fff 0 1.35px,transparent 1.55px);
+  filter:drop-shadow(0 1px 2px rgba(0,0,0,.75));
+}
+#aim:before,#aim:after{background:rgba(255,255,255,.92);border-radius:2px}
+#aim:before{width:14px;height:1px;left:4px;top:10.5px}
+#aim:after{width:1px;height:14px;left:10.5px;top:4px}
+#aim.hit{background:radial-gradient(circle at center,var(--ui-accent-strong) 0 1.5px,transparent 1.7px)}
+#aim.hit:before,#aim.hit:after{background:var(--ui-accent-strong)}
+#aim.snap-intersection{background:radial-gradient(circle at center,#7cc7ff 0 1.5px,transparent 1.7px)}
+#aim.snap-intersection:before,#aim.snap-intersection:after{background:#7cc7ff}
+
+/* Confirm control stays easy to hit but looks much lighter */
+#captureBtn{
+  bottom:max(66px,calc(env(safe-area-inset-bottom) + 66px));
+  width:56px;height:56px;
+  border:2px solid rgba(255,255,255,.92);
+  background:rgba(8,10,9,.28);
+  box-shadow:0 8px 28px rgba(0,0,0,.24);
+  backdrop-filter:blur(6px);
+}
+#captureBtn:after{inset:6px;background:rgba(255,255,255,.92)}
+#captureBtn:not(:disabled):after{background:var(--ui-accent-strong)}
+#captureBtn:not(:disabled){border-color:rgba(105,219,136,.78)}
+
+#hint{
+  bottom:max(10px,env(safe-area-inset-bottom));
+  width:auto;max-width:min(86vw,430px);
+  padding:6px 10px;
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:9px;
+  background:rgba(7,9,8,.70);
+  color:#b8c1bc;
+  font-size:.64rem;
+  backdrop-filter:blur(10px);
+}
+
+/* Labels become technical annotations, not bubbles */
+.lineLabel,.previewLabel{
+  padding:3px 6px;
+  border-radius:6px;
+  background:rgba(7,9,8,.80);
+  border:1px solid rgba(255,255,255,.12);
+  font-size:.59rem;
+  font-weight:720;
+  box-shadow:0 2px 8px rgba(0,0,0,.18)
+}
+.previewLabel{background:rgba(36,31,15,.84);border-color:rgba(255,209,102,.26);color:#f6df9e}
+.pointLabel{
+  min-width:18px;
+  padding:2px 5px;
+  border-radius:99px;
+  background:rgba(8,11,9,.82);
+  border:1px solid rgba(105,219,136,.48);
+  color:#d8ffe2;
+  font-size:.54rem;
+}
+
+/* Drawing controls: slim command bar */
+.drawingHud{
+  width:min(90vw,390px);
+  bottom:max(132px,calc(env(safe-area-inset-bottom) + 132px));
+  padding:4px;
+  border:1px solid var(--ui-line-strong);
+  border-radius:11px;
+  background:rgba(8,10,9,.82);
+  box-shadow:0 10px 34px rgba(0,0,0,.22);
+  backdrop-filter:blur(14px) saturate(120%);
+}
+.hudMain{grid-template-columns:minmax(58px,auto) 1fr 1fr 34px;gap:3px}
+.drawingHud button{min-height:32px;padding:4px 7px;border-radius:7px;font-size:.66rem;font-weight:650;background:rgba(255,255,255,.055)}
+.drawingHud .hudTool{color:var(--ui-accent-strong);font-size:.62rem;font-weight:760;letter-spacing:.06em}
+.hudStatusRow{padding:3px 1px 0;gap:3px}
+.hudChip{padding:2px 5px;font-size:.52rem;border-color:rgba(255,255,255,.08);background:rgba(255,255,255,.035);color:#aeb8b2}
+.chipButton{font-size:.52rem!important;padding:2px 5px!important}
+#hudSnapChip{min-height:24px;padding:2px 5px;border-color:rgba(255,209,102,.22);color:#e7d28f}
+.hudContext{font-size:.53rem;color:#89938d;padding:3px 2px 0}
+.hudActions{grid-template-columns:34px 34px 1fr 50px;gap:3px;margin-top:3px}
+.hudActions button{min-height:30px;font-size:.61rem}
+.hudActions .primary{background:var(--ui-accent);color:#071109}
+.hudPopover{
+  bottom:max(184px,calc(env(safe-area-inset-bottom) + 184px));
+  width:min(86vw,320px);
+  padding:6px;
+  gap:4px;
+  border:1px solid var(--ui-line-strong);
+  border-radius:12px;
+  background:rgba(10,12,11,.94);
+  box-shadow:var(--ui-shadow);
+}
+.hudPopover button,.hudPopover input,.hudPopover select{min-height:38px;font-size:.69rem}
+
+/* Zoom tools fade into AR instead of dominating it */
+#zoomHud{right:8px;top:max(62px,calc(env(safe-area-inset-top) + 62px));gap:3px}
+#zoomHud button{width:34px;height:34px;min-height:34px;border-radius:9px;background:rgba(8,10,9,.66);font-size:.78rem;border-color:rgba(255,255,255,.08)}
+#zoomValue{padding:4px 2px;border-radius:7px;background:rgba(8,10,9,.64);color:#9ba59f;font-size:.52rem}
+
+/* Project cards / utility UI */
+.toast{top:max(64px,calc(env(safe-area-inset-top) + 64px));padding:7px 10px;border-radius:9px;font-size:.68rem;background:rgba(21,58,32,.92)}
+.projectCard{padding:10px 5px}.projectCardTitle{font-size:.79rem}.projectCardMeta{font-size:.58rem}.projectBadge{font-size:.53rem;background:var(--ui-accent-soft);border-color:rgba(85,200,117,.24);color:#b9f5c9}
+.projectCardActions button{font-size:.69rem}
+
+/* Standalone CAD import inherits the same visual language */
+#cadStandalone{background:linear-gradient(180deg,#0b0d0c,#0d100e)!important;padding:18px!important}
+.cadStandaloneCard{
+  width:min(90vw,480px)!important;
+  padding:24px 20px 20px!important;
+  border:1px solid var(--ui-line)!important;
+  border-radius:20px!important;
+  background:linear-gradient(180deg,rgba(25,29,26,.98),rgba(15,18,16,.98))!important;
+  box-shadow:var(--ui-shadow);
+}
+.cadStandaloneCard h1{font-size:1.35rem;letter-spacing:-.025em;margin:.3rem 0 .6rem}
+.cadStandaloneCard .logo{font-size:34px;color:var(--ui-accent-strong)}
+.cadStandaloneCard .status{font-size:.8rem!important;color:#c4ccc7;line-height:1.45!important;margin:10px 0 14px!important}
+.cadStandaloneCard button{margin-top:7px!important;font-size:.76rem}
+.cadStandaloneCard .help,.cadStandaloneCard .error{font-size:.62rem!important}
+
+@media(max-width:390px){
+  #topbar .status{max-width:75vw;padding:6px 8px}
+  #detail,#stability{display:none}
+  #menuPanel{width:calc(100vw - 10px);height:min(76dvh,620px);bottom:max(3px,env(safe-area-inset-bottom));border-radius:18px}
+  .menuBody{padding:8px}
+  .drawingHud{width:min(94vw,370px);bottom:max(128px,calc(env(safe-area-inset-bottom) + 128px))}
+  .hudMain{grid-template-columns:auto 1fr 1fr 32px}
+  .drawingHud button{font-size:.62rem;padding:4px 5px}
+  .hudPopover{bottom:max(178px,calc(env(safe-area-inset-bottom) + 178px))}
+}
