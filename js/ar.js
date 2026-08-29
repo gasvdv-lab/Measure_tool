@@ -1,10 +1,10 @@
-import {S,$} from "./state.js?v=0.8.29.0-20260829-ai-prototype";
-import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.29.0-20260829-ai-prototype";
-import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.29.0-20260829-ai-prototype";
-import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.29.0-20260829-ai-prototype";
-import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.29.0-20260829-ai-prototype";
-import {updateCadFrame,clearCadRuntime} from "./cad.js?v=0.8.29.0-20260829-ai-prototype";
-import {clearAiBuilderObjects} from "./ai-builder.js?v=0.8.29.0-20260829-ai-prototype";
+import {S,$} from "./state.js?v=0.8.29.1-20260830-cad-preview";
+import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.29.1-20260830-cad-preview";
+import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.29.1-20260830-cad-preview";
+import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.29.1-20260830-cad-preview";
+import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.29.1-20260830-cad-preview";
+import {updateCadFrame,clearCadRuntime} from "./cad.js?v=0.8.29.1-20260830-cad-preview";
+import {clearAiBuilderObjects} from "./ai-builder.js?v=0.8.29.1-20260830-cad-preview";
 
 let samples=[],sampleSource=null,camPos,camQuat,forward;
 

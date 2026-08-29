@@ -1,4 +1,4 @@
-import {S} from "./state.js?v=0.8.29.0-20260829-ai-prototype";
+import {S} from "./state.js?v=0.8.29.1-20260830-cad-preview";
 
 function nowIso(){return new Date().toISOString();}
 function normDeg(v){return ((v%360)+360)%360;}

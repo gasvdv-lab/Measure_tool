@@ -1,4 +1,4 @@
-import {S,$,fmt,pointName,getPoint,getLine,getContour,getShape,projectToWorld} from "./state.js?v=0.8.29.0-20260829-ai-prototype";
+import {S,$,fmt,pointName,getPoint,getLine,getContour,getShape,projectToWorld} from "./state.js?v=0.8.29.1-20260830-cad-preview";
 
 export function renderPosition(p){return p?.worldPosition||p?.position||null;}
 
