@@ -1,3 +1,32 @@
+# Testing — Measure AR
+
+## v0.8.29.0 — AI Builder Prototype
+
+### Automatisch uitgevoerd
+- [x] JavaScript syntaxcontrole op alle JS-bestanden.
+- [x] Lokale ES-module imports bestaan.
+- [x] Geen dubbele HTML-id's.
+- [x] Release bevat README.md, ROADMAP.md, TESTING.md en MODULES.md.
+- [x] Geen TEST_RESULTS-bestanden in release.
+- [x] Versie/cachetags naar v0.8.29.0 bijgewerkt.
+
+### Fysiek op Android/Chrome/WebXR — nog uitvoeren
+- [ ] Bestaande basisfuncties starten zonder regressie.
+- [ ] Teken horizontale vorm en sla ze op.
+- [ ] Open vorm → AI Builder prototype.
+- [ ] `Maak hier een houten kist van 50 cm hoog` geeft conceptvolume op exacte footprint.
+- [ ] `Maak hem 80 cm hoog` wijzigt hetzelfde object.
+- [ ] `Maak hem 20 cm hoger` werkt relatief.
+- [ ] Vastgezet concept weigert tekstwijziging.
+- [ ] Ontgrendelen laat wijziging opnieuw toe.
+- [ ] Undo/redo werkt voor maken, aanpassen, lock en verwijderen.
+- [ ] Project opslaan → app/project opnieuw openen → AI-concept herstelt.
+- [ ] Verticale vorm wordt veilig geweigerd door prototype in plaats van foutieve geometrie te maken.
+- [ ] CAD import/placement blijft werken.
+- [ ] Project op locatie plaatsen/reference capture: bekende open bug opnieuw controleren, niet als opgelost beschouwen.
+
+---
+
 ## v0.8.28.10 — Theme Selector
 
 **Automatische controles**

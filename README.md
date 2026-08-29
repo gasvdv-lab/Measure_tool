@@ -1,3 +1,23 @@
+# Measure AR v0.8.29.0 — AI Builder Prototype
+
+App: https://gasvdv-lab.github.io/Measure_tool/
+
+## Nieuw in v0.8.29.0
+
+Deze release voegt de eerste **geïsoleerde AI Builder-prototypeketen** toe. Het is bewust nog geen externe AI-integratie. De app gebruikt lokaal een beperkte, deterministische opdrachtinterpreter zodat we eerst de veilige keten `geselecteerde vorm → opdracht → parametrisch concept → opslaan/herstellen` kunnen testen zonder API-sleutels, kosten of invloed op de WebXR-core.
+
+Prototypeworkflow: teken en bewaar een vorm → open die vorm via **Objecten** → kies **✨ AI Builder · prototype** → geef bijvoorbeeld `Maak hier een houten kist van 50 cm hoog` → het concept gebruikt de exacte contour van de vorm als footprint. Bestaande concepten kunnen met een exacte hoogte worden aangepast, bijvoorbeeld `Maak hem 80 cm hoog` of `Maak hem 20 cm hoger`. Een concept kan worden vastgezet/ontgrendeld en verwijderd.
+
+Beperkingen: alleen **Conceptmodus**, alleen horizontale/bijna horizontale vormen, alleen eenvoudige kist/box/blok/volume-opdrachten met een expliciete maat. Dit prototype maakt een conceptvolume, geen constructief uitgewerkte houten kist. Er is nog geen LLM/API, geen Detailed Builder, geen Project Builder, geen materiaalengine en geen constructieve validatie.
+
+Nieuw document: **MODULES.md** beschrijft vanaf deze release cumulatief de modules van de app, hun status en gebruik.
+
+## Teststatus
+
+Automatische statische tests zijn uitgevoerd op de releasebestanden. Fysieke Android/WebXR-tests blijven vereist, inclusief het AI-concept op een getekende vorm, opslaan/heropenen, undo/redo, CAD-placement bij voldoende licht en de reeds openstaande reference-capturetest.
+
+---
+
 # Measure AR v0.8.28.10 — Theme Selector
 
 GitHub Pages: https://gasvdv-lab.github.io/Measure_tool/

@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#111111">
   <script>try{document.documentElement.dataset.appTheme=localStorage.getItem("measurear.ui.theme.v1")||"technical-green"}catch{document.documentElement.dataset.appTheme="technical-green"}</script>
-  <title>Measure AR v0.8.28.10</title>
-  <link rel="stylesheet" href="./css/app.css?v=0.8.28.10-20260829-theme">
+  <title>Measure AR v0.8.29.0</title>
+  <link rel="stylesheet" href="./css/app.css?v=0.8.29.0-20260829-ai-prototype">
 </head>
 <body>
 <div id="app">
@@ -14,7 +14,7 @@
     <div class="logo">⌖</div><h1>Measure AR</h1>
     <p id="launchStatus">Tik om AR te starten.</p>
     <div id="startupRecovery" class="help" style="display:none"></div>
-    <div id="buildInfo" class="build">v0.8.28.10 · Professional Color Picker · 20260829</div>
+    <div id="buildInfo" class="build">v0.8.29.0 · Professional Color Picker · 20260829</div>
     <button id="startArBtn" class="primary">AR starten</button>
     <div id="error" class="error"></div>
   </main>
@@ -37,7 +37,7 @@
   <aside id="menuPanel">
     <div class="menuHead">
       <button id="menuBackBtn" class="secondary">‹</button>
-      <div><strong id="menuTitle">Measure AR</strong><small id="menuMeta">v0.8.28.10</small></div>
+      <div><strong id="menuTitle">Measure AR</strong><small id="menuMeta">v0.8.29.0</small></div>
       <button id="menuCloseBtn" class="secondary">✕</button>
     </div>
     <div class="menuBody">
@@ -268,11 +268,29 @@
           <label>Randdikte<select id="editShapeThickness"><option value="1">1 · fijn</option><option value="2">2 · normaal</option><option value="3">3 · duidelijk</option><option value="4">4 · zwaar</option></select></label>
           <label class="check"><input id="editShapeLabels" type="checkbox"> Randlabels tonen</label>
           <button id="saveShapeBtn" class="primary">Wijzigingen opslaan</button>
+          <button id="openAiBuilderBtn" class="primary aiBuilderEntry">✨ AI Builder · prototype</button>
+          <div class="help">Gebruik deze vorm als footprint voor een eenvoudig parametrisch concept.</div>
           <button id="deleteShapeOnlyBtn" class="secondary">Alleen vorm/opvulling verwijderen</button>
           <button id="deleteShapeContourBtn" class="danger">Vorm + contour verwijderen</button>
         </div>
       </section>
 
+      <section id="page-aibuilder" class="page">
+        <h3>AI Builder <span class="prototypeBadge">PROTOTYPE</span></h3>
+        <div class="menuCard aiBuilderCard">
+          <div id="aiBuilderContext" class="help">Selecteer eerst een vorm.</div>
+          <div class="prototypeNotice"><strong>Conceptmodus</strong><span>Deze eerste versie gebruikt een lokale, deterministische taalinterpreter — nog geen externe AI-service.</span></div>
+          <label>Wat wil je maken of aanpassen?
+            <textarea id="aiPrompt" rows="4" placeholder="bv. Maak hier een houten kist van 50 cm hoog"></textarea>
+          </label>
+          <div class="aiExamples"><button type="button" class="secondary" data-ai-example="Maak hier een houten kist van 50 cm hoog">Kist 50 cm</button><button type="button" class="secondary" data-ai-example="Maak hier een volume van 1 m hoog">Volume 1 m</button><button type="button" class="secondary" data-ai-example="Maak hem 20 cm hoger">+20 cm</button></div>
+          <button id="aiRunBtn" class="primary">Concept maken / aanpassen</button>
+          <div id="aiBuilderStatus" class="help aiBuilderStatus">Nog geen concept.</div>
+          <button id="aiLockBtn" class="secondary" style="display:none">🔒 Concept vastzetten</button>
+          <button id="aiDeleteBtn" class="danger" style="display:none">Concept verwijderen</button>
+          <div class="help"><strong>Prototypebeperking:</strong> voorlopig alleen horizontale vormen en eenvoudige kist/blok/volume-opdrachten met een exacte hoogte. Een vastgezet concept wordt niet door tekstcommando's gewijzigd totdat je het ontgrendelt.</div>
+        </div>
+      </section>
 
       <section id="page-openingcreate" class="page">
         <h3>Opening toevoegen</h3><div class="menuCard">
@@ -394,6 +412,6 @@
   <div id="hint">Open ☰ en kies wat je wilt tekenen.</div>
 </div>
 
-<script type="module" src="./js/bootstrap.js?v=0.8.28.10-20260829-theme"></script>
+<script type="module" src="./js/bootstrap.js?v=0.8.29.0-20260829-ai-prototype"></script>
 </body>
 </html>

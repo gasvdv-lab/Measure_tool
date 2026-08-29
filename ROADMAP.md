@@ -1,3 +1,29 @@
+# Measure AR Roadmap
+
+## Huidige versie: v0.8.29.0 — AI Builder Prototype
+
+- [x] AI Builder als geïsoleerde experimentele module toegevoegd.
+- [x] Conceptmodus: geselecteerde vorm als exacte footprint.
+- [x] Lokale deterministische opdrachtinterpreter voor kist/box/blok/volume + exacte hoogte.
+- [x] Bestaand concept via teksthoogte aanpassen.
+- [x] Concept vastzetten/ontgrendelen en verwijderen.
+- [x] AI-concepten opgenomen in historie en project snapshot/recovery.
+- [x] MODULES.md toegevoegd als cumulatieve modulehandleiding.
+- [ ] Fysiek testen op Android/Chrome/WebXR.
+- [ ] Verifiëren dat AI-concept na opslaan, sluiten en herstellen exact terugkomt.
+- [ ] Verifiëren undo/redo van maken, aanpassen, lock en verwijderen.
+- [ ] Echte AI/LLM-provider pas later kiezen; geen secrets in GitHub Pages-clientcode.
+- [ ] Detailed Builder: parametrische onderdelen en eigenschappen.
+- [ ] Project Builder: componenthiërarchie, lock per onderdeel, binnen/buiten/constructielagen.
+- [ ] Spatial/Constraint Engine: vrije zones, relaties, collision en clearance.
+- [ ] Material Engine, zaaglijsten en optimalisatie.
+- [ ] Design ↔ As-built en toleranties.
+- [ ] Open bug: Project op locatie plaatsen/reference capture opnieuw oppakken.
+- [ ] CAD-placement v0.8.28.x fysiek testen bij voldoende licht.
+- [ ] Oriëntatie/meedraaien van lijnlabels later opnieuw oppakken.
+
+---
+
 ## v0.8.28.10 — Theme Selector ✅
 - [x] Vijf samenhangende professionele interface-thema’s
 - [x] Themawissel onder Instellingen
