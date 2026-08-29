@@ -1,6 +1,6 @@
-import {S,getPoint} from "./state.js?v=0.8.25-20260829-1905";
-import {snapshotProject,restoreProject} from "./history.js?v=0.8.25-20260829-1905";
-import {validateGeometryState} from "./geometry.js?v=0.8.25-20260829-1905";
+import {S,getPoint} from "./state.js?v=0.8.27-20260829-1845";
+import {snapshotProject,restoreProject} from "./history.js?v=0.8.27-20260829-1845";
+import {validateGeometryState} from "./geometry.js?v=0.8.27-20260829-1845";
 
 const EPS=1e-9;
 function v3(x=0,y=0,z=0){return new S.THREE.Vector3(x,y,z);}
@@ -122,9 +122,56 @@ function solveThree(src,dst){
   const t=dst[0].clone().sub(src[0].clone().applyMatrix3(R));
   return {R,t,method:"3-point"};
 }
+function largestEigenvectorSymmetric4(input){
+  // Jacobi diagonalisation for a real symmetric 4x4 matrix.
+  // Unlike plain power iteration this remains stable when the largest positive
+  // and negative eigenvalues have the same absolute value, which commonly
+  // happens for planar AR reference sets.
+  const A=input.map(r=>r.slice());
+  const V=[
+    [1,0,0,0],
+    [0,1,0,0],
+    [0,0,1,0],
+    [0,0,0,1]
+  ];
+  for(let sweep=0;sweep<64;sweep++){
+    let p=0,q=1,max=Math.abs(A[0][1]);
+    for(let i=0;i<4;i++)for(let j=i+1;j<4;j++){
+      const x=Math.abs(A[i][j]);if(x>max){max=x;p=i;q=j;}
+    }
+    if(max<1e-12)break;
+    const app=A[p][p],aqq=A[q][q],apq=A[p][q];
+    const phi=.5*Math.atan2(2*apq,aqq-app);
+    const c=Math.cos(phi),s=Math.sin(phi);
+    for(let k=0;k<4;k++)if(k!==p&&k!==q){
+      const akp=A[k][p],akq=A[k][q];
+      A[k][p]=A[p][k]=c*akp-s*akq;
+      A[k][q]=A[q][k]=s*akp+c*akq;
+    }
+    A[p][p]=c*c*app-2*s*c*apq+s*s*aqq;
+    A[q][q]=s*s*app+2*s*c*apq+c*c*aqq;
+    A[p][q]=A[q][p]=0;
+    for(let k=0;k<4;k++){
+      const vkp=V[k][p],vkq=V[k][q];
+      V[k][p]=c*vkp-s*vkq;
+      V[k][q]=s*vkp+c*vkq;
+    }
+  }
+  let best=0;
+  for(let i=1;i<4;i++)if(A[i][i]>A[best][best])best=i;
+  const v=[V[0][best],V[1][best],V[2][best],V[3][best]];
+  const len=Math.hypot(...v);
+  if(!Number.isFinite(len)||len<EPS)throw new Error("Best-fit rotatie kon niet stabiel worden bepaald.");
+  return v.map(x=>x/len);
+}
+
 function solveBestFit(src,dst){
-  // Horn/Kabsch-like rigid fit using a quaternion power iteration on 4x4 symmetric matrix.
+  // Horn absolute orientation. The dominant eigenvector is solved with a
+  // symmetric Jacobi eigensolver instead of power iteration (v0.8.25 bugfix).
   const cs=centroid(src),cd=centroid(dst);
+  let spread=0;
+  for(const p of src)spread+=p.distanceToSquared(cs);
+  if(spread<EPS)throw new Error("Referentiepunten liggen te dicht bij elkaar voor best-fit.");
   let Sxx=0,Sxy=0,Sxz=0,Syx=0,Syy=0,Syz=0,Szx=0,Szy=0,Szz=0;
   for(let i=0;i<src.length;i++){
     const a=src[i].clone().sub(cs),b=dst[i].clone().sub(cd);
@@ -138,15 +185,11 @@ function solveBestFit(src,dst){
     [Szx-Sxz,Sxy+Syx,-Sxx+Syy-Szz,Syz+Szy],
     [Sxy-Syx,Szx+Sxz,Syz+Szy,-Sxx-Syy+Szz]
   ];
-  let q=[1,0,0,0];
-  for(let it=0;it<40;it++){
-    const nq=N.map(r=>r[0]*q[0]+r[1]*q[1]+r[2]*q[2]+r[3]*q[3]);
-    const len=Math.hypot(...nq)||1;q=nq.map(x=>x/len);
-  }
+  const q=largestEigenvectorSymmetric4(N);
   const quat=new S.THREE.Quaternion(q[1],q[2],q[3],q[0]).normalize();
   const R=mat3FromQuaternion(quat);
   const t=cd.clone().sub(cs.clone().applyMatrix3(R));
-  return {R,t,method:"best-fit"};
+  return {R,t,method:"best-fit-jacobi"};
 }
 
 export function solveRelocalization(){

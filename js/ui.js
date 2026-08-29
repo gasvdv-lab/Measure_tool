@@ -1,26 +1,26 @@
-import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.25-20260829-1905";
+import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.27-20260829-1845";
 import {
   startTool,cancelTool,setPlacement,setDistance,setConstraint,setAngle,flipSide,setReferenceLine,setSnapMode,
   confirmCandidate,undoToolStep,finishTool,toolLabel,constraintLabel,getActivePoint,referenceRequired,resetDrawingCore
-} from "./drawing-core.js?v=0.8.25-20260829-1905";
+} from "./drawing-core.js?v=0.8.27-20260829-1845";
 import {
   createShape,updateShape,deleteShapeOnly,deleteShapeWithContour,deleteLineRaw,deletePointRaw,renamePoint,updateLine,analyzeContour,
   lineDependencies,pointDependencies,canDeleteLine,canDeletePoint,clearAllGeometry,validateGeometryState,dispose
-} from "./geometry.js?v=0.8.25-20260829-1905";
-import {startAR,applyZoom} from "./ar.js?v=0.8.25-20260829-1905";
-import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.25-20260829-1905";
-import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.25-20260829-1905";
+} from "./geometry.js?v=0.8.27-20260829-1845";
+import {startAR,applyZoom} from "./ar.js?v=0.8.27-20260829-1845";
+import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.27-20260829-1845";
+import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.27-20260829-1845";
 import {
   initProjectStorage,saveCurrentProject,listProjects,loadStoredProject,newProject,duplicateStoredProject,
   deleteStoredProject,renameStoredProject,projectStats,formatStats,getStoredProjectInfo,hasRecovery,recoveryInfo,restoreRecovery,clearRecovery,
   exportCurrentProject,importProjectFile
-} from "./project-storage.js?v=0.8.25-20260829-1905";
+} from "./project-storage.js?v=0.8.27-20260829-1845";
 import {
   captureCurrentGeo,addProjectReference,removeProjectReference,beginRelocalization,cancelRelocalization,
   captureRelocalizationPoint,solveRelocalization,applyRelocalization,relocalizationSummary,beginSpatialRestore
-} from "./relocalization.js?v=0.8.25-20260829-1905";
+} from "./relocalization.js?v=0.8.27-20260829-1845";
 
-import {detachAllPointAnchors} from "./world-lock.js?v=0.8.25-20260829-1905";
+import {detachAllPointAnchors} from "./world-lock.js?v=0.8.27-20260829-1845";
 
 const pages=["home","project","references","relocalize","projects","objects","line","point","walltool","wallcreate","wall","openingcreate","opening","shapecreate","shape","settings","clear"];
 let menuStack=["home"];
@@ -57,8 +57,22 @@ function showPage(name,push=true){
   const titles={home:"Measure AR",project:"Project",references:"Projectreferenties",relocalize:"Projectpositie herstellen",projects:"Mijn projecten",objects:"Objecten",line:"Lijn",point:"Punt",walltool:"Muur tekenen",wallcreate:"Muur maken",wall:"Muur",openingcreate:"Opening toevoegen",opening:"Opening",shapecreate:"Vorm opslaan",shape:"Vorm",settings:"Instellingen",clear:"Alles wissen"};
   el("menuTitle").textContent=titles[name]||name;if(push&&menuStack.at(-1)!==name)menuStack.push(name);el("menuBackBtn").style.visibility=name==="home"?"hidden":"visible";if(name==="objects")renderObjects();if(name==="project")renderProjectPage();if(name==="references")renderReferenceManager();if(name==="relocalize")renderRelocalizePage();if(name==="projects")renderProjectsList();
 }
-function openMenu(){menuStack=["home"];showPage("home",false);el("menuPanel").classList.add("open");el("menuMeta").textContent=`${S.project.name||"Project"} · v${S.version}`;closePopovers();}
+function openMenu(){
+  el("overlay")?.classList.remove("relocalizationAimMode");
+  menuStack=["home"];
+  showPage("home",false);
+  el("menuPanel").classList.add("open");
+  el("menuMeta").textContent=`${S.project.name||"Project"} · v${S.version}`;
+  closePopovers();
+}
 function closeMenu(){el("menuPanel").classList.remove("open");closePopovers();S.objectPickMode=null;}
+function enterRelocalizationAimMode(){
+  closeMenu();
+  el("overlay")?.classList.add("relocalizationAimMode");
+}
+function exitRelocalizationAimMode(){
+  el("overlay")?.classList.remove("relocalizationAimMode");
+}
 function returnToArView(){
   closeMenu();
   if(S.xrSession){
@@ -230,6 +244,7 @@ function renderRelocalizePage(){
     const cap=document.createElement("button");cap.className="primary";cap.textContent="Gebruik vizier";
     cap.onclick=()=>{
       pendingRelocalizationRefId=r.id;
+      enterRelocalizationAimMode();
       returnToArView();
       el("hint").textContent=`${r.name} aanwijzen · richt het vizier exact op het fysieke punt en druk op de witte knop.`;
       showStatus(`${r.name}: richt met het vizier en bevestig met de witte knop.`);
@@ -335,7 +350,16 @@ function openShape(id){
 }
 
 export function initUI(){
-  bind("menuBtn","click",()=>el("menuPanel").classList.contains("open")?closeMenu():openMenu());bind("menuCloseBtn","click",closeMenu);bind("menuBackBtn","click",menuBack);
+  bind("menuBtn","click",()=>{
+    if(pendingRelocalizationRefId){
+      pendingRelocalizationRefId=null;
+      exitRelocalizationAimMode();
+      openMenu();showPage("relocalize",false);
+      showStatus("Aanwijzen geannuleerd.");
+      return;
+    }
+    el("menuPanel").classList.contains("open")?closeMenu():openMenu();
+  });bind("menuCloseBtn","click",closeMenu);bind("menuBackBtn","click",menuBack);
   bind("globalUndoBtn","click",()=>{const e=undoHistory();afterProjectChange(`Ongedaan: ${e.label}`);});
   bind("globalRedoBtn","click",()=>{const e=redoHistory();afterProjectChange(`Opnieuw: ${e.label}`);});
   document.querySelectorAll("[data-page]").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.page)));
@@ -477,6 +501,7 @@ export function initUI(){
       if(!S.currentTarget)throw new Error("Geen geldig AR-punt onder het vizier. Richt op een herkend oppervlak.");
       captureRelocalizationPoint(refId,S.currentTarget);
       pendingRelocalizationRefId=null;
+      exitRelocalizationAimMode();
       openMenu();showPage("relocalize",false);
       const ref=(S.project.relocalization.references||[]).find(x=>x.id===refId);
       showStatus(`${ref?.name||"Referentie"} opnieuw aangewezen.`);
