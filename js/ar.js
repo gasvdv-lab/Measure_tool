@@ -1,8 +1,8 @@
-import {S,$} from "./state.js?v=0.8.28-20260829-1850";
-import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.28-20260829-1850";
-import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.28-20260829-1850";
-import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.28-20260829-1850";
-import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.28-20260829-1850";
+import {S,$} from "./state.js?v=0.8.29-20260829-1900";
+import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.29-20260829-1900";
+import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.29-20260829-1900";
+import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.29-20260829-1900";
+import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.29-20260829-1900";
 
 let samples=[],sampleSource=null,camPos,camQuat,forward;
 
@@ -55,7 +55,7 @@ export async function startAR(){
 function cleanup(){
   resetWorldLock();resetTrackingSamples();S.renderer?.setAnimationLoop(null);
   if(S.renderer?.domElement)S.renderer.domElement.style.display="none";
-  S.xrSession=null;S.hitSource=null;S.hitRequested=false;S.currentTarget=null;S.currentHitResult=null;S.currentXRFrame=null;S.currentReferenceSpace=null;S.targetSource="none";S.relocalizationAimMode=false;
+  S.xrSession=null;S.hitSource=null;S.hitRequested=false;S.currentTarget=null;S.currentHitResult=null;S.currentXRFrame=null;S.currentReferenceSpace=null;S.targetSource="none";
   clearWalls();clearAllGeometry();resetDrawingCore();
   $("overlay").style.display="none";$("app").style.display="grid";
   if($("startArBtn")){$("startArBtn").disabled=false;$("startArBtn").textContent="AR starten";}
@@ -88,15 +88,15 @@ function render(_,frame){
   if(worldLockChanged)syncWorldLockedWalls();
 
   updateCandidate({hit,hitNormal:normal,ray:cameraRay()});
-  // Relocalization is not a drawing tool. In aim-mode the white button must
-  // depend only on a valid hit under the reticle; using isCaptureAllowed() here
-  // would keep it disabled because S.tool.kind is intentionally null.
-  $("captureBtn").disabled=S.relocalizationAimMode ? !Boolean(S.currentTarget) : !isCaptureAllowed();
+  // Minimal relocalization fix: use the already-existing DOM aim-mode class.
+  // No new central state is introduced, so project loading and drawing remain on the v0.8.27 baseline.
+  const relocalizationAimMode=$("overlay")?.classList.contains("relocalizationAimMode")===true;
+  $("captureBtn").disabled=relocalizationAimMode ? !S.currentTarget : !isCaptureAllowed();
 
   const c=S.tool.candidate;
   if(S.tool.kind&&S.tool.status==="drawing"){
     $("stage").textContent=c?.valid?(S.tool.activePointId?`Vanaf ${S.points.find(p=>p.id===S.tool.activePointId)?.name||"?"}`:"Plaats punt A"):(c?.reason||"Zoek een oppervlak");
-  }else if(S.relocalizationAimMode){
+  }else if(relocalizationAimMode){
     $("stage").textContent=S.currentTarget?"Referentiepunt gevonden · bevestig met witte knop":"Zoek een herkend oppervlak";
   }else if(!S.tool.kind){
     $("stage").textContent="Kies een tekenfunctie";
