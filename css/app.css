@@ -121,5 +121,4 @@ canvas{position:fixed;inset:0;width:100%;height:100%}#overlay{position:fixed;ins
 #page-cad #cadPlacementControls{margin-top:10px;padding-top:8px;border-top:1px solid #ffffff16}
 
 
-/* v0.8.28.4 - CAD Safe Import Workspace */
-.cadImportWorkspace{display:none;text-align:left}.cadImportWorkspace h1{text-align:center}.cadImportWorkspace .logo{text-align:center}.cadImportWorkspace button{width:100%;margin-top:8px}.cadImportWorkspace .error{margin-top:10px}
+/* v0.8.28.5 - CAD Safe Import Workspace */
