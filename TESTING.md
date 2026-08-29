@@ -1,4 +1,9 @@
-# v0.8.28.7 — AR HUD Refinement
+# v0.8.28.8 — AR HUD Refinement
+
+## v0.8.28.8 tests
+
+**Automatisch:** JS-syntax/imports, HTML-ID's, ZIP-structuur en regressiecontrole. **Fysiek nog uit te voeren:** lijn tekenen, vizier/maatlabels in AR, leesbaarheid buiten, CAD-plaatsing bij voldoende licht. Bestaande niet-uitgevoerde fysieke tests blijven van kracht.
+
 
 ## Automatische controles
 - [x] JavaScript-modules byte-identiek aan v0.8.28.6.

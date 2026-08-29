@@ -1,4 +1,15 @@
-## v0.8.28.7 — AR HUD Refinement ✅
+## v0.8.28.8 — AR HUD Refinement ✅
+
+## Huidige stap — v0.8.28.8
+
+- [x] AR Visualization System basislaag
+- [x] Technische maatlabelstijl
+- [x] Consistente visuele statussemantiek
+- [x] Tracking/snap/focus/CAD/outdoor UI-hooks
+- [ ] Fysieke AR-praktijktest bij voldoende licht
+- [ ] CAD-plaatsing verder valideren
+- [ ] Open relocalisatie/reference-capture bug later opnieuw opnemen
+
 - [x] Vizier verder verfijnd.
 - [x] AR-HUD compacter en rustiger.
 - [x] Actieve tool visueel duidelijk maar klein.

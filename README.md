@@ -1,4 +1,9 @@
-# Measure AR v0.8.28.7 — AR HUD Refinement
+# Measure AR v0.8.28.8 — AR HUD Refinement
+
+## v0.8.28.8 — AR Visualization System
+
+Visuele verfijningslaag voor technische AR-weergave: compactere maatlabels, consistente statuskleuren, tracking/snap-visuele taal, focus-mode hooks, CAD-statusstijl en outdoor-contrast hooks. De functionele JavaScript-kern is niet gewijzigd.
+
 
 Deze release bouwt visueel verder op v0.8.28.6 en blijft bewust **UI-only**. De AR-interface is verder verfijnd zodat de echte werf meer ruimte krijgt: kleiner precisievizier, lichtere meetlabels, een slankere contextbalk, compactere actieve-toolweergave en subtielere statusinformatie.
 
