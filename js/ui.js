@@ -1,33 +1,33 @@
-import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.27-20260829-1935";
+import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.27.1-20260829-2015";
 import {
   startTool,cancelTool,setPlacement,setDistance,setConstraint,setAngle,flipSide,setReferenceLine,setSnapMode,
   confirmCandidate,undoToolStep,finishTool,toolLabel,constraintLabel,getActivePoint,referenceRequired,resetDrawingCore
-} from "./drawing-core.js?v=0.8.27-20260829-1935";
+} from "./drawing-core.js?v=0.8.27.1-20260829-2015";
 import {
   createShape,updateShape,deleteShapeOnly,deleteShapeWithContour,deleteLineRaw,deletePointRaw,renamePoint,updateLine,analyzeContour,
   lineDependencies,pointDependencies,canDeleteLine,canDeletePoint,clearAllGeometry,validateGeometryState,dispose
-} from "./geometry.js?v=0.8.27-20260829-1935";
-import {startAR,applyZoom,resetTrackingSamples} from "./ar.js?v=0.8.27-20260829-1935";
-import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.27-20260829-1935";
-import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.27-20260829-1935";
+} from "./geometry.js?v=0.8.27.1-20260829-2015";
+import {startAR,applyZoom,resetTrackingSamples} from "./ar.js?v=0.8.27.1-20260829-2015";
+import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.27.1-20260829-2015";
+import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.27.1-20260829-2015";
 import {
   initProjectStorage,saveCurrentProject,listProjects,loadStoredProject,newProject,duplicateStoredProject,
   deleteStoredProject,renameStoredProject,projectStats,formatStats,getStoredProjectInfo,hasRecovery,recoveryInfo,restoreRecovery,clearRecovery,
   exportCurrentProject,importProjectFile
-} from "./project-storage.js?v=0.8.27-20260829-1935";
+} from "./project-storage.js?v=0.8.27.1-20260829-2015";
 import {
   captureCurrentGeo,addProjectReference,removeProjectReference,clearProjectReferences,beginRelocalization,cancelRelocalization,
   captureRelocalizationPoint,solveRelocalization,applyRelocalization,relocalizationSummary,beginSpatialRestore
-} from "./relocalization.js?v=0.8.27-20260829-1935";
+} from "./relocalization.js?v=0.8.27.1-20260829-2015";
 
-import {captureHybridBaseline,assessHybridLocation,enableHeading} from "./hybrid-localization.js?v=0.8.27-20260829-1935";
+import {captureHybridBaseline,assessHybridLocation,enableHeading} from "./hybrid-localization.js?v=0.8.27.1-20260829-2015";
 
-import {detachAllPointAnchors} from "./world-lock.js?v=0.8.27-20260829-1935";
+import {detachAllPointAnchors} from "./world-lock.js?v=0.8.27.1-20260829-2015";
 
 const pages=["home","project","references","relocalize","projects","objects","line","point","walltool","wallcreate","wall","openingcreate","opening","shapecreate","shape","settings","clear"];
 let menuStack=["home"];
 let toastTimer=null;
-let pendingRelocalizationRefId=null;
+
 
 const el=id=>$(id);
 function bind(id,event,fn){
@@ -58,6 +58,9 @@ function showPage(name,push=true){
   pages.forEach(p=>el("page-"+p)?.classList.remove("active"));const page=el("page-"+name);if(!page)throw new Error(`Menupagina ontbreekt: ${name}`);page.classList.add("active");
   const titles={home:"Measure AR",project:"Project",references:"Projectreferenties",relocalize:"Projectpositie herstellen",projects:"Mijn projecten",objects:"Objecten",line:"Lijn",point:"Punt",walltool:"Muur tekenen",wallcreate:"Muur maken",wall:"Muur",openingcreate:"Opening toevoegen",opening:"Opening",shapecreate:"Vorm opslaan",shape:"Vorm",settings:"Instellingen",clear:"Alles wissen"};
   el("menuTitle").textContent=titles[name]||name;if(push&&menuStack.at(-1)!==name)menuStack.push(name);el("menuBackBtn").style.visibility=name==="home"?"hidden":"visible";if(name==="objects")renderObjects();if(name==="project")renderProjectPage();if(name==="references")renderReferenceManager();if(name==="relocalize")renderRelocalizePage();if(name==="projects")renderProjectsList();
+}
+function cancelReferenceCapture(){
+  S.referenceCaptureId=null;
 }
 function openMenu(){menuStack=["home"];showPage("home",false);el("menuPanel").classList.add("open");el("menuMeta").textContent=`${S.project.name||"Project"} · v${S.version}`;closePopovers();}
 function closeMenu(){el("menuPanel").classList.remove("open");closePopovers();S.objectPickMode=null;}
@@ -230,7 +233,7 @@ function renderRelocalizePage(){
     const info=document.createElement("button");info.className="secondary";info.textContent=`${r.name} · ${S.project.relocalization.captured.some(c=>c.refId===r.id)?"✓ opnieuw aangewezen":"nog aanwijzen"}`;
     const cap=document.createElement("button");cap.className="primary";cap.textContent="Gebruik vizier";
     cap.onclick=()=>{
-      pendingRelocalizationRefId=r.id;
+      S.referenceCaptureId=r.id;
       resetTrackingSamples();
       returnToArView();
       el("hint").textContent=`${r.name} aanwijzen · richt het vizier exact op het fysieke punt en druk op de witte knop.`;
@@ -337,7 +340,10 @@ function openShape(id){
 }
 
 export function initUI(){
-  bind("menuBtn","click",()=>el("menuPanel").classList.contains("open")?closeMenu():openMenu());bind("menuCloseBtn","click",closeMenu);bind("menuBackBtn","click",menuBack);
+  bind("menuBtn","click",()=>{
+    if(S.referenceCaptureId){cancelReferenceCapture();showStatus("Referentie aanwijzen geannuleerd.");}
+    el("menuPanel").classList.contains("open")?closeMenu():openMenu();
+  });bind("menuCloseBtn","click",closeMenu);bind("menuBackBtn","click",menuBack);
   bind("globalUndoBtn","click",()=>{const e=undoHistory();afterProjectChange(`Ongedaan: ${e.label}`);});
   bind("globalRedoBtn","click",()=>{const e=redoHistory();afterProjectChange(`Opnieuw: ${e.label}`);});
   document.querySelectorAll("[data-page]").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.page)));
@@ -476,11 +482,11 @@ export function initUI(){
   bind("hudCancelBtn","click",()=>{runHistoryAction("Tekenfunctie stoppen",()=>cancelTool());syncHud();syncHistoryControls();showStatus("Tekenfunctie gestopt. Bevestigde geometrie blijft bestaan.");});
 
   bind("captureBtn","click",()=>{
-    if(pendingRelocalizationRefId){
-      const ref=S.project.relocalization.references.find(x=>x.id===pendingRelocalizationRefId);
+    if(S.referenceCaptureId){
+      const ref=S.project.relocalization.references.find(x=>x.id===S.referenceCaptureId);
       if(!ref)throw new Error("Referentiepunt niet gevonden.");
       if(!S.currentTarget)throw new Error("Nog geen geldig oppervlak onder het vizier.");
-      captureRelocalizationPoint(ref.id,S.currentRawTarget||S.currentTarget);pendingRelocalizationRefId=null;
+      captureRelocalizationPoint(ref.id,S.currentRawTarget||S.currentTarget);S.referenceCaptureId=null;
       openMenu();showPage("relocalize",false);renderRelocalizePage();showStatus(`${ref.name} opnieuw aangewezen.`);return;
     }
     closePopovers();const r=confirmCandidate();syncHud();
@@ -570,3 +576,5 @@ bind("saveWallBtn","click",()=>{
   S.defaults.unit="cm";S.defaults.lineThickness=2;S.defaults.labels=true;S.hud.compact=true;S.tool.snapMode="smart";el("hudDensity").value="compact";el("hudSnap").value="smart";el("defaultUnit").value="cm";el("hudUnit").value="cm";el("defaultThickness").value="2";el("defaultLabels").checked=true;
   syncHud();syncHistoryControls();document.documentElement.dataset.uiReady="1";console.info("Measure AR unified drawing UI ready",S.version,S.build);
 }
+
+document.addEventListener("measurear:project-loaded",()=>{S.referenceCaptureId=null;});

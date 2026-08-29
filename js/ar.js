@@ -1,8 +1,8 @@
-import {S,$} from "./state.js?v=0.8.27-20260829-1935";
-import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.27-20260829-1935";
-import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.27-20260829-1935";
-import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.27-20260829-1935";
-import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.27-20260829-1935";
+import {S,$} from "./state.js?v=0.8.27.1-20260829-2015";
+import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.27.1-20260829-2015";
+import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.27.1-20260829-2015";
+import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.27.1-20260829-2015";
+import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.27.1-20260829-2015";
 
 let samples=[],sampleSource=null,camPos,camQuat,forward;
 
@@ -55,7 +55,7 @@ export async function startAR(){
 function cleanup(){
   resetWorldLock();resetTrackingSamples();S.renderer?.setAnimationLoop(null);
   if(S.renderer?.domElement)S.renderer.domElement.style.display="none";
-  S.xrSession=null;S.hitSource=null;S.hitRequested=false;S.currentTarget=null;S.currentHitResult=null;S.currentXRFrame=null;S.currentReferenceSpace=null;S.targetSource="none";
+  S.xrSession=null;S.hitSource=null;S.hitRequested=false;S.currentTarget=null;S.currentRawTarget=null;S.currentHitResult=null;S.currentXRFrame=null;S.currentReferenceSpace=null;S.targetSource="none";S.referenceCaptureId=null;
   clearWalls();clearAllGeometry();resetDrawingCore();
   $("overlay").style.display="none";$("app").style.display="grid";
   if($("startArBtn")){$("startArBtn").disabled=false;$("startArBtn").textContent="AR starten";}
@@ -88,7 +88,8 @@ function render(_,frame){
   if(worldLockChanged)syncWorldLockedWalls();
 
   updateCandidate({hit,hitNormal:normal,ray:cameraRay()});
-  $("captureBtn").disabled=!isCaptureAllowed();
+  const referenceCaptureAllowed=Boolean(S.referenceCaptureId&&S.currentRawTarget&&S.currentHitResult&&S.targetSource==="hit");
+  $("captureBtn").disabled=!(referenceCaptureAllowed||isCaptureAllowed());
 
   const c=S.tool.candidate;
   if(S.tool.kind&&S.tool.status==="drawing"){

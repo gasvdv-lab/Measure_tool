@@ -1,4 +1,4 @@
-import {S,$,fmt,pointName,getPoint,getLine,getContour,getShape,projectToWorld} from "./state.js?v=0.8.27-20260829-1935";
+import {S,$,fmt,pointName,getPoint,getLine,getContour,getShape,projectToWorld} from "./state.js?v=0.8.27.1-20260829-2015";
 
 export function renderPosition(p){return p?.worldPosition||p?.position||null;}
 
@@ -52,7 +52,7 @@ export function createPoint(pos,{color=0x69ff9a,surfaceNormal=null,id=null,name=
     marker:makePointMarker(color),
     label:makePointLabel(finalName)
   };
-  p.marker.position.copy(fixed);S.points.push(p);document.dispatchEvent(new CustomEvent("measurear:point-created",{detail:{pointId:p.id}}));return p;
+  p.marker.position.copy(p.worldPosition);S.points.push(p);document.dispatchEvent(new CustomEvent("measurear:point-created",{detail:{pointId:p.id}}));return p;
 }
 
 export function enforceLocked(){
@@ -144,7 +144,7 @@ export function setLineStyle(line,{color=line.color,thickness=line.thickness,lab
   line.color=color;line.thickness=Number(thickness)||2;
   if(line.object)dispose(line.object);
   const a=getPoint(line.startId),b=getPoint(line.endId);
-  if(a&&b)line.object=makeLineMesh(a.position,b.position,line.color,line.thickness);
+  if(a&&b)line.object=makeLineMesh(renderPosition(a),renderPosition(b),line.color,line.thickness);
   line.labelsVisible=labels!==false;if(line.label)line.label.style.display=line.labelsVisible?"block":"none";
 }
 

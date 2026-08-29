@@ -1,8 +1,9 @@
-import {S} from "./state.js?v=0.8.27-20260829-1935";
-import {snapshotProject,restoreProject,clearHistory} from "./history.js?v=0.8.27-20260829-1935";
-import {clearAllGeometry,validateGeometryState} from "./geometry.js?v=0.8.27-20260829-1935";
-import {clearWalls} from "./walls.js?v=0.8.27-20260829-1935";
-import {resetDrawingCore} from "./drawing-core.js?v=0.8.27-20260829-1935";
+import {S} from "./state.js?v=0.8.27.1-20260829-2015";
+import {snapshotProject,restoreProject,clearHistory} from "./history.js?v=0.8.27.1-20260829-2015";
+import {clearAllGeometry,validateGeometryState} from "./geometry.js?v=0.8.27.1-20260829-2015";
+import {clearWalls} from "./walls.js?v=0.8.27.1-20260829-2015";
+import {resetDrawingCore} from "./drawing-core.js?v=0.8.27.1-20260829-2015";
+import {detachAllPointAnchors} from "./world-lock.js?v=0.8.27.1-20260829-2015";
 
 export const PROJECT_SCHEMA_VERSION=1;
 const INDEX_KEY="measurear.projects.v1.index";
@@ -48,10 +49,16 @@ function sourceSnapshot(){
 
 function captureSpatialState(){
   const prev=S.project.spatial||{};
-  const cam=S.camera?.position;
+  let cam=null;
+  try{
+    if(S.renderer?.xr&&S.camera&&S.THREE){
+      const xrCam=S.renderer.xr.getCamera(S.camera),p=new S.THREE.Vector3();
+      xrCam.getWorldPosition(p);cam=p;
+    }
+  }catch{}
   return {
     projectOrigin:{...(prev.projectOrigin||{x:0,y:0,z:0})},
-    savedWorldPose:cam&&[cam.x,cam.y,cam.z].every(Number.isFinite)?{camera:{x:cam.x,y:cam.y,z:cam.z}}:(prev.savedWorldPose||null),
+    savedWorldPose:cam&&[cam.x,cam.y,cam.z].every(Number.isFinite)?{camera:{x:cam.x,y:cam.y,z:cam.z},source:"xr-camera-local"}:(prev.savedWorldPose||null),
     savedAt:nowIso()
   };
 }
@@ -196,17 +203,27 @@ export function loadEnvelope(e,source="import"){
   const before=snapshotProject(),beforeMeta=JSON.parse(JSON.stringify(S.project));
   lifecycleBusy=true;
   try{
+    // Een nieuw project mag nooit worden opgebouwd met de sessietransform/anchors
+    // van het vorige project. Reset die context vóór createPoint() wordt aangeroepen.
+    detachAllPointAnchors();
+    S.referenceCaptureId=null;
+    S.project.spatial={...(S.project.spatial||{}),sessionTransform:null};
     restoreProject(e.data);clearHistory();
     const check=validateGeometryState();if(!check.ok)throw new Error(check.errors[0]);
     setCurrentMeta(e,source);clearRecovery();document.dispatchEvent(new CustomEvent("measurear:project-loaded"));return e;
   }catch(err){
-    try{restoreProject(before);Object.assign(S.project,beforeMeta);}catch{}
+    try{
+      detachAllPointAnchors();
+      Object.assign(S.project,beforeMeta);
+      restoreProject(before);
+    }catch{}
     throw err;
   }finally{lifecycleBusy=false;}
 }
 export function newProject(name="Nieuw project"){
   lifecycleBusy=true;
   try{
+    detachAllPointAnchors();S.referenceCaptureId=null;
     clearWalls();clearAllGeometry();resetDrawingCore();clearHistory();
     const ts=nowIso();Object.assign(S.project,{schemaVersion:1,id:newId(),name:cleanName(name)||"Nieuw project",createdAt:ts,updatedAt:ts,lastSavedAt:null,dirty:true,recoveryAvailable:false,loadedFrom:"new",geo:null,hybrid:{savedHeading:null,currentHeading:null,lastAssessment:null,headingSource:null},spatial:{projectOrigin:{x:0,y:0,z:0},savedWorldPose:null,savedAt:null,sessionTransform:null},relocalization:{references:[],active:false,captured:[],lastResult:null,mode:"auto"}});
     writeRecovery();document.dispatchEvent(new CustomEvent("measurear:project-loaded"));document.dispatchEvent(new CustomEvent("measurear:project-meta-changed"));return S.project;
