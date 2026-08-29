@@ -1,4 +1,4 @@
-import {S,$,fmt,pointName,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.21.3-20260829-1030";
+import {S,$,fmt,pointName,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.21.4-20260829-1255";
 
 export function renderPosition(p){return p?.worldPosition||p?.position||null;}
 
@@ -115,10 +115,28 @@ export function createLine(a,b,{color="#ffffff",thickness=null,ownerType=null,ow
     startId:a.id,endId:b.id,distance,
     thickness:t,color,ownerType,ownerId,
     labelsVisible:labelsVisible!==false,
-    object:makeLineMesh(a.position,b.position,color,t),
+    object:makeLineMesh(renderPosition(a),renderPosition(b),color,t),
     label:makeLineLabel(`${String(name||a.name+b.name).trim()} · ${fmt(distance)}`)
   };
-  S.lines.push(l);return l;
+  S.lines.push(l);
+  syncLineObject(l);
+  return l;
+}
+
+export function ensureLineRendered(line){
+  if(!line)return null;
+  const a=getPoint(line.startId),b=getPoint(line.endId);
+  if(!a||!b)throw new Error("Lijnpunten ontbreken.");
+  if(!line.object){
+    line.object=makeLineMesh(renderPosition(a),renderPosition(b),line.color||"#ffffff",line.thickness||S.defaults.lineThickness||2);
+  }else if(S.scene&&line.object.parent!==S.scene){
+    S.scene.add(line.object);
+  }
+  if(!line.label)line.label=makeLineLabel(`${line.name} · ${fmt(line.distance)}`);
+  line.labelsVisible=line.labelsVisible!==false;
+  line.label.style.display=line.labelsVisible?"block":"none";
+  syncLineObject(line);
+  return line;
 }
 
 export function setLineStyle(line,{color=line.color,thickness=line.thickness,labels=true}={}){

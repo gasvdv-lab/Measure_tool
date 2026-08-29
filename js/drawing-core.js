@@ -1,7 +1,7 @@
-import {S,$,fmt,getPoint,getLine} from "./state.js?v=0.8.21.3-20260829-1030";
-import {createPoint,createLine,deleteLineRaw,deletePointRaw,createContour,dispose,analyzeShapePoints} from "./geometry.js?v=0.8.21.3-20260829-1030";
-import {snapshotProject,commitSnapshot,undoHistory} from "./history.js?v=0.8.21.3-20260829-1030";
-import {createWall,nextWallName} from "./walls.js?v=0.8.21.3-20260829-1030";
+import {S,$,fmt,getPoint,getLine} from "./state.js?v=0.8.21.4-20260829-1255";
+import {createPoint,createLine,ensureLineRendered,deleteLineRaw,deletePointRaw,createContour,dispose,analyzeShapePoints} from "./geometry.js?v=0.8.21.4-20260829-1255";
+import {snapshotProject,commitSnapshot,undoHistory} from "./history.js?v=0.8.21.4-20260829-1255";
+import {createWall,nextWallName} from "./walls.js?v=0.8.21.4-20260829-1255";
 
 const REF_MODES=new Set(["parallel","perpendicular","angle"]);
 const TOOL_NAMES={line:"LIJN",polyline:"POLYLIJN",shape:"VORM",stake:"UITZETTEN",wall:"MUUR"};
@@ -475,9 +475,13 @@ export function finishTool(){
     if(last.id!==first.id){
       const existing=S.lines.find(l=>(l.startId===last.id&&l.endId===first.id)||(l.startId===first.id&&l.endId===last.id));
       if(existing){
+        ensureLineRendered(existing);
         if(!S.tool.lineIds.includes(existing.id))S.tool.lineIds.push(existing.id);
       }else{
-        const closing=createLine(last,first);
+        // A shape is geometrically complete only when its final edge exists as
+        // a normal, visible line. For A-B-C this explicitly creates C-A.
+        const closing=createLine(last,first,{ownerType:"shapeclose"});
+        ensureLineRendered(closing);
         S.tool.lineIds.push(closing.id);
         transaction({type:"closing",tool:"shape",lineId:closing.id,previousActiveId:last.id,endId:first.id});
       }

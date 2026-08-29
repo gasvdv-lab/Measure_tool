@@ -1,8 +1,8 @@
-import {S} from "./state.js?v=0.8.21.3-20260829-1030";
-import {snapshotProject,restoreProject,clearHistory} from "./history.js?v=0.8.21.3-20260829-1030";
-import {clearAllGeometry,validateGeometryState} from "./geometry.js?v=0.8.21.3-20260829-1030";
-import {clearWalls} from "./walls.js?v=0.8.21.3-20260829-1030";
-import {resetDrawingCore} from "./drawing-core.js?v=0.8.21.3-20260829-1030";
+import {S} from "./state.js?v=0.8.21.4-20260829-1255";
+import {snapshotProject,restoreProject,clearHistory} from "./history.js?v=0.8.21.4-20260829-1255";
+import {clearAllGeometry,validateGeometryState} from "./geometry.js?v=0.8.21.4-20260829-1255";
+import {clearWalls} from "./walls.js?v=0.8.21.4-20260829-1255";
+import {resetDrawingCore} from "./drawing-core.js?v=0.8.21.4-20260829-1255";
 
 export const PROJECT_SCHEMA_VERSION=1;
 const INDEX_KEY="measurear.projects.v1.index";
