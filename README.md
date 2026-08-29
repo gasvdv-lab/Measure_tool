@@ -1,49 +1,53 @@
-# Measure AR v0.8.21.2 — Constraint Regression Audit
-Build: 20260829-0915
+# Measure AR v0.8.21.3 — World Lock Core
+Build: 20260829-1030
 
-## v0.8.21.2 — constraint audit / bugfix
-Deze patch volgt op de praktijkmelding dat **Verticaal** instabiel meebewoog en op de eerdere fout bij **Horizontaal + exacte afstand**. De volledige tekenconstraintlaag is opnieuw nagekeken.
+## Doel van deze bugfix
+Deze patch behandelt de gemelde **core-regressie waarbij een reeds bevestigde lijn A→B visueel met de smartphone meebewoog**. Dat gedrag is fout: definitieve projectgeometrie moet aan de echte omgeving gekoppeld blijven.
 
-Wijzigingen:
-- Exact **Verticaal** is nu camera-onafhankelijk en blijft exact op de verticale as door het actieve vertrekpunt.
-- Verticaal heeft expliciet **omhoog/omlaag** via de richtingschip.
-- AUTO Verticaal blijft op dezelfde verticale as en respecteert de gekozen omhoog/omlaag-richting.
-- AUTO **Parallel / Loodrecht / Eigen hoek** respecteert nu werkelijk de gekozen zijde/richting; voorheen kon `side` algebraïsch wegvallen.
-- Runtime-invariantcontrole toegevoegd: kandidaat moet de gekozen constraint én ingestelde exacte afstand respecteren voordat bevestigen mogelijk is.
-- Constraintwaarden worden gevalideerd; onbekende waarde valt veilig terug op Vrij.
-- Muur-scèneobjecten krijgen een ID-tag en de projectconsistentiecontrole detecteert ontbrekende of verweesde muurweergaven.
+## Nieuw in v0.8.21.3
+- Nieuwe module `js/world-lock.js`.
+- WebXR-sessie vraagt `anchors` als **optionele** feature; ontbreken van anchors blokkeert de app niet.
+- Elk nieuw definitief Measure AR-punt wordt tijdens de actieve XR-sessie gekoppeld aan een WebXR Anchor wanneer de browser/ARCore dit ondersteunt.
+- Project/source-coördinaten (`point.position` / `locked`) blijven onveranderd; anchor-gecorrigeerde AR-weergave staat afzonderlijk in `point.worldPosition`.
+- Puntmarkers, definitieve lijnen, lijnlabels, puntlabels en vormen renderen vanuit de actuele world-lockpositie.
+- Lijnmeshes worden per frame opnieuw uit hun twee verankerde eindpunten gepositioneerd zonder de opgeslagen projectlengte te wijzigen.
+- Muren worden bij relevante anchor-correcties opnieuw opgebouwd vanuit de actuele world-lockposities van hun basislijn.
+- Bij verwijderen van een punt wordt zijn XR-anchor ook opgeruimd.
+- Undo/Redo/projectherstel kan opnieuw anchors aanvragen voor teruggezette punten.
+- Na Relocalization worden oude session-anchors ongeldig gemaakt en opnieuw opgebouwd op de nieuwe positie.
+- In de AR-HUD verschijnt `World Lock: actief · N anchors` wanneer anchors daadwerkelijk actief zijn. Als de browser ze niet aanbiedt, verschijnt een expliciete lokale-tracking fallback.
 
-**Belangrijk:** echte WebXR-tracking kan niet automatisch worden nagebootst. AUTO-tests valideren code, state en geometrische invariantlogica; AR-IN blijft nodig voor camera/trackinggedrag.
+**Architectuurregel:** projectgeometrie blijft de geometrische waarheid. XR-anchors beïnvloeden alleen de actuele AR-world pose; ze mogen opgeslagen maten niet stilletjes herschrijven.
 
 Vaste app-link: https://gasvdv-lab.github.io/Measure_tool/
 
-## Bugfix in v0.8.21.2
-Bij **exacte afstand + Horizontaal** werd de richting voorheen rechtstreeks afgeleid van de camera-kijkrichting. Daardoor kon de previewlijn vanuit het actieve vertrekpunt parallel aan de kijkrichting lopen in plaats van naar de positie te wijzen waarop het vizier mikte.
+## AUTO teststatus v0.8.21.3
+- JavaScript-syntax van alle modules.
+- Alle relatieve ES-module-imports bestaan.
+- Uniforme cache/build-key `0.8.21.3-20260829-1030`.
+- WebXR `anchors` is optioneel en `hit-test` blijft required.
+- Point create/delete lifecycle is gekoppeld aan World Lock queue/cleanup.
+- Projectpositie en worldPosition zijn gescheiden.
+- Definitieve lijnrender gebruikt beide world-lock eindpunten.
+- Punt- en lijnlabels gebruiken world-lock posities.
+- Muren hebben een world-lock resyncpad.
+- Relocalization reset/requeue van anchors aanwezig.
+- Fallbackpad blijft beschikbaar wanneer `XRFrame.createAnchor()` ontbreekt.
 
-De exacte plaatsing gebruikt nu de geometrische richting **van het actieve vertrekpunt naar de ray/plane-intersectie van het vizier**. Daardoor gelden tegelijk:
-- de ingestelde afstand blijft exact;
-- het eindpunt blijft horizontaal in de AR-wereld;
-- preview en bevestigde geometrie gebruiken dezelfde kandidaatpositie;
-- de richting volgt de bedoelde vizierzijde vanaf het vertrekpunt.
+## GO/NO-GO fysieke test
+**Eerst AR-IN/ROOM. Relocalization blijft gepauzeerd totdat dit slaagt.**
 
-Dezelfde richtingsbasis is ook consistenter gemaakt voor Vrij, Verticaal en Op oppervlak bij exacte afstand. Parallel, Loodrecht en Eigen hoek blijven referentiegestuurd.
+1. Start AR en controleer bovenaan of `World Lock: actief` verschijnt.
+2. Plaats A en B en bevestig lijn AB volledig.
+3. Houd AB in beeld en beweeg de smartphone 0,5–2 m zijwaarts, vooruit/achteruit en licht roterend.
+4. AB moet op dezelfde fysieke plaats in de ruimte blijven. Alleen de schermprojectie verandert door de camerabeweging.
+5. Herhaal met Horizontaal exact, Verticaal exact en Vrij.
+6. Maak daarna een muur op een lijn en controleer dezelfde world-lock.
+7. Meld expliciet of de HUD `World Lock: actief` of `lokale tracking` toont.
 
-## AUTO teststatus v0.8.21.2 — PASS
-- JavaScript syntax van alle modules.
-- Alle relatieve module-importpaden bestaan.
-- Geen dubbele HTML-ID's.
-- Uniforme cache/build-key `0.8.21.2-20260829-0915`.
-- Numerieke regressietest: oude camera-ray richting verschilt aantoonbaar van actieve-punt→vizier-richting.
-- Exacte horizontale afstand blijft wiskundig exact.
-- Verticale component van de horizontale eindpositie blijft gelijk aan het vertrekpunt.
-
-## Eerstvolgende fysieke test
-**AR-IN**: test nu eerst Horizontaal + exacte afstand op korte afstanden (50/100/250 cm) en daarna 5,20 m indien mogelijk. Test daarna Vrij, Verticaal, Op oppervlak, Parallel, Loodrecht en Eigen hoek met exacte afstand.
-
-Zie `TESTING.md` voor de vaste testprocedure en `ROADMAP.md` voor het verdere stappenplan.
+Als een bevestigde lijn ondanks **actieve anchors** nog met de telefoon meebeweegt, behandelen we dit als een diepere XR reference-space/rendering-regressie en gaan we niet verder met features.
 
 ---
-
 ## Basis waarop deze bugfix voortbouwt
 ## Doel
 Een opgeslagen project later opnieuw aan de echte fysieke omgeving koppelen. Omdat WebXR-sessies een nieuw lokaal coördinatenstelsel krijgen, gebruikt v0.8.21 een combinatie van opgeslagen locatie-informatie en door de gebruiker gekozen referentiepunten.
