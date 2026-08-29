@@ -1,6 +1,6 @@
-import {S,getPoint} from "./state.js?v=0.8.24-20260829-1805";
-import {snapshotProject,restoreProject} from "./history.js?v=0.8.24-20260829-1805";
-import {validateGeometryState} from "./geometry.js?v=0.8.24-20260829-1805";
+import {S,getPoint} from "./state.js?v=0.8.25-20260829-1815";
+import {snapshotProject,restoreProject} from "./history.js?v=0.8.25-20260829-1815";
+import {validateGeometryState} from "./geometry.js?v=0.8.25-20260829-1815";
 
 const EPS=1e-9;
 function v3(x=0,y=0,z=0){return new S.THREE.Vector3(x,y,z);}
@@ -153,6 +153,9 @@ export function solveRelocalization(){
   const refs=S.project.relocalization.references;
   const caps=S.project.relocalization.captured;
   if(!caps.length)throw new Error("Nog geen referentiepunten opnieuw aangewezen.");
+  const mode=String(S.project.relocalization.mode||"auto");
+  const minRequired=mode==="precision"?4:mode==="3"?3:mode==="2"?2:1;
+  if(caps.length<minRequired)throw new Error(`Voor deze methode zijn minstens ${minRequired} opnieuw aangewezen referentiepunten nodig.`);
   const paired=caps.map(c=>{
     const r=refs.find(x=>x.id===c.refId);if(!r)throw new Error("Referentie ontbreekt.");
     return {src:v3(r.projectPosition.x,r.projectPosition.y,r.projectPosition.z),dst:v3(c.world.x,c.world.y,c.world.z),ref:r};
@@ -188,13 +191,28 @@ export function applyRelocalization(result){
     const snap=snapshotProject();
     restoreProject(snap);
     const check=validateGeometryState();if(!check.ok)throw new Error(check.errors[0]);
+    // Keep persisted spatial metadata coherent with the rigidly transformed geometry.
+    // Distances/angles remain unchanged, while the project's saved origin and references now describe
+    // the same coordinate frame as the transformed project points.
     const origin=S.project.spatial?.projectOrigin||{x:0,y:0,z:0};
     const originWorld=applyRigid(v3(origin.x,origin.y,origin.z),result.R,result.t);
-    S.project.spatial={...(S.project.spatial||{}),projectOrigin:{...origin},restoredWorldOrigin:{x:originWorld.x,y:originWorld.y,z:originWorld.z},restoredAt:nowIso()};
+    for(const ref of S.project.relocalization.references||[]){
+      const q=v3(ref.projectPosition.x,ref.projectPosition.y,ref.projectPosition.z);
+      const nq=applyRigid(q,result.R,result.t);
+      ref.projectPosition={x:nq.x,y:nq.y,z:nq.z};
+    }
+    S.project.spatial={
+      ...(S.project.spatial||{}),
+      projectOrigin:{x:originWorld.x,y:originWorld.y,z:originWorld.z},
+      restoredWorldOrigin:{x:originWorld.x,y:originWorld.y,z:originWorld.z},
+      restoredAt:nowIso(),
+      lastRestoreQuality:{method:result.method,count:result.count,mean:result.mean,max:result.max,rms:result.rms,quality:result.quality}
+    };
     S.project.relocalization.lastResult={
       method:result.method,count:result.count,mean:result.mean,max:result.max,rms:result.rms,quality:result.quality,appliedAt:nowIso()
     };
     S.project.relocalization.active=false;
+    S.project.relocalization.captured=[];
     document.dispatchEvent(new CustomEvent("measurear:relocalized"));
     return S.project.relocalization.lastResult;
   }catch(err){

@@ -1,4 +1,4 @@
-import {S,$,fmt,pointName,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.24-20260829-1805";
+import {S,$,fmt,pointName,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.25-20260829-1815";
 
 export function renderPosition(p){return p?.worldPosition||p?.position||null;}
 

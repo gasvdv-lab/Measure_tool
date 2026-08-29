@@ -1,26 +1,26 @@
-import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.24-20260829-1805";
+import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.25-20260829-1815";
 import {
   startTool,cancelTool,setPlacement,setDistance,setConstraint,setAngle,flipSide,setReferenceLine,setSnapMode,
   confirmCandidate,undoToolStep,finishTool,toolLabel,constraintLabel,getActivePoint,referenceRequired,resetDrawingCore
-} from "./drawing-core.js?v=0.8.24-20260829-1805";
+} from "./drawing-core.js?v=0.8.25-20260829-1815";
 import {
   createShape,updateShape,deleteShapeOnly,deleteShapeWithContour,deleteLineRaw,deletePointRaw,renamePoint,updateLine,analyzeContour,
   lineDependencies,pointDependencies,canDeleteLine,canDeletePoint,clearAllGeometry,validateGeometryState,dispose
-} from "./geometry.js?v=0.8.24-20260829-1805";
-import {startAR,applyZoom} from "./ar.js?v=0.8.24-20260829-1805";
-import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.24-20260829-1805";
-import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.24-20260829-1805";
+} from "./geometry.js?v=0.8.25-20260829-1815";
+import {startAR,applyZoom} from "./ar.js?v=0.8.25-20260829-1815";
+import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.25-20260829-1815";
+import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.25-20260829-1815";
 import {
   initProjectStorage,saveCurrentProject,listProjects,loadStoredProject,newProject,duplicateStoredProject,
   deleteStoredProject,renameStoredProject,projectStats,formatStats,getStoredProjectInfo,hasRecovery,recoveryInfo,restoreRecovery,clearRecovery,
   exportCurrentProject,importProjectFile
-} from "./project-storage.js?v=0.8.24-20260829-1805";
+} from "./project-storage.js?v=0.8.25-20260829-1815";
 import {
   captureCurrentGeo,addProjectReference,removeProjectReference,beginRelocalization,cancelRelocalization,
   captureRelocalizationPoint,solveRelocalization,applyRelocalization,relocalizationSummary,beginSpatialRestore
-} from "./relocalization.js?v=0.8.24-20260829-1805";
+} from "./relocalization.js?v=0.8.25-20260829-1815";
 
-import {detachAllPointAnchors} from "./world-lock.js?v=0.8.24-20260829-1805";
+import {detachAllPointAnchors} from "./world-lock.js?v=0.8.25-20260829-1815";
 
 const pages=["home","project","references","relocalize","projects","objects","line","point","walltool","wallcreate","wall","openingcreate","opening","shapecreate","shape","settings","clear"];
 let menuStack=["home"];
@@ -214,13 +214,18 @@ function markProjectDirtyFromReference(){
   document.dispatchEvent(new CustomEvent("measurear:history-changed"));
 }
 function renderRelocalizePage(){
-  const mode=el("relocalizeMode").value||"2";el("relocalizeHelp").textContent=relocalizeModeText(mode);
+  const refs=S.project.relocalization.references||[];
+  const recommended=refs.length>=4?"precision":refs.length===3?"3":refs.length===2?"2":"1";
+  if(!S.project.relocalization.active&&refs.length&&el("relocalizeMode").value!==recommended)el("relocalizeMode").value=recommended;
+  const mode=el("relocalizeMode").value||recommended;el("relocalizeHelp").textContent=relocalizeModeText(mode);
   const geo=S.project.geo;el("relocalizeGeoInfo").textContent=geo?`Opgeslagen GPS: ${geo.lat.toFixed(6)}, ${geo.lon.toFixed(6)} · nauwkeurigheid ${Number.isFinite(geo.accuracy)?`±${geo.accuracy.toFixed(1)} m`:"onbekend"}`:"Geen GPS-locatie opgeslagen.";
-  const refs=S.project.relocalization.references||[],box=el("relocalizeRefs");box.innerHTML="";
+  const box=el("relocalizeRefs");box.innerHTML="";
   if(!refs.length){box.innerHTML='<div class="help">Geen referentiepunten geregistreerd.</div>';return;}
   for(const r of refs){
     const row=document.createElement("div");row.className="objectRow";
-    const info=document.createElement("button");info.className="secondary";info.textContent=`${r.name} · ${S.project.relocalization.captured.some(c=>c.refId===r.id)?"✓ opnieuw aangewezen":"nog aanwijzen"}`;
+    const info=document.createElement("button");info.className="secondary";
+    const detail=r.description?` · ${r.description}`:"";
+    info.textContent=`${r.name}${detail} · ${S.project.relocalization.captured.some(c=>c.refId===r.id)?"✓ opnieuw aangewezen":"nog aanwijzen"}`;
     const cap=document.createElement("button");cap.className="primary";cap.textContent="Gebruik vizier";
     cap.onclick=()=>{
       if(!S.currentTarget)throw new Error("Richt eerst het vizier op het fysieke referentiepunt.");
@@ -365,10 +370,12 @@ export function initUI(){
   let lastRelocalizationResult=null;
   bind("solveRelocalizeBtn","click",()=>{
     lastRelocalizationResult=solveRelocalization();
-    el("relocalizeQuality").textContent=`${lastRelocalizationResult.count} punt(en) · ${lastRelocalizationResult.quality} · gemiddelde ${(lastRelocalizationResult.mean*100).toFixed(1)} cm · max ${(lastRelocalizationResult.max*100).toFixed(1)} cm`;
+    el("relocalizeQuality").textContent=`${lastRelocalizationResult.count} punt(en) · ${lastRelocalizationResult.quality} · RMS ${(lastRelocalizationResult.rms*100).toFixed(1)} cm · gemiddelde ${(lastRelocalizationResult.mean*100).toFixed(1)} cm · max ${(lastRelocalizationResult.max*100).toFixed(1)} cm`;
+    showStatus(lastRelocalizationResult.quality==="zwak"?"Waarschuwing: positieherstel heeft een grote afwijking. Controleer je referentiepunten.":`Uitlijning berekend · ${lastRelocalizationResult.quality}.`);
   });
   bind("applyRelocalizeBtn","click",()=>{
     if(!lastRelocalizationResult)throw new Error("Bereken eerst de uitlijning.");
+    if(lastRelocalizationResult.quality==="zwak"&&!confirm(`De maximale afwijking is ${(lastRelocalizationResult.max*100).toFixed(1)} cm. Toch toepassen?`))return;
     const r=applyRelocalization(lastRelocalizationResult);lastRelocalizationResult=null;
     markProjectDirtyFromReference();afterProjectChange(`Project uitgelijnd · ${r.quality} · max ${(r.max*100).toFixed(1)} cm.`);
     closeMenu();

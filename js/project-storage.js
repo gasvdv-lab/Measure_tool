@@ -1,8 +1,8 @@
-import {S} from "./state.js?v=0.8.24-20260829-1805";
-import {snapshotProject,restoreProject,clearHistory} from "./history.js?v=0.8.24-20260829-1805";
-import {clearAllGeometry,validateGeometryState} from "./geometry.js?v=0.8.24-20260829-1805";
-import {clearWalls} from "./walls.js?v=0.8.24-20260829-1805";
-import {resetDrawingCore} from "./drawing-core.js?v=0.8.24-20260829-1805";
+import {S} from "./state.js?v=0.8.25-20260829-1815";
+import {snapshotProject,restoreProject,clearHistory} from "./history.js?v=0.8.25-20260829-1815";
+import {clearAllGeometry,validateGeometryState} from "./geometry.js?v=0.8.25-20260829-1815";
+import {clearWalls} from "./walls.js?v=0.8.25-20260829-1815";
+import {resetDrawingCore} from "./drawing-core.js?v=0.8.25-20260829-1815";
 
 export const PROJECT_SCHEMA_VERSION=1;
 const INDEX_KEY="measurear.projects.v1.index";
@@ -49,8 +49,14 @@ function sourceSnapshot(){
 function captureSpatialState(){
   const prev=S.project.spatial||{};
   const cam=S.camera?.position;
+  // Stable project origin: prefer the first explicit project reference, then the first project point.
+  // This origin is project metadata; it is not the transient WebXR session origin.
+  const firstRef=S.project.relocalization?.references?.[0];
+  const firstPoint=S.points?.[0];
+  const origin=firstRef?.projectPosition||firstPoint?.position||prev.projectOrigin||{x:0,y:0,z:0};
   return {
-    projectOrigin:{...(prev.projectOrigin||{x:0,y:0,z:0})},
+    projectOrigin:{x:Number(origin.x)||0,y:Number(origin.y)||0,z:Number(origin.z)||0},
+    originSource:firstRef?`reference:${firstRef.id}`:(firstPoint?`point:${firstPoint.id}`:(prev.originSource||"default")),
     savedWorldPose:cam&&[cam.x,cam.y,cam.z].every(Number.isFinite)?{camera:{x:cam.x,y:cam.y,z:cam.z}}:(prev.savedWorldPose||null),
     savedAt:nowIso()
   };
