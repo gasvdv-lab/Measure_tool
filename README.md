@@ -324,3 +324,19 @@ Upload de volledige inhoud van deze ZIP naar GitHub. `js/relocalization.js` is n
 - Gerichte fix voor de niet-reagerende Relocalisatie-knop.
 - De knop gebruikt nu dezelfde generieke menunavigatie als de andere pagina's (`data-page="relocalize"`).
 - Geen wijziging aan de relocalisatie-engine.
+
+## v0.8.22 — Project Coordinate System & Spatial Save
+- Project opslaan bewaart nu naast geometrie ook een expliciete `spatial` projectlaag.
+- `projectOrigin` wordt als vaste projectbasis opgeslagen.
+- De laatst beschikbare AR-world/camerapose en opslagtijd worden als ruimtelijke metadata bewaard.
+- GPS en projectreferenties blijven onderdeel van hetzelfde projectbestand.
+- Bij opnieuw openen worden projectgeometrie, project-origin, ruimtelijke metadata, GPS en referenties samen hersteld.
+- Belangrijk: WebXR maakt bij een nieuwe sessie een nieuwe trackingruimte. Spatial Save bewaart dus waar het project hoort; automatische centimeternauwkeurige herkenning van die plek vereist nog relocalisatie/visuele/geospatiale ondersteuning. Referentiepunten blijven de precisie-fallback.
+
+### v0.8.22 hotfix — Nieuw project blijft in AR
+- Nieuw project aanmaken sluit alleen de Project Manager en keert expliciet terug naar de actieve AR-camera.
+- De AR-sessie wordt niet beëindigd of naar het startscherm gestuurd.
+- Cache-key vernieuwd zodat GitHub Pages de fix direct laadt.
+
+### v0.8.22 patch — Nieuw project blijft in camera
+Bij het starten van een nieuw project worden World Lock-koppelingen veilig losgemaakt zonder de actieve WebXR-sessie te beheren. De Project Manager sluit en de gebruiker keert terug naar het AR-beeld, niet naar het startscherm.

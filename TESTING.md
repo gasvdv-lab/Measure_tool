@@ -72,3 +72,6 @@ Een gestandaardiseerd afdrukbaar testblad blijft gepland. Afdrukken op 100% scha
 
 ## v0.8.21.8 — Relocalisatie toegang
 AR-IN/ROOM: open een opgeslagen project en controleer dat `☰ → Relocalisatie` rechtstreeks beschikbaar is. Voer daarna de referentiepunt-flow uit.
+
+### v0.8.22 hotfix test
+AR-IN: Start AR → Project → Nieuw leeg project → bevestigen. Verwacht: Project Manager sluit en camera blijft actief; startscherm verschijnt niet.

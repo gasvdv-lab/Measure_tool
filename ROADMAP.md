@@ -98,3 +98,13 @@
 - [x] Relocalisatie-ingang via standaard menunavigatie gekoppeld.
 - [ ] AR-IN: bevestigen dat `☰ → Relocalisatie` het scherm `Project uitlijnen` opent.
 - [ ] Daarna fysieke 1/2/3/4+ referentiepunttest hervatten.
+
+## v0.8.22 — Project Coordinate System & Spatial Save
+- [x] Expliciete project-origin in projectdata
+- [x] Ruimtelijke save-metadata gekoppeld aan project
+- [x] GPS + referenties + geometrie als één opgeslagen project
+- [x] Spatial metadata herstellen bij project load/import/duplicate
+- [ ] Fysieke AR-test: save → sessie sluiten → reopen → spatial data behouden
+- [ ] Volgende: automatische/semi-automatische relocalisatie op deze project-space basis
+
+- [x] v0.8.22 hotfix: Nieuw project → Project Manager sluiten → terug naar actieve AR-camera, nooit naar startscherm.
