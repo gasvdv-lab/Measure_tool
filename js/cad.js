@@ -1,4 +1,4 @@
-import {S,projectToWorld,worldToProject} from "./state.js?v=0.8.28.5-20260829-2205";
+import {S,projectToWorld,worldToProject} from "./state.js?v=0.8.28.9-20260829-2238";
 
 const DB_NAME="measurear.cad.v1",STORE="files";
 let loaderPromise=null;

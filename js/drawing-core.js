@@ -1,8 +1,8 @@
-import {S,$,fmt,getPoint,getLine,worldToProject} from "./state.js?v=0.8.28.5-20260829-2205";
-import {createPoint,createLine,ensureLineRendered,deleteLineRaw,deletePointRaw,createContour,dispose,analyzeShapePoints} from "./geometry.js?v=0.8.28.5-20260829-2205";
-import {snapshotProject,commitSnapshot,undoHistory} from "./history.js?v=0.8.28.5-20260829-2205";
-import {queuePointHitAnchor} from "./world-lock.js?v=0.8.28.5-20260829-2205";
-import {createWall,nextWallName} from "./walls.js?v=0.8.28.5-20260829-2205";
+import {S,$,fmt,getPoint,getLine,worldToProject} from "./state.js?v=0.8.28.9-20260829-2238";
+import {createPoint,createLine,ensureLineRendered,deleteLineRaw,deletePointRaw,createContour,dispose,analyzeShapePoints} from "./geometry.js?v=0.8.28.9-20260829-2238";
+import {snapshotProject,commitSnapshot,undoHistory} from "./history.js?v=0.8.28.9-20260829-2238";
+import {queuePointHitAnchor} from "./world-lock.js?v=0.8.28.9-20260829-2238";
+import {createWall,nextWallName} from "./walls.js?v=0.8.28.9-20260829-2238";
 
 const REF_MODES=new Set(["parallel","perpendicular","angle"]);
 const TOOL_NAMES={line:"LIJN",polyline:"POLYLIJN",shape:"VORM",stake:"UITZETTEN",wall:"MUUR"};

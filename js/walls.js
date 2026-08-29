@@ -1,6 +1,6 @@
 
-import {S,getPoint,getLine} from "./state.js?v=0.8.28.5-20260829-2205";
-import {dispose,renderPosition} from "./geometry.js?v=0.8.28.5-20260829-2205";
+import {S,getPoint,getLine} from "./state.js?v=0.8.28.9-20260829-2238";
+import {dispose,renderPosition} from "./geometry.js?v=0.8.28.9-20260829-2238";
 
 function cleanName(name){return String(name||"").trim().replace(/\s+/g," ");}
 export function wallNameExists(name,excludeId=null){
