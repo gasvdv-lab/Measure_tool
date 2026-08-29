@@ -1,10 +1,16 @@
-# Measure AR v0.8.28.9 — Professional Color Picker
+# Measure AR v0.8.28.10 — Theme Selector
+
+GitHub Pages: https://gasvdv-lab.github.io/Measure_tool/
+
+Deze versie voegt vijf professionele app-thema’s toe onder **Instellingen → App-thema**: Technical Green, Survey Blue, Industrial Orange, Precision Red en Neutral Steel. De keuze wordt lokaal onthouden en geldt ook op de losse CAD-importpagina. Functionele semantische kleuren (geldig/bevestigd, waarschuwing, fout) blijven onafhankelijk van het gekozen thema. De Professional Color Picker uit v0.8.28.9 blijft behouden.
+
+# Measure AR v0.8.28.10 — Professional Color Picker
 
 Deze release vervangt de beperkte browserkleurkeuze door één professionele, herbruikbare kleurkiezer voor lijnen, muren, vormopvulling en vormranden. De bestaande objectvelden blijven dezelfde HEX-kleurwaarden gebruiken; geometrie-, CAD-, project- en WebXR-logica zijn niet gewijzigd.
 
 GitHub Pages: https://gasvdv-lab.github.io/Measure_tool/
 
-## Nieuw in v0.8.28.9
+## Nieuw in v0.8.28.10
 - Office-achtige themakleuren en uitgebreide kleurenmatrix.
 - Recent gebruikte kleuren worden lokaal onthouden.
 - **Meer kleuren…** opent een volledige mobiele picker met verzadiging/helderheid en hue-slider.

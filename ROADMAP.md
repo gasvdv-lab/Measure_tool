@@ -1,3 +1,14 @@
+## v0.8.28.10 — Theme Selector ✅
+- [x] Vijf samenhangende professionele interface-thema’s
+- [x] Themawissel onder Instellingen
+- [x] Directe preview en actieve-thema-indicatie
+- [x] Keuze lokaal onthouden tussen sessies
+- [x] Thema doorgetrokken naar externe CAD-importpagina
+- [x] Semantische statuskleuren blijven thema-onafhankelijk
+- [ ] Praktijktest op Android/Chrome
+- [ ] CAD-plaatsing verder valideren bij voldoende licht
+- [ ] `Project op locatie plaatsen` / reference-capture bug blijft open voor latere herneming
+
 # Huidige stap — v0.8.28.9 Professional Color Picker
 
 - [x] Eén professionele colorpicker voor alle huidige kleurvelden.

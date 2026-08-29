@@ -4,8 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#111111">
-  <title>Measure AR v0.8.28.9</title>
-  <link rel="stylesheet" href="./css/app.css?v=0.8.28.9-20260829-colorpicker">
+  <script>try{document.documentElement.dataset.appTheme=localStorage.getItem("measurear.ui.theme.v1")||"technical-green"}catch{document.documentElement.dataset.appTheme="technical-green"}</script>
+  <title>Measure AR v0.8.28.10</title>
+  <link rel="stylesheet" href="./css/app.css?v=0.8.28.10-20260829-theme">
 </head>
 <body>
 <div id="app">
@@ -13,7 +14,7 @@
     <div class="logo">⌖</div><h1>Measure AR</h1>
     <p id="launchStatus">Tik om AR te starten.</p>
     <div id="startupRecovery" class="help" style="display:none"></div>
-    <div id="buildInfo" class="build">v0.8.28.9 · Professional Color Picker · 20260829</div>
+    <div id="buildInfo" class="build">v0.8.28.10 · Professional Color Picker · 20260829</div>
     <button id="startArBtn" class="primary">AR starten</button>
     <div id="error" class="error"></div>
   </main>
@@ -36,7 +37,7 @@
   <aside id="menuPanel">
     <div class="menuHead">
       <button id="menuBackBtn" class="secondary">‹</button>
-      <div><strong id="menuTitle">Measure AR</strong><small id="menuMeta">v0.8.28.9</small></div>
+      <div><strong id="menuTitle">Measure AR</strong><small id="menuMeta">v0.8.28.10</small></div>
       <button id="menuCloseBtn" class="secondary">✕</button>
     </div>
     <div class="menuBody">
@@ -308,6 +309,18 @@
 
       <section id="page-settings" class="page">
         <h3>Instellingen</h3><div class="menuCard">
+          <div class="themeSetting">
+            <div class="themeSettingHead"><div><strong>App-thema</strong><small>Kies een professionele kleurencombinatie</small></div><span id="themeCurrentName" class="themeCurrentName">Technical Green</span></div>
+            <div id="themeGrid" class="themeGrid" role="radiogroup" aria-label="App-thema">
+              <button type="button" class="themeCard" data-theme-choice="technical-green" role="radio" aria-checked="false"><span class="themePreview themePreviewGreen"><i></i><i></i><i></i></span><span><strong>Technical Green</strong><small>Huidige technische stijl</small></span></button>
+              <button type="button" class="themeCard" data-theme-choice="survey-blue" role="radio" aria-checked="false"><span class="themePreview themePreviewBlue"><i></i><i></i><i></i></span><span><strong>Survey Blue</strong><small>CAD & landmeting</small></span></button>
+              <button type="button" class="themeCard" data-theme-choice="industrial-orange" role="radio" aria-checked="false"><span class="themePreview themePreviewOrange"><i></i><i></i><i></i></span><span><strong>Industrial Orange</strong><small>Werf & hoge zichtbaarheid</small></span></button>
+              <button type="button" class="themeCard" data-theme-choice="precision-red" role="radio" aria-checked="false"><span class="themePreview themePreviewRed"><i></i><i></i><i></i></span><span><strong>Precision Red</strong><small>Donker & scherp technisch</small></span></button>
+              <button type="button" class="themeCard" data-theme-choice="neutral-steel" role="radio" aria-checked="false"><span class="themePreview themePreviewSteel"><i></i><i></i><i></i></span><span><strong>Neutral Steel</strong><small>Sober & neutraal</small></span></button>
+            </div>
+            <div class="help themeHelp">Het thema verandert de interface. Betekeniskleuren voor geldig, waarschuwing en fout blijven behouden.</div>
+          </div>
+          <div class="settingsDivider"></div>
           <label>Eenheid<select id="defaultUnit"><option value="cm" selected>centimeter</option><option value="m">meter</option></select></label>
           <label>Lijndikte<select id="defaultThickness"><option value="1">1 · fijn</option><option value="2" selected>2 · normaal</option><option value="3">3 · duidelijk</option><option value="4">4 · zwaar</option></select></label>
           <label class="check"><input id="defaultLabels" type="checkbox" checked> Labels tonen</label>
@@ -381,6 +394,6 @@
   <div id="hint">Open ☰ en kies wat je wilt tekenen.</div>
 </div>
 
-<script type="module" src="./js/bootstrap.js?v=0.8.28.9-20260829-2238"></script>
+<script type="module" src="./js/bootstrap.js?v=0.8.28.10-20260829-theme"></script>
 </body>
 </html>

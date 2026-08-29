@@ -4,8 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#111111">
+  <script>try{document.documentElement.dataset.appTheme=localStorage.getItem("measurear.ui.theme.v1")||"technical-green"}catch{document.documentElement.dataset.appTheme="technical-green"}</script>
   <title>Measure AR · CAD import</title>
-  <link rel="stylesheet" href="./css/app.css?v=0.8.28.9-20260829-colorpicker">
+  <link rel="stylesheet" href="./css/app.css?v=0.8.28.10-20260829-theme">
   <style>
     html,body{overflow:auto;min-height:100%;background:#111}
     #cadStandalone{min-height:100dvh;display:grid;place-items:center;padding:24px}
@@ -27,9 +28,9 @@
     <button id="cadStandaloneReturn" class="primary" style="display:none">Terug naar Measure AR</button>
     <button id="cadStandaloneCancel" class="secondary">Annuleren en terug</button>
     <div id="cadStandaloneError" class="error"></div>
-    <div class="build">v0.8.28.8 · AR HUD Refinement · External CAD Import</div>
+    <div class="build">v0.8.28.10 · Theme Selector · External CAD Import</div>
   </section>
 </main>
-<script type="module" src="./js/cad-import-page.js?v=0.8.28.9-20260829-2238"></script>
+<script type="module" src="./js/cad-import-page.js?v=0.8.28.10-20260829-theme"></script>
 </body>
 </html>

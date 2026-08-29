@@ -1,4 +1,21 @@
-# v0.8.28.9 — Professional Color Picker
+## v0.8.28.10 — Theme Selector
+
+**Automatische controles**
+- Alle JavaScript syntactisch geldig.
+- Alle lokale module-imports bestaan.
+- Geen dubbele HTML-ID’s.
+- Exact vijf geldige thema-keuzes aanwezig.
+- Thema-opslag gebruikt uitsluitend lokale UI-state en wijzigt geen projectgeometrie.
+- Professional Color Picker blijft aanwezig.
+
+**Fysieke tests nog uit te voeren**
+- Elk van de vijf thema’s kiezen in Android Chrome en controleren dat de keuze direct zichtbaar is.
+- App vernieuwen en controleren dat het gekozen thema behouden blijft.
+- Menu, HUD, popovers en colorpicker controleren binnen ieder thema.
+- CAD-importpagina openen en controleren dat hetzelfde thema wordt gebruikt.
+- Bestaande AR-teken- en projecttests blijven open waar nog niet fysiek uitgevoerd.
+
+# v0.8.28.10 — Professional Color Picker
 
 ## Automatische controles
 - [x] JavaScript-syntaxcontrole.
