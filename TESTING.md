@@ -69,3 +69,6 @@ Een gestandaardiseerd afdrukbaar testblad blijft gepland. Afdrukken op 100% scha
 - Zichtbare toast-feedback voor opslaan/openen/kopiëren/hernoemen/wissen.
 - Permanente projectstatus in de AR-topbalk: opgeslagen of gewijzigd.
 - Startscherm wordt niet gebruikt als bestemming van Project Manager-acties.
+
+## v0.8.21.7 — Relocalisatie toegang
+AR-IN/ROOM: open een opgeslagen project en controleer dat `☰ → Relocalisatie` rechtstreeks beschikbaar is. Voer daarna de referentiepunt-flow uit.

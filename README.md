@@ -314,3 +314,8 @@ Upload de volledige inhoud van deze ZIP naar GitHub. `js/relocalization.js` is n
 - Zichtbare toast-feedback voor opslaan/openen/kopiëren/hernoemen/wissen.
 - Permanente projectstatus in de AR-topbalk: opgeslagen of gewijzigd.
 - Startscherm wordt niet gebruikt als bestemming van Project Manager-acties.
+
+## v0.8.21.7 — Relocalization Menu Access
+- `Relocalisatie` is nu rechtstreeks bereikbaar vanuit het hoofdmenu tijdens AR.
+- De knop opent de bestaande pagina `Project op locatie plaatsen`.
+- Geen wijziging aan de relocalisatie-engine; deze release maakt de bestaande flow bereikbaar voor de praktijktest.
