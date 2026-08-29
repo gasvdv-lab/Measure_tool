@@ -1,9 +1,10 @@
-import {S} from "./state.js?v=0.8.27.1-20260829-2015";
-import {snapshotProject,restoreProject,clearHistory} from "./history.js?v=0.8.27.1-20260829-2015";
-import {clearAllGeometry,validateGeometryState} from "./geometry.js?v=0.8.27.1-20260829-2015";
-import {clearWalls} from "./walls.js?v=0.8.27.1-20260829-2015";
-import {resetDrawingCore} from "./drawing-core.js?v=0.8.27.1-20260829-2015";
-import {detachAllPointAnchors} from "./world-lock.js?v=0.8.27.1-20260829-2015";
+import {S} from "./state.js?v=0.8.28-20260829-2035";
+import {snapshotProject,restoreProject,clearHistory} from "./history.js?v=0.8.28-20260829-2035";
+import {clearAllGeometry,validateGeometryState} from "./geometry.js?v=0.8.28-20260829-2035";
+import {clearWalls} from "./walls.js?v=0.8.28-20260829-2035";
+import {resetDrawingCore} from "./drawing-core.js?v=0.8.28-20260829-2035";
+import {detachAllPointAnchors} from "./world-lock.js?v=0.8.28-20260829-2035";
+import {clearCadRuntime,restoreCadRuntime} from "./cad.js?v=0.8.28-20260829-2035";
 
 export const PROJECT_SCHEMA_VERSION=1;
 const INDEX_KEY="measurear.projects.v1.index";
@@ -72,6 +73,7 @@ function envelope(name,id,createdAt,data=sourceSnapshot(),projectExtras=null){
       geo:projectExtras?.geo??S.project.geo,
       hybrid:projectExtras?.hybrid??JSON.parse(JSON.stringify(S.project.hybrid||{})),
       spatial:(()=>{const q=projectExtras?.spatial??captureSpatialState();return {...q,sessionTransform:null};})(),
+      cad:JSON.parse(JSON.stringify(projectExtras?.cad??S.project.cad??{models:[]})),
       relocalization:projectExtras?.relocalization?cloneReloc(projectExtras.relocalization):cloneReloc()
     },
     data
@@ -113,6 +115,7 @@ function setCurrentMeta(e,source="local"){
     dirty:false,recoveryAvailable:hasRecovery(),loadedFrom:source,geo:e.project.geo||null,
     hybrid:e.project.hybrid||{savedHeading:null,currentHeading:null,lastAssessment:null,headingSource:null},
     spatial:{...(e.project.spatial||{projectOrigin:{x:0,y:0,z:0},savedWorldPose:null,savedAt:null}),sessionTransform:null},
+    cad:JSON.parse(JSON.stringify(e.project.cad||{models:[]})),
     relocalization:{references:(e.project.relocalization?.references||[]).map(r=>({...r,projectPosition:{...r.projectPosition}})),active:false,captured:[],lastResult:e.project.relocalization?.lastResult||null,mode:"auto"}
   });
   storageSet(LAST_PROJECT_KEY,e.project.id);
@@ -150,10 +153,10 @@ function repairIndex(){
   return repaired;
 }
 
-export function projectStats(){return {points:S.points.length,lines:S.lines.length,contours:S.contours.length,shapes:S.shapes.length,walls:S.walls.length,openings:S.openings.length};}
-export function formatStats(s=projectStats()){return `${s.points} punten · ${s.lines} lijnen · ${s.shapes} vormen · ${s.walls} muren · ${s.openings} openingen`;}
+export function projectStats(){return {points:S.points.length,lines:S.lines.length,contours:S.contours.length,shapes:S.shapes.length,walls:S.walls.length,openings:S.openings.length,cad:S.project.cad?.models?.length||0};}
+export function formatStats(s=projectStats()){return `${s.points} punten · ${s.lines} lijnen · ${s.shapes} vormen · ${s.walls} muren · ${s.openings} openingen · ${s.cad||0} CAD`;}
 export function listProjects(){return readIndex();}
-export function getStoredProjectInfo(id){const e=readStoredEnvelope(id);return {...metaFromEnvelope(e),stats:{points:e.data.points.length,lines:e.data.lines.length,shapes:e.data.shapes.length,walls:e.data.walls.length,openings:e.data.openings.length}};}
+export function getStoredProjectInfo(id){const e=readStoredEnvelope(id);return {...metaFromEnvelope(e),stats:{points:e.data.points.length,lines:e.data.lines.length,shapes:e.data.shapes.length,walls:e.data.walls.length,openings:e.data.openings.length,cad:e.project.cad?.models?.length||0}};}
 
 export function saveCurrentProject(name=null,forceNew=false){
   const oldMeta={id:S.project.id,name:S.project.name,createdAt:S.project.createdAt,updatedAt:S.project.updatedAt,lastSavedAt:S.project.lastSavedAt,dirty:S.project.dirty,loadedFrom:S.project.loadedFrom};
@@ -172,7 +175,7 @@ export function duplicateCurrentProject(name=null){
 }
 export function duplicateStoredProject(id,name=null){
   const src=readStoredEnvelope(id);
-  const copy=envelope(cleanName(name)||`${src.project.name} kopie`,null,null,JSON.parse(JSON.stringify(src.data)),{geo:src.project.geo||null,spatial:src.project.spatial||null,relocalization:src.project.relocalization||null,hybrid:src.project.hybrid||null});
+  const copy=envelope(cleanName(name)||`${src.project.name} kopie`,null,null,JSON.parse(JSON.stringify(src.data)),{geo:src.project.geo||null,spatial:src.project.spatial||null,relocalization:src.project.relocalization||null,hybrid:src.project.hybrid||null,cad:src.project.cad||null});
   storageSet(PROJECT_PREFIX+copy.project.id,JSON.stringify(copy));upsertIndex(metaFromEnvelope(copy));return copy;
 }
 export function renameStoredProject(id,name){
@@ -206,14 +209,16 @@ export function loadEnvelope(e,source="import"){
     // Een nieuw project mag nooit worden opgebouwd met de sessietransform/anchors
     // van het vorige project. Reset die context vóór createPoint() wordt aangeroepen.
     detachAllPointAnchors();
+    clearCadRuntime();
     S.referenceCaptureId=null;
     S.project.spatial={...(S.project.spatial||{}),sessionTransform:null};
     restoreProject(e.data);clearHistory();
     const check=validateGeometryState();if(!check.ok)throw new Error(check.errors[0]);
-    setCurrentMeta(e,source);clearRecovery();document.dispatchEvent(new CustomEvent("measurear:project-loaded"));return e;
+    setCurrentMeta(e,source);clearRecovery();restoreCadRuntime().catch(err=>console.warn("CAD restore",err));document.dispatchEvent(new CustomEvent("measurear:project-loaded"));return e;
   }catch(err){
     try{
       detachAllPointAnchors();
+      clearCadRuntime();
       Object.assign(S.project,beforeMeta);
       restoreProject(before);
     }catch{}
@@ -223,9 +228,9 @@ export function loadEnvelope(e,source="import"){
 export function newProject(name="Nieuw project"){
   lifecycleBusy=true;
   try{
-    detachAllPointAnchors();S.referenceCaptureId=null;
+    detachAllPointAnchors();clearCadRuntime();S.referenceCaptureId=null;
     clearWalls();clearAllGeometry();resetDrawingCore();clearHistory();
-    const ts=nowIso();Object.assign(S.project,{schemaVersion:1,id:newId(),name:cleanName(name)||"Nieuw project",createdAt:ts,updatedAt:ts,lastSavedAt:null,dirty:true,recoveryAvailable:false,loadedFrom:"new",geo:null,hybrid:{savedHeading:null,currentHeading:null,lastAssessment:null,headingSource:null},spatial:{projectOrigin:{x:0,y:0,z:0},savedWorldPose:null,savedAt:null,sessionTransform:null},relocalization:{references:[],active:false,captured:[],lastResult:null,mode:"auto"}});
+    const ts=nowIso();Object.assign(S.project,{schemaVersion:1,id:newId(),name:cleanName(name)||"Nieuw project",createdAt:ts,updatedAt:ts,lastSavedAt:null,dirty:true,recoveryAvailable:false,loadedFrom:"new",geo:null,hybrid:{savedHeading:null,currentHeading:null,lastAssessment:null,headingSource:null},spatial:{projectOrigin:{x:0,y:0,z:0},savedWorldPose:null,savedAt:null,sessionTransform:null},cad:{models:[]},relocalization:{references:[],active:false,captured:[],lastResult:null,mode:"auto"}});
     writeRecovery();document.dispatchEvent(new CustomEvent("measurear:project-loaded"));document.dispatchEvent(new CustomEvent("measurear:project-meta-changed"));return S.project;
   }finally{lifecycleBusy=false;}
 }
@@ -237,7 +242,7 @@ export function markDirtyAndRecover(){
 export function hasRecovery(){return Boolean(recoveryEnvelopeOrNull());}
 export function recoveryInfo(){
   const e=recoveryEnvelopeOrNull();if(!e)return null;
-  return {id:e.project.id,name:e.project.name,updatedAt:e.project.updatedAt,stats:{points:e.data.points.length,lines:e.data.lines.length,shapes:e.data.shapes.length,walls:e.data.walls.length,openings:e.data.openings.length}};
+  return {id:e.project.id,name:e.project.name,updatedAt:e.project.updatedAt,stats:{points:e.data.points.length,lines:e.data.lines.length,shapes:e.data.shapes.length,walls:e.data.walls.length,openings:e.data.openings.length,cad:e.project.cad?.models?.length||0}};
 }
 export function restoreRecovery(){const e=recoveryEnvelopeOrNull();if(!e)throw new Error("Geen geldig herstelproject gevonden.");return loadEnvelope(e,"recovery");}
 export function clearRecovery(){localStorage.removeItem(RECOVERY_KEY);S.project.recoveryAvailable=false;document.dispatchEvent(new CustomEvent("measurear:project-meta-changed"));}
@@ -253,7 +258,7 @@ export async function importProjectFile(file){
   const raw=await file.text(),src=safeParse(raw);if(!src)throw new Error("Bestand bevat geen geldige JSON.");
   const v=validateProjectEnvelope(src);if(!v.ok)throw new Error("Import geweigerd: "+v.errors[0]);
   const idExists=Boolean(storedEnvelopeOrNull(src.project.id));
-  const imported=envelope(idExists?`${src.project.name} import`:src.project.name,idExists?newId():src.project.id,src.project.createdAt,JSON.parse(JSON.stringify(src.data)),{geo:src.project.geo||null,spatial:src.project.spatial||null,relocalization:src.project.relocalization||null,hybrid:src.project.hybrid||null});
+  const imported=envelope(idExists?`${src.project.name} import`:src.project.name,idExists?newId():src.project.id,src.project.createdAt,JSON.parse(JSON.stringify(src.data)),{geo:src.project.geo||null,spatial:src.project.spatial||null,relocalization:src.project.relocalization||null,hybrid:src.project.hybrid||null,cad:src.project.cad||null});
   loadEnvelope(imported,"import");
   storageSet(PROJECT_PREFIX+imported.project.id,JSON.stringify(imported));upsertIndex(metaFromEnvelope(imported));setCurrentMeta(imported,"local");clearRecovery();
   return imported;

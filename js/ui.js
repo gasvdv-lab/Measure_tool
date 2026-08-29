@@ -1,30 +1,31 @@
-import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.27.1-20260829-2015";
+import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.28-20260829-2035";
 import {
   startTool,cancelTool,setPlacement,setDistance,setConstraint,setAngle,flipSide,setReferenceLine,setSnapMode,
   confirmCandidate,undoToolStep,finishTool,toolLabel,constraintLabel,getActivePoint,referenceRequired,resetDrawingCore
-} from "./drawing-core.js?v=0.8.27.1-20260829-2015";
+} from "./drawing-core.js?v=0.8.28-20260829-2035";
 import {
   createShape,updateShape,deleteShapeOnly,deleteShapeWithContour,deleteLineRaw,deletePointRaw,renamePoint,updateLine,analyzeContour,
   lineDependencies,pointDependencies,canDeleteLine,canDeletePoint,clearAllGeometry,validateGeometryState,dispose
-} from "./geometry.js?v=0.8.27.1-20260829-2015";
-import {startAR,applyZoom,resetTrackingSamples} from "./ar.js?v=0.8.27.1-20260829-2015";
-import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.27.1-20260829-2015";
-import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.27.1-20260829-2015";
+} from "./geometry.js?v=0.8.28-20260829-2035";
+import {startAR,applyZoom,resetTrackingSamples} from "./ar.js?v=0.8.28-20260829-2035";
+import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.28-20260829-2035";
+import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.28-20260829-2035";
 import {
   initProjectStorage,saveCurrentProject,listProjects,loadStoredProject,newProject,duplicateStoredProject,
   deleteStoredProject,renameStoredProject,projectStats,formatStats,getStoredProjectInfo,hasRecovery,recoveryInfo,restoreRecovery,clearRecovery,
-  exportCurrentProject,importProjectFile
-} from "./project-storage.js?v=0.8.27.1-20260829-2015";
+  exportCurrentProject,importProjectFile,markDirtyAndRecover
+} from "./project-storage.js?v=0.8.28-20260829-2035";
 import {
   captureCurrentGeo,addProjectReference,removeProjectReference,clearProjectReferences,beginRelocalization,cancelRelocalization,
   captureRelocalizationPoint,solveRelocalization,applyRelocalization,relocalizationSummary,beginSpatialRestore
-} from "./relocalization.js?v=0.8.27.1-20260829-2015";
+} from "./relocalization.js?v=0.8.28-20260829-2035";
 
-import {captureHybridBaseline,assessHybridLocation,enableHeading} from "./hybrid-localization.js?v=0.8.27.1-20260829-2015";
+import {captureHybridBaseline,assessHybridLocation,enableHeading} from "./hybrid-localization.js?v=0.8.28-20260829-2035";
 
-import {detachAllPointAnchors} from "./world-lock.js?v=0.8.27.1-20260829-2015";
+import {detachAllPointAnchors} from "./world-lock.js?v=0.8.28-20260829-2035";
+import {importCadFile,listCadModels,cadStatus,selectCad,beginCadPlacement,rotateCad,moveCadHeight,confirmCadPlacement,cancelCadPlacement,deleteCadModel,clearCadRuntime} from "./cad.js?v=0.8.28-20260829-2035";
 
-const pages=["home","project","references","relocalize","projects","objects","line","point","walltool","wallcreate","wall","openingcreate","opening","shapecreate","shape","settings","clear"];
+const pages=["home","project","references","relocalize","projects","cad","objects","line","point","walltool","wallcreate","wall","openingcreate","opening","shapecreate","shape","settings","clear"];
 let menuStack=["home"];
 let toastTimer=null;
 
@@ -56,8 +57,8 @@ function togglePopover(id){
 }
 function showPage(name,push=true){
   pages.forEach(p=>el("page-"+p)?.classList.remove("active"));const page=el("page-"+name);if(!page)throw new Error(`Menupagina ontbreekt: ${name}`);page.classList.add("active");
-  const titles={home:"Measure AR",project:"Project",references:"Projectreferenties",relocalize:"Projectpositie herstellen",projects:"Mijn projecten",objects:"Objecten",line:"Lijn",point:"Punt",walltool:"Muur tekenen",wallcreate:"Muur maken",wall:"Muur",openingcreate:"Opening toevoegen",opening:"Opening",shapecreate:"Vorm opslaan",shape:"Vorm",settings:"Instellingen",clear:"Alles wissen"};
-  el("menuTitle").textContent=titles[name]||name;if(push&&menuStack.at(-1)!==name)menuStack.push(name);el("menuBackBtn").style.visibility=name==="home"?"hidden":"visible";if(name==="objects")renderObjects();if(name==="project")renderProjectPage();if(name==="references")renderReferenceManager();if(name==="relocalize")renderRelocalizePage();if(name==="projects")renderProjectsList();
+  const titles={home:"Measure AR",project:"Project",references:"Projectreferenties",relocalize:"Projectpositie herstellen",projects:"Mijn projecten",cad:"CAD / 3D-model",objects:"Objecten",line:"Lijn",point:"Punt",walltool:"Muur tekenen",wallcreate:"Muur maken",wall:"Muur",openingcreate:"Opening toevoegen",opening:"Opening",shapecreate:"Vorm opslaan",shape:"Vorm",settings:"Instellingen",clear:"Alles wissen"};
+  el("menuTitle").textContent=titles[name]||name;if(push&&menuStack.at(-1)!==name)menuStack.push(name);el("menuBackBtn").style.visibility=name==="home"?"hidden":"visible";if(name==="objects")renderObjects();if(name==="project")renderProjectPage();if(name==="references")renderReferenceManager();if(name==="relocalize")renderRelocalizePage();if(name==="projects")renderProjectsList();if(name==="cad")renderCadPage();
 }
 function cancelReferenceCapture(){
   S.referenceCaptureId=null;
@@ -305,6 +306,19 @@ function syncProjectMeta(){
   }
 }
 
+function renderCadPage(){
+  const box=el("cadList"),st=cadStatus(),models=listCadModels();if(!box)return;box.innerHTML="";
+  el("cadStatus").textContent=models.length?`${models.length} CAD-model(len) · ${st.loaded} geladen in AR`:`Nog geen CAD-model geladen.`;
+  for(const m of models){
+    const row=document.createElement("div");row.className="objectRow";
+    const b=document.createElement("button");b.className="secondary";b.textContent=`${m.name} · ${(m.dimensions?.x||0).toFixed(2)} × ${(m.dimensions?.z||0).toFixed(2)} × ${(m.dimensions?.y||0).toFixed(2)} m${m.missingFile?" · bestand ontbreekt":""}`;
+    const del=document.createElement("button");del.className="danger";del.textContent="Wis";
+    b.onclick=()=>{selectCad(m.id);beginCadPlacement(m.id);renderCadPage();returnToArView();el("hint").textContent=`${m.name}: richt op positie. Open ☰ → CAD om rotatie/hoogte te regelen en te bevestigen.`;};
+    del.onclick=()=>{deleteCadModel(m.id);markDirtyAndRecover();renderCadPage();showStatus(`CAD ${m.name} verwijderd.`);};
+    row.append(b,del);box.append(row);
+  }
+  const active=st.active;el("cadPlacementControls").style.display=active?"block":"none";
+}
 function renderObjects(){
   const box=el("objectsList");box.innerHTML="";
   if(!S.walls.length&&!S.shapes.length&&!S.lines.length&&!S.points.length){box.innerHTML='<div class="help">Nog geen objecten.</div>';return;}
@@ -401,6 +415,14 @@ export function initUI(){
     const file=el("importProjectFile").files?.[0];if(!file)return;
     await importProjectFile(file);el("importProjectFile").value="";afterProjectChange(`✓ Project ${S.project.name} geïmporteerd.`);renderProjectPage();closeMenu();
   });
+  bind("cadImportBtn","click",()=>el("cadFile").click());
+  bind("cadFile","change",async()=>{const file=el("cadFile").files?.[0];if(!file)return;const m=await importCadFile(file);el("cadFile").value="";markDirtyAndRecover();renderCadPage();returnToArView();el("hint").textContent=`${m.name} geladen op 1:1. Richt het vizier op de gewenste locatie; open CAD-menu voor rotatie/hoogte en bevestigen.`;showStatus(`CAD ${m.name} geladen · 1:1.`);});
+  bind("cadRotateLeftBtn","click",()=>{rotateCad(-5);markDirtyAndRecover();renderCadPage();});
+  bind("cadRotateRightBtn","click",()=>{rotateCad(5);markDirtyAndRecover();renderCadPage();});
+  bind("cadDownBtn","click",()=>{moveCadHeight(-0.01);markDirtyAndRecover();renderCadPage();});
+  bind("cadUpBtn","click",()=>{moveCadHeight(0.01);markDirtyAndRecover();renderCadPage();});
+  bind("cadConfirmBtn","click",()=>{const m=confirmCadPlacement();markDirtyAndRecover();renderCadPage();closeMenu();showStatus(`CAD ${m.name} geplaatst.`);});
+  bind("cadCancelBtn","click",()=>{cancelCadPlacement();renderCadPage();showStatus("CAD-plaatsing geannuleerd.");});
   bind("restoreRecoveryBtn","click",()=>{restoreRecovery();afterProjectChange(`✓ Herstelproject ${S.project.name} geopend.`);renderProjectPage();closeMenu();});
   bind("discardRecoveryBtn","click",()=>{clearRecovery();renderProjectPage();syncProjectMeta();showStatus("Hersteldata verwijderd.");});
 
@@ -557,7 +579,7 @@ bind("saveWallBtn","click",()=>{
   bind("deleteShapeOnlyBtn","click",()=>{const s=getShape(S.selectedShapeId);if(!s)throw new Error("Geen vorm geselecteerd.");runHistoryAction(`Vorm ${s.name} verwijderen`,()=>deleteShapeOnly(s.id));showPage("objects");afterProjectChange(`Vorm ${s.name} verwijderd; contour bewaard.`);});
   bind("deleteShapeContourBtn","click",()=>{const s=getShape(S.selectedShapeId);if(!s)throw new Error("Geen vorm geselecteerd.");runHistoryAction(`Vorm ${s.name} + contour verwijderen`,()=>deleteShapeWithContour(s.id));showPage("objects");afterProjectChange(`Vorm ${s.name} en contour verwijderd.`);});
 
-  bind("clearAllBtn","click",()=>showPage("clear"));bind("cancelClearBtn","click",()=>showPage("home",false));bind("confirmClearBtn","click",()=>{runHistoryAction("Alles wissen",()=>{clearWalls();clearAllGeometry();clearProjectReferences();resetDrawingCore();});closeMenu();el("distance").textContent="—";el("hint").textContent="Alles gewist. Open ☰ om opnieuw te beginnen.";afterProjectChange("Alles gewist.");});
+  bind("clearAllBtn","click",()=>showPage("clear"));bind("cancelClearBtn","click",()=>showPage("home",false));bind("confirmClearBtn","click",()=>{runHistoryAction("Alles wissen",()=>{clearCadRuntime();S.project.cad={models:[]};clearWalls();clearAllGeometry();clearProjectReferences();resetDrawingCore();});closeMenu();el("distance").textContent="—";el("hint").textContent="Alles gewist. Open ☰ om opnieuw te beginnen.";afterProjectChange("Alles gewist.");});
 
   bind("menuSettingsBtn","click",()=>showPage("settings"));
   bind("defaultUnit","change",()=>{S.defaults.unit=el("defaultUnit").value;el("hudUnit").value=S.defaults.unit;syncHud();});
@@ -569,7 +591,8 @@ bind("saveWallBtn","click",()=>{
   document.addEventListener("measurear:history-changed",syncHistoryControls);
   document.addEventListener("measurear:project-restored",()=>{syncHud();syncHistoryControls();renderObjects();syncProjectMeta();});
   document.addEventListener("measurear:project-meta-changed",syncProjectMeta);
-  document.addEventListener("measurear:project-loaded",()=>{syncProjectMeta();renderObjects();syncHistoryControls();});
+  document.addEventListener("measurear:project-loaded",()=>{syncProjectMeta();renderObjects();renderCadPage();syncHistoryControls();});
+  document.addEventListener("measurear:cad-changed",()=>{if(document.getElementById("page-cad")?.classList.contains("active"))renderCadPage();syncProjectMeta();});
 
   initProjectStorage();
   enableHeading().catch(()=>{});

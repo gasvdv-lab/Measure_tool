@@ -1,8 +1,9 @@
-import {S,$} from "./state.js?v=0.8.27.1-20260829-2015";
-import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.27.1-20260829-2015";
-import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.27.1-20260829-2015";
-import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.27.1-20260829-2015";
-import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.27.1-20260829-2015";
+import {S,$} from "./state.js?v=0.8.28-20260829-2035";
+import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.28-20260829-2035";
+import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.28-20260829-2035";
+import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.28-20260829-2035";
+import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.28-20260829-2035";
+import {updateCadFrame,clearCadRuntime} from "./cad.js?v=0.8.28-20260829-2035";
 
 let samples=[],sampleSource=null,camPos,camQuat,forward;
 
@@ -56,7 +57,7 @@ function cleanup(){
   resetWorldLock();resetTrackingSamples();S.renderer?.setAnimationLoop(null);
   if(S.renderer?.domElement)S.renderer.domElement.style.display="none";
   S.xrSession=null;S.hitSource=null;S.hitRequested=false;S.currentTarget=null;S.currentRawTarget=null;S.currentHitResult=null;S.currentXRFrame=null;S.currentReferenceSpace=null;S.targetSource="none";S.referenceCaptureId=null;
-  clearWalls();clearAllGeometry();resetDrawingCore();
+  clearCadRuntime();clearWalls();clearAllGeometry();resetDrawingCore();
   $("overlay").style.display="none";$("app").style.display="grid";
   if($("startArBtn")){$("startArBtn").disabled=false;$("startArBtn").textContent="AR starten";}
   if($("launchStatus"))$("launchStatus").textContent="Tik om AR te starten.";
@@ -98,7 +99,7 @@ function render(_,frame){
     $("stage").textContent="Kies een tekenfunctie";
   }
 
-  enforceLocked();updateMarkerScale();updatePointLabels();updateLabels();updatePreviewScreen();
+  enforceLocked();updateCadFrame();updateMarkerScale();updatePointLabels();updateLabels();updatePreviewScreen();
   S.renderer.render(S.scene,S.camera);
 }
 window.addEventListener("resize",()=>{S.renderer?.setSize(innerWidth,innerHeight);if(S.camera){S.camera.aspect=innerWidth/innerHeight;S.camera.updateProjectionMatrix();}});
