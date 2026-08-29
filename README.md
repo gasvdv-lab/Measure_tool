@@ -1,8 +1,15 @@
-# Measure AR v0.8.28.2 — CAD File Picker Home-Block Fix
+# Measure AR v0.8.28.3 — CAD Resume Fix
+
+## Fix in v0.8.28.3
+- **AR hervatten en CAD plaatsen** vraagt de nieuwe `immersive-ar`-sessie nu direct aan vanuit de gebruiker-tik, vóór enige asynchrone controle. Dit voorkomt verlies van Android/Chrome user activation.
+- Na de nieuwe XR-sessie wordt `restoreCadRuntime()` expliciet uitgevoerd, zodat het geïmporteerde GLB/glTF opnieuw in de Three.js-scène staat vóór de plaatsingsmodus start.
+- De oude kunstmatige wachttijd van 2,5 s op een CAD-event is verwijderd.
+- Tijdens hervatten toont de knop **AR wordt hervat…**. Bij een fout blijft de CAD-importcontext actief en wordt Home niet geopend.
+- De fix raakt de normale project-, teken- en CAD-importlogica verder niet.
 
 GitHub Pages: https://gasvdv-lab.github.io/Measure_tool/
 
-## Fix in v0.8.28.2
+## Fix in v0.8.28.3
 - CAD-import heeft nu een persistente Home-block vanaf het openen van de Android-bestandskiezer tot AR hervat/plaatsing afgerond of geannuleerd is.
 - De bescherming blijft actief ná `change`/`cancel`, zodat een vertraagd WebXR `end`-event niet meer door de guard kan glippen.
 - De CAD-importstatus wordt ook in `sessionStorage` bewaard; bij een UI/browser-herinitialisatie wordt direct de CAD-context hersteld in plaats van Home.
