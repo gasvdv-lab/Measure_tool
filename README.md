@@ -1,3 +1,24 @@
+# Measure AR v0.8.28.7 — AR HUD Refinement
+
+Deze release bouwt visueel verder op v0.8.28.6 en blijft bewust **UI-only**. De AR-interface is verder verfijnd zodat de echte werf meer ruimte krijgt: kleiner precisievizier, lichtere meetlabels, een slankere contextbalk, compactere actieve-toolweergave en subtielere statusinformatie.
+
+**Functionele kern ongewijzigd:** alle JavaScript-modules zijn identiek aan v0.8.28.6. CAD-import, projectopslag, geometrie, tekenen, WebXR lifecycle, relocalisatie en IndexedDB zijn niet aangepast.
+
+GitHub Pages: https://gasvdv-lab.github.io/Measure_tool/
+
+## UI-wijzigingen
+- Precisievizier verder verkleind van 22 × 22 px naar 18 × 18 px.
+- Geldige hit en snap blijven herkenbaar via subtiel groen/blauw lichtaccent.
+- Bevestigingsknop visueel lichter en iets compacter, zonder de workflow te wijzigen.
+- Lijn-, preview- en puntlabels kleiner en minder blokvormig.
+- Teken-HUD omgevormd tot een slanke command strip.
+- Actieve tool krijgt een kleine statusdot en compacte technische chip.
+- Undo/redo/voltooien/stop nemen minder schermruimte in.
+- Statuschips en instructieregel zijn terughoudender.
+- Zoom-HUD en onderste hint zijn visueel gedempt.
+- Touch-/eventlogica is niet gewijzigd.
+- Geen losse TEST_RESULTS-bestanden.
+
 # Measure AR v0.8.28.6 — Professional UI Pass
 
 Deze release is bewust een **UI-only upgrade** op v0.8.28.5. De functionele JavaScript-modules zijn byte-for-byte ongewijzigd. De wijziging beperkt zich tot presentatie: compactere AR-HUD, kleiner/nauwkeuriger vizier, lichtere bevestigingsknop, professioneel bottom-sheet menu, rustigere typografie, subtielere labels en een consistente donkergroene technische stijl.

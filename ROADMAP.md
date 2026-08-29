@@ -1,3 +1,14 @@
+## v0.8.28.7 — AR HUD Refinement ✅
+- [x] Vizier verder verfijnd.
+- [x] AR-HUD compacter en rustiger.
+- [x] Actieve tool visueel duidelijk maar klein.
+- [x] Lijn-/punt-/previewlabels subtieler.
+- [x] Contextacties compacter.
+- [x] Geen functionele JavaScriptwijzigingen.
+- [ ] Praktijktest in goed daglicht.
+- [ ] CAD-plaatsing in goed daglicht verder valideren.
+- [ ] Openstaand: Project op locatie plaatsen / referentie-capture opnieuw oppakken.
+
 ## v0.8.28.6 — Professional UI Pass ✅
 - [x] UI-only release; functionele JavaScript-modules ongewijzigd.
 - [x] Professioneel compact AR-vizier.

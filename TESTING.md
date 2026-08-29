@@ -1,3 +1,21 @@
+# v0.8.28.7 — AR HUD Refinement
+
+## Automatische controles
+- [x] JavaScript-modules byte-identiek aan v0.8.28.6.
+- [x] HTML gebruikt bestaande DOM-id's; geen functionele eventtargets verwijderd.
+- [x] CSS-only HUD-refinement.
+- [x] Geen TEST_RESULTS-bestand in release.
+
+## Praktijktests — nog uitvoeren
+- [ ] AR: vizier is nauwkeurig zichtbaar zonder het doelpunt te bedekken.
+- [ ] AR: hit-status groen en snap-status blauw duidelijk genoeg in buitenlicht.
+- [ ] Lijn tekenen: HUD/contextbalk belemmert het zicht niet.
+- [ ] Lijn tekenen: Undo, Redo, Voltooien en Stop blijven goed bedienbaar.
+- [ ] Maatlabels zijn leesbaar maar minder dominant.
+- [ ] Kleine puntlabels blijven herkenbaar op verschillende achtergronden.
+- [ ] Bestaand project openen en nieuwe lijn tekenen werkt identiek aan v0.8.28.6.
+- [ ] CAD-import via aparte cad-import.html blijft identiek werken.
+
 # v0.8.28.6 — Professional UI Pass
 
 ## AUTO
