@@ -4,13 +4,26 @@ Project Space blijft de geometrische waarheid. Bij het openen van een opgeslagen
 
 # Measure AR — Master Roadmap
 
-**Huidige versie:** v0.8.21.6 — Project Manager Stability  
-**Huidige gate:** Project Manager Stability praktisch valideren; World Lock voor eenvoudige en samengestelde geometrie is door de gebruiker positief getest.
+**Huidige versie:** v0.8.27 — Relocalization Aim Mode Fix  
+**Huidige gate:** praktisch valideren dat **Gebruik vizier** het herstelmenu volledig verbergt, een fysiek referentiepunt laat opnemen en daarna terugkeert naar dezelfde herstelpagina; vervolgens 4+ best-fit fysiek valideren.
 
 ## Testcodes
 `AUTO` · `PC` · `AR-IN/A4` · `AR-IN/ROOM` · `AR-OUT`
 
 ## Nu — Core herstel
+
+
+### v0.8.27 — Relocalization Aim Mode Fix
+- [x] Expliciete relocalization aim-mode toegevoegd.
+- [x] Herstelmenu in aim-mode gegarandeerd verborgen.
+- [x] Vizier + witte opnameknop blijven beschikbaar.
+- [x] Na puntopname automatisch terug naar herstelpagina.
+- [x] ☰ annuleert lopende aanwijzing veilig.
+- [x] Best-fit/Jacobi-fix uit v0.8.26 behouden.
+- [x] AUTO syntax/cache/UI-broncontrole.
+- [ ] **AR-IN/AR-OUT:** tik **Gebruik vizier** → menu verdwijnt onmiddellijk.
+- [ ] **AR-IN/AR-OUT:** richt punt → witte knop → menu keert terug met ✓.
+- [ ] **AR-IN/AR-OUT:** vier referenties opnemen en 4+ best-fit fysiek controleren.
 
 ### v0.8.21.6 — Project Manager Stability
 - [x] Projectkopie loskoppelen van `loadStoredProject()`.
@@ -132,3 +145,13 @@ Project Space blijft de geometrische waarheid. Bij het openen van een opgeslagen
 - [ ] AR-IN/ROOM: afmetingen/hoeken vóór en na restore exact vergelijken.
 - [ ] AR-IN/ROOM: tweede save/reopen/restore uitvoeren om dubbele transformatie uit te sluiten.
 - [ ] Na fysieke gate: Relocalization UX 2.0 / kalibratiewizard verder verfijnen.
+
+
+## v0.8.27 — Relocalization Best-Fit Fix
+- [x] Reproduceerbare 4+ best-fit solverfout uit v0.8.25 geïsoleerd.
+- [x] Quaternion power iteration vervangen door stabiele symmetrische Jacobi-eigenoplosser.
+- [x] Automatische bekende-transformtests voor 10°/30°/60°/90°/135° toegevoegd aan testdocumentatie.
+- [ ] AR-IN/ROOM: 4+ fysieke restore opnieuw uitvoeren.
+- [ ] AR-IN/ROOM: onafhankelijk controlepunt meten.
+- [ ] AR-IN/ROOM: tweede save/reopen/restore uitvoeren.
+- [ ] Na fysieke gate: formele Project Space → Project Transform → AR World Space-laag uitvoeren vóór verdere CAD/Measure Engine-uitbreiding.

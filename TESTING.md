@@ -1,3 +1,38 @@
+# Testupdate v0.8.27 — Relocalization Aim Mode Fix
+
+## Nieuwe UI-regressie v0.8.27
+- [x] Broncontrole: **Gebruik vizier** activeert expliciet `relocalizationAimMode`.
+- [x] Broncontrole: `#menuPanel` is in aim-mode `display:none!important`.
+- [x] Broncontrole: opnameknop beëindigt aim-mode en heropent `relocalize`.
+- [x] Broncontrole: ☰ annuleert een lopende aanwijzing zonder een punt op te slaan.
+
+## Verplichte fysieke UI-test
+- [ ] Open **Projectpositie herstellen**.
+- [ ] Tik **Gebruik vizier** bij Referentie 1.
+- [ ] **PASS:** herstelmenu verdwijnt volledig.
+- [ ] **PASS:** AR-camera, vizier en witte opnameknop blijven zichtbaar/bruikbaar.
+- [ ] Richt op het fysieke referentiepunt en druk op de witte knop.
+- [ ] **PASS:** herstelmenu keert automatisch terug op dezelfde pagina.
+- [ ] **PASS:** Referentie 1 toont `✓ opnieuw aangewezen`.
+- [ ] Herhaal voor alle overige referenties.
+
+
+## Automatische regressietest toegevoegd
+De best-fit wiskunde is gecontroleerd met vier perfecte coplanaire punten, bekende translatie en yaw-rotaties van 10°, 30°, 60°, 90° en 135°. Verwachting: rigid fit zonder schaal en numerieke residual praktisch nul. Resultaat voor de nieuwe Jacobi-solver: PASS voor alle vijf rotaties; maximale numerieke fout bleef op floating-point niveau (< 1e-12 m in de onafhankelijke referentieberekening).
+
+## Openstaande fysieke AR-test
+- [ ] Project met 4 refs opslaan.
+- [ ] AR/browser volledig sluiten en opnieuw starten.
+- [ ] Hetzelfde project openen.
+- [ ] Vier fysieke refs opnieuw aanwijzen.
+- [ ] 4+ precision berekenen en toepassen.
+- [ ] RMS, gemiddelde en max noteren.
+- [ ] Onafhankelijk controlepunt fysiek controleren.
+- [ ] Afstanden en hoeken vóór/na vergelijken.
+- [ ] Nogmaals opslaan, opnieuw openen en herstellen om dubbele transformatie uit te sluiten.
+
+---
+
 # v0.8.23 Spatial Restore
 
 Project Space blijft de geometrische waarheid. Bij het openen van een opgeslagen project met referentiepunten start nu automatisch de positieherstel-flow. De gebruiker wijst dezelfde fysieke referenties opnieuw aan; Measure AR berekent daaruit de transformatie van het permanente Project Origin naar de nieuwe WebXR-sessie. 4+ referenties gebruiken best-fit en residualcontrole.

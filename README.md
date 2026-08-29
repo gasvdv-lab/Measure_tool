@@ -1,3 +1,24 @@
+# Measure AR v0.8.27 — Relocalization Aim Mode Fix
+
+**Vaste GitHub Pages-link:** https://gasvdv-lab.github.io/Measure_tool/
+
+Deze release corrigeert de concrete bediening van **Projectpositie herstellen**: na **Gebruik vizier** verdwijnt het herstelmenu nu gegarandeerd zodat het fysieke referentiepunt vrij in de AR-camera kan worden gericht. De witte opnameknop legt het punt vast en opent daarna automatisch opnieuw dezelfde herstelpagina. De best-fit-correctie uit v0.8.26 blijft behouden.
+
+## v0.8.27 wijzigingen
+- **Gebruik vizier** schakelt nu expliciet naar een aparte relocalization aim-mode.
+- Het volledige herstelmenu wordt in die aim-mode met een harde UI-regel verborgen.
+- Vizier, witte opnameknop en instructieregel blijven zichtbaar en bovenaan de UI-stack.
+- Na een geldige opname wordt aim-mode beëindigd en keert de app automatisch terug naar **Projectpositie herstellen**.
+- Tik op ☰ tijdens het aanwijzen annuleert alleen de lopende aanwijzing en keert veilig terug naar het herstelmenu.
+- De best-fit/Jacobi-correctie van v0.8.26 blijft behouden.
+- Cache-key en zichtbare appversie bijgewerkt.
+- Projectformaat blijft compatibel; geen migratie nodig.
+
+## Belangrijkste praktijktest
+Open **Projectpositie herstellen** en tik bij een referentie op **Gebruik vizier**. **PASS:** het menu verdwijnt onmiddellijk en je ziet vrij de AR-camera, het vizier en de witte opnameknop. Richt op het fysieke punt en druk op de witte knop. **PASS:** dezelfde herstelpagina verschijnt opnieuw en de referentie staat op ✓ opnieuw aangewezen. Herhaal daarna voor de overige referenties en voer de 4+ best-fit test uit.
+
+---
+
 # v0.8.23 Spatial Restore
 
 Project Space blijft de geometrische waarheid. Bij het openen van een opgeslagen project met referentiepunten start nu automatisch de positieherstel-flow. De gebruiker wijst dezelfde fysieke referenties opnieuw aan; Measure AR berekent daaruit de transformatie van het permanente Project Origin naar de nieuwe WebXR-sessie. 4+ referenties gebruiken best-fit en residualcontrole.
