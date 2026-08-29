@@ -356,3 +356,17 @@ Bij het starten van een nieuw project worden World Lock-koppelingen veilig losge
 - Een gesloten vorm wordt nu onmiddellijk als vorm aangemaakt en opgevuld.
 - De bestaande kleur, transparantie, randdikte en labels worden gebruikt.
 - De opvulling blijft gekoppeld aan de world-locked hoekpunten.
+
+
+## v0.8.25 — Spatial Restore 2.0
+- Spatial Restore is opnieuw de actieve roadmapstap na de geslaagde World Lock 2.0-regressietest.
+- Project Origin wordt bij opslaan automatisch afgeleid van de eerste projectreferentie; zonder referentie wordt het eerste projectpunt gebruikt.
+- Bij openen van een opgeslagen project met referenties start positieherstel automatisch in de aanbevolen 1/2/3/4+ methode.
+- De gekozen methode vereist nu effectief het juiste minimumaantal opnieuw aangewezen referenties.
+- Referentienaam en omschrijving worden samen getoond zodat het fysieke punt herkenbaar is.
+- Resultaat toont RMS, gemiddelde en maximale afwijking. Een zwakke oplossing geeft een waarschuwing vóór toepassen.
+- Na een rigid Spatial Restore worden Project Origin en opgeslagen referentiecoördinaten mee getransformeerd zodat een volgende save/reopen geen gemengde coördinatenframes bevat. Lengtes en hoeken blijven ongewijzigd.
+- World Lock 2.0 en de shape-fill hotfix uit v0.8.24 blijven behouden.
+
+### Praktijktest v0.8.25
+Maak een project met 4 herkenbare punten, registreer ze als referenties en sla op. Sluit AR volledig, open opnieuw, open het project, wijs dezelfde 4 fysieke punten opnieuw aan, bereken de uitlijning en pas ze toe. Controleer dat geometrie terug op dezelfde plaats komt, World Lock actief blijft en alle afmetingen identiek blijven.

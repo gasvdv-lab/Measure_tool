@@ -82,3 +82,7 @@ AR-IN: Start AR → Project → Nieuw leeg project → bevestigen. Verwacht: Pro
 
 ## v0.8.24 World Lock 2.0 gate
 AR-IN/ROOM: place A→B on a stable surface, confirm both endpoints, then move the phone 0.5–2 m. The committed geometry must remain fixed relative to the environment. If it moves with the phone, stop further Spatial Restore testing.
+
+
+## v0.8.25 Spatial Restore 2.0 gate
+AR-IN/ROOM: maak 4 vaste fysieke referenties A/B/C/D en geometrie die ertussen ligt. Registreer alle vier, sla het project op en sluit de WebXR-sessie volledig. Open opnieuw en open het project. Verwacht: Spatial Restore wordt aangeboden met de opgeslagen referentienamen. Wijs A/B/C/D opnieuw aan, bereken de uitlijning en noteer RMS/max. Pas toe en controleer vanaf meerdere kijkhoeken dat de geometrie terug op de oorspronkelijke fysieke positie ligt. Controleer alle oorspronkelijke lengtes/hoeken. Sla opnieuw op, herhaal een tweede reopen/restore en controleer dat geen dubbele transformatie ontstaat.

@@ -118,3 +118,17 @@ Project Space blijft de geometrische waarheid. Bij het openen van een opgeslagen
 - [x] Frame-anchor fallback for computed points
 - [ ] Physical AR gate: committed A→B remains fixed while phone moves
 - [ ] After pass: resume Spatial Restore validation
+
+
+### v0.8.25 — Spatial Restore 2.0
+- [x] World Lock 2.0 fysieke basisgate geslaagd: getekende geometrie blijft op positie.
+- [x] Shape fill regressie hersteld en fysiek bevestigd.
+- [x] Project Origin automatisch vastleggen bij save.
+- [x] Referenties herkenbaar tonen met naam/omschrijving.
+- [x] Minimumaantal referenties per 1/2/3/precision methode afdwingen.
+- [x] RMS/gemiddelde/max fout rapporteren en zwakke oplossing waarschuwen.
+- [x] Project Origin + referentiecoördinaten coherent houden na toegepaste rigid restore.
+- [ ] AR-IN/ROOM: save → volledig sluiten → reopen → 4 refs opnieuw aanwijzen → restore → fysieke positie controleren.
+- [ ] AR-IN/ROOM: afmetingen/hoeken vóór en na restore exact vergelijken.
+- [ ] AR-IN/ROOM: tweede save/reopen/restore uitvoeren om dubbele transformatie uit te sluiten.
+- [ ] Na fysieke gate: Relocalization UX 2.0 / kalibratiewizard verder verfijnen.
