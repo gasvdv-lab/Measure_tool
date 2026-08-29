@@ -4,19 +4,31 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#111111">
-  <title>Measure AR v0.8.28.3</title>
-  <link rel="stylesheet" href="./css/app.css?v=0.8.28.3-20260829-2125">
+  <title>Measure AR v0.8.28.4</title>
+  <link rel="stylesheet" href="./css/app.css?v=0.8.28.4-20260829-2145">
 </head>
 <body>
 <div id="app">
-  <main class="startCard directFallback">
+  <main id="launchScreen" class="startCard directFallback">
     <div class="logo">⌖</div><h1>Measure AR</h1>
     <p id="launchStatus">Tik om AR te starten.</p>
     <div id="startupRecovery" class="help" style="display:none"></div>
-    <div id="buildInfo" class="build">v0.8.28.3 · CAD Resume Fix · 20260829-2100</div>
+    <div id="buildInfo" class="build">v0.8.28.4 · CAD Safe Import Workspace · 20260829-2145</div>
     <button id="startArBtn" class="primary">AR starten</button>
     <div id="error" class="error"></div>
   </main>
+    <section id="cadImportWorkspace" class="startCard cadImportWorkspace" style="display:none">
+      <div class="logo">▱</div>
+      <h1>CAD importeren</h1>
+      <p id="cadWorkspaceStatus">AR is veilig gepauzeerd. Kies nu je GLB/glTF-bestand.</p>
+      <button id="cadWorkspaceChooseBtn" class="primary">Bestand kiezen</button>
+      <input id="cadWorkspaceFile" type="file" accept=".glb,.gltf,model/gltf-binary,model/gltf+json" hidden>
+      <div id="cadWorkspaceFileInfo" class="help" style="margin:10px 0"></div>
+      <button id="cadWorkspaceResumeBtn" class="primary" style="display:none">AR starten en CAD plaatsen</button>
+      <button id="cadWorkspaceBackBtn" class="secondary">Terug naar AR zonder import</button>
+      <div id="cadWorkspaceError" class="error"></div>
+    </section>
+
 </div>
 
 <div id="overlay">
@@ -34,7 +46,7 @@
   <aside id="menuPanel">
     <div class="menuHead">
       <button id="menuBackBtn" class="secondary">‹</button>
-      <div><strong id="menuTitle">Measure AR</strong><small id="menuMeta">v0.8.28.3</small></div>
+      <div><strong id="menuTitle">Measure AR</strong><small id="menuMeta">v0.8.28.4</small></div>
       <button id="menuCloseBtn" class="secondary">✕</button>
     </div>
     <div class="menuBody">
@@ -135,7 +147,7 @@
         <h3>CAD / 3D-model</h3><div class="menuCard">
           <div class="help">Importeer GLB/glTF. Measure AR gebruikt schaal 1:1: 1 modeleeneenheid = 1 meter volgens glTF.</div>
           <button id="cadImportBtn" class="primary">CAD-model importeren</button>
-          <input id="cadFile" type="file" accept=".glb,.gltf,model/gltf-binary,model/gltf+json" hidden>
+          
           <div id="cadStatus" class="help">Nog geen CAD-model geladen.</div>
           <button id="cadResumeArBtn" class="primary" style="display:none">AR hervatten en CAD plaatsen</button>
           <div id="cadList"></div>
@@ -379,6 +391,6 @@
   <div id="hint">Open ☰ en kies wat je wilt tekenen.</div>
 </div>
 
-<script type="module" src="./js/bootstrap.js?v=0.8.28.3-20260829-2125"></script>
+<script type="module" src="./js/bootstrap.js?v=0.8.28.4-20260829-2145"></script>
 </body>
 </html>

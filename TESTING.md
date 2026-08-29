@@ -1,4 +1,10 @@
-# v0.8.28.3 gerichte regressietest — CAD AR hervatten
+# v0.8.28.4 tests
+
+Automatisch: JS-syntax, lokale module-imports, unieke DOM-id's.
+
+Praktijktest: actief project → CAD → CAD-model importeren → AR moet eerst stoppen en de normale CAD-importworkspace tonen → Bestand kiezen → na terugkeer moeten alle workspaceknoppen bruikbaar blijven → AR starten en CAD plaatsen → AR opent opnieuw en model kan geplaatst worden. Annuleren van de Android-bestandskiezer mag de workspace niet blokkeren. Bestaand project en geometrie moeten behouden blijven.
+
+# v0.8.28.4 gerichte regressietest — CAD AR hervatten
 
 1. Open een bestaand of nieuw project in AR.
 2. Open **CAD / 3D-model** en importeer een GLB.
@@ -8,11 +14,11 @@
 6. Open CAD-menu en bevestig **Plaats CAD hier**. PASS: model blijft op de gekozen positie.
 7. Bij een WebXR-fout: PASS als foutmelding zichtbaar is en CAD-context actief blijft; Home mag niet verschijnen.
 
-# v0.8.28.3 gerichte regressietest — CAD Home-block
+# v0.8.28.4 gerichte regressietest — CAD Home-block
 
 **Kritieke test:** Open actief project → ☰ → CAD → CAD-model importeren → open Android-bestandskiezer → kies GLB. Op geen enkel moment mag het Measure AR-startscherm verschijnen. Bij XR-onderbreking moet CAD-menu/context zichtbaar blijven. Test ook annuleren van de bestandskiezer.
 
-# v0.8.28.3 gerichte regressietest — CAD file picker lifecycle
+# v0.8.28.4 gerichte regressietest — CAD file picker lifecycle
 
 ## AUTO
 - [x] Alle JS-bestanden syntax geldig.
