@@ -1,7 +1,7 @@
-import {S,$,fmt,getPoint,getLine} from "./state.js?v=0.8.21-20260823-0345";
-import {createPoint,createLine,deleteLineRaw,deletePointRaw,createContour,dispose,analyzeShapePoints} from "./geometry.js?v=0.8.21-20260823-0345";
-import {snapshotProject,commitSnapshot,undoHistory} from "./history.js?v=0.8.21-20260823-0345";
-import {createWall,nextWallName} from "./walls.js?v=0.8.21-20260823-0345";
+import {S,$,fmt,getPoint,getLine} from "./state.js?v=0.8.21.1-20260829-0825";
+import {createPoint,createLine,deleteLineRaw,deletePointRaw,createContour,dispose,analyzeShapePoints} from "./geometry.js?v=0.8.21.1-20260829-0825";
+import {snapshotProject,commitSnapshot,undoHistory} from "./history.js?v=0.8.21.1-20260829-0825";
+import {createWall,nextWallName} from "./walls.js?v=0.8.21.1-20260829-0825";
 
 const REF_MODES=new Set(["parallel","perpendicular","angle"]);
 const TOOL_NAMES={line:"LIJN",polyline:"POLYLIJN",shape:"VORM",stake:"UITZETTEN",wall:"MUUR"};
@@ -61,24 +61,40 @@ function requireReference(plane){
   if(!dir)throw new Error("Referentielijn ligt niet bruikbaar in het actieve tekenvlak.");
   return dir;
 }
-function directionForExact(ray){
+function directionForExact(ray,hit=null){
   const active=getActivePoint();if(!active)throw new Error("Geen actief vertrekpunt.");
   const kind=S.tool.constraint;
   const activePlane=S.tool.activePlane||planeFromPoint(active,ray?.dir);
-  let dir=ray?.dir?.clone?.()||activePlane.u.clone();
+  let dir=null;
 
+  // Belangrijk: bij een exacte afstand moet de richting vertrekken vanuit het
+  // actieve punt naar de plek waar de gebruiker mikt. De oude implementatie
+  // gebruikte rechtstreeks de camera-ray als richting. Daardoor liep de
+  // exacte lijn parallel aan de kijkrichting, in plaats van van het actieve
+  // punt naar het vizier te wijzen (vooral zichtbaar bij Horizontaal).
   if(kind==="free"){
+    const aim=S.tool.kind==="shape"
+      ? intersectRayPlane(ray,activePlane)
+      : (hit?.clone?.()||intersectRayPlane(ray,activePlane));
+    if(aim)dir=aim.clone().sub(active.position);
+    else dir=ray?.dir?.clone?.()||activePlane.u.clone();
     if(S.tool.kind==="shape"){
       dir.sub(activePlane.normal.clone().multiplyScalar(dir.dot(activePlane.normal)));
-      if(dir.lengthSq()<1e-8)dir=activePlane.u.clone();
-    }else if(dir.lengthSq()<1e-8)dir=activePlane.u.clone();
+    }
   }else if(kind==="horizontal"){
-    dir.y=0;if(dir.lengthSq()<1e-8)dir.set(1,0,0);
+    const aim=intersectRayPlane(ray,worldHorizontalPlane(active.position));
+    if(!aim)throw new Error("Richt het vizier duidelijker naar het horizontale vlak vanaf het vertrekpunt.");
+    dir=aim.sub(active.position);
+    dir.y=0;
   }else if(kind==="vertical"){
-    dir.set(0,(ray?.dir?.y??0)>=0?1:-1,0);
+    const aim=closestPointVertical(ray,active.position);
+    if(!aim)throw new Error("Richt het vizier dichter langs de verticale lijn door het vertrekpunt.");
+    dir=aim.sub(active.position);
   }else if(kind==="surface"){
+    const aim=intersectRayPlane(ray,activePlane);
+    if(!aim)throw new Error("Richt het vizier duidelijker naar het actieve tekenvlak.");
+    dir=aim.sub(active.position);
     dir.sub(activePlane.normal.clone().multiplyScalar(dir.dot(activePlane.normal)));
-    if(dir.lengthSq()<1e-8)throw new Error("Richt de camera meer langs het actieve vlak.");
   }else if(kind==="parallel"){
     dir=requireReference(activePlane).multiplyScalar(S.tool.side);
   }else if(kind==="perpendicular"){
@@ -88,7 +104,7 @@ function directionForExact(ray){
     const ref=requireReference(activePlane);
     dir=rotateInPlane(ref,activePlane,S.tool.angleDeg*S.tool.side);
   }
-  if(dir.lengthSq()<1e-8)throw new Error("Kon geen geldige richting bepalen.");
+  if(!dir||dir.lengthSq()<1e-8)throw new Error("Kon geen geldige richting bepalen. Richt het vizier verder van het vertrekpunt.");
   return dir.normalize();
 }
 function manualCandidate(active,hit,ray){
@@ -350,7 +366,7 @@ export function updateCandidate({hit=null,hitNormal=null,ray=null}={}){
       if(!hit)throw new Error("Zoek eerst een herkenbaar oppervlak voor punt A.");
       pos=hit.clone();
     }else if(S.tool.placement==="metric"){
-      const dir=directionForExact(ray);pos=active.position.clone().add(dir.multiplyScalar(S.tool.distanceM));
+      const dir=directionForExact(ray,hit);pos=active.position.clone().add(dir.multiplyScalar(S.tool.distanceM));
       planeNormal=S.tool.activePlane?.normal?.clone?.()||active.surfaceNormal?.clone?.()||null;
     }else{
       pos=manualCandidate(active,hit,ray);
