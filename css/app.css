@@ -115,3 +115,11 @@ canvas{position:fixed;inset:0;width:100%;height:100%}#overlay{position:fixed;ins
 .projectListIntro{margin-bottom:6px}
 #projectSaveState.saved{color:#aef7be}#projectSaveState.dirty{color:#ffe6a3}
 @media(max-width:390px){.projectCardActions{grid-template-columns:1fr 46px}.projectMorePanel{grid-template-columns:1fr}}
+
+
+/* v0.8.27 Relocalization aim-mode UX fix */
+#overlay.relocalizationAimMode #menuPanel{display:none!important}
+#overlay.relocalizationAimMode #aim{z-index:120}
+#overlay.relocalizationAimMode #captureBtn{z-index:125}
+#overlay.relocalizationAimMode #hint{z-index:124}
+#overlay.relocalizationAimMode #menuBtn{z-index:126}
