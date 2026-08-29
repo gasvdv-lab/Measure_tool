@@ -826,3 +826,81 @@ body.outdoor-mode #reticle {
 .proColorFields{display:grid;grid-template-columns:1.45fr repeat(3,.75fr);gap:6px}.proColorFields label{margin:0!important;font-size:.54rem}.proColorFields input{min-height:36px!important;padding:5px 6px!important;text-align:center;font-size:.68rem}.proColorFields label:first-child input{text-align:left;text-transform:uppercase;font-variant-numeric:tabular-nums}.proColorMeta{margin-top:6px;color:#748079;font-size:.54rem;font-variant-numeric:tabular-nums}
 .proColorFoot{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:9px 13px calc(9px + env(safe-area-inset-bottom));border-top:1px solid rgba(255,255,255,.08);background:#0e1311}.proColorFoot button{min-height:42px!important}
 @media (min-width:560px){.proColorOverlay{align-items:center;padding:18px}.proColorSheet{border-radius:18px}.proColorTheme{grid-template-columns:repeat(9,1fr)}.proColorSV{height:205px}}
+
+
+/* ============================================================
+   v0.8.28.10 — Theme Selector
+   Five coherent interface themes. Semantic AR status colours remain fixed.
+   ============================================================ */
+:root,
+html[data-app-theme="technical-green"]{
+  --theme-bg:#0b0d0c;--theme-panel:#0f1210;--theme-panel-soft:#141815;
+  --theme-accent:#55c875;--theme-accent-strong:#69db88;--theme-accent-soft:rgba(85,200,117,.14);
+  --theme-text:#f3f6f4;--theme-muted:#9ba59f;--theme-line:rgba(255,255,255,.10);--theme-line-strong:rgba(255,255,255,.16);
+  --theme-hud:rgba(7,10,8,.72);--theme-hud-strong:rgba(7,10,8,.88);--theme-primary-ink:#071109;
+}
+html[data-app-theme="survey-blue"]{
+  --theme-bg:#091019;--theme-panel:#0d1722;--theme-panel-soft:#111d29;
+  --theme-accent:#4b9fe8;--theme-accent-strong:#6ab8ff;--theme-accent-soft:rgba(75,159,232,.15);
+  --theme-text:#f1f7fc;--theme-muted:#93a9bb;--theme-line:rgba(183,218,244,.11);--theme-line-strong:rgba(183,218,244,.18);
+  --theme-hud:rgba(7,14,22,.74);--theme-hud-strong:rgba(7,14,22,.90);--theme-primary-ink:#06111c;
+}
+html[data-app-theme="industrial-orange"]{
+  --theme-bg:#11100d;--theme-panel:#171510;--theme-panel-soft:#1d1a13;
+  --theme-accent:#e99a3a;--theme-accent-strong:#ffb557;--theme-accent-soft:rgba(233,154,58,.15);
+  --theme-text:#f8f4ed;--theme-muted:#b0a495;--theme-line:rgba(255,231,195,.11);--theme-line-strong:rgba(255,231,195,.18);
+  --theme-hud:rgba(15,12,7,.74);--theme-hud-strong:rgba(15,12,7,.90);--theme-primary-ink:#1a0e03;
+}
+html[data-app-theme="precision-red"]{
+  --theme-bg:#100c0d;--theme-panel:#171011;--theme-panel-soft:#1e1416;
+  --theme-accent:#d65f69;--theme-accent-strong:#ef7881;--theme-accent-soft:rgba(214,95,105,.15);
+  --theme-text:#f8f2f3;--theme-muted:#ad999d;--theme-line:rgba(255,219,222,.10);--theme-line-strong:rgba(255,219,222,.17);
+  --theme-hud:rgba(15,8,10,.74);--theme-hud-strong:rgba(15,8,10,.90);--theme-primary-ink:#1a0709;
+}
+html[data-app-theme="neutral-steel"]{
+  --theme-bg:#0e1113;--theme-panel:#14181b;--theme-panel-soft:#1a1f23;
+  --theme-accent:#a7b5bd;--theme-accent-strong:#c7d1d6;--theme-accent-soft:rgba(167,181,189,.14);
+  --theme-text:#f2f5f6;--theme-muted:#98a4aa;--theme-line:rgba(220,232,238,.10);--theme-line-strong:rgba(220,232,238,.17);
+  --theme-hud:rgba(9,12,14,.76);--theme-hud-strong:rgba(9,12,14,.91);--theme-primary-ink:#0a0d0f;
+}
+
+/* Map the existing professional UI tokens to the selected theme. */
+html[data-app-theme]{
+  --ui-bg:var(--theme-bg);--ui-panel:color-mix(in srgb,var(--theme-panel) 94%,transparent);--ui-panel-soft:color-mix(in srgb,var(--theme-panel-soft) 86%,transparent);
+  --ui-line:var(--theme-line);--ui-line-strong:var(--theme-line-strong);--ui-text:var(--theme-text);--ui-muted:var(--theme-muted);
+  --ui-accent:var(--theme-accent);--ui-accent-strong:var(--theme-accent-strong);--ui-accent-soft:var(--theme-accent-soft);
+  --hud-glass:var(--theme-hud);--hud-glass-strong:var(--theme-hud-strong);
+}
+html[data-app-theme] body{background:var(--theme-bg);color:var(--theme-text)}
+html[data-app-theme] .startCard{background:var(--theme-panel);border-color:var(--theme-line)}
+html[data-app-theme] #menuPanel{background:var(--theme-panel);border-color:var(--theme-line-strong)}
+html[data-app-theme] .menuCard{background:color-mix(in srgb,var(--theme-panel-soft) 72%,transparent);border-color:var(--theme-line)}
+html[data-app-theme] .menuHead,html[data-app-theme] .menuFoot{border-color:var(--theme-line)}
+html[data-app-theme] .menuFoot{background:color-mix(in srgb,var(--theme-bg) 48%,transparent)}
+html[data-app-theme] button.primary{background:var(--theme-accent);color:var(--theme-primary-ink);border-color:color-mix(in srgb,var(--theme-accent) 80%,white)}
+html[data-app-theme] button.secondary{background:color-mix(in srgb,var(--theme-text) 5%,transparent);color:var(--theme-text);border-color:var(--theme-line)}
+html[data-app-theme] input,html[data-app-theme] select{background:var(--theme-panel-soft);color:var(--theme-text);border-color:var(--theme-line-strong)}
+html[data-app-theme] .logo,html[data-app-theme] .drawingHud .hudTool{color:var(--theme-accent-strong)}
+html[data-app-theme] .drawingHud{background:var(--theme-hud);border-color:var(--theme-line-strong)}
+html[data-app-theme] .hudPopover{background:var(--theme-hud-strong);border-color:var(--theme-line-strong)}
+html[data-app-theme] .hudActions .primary{background:var(--theme-accent);color:var(--theme-primary-ink)}
+html[data-app-theme] #captureBtn:not(:disabled):after{background:var(--theme-accent-strong)}
+html[data-app-theme] .projectBadge{background:var(--theme-accent-soft);border-color:color-mix(in srgb,var(--theme-accent) 34%,transparent);color:color-mix(in srgb,var(--theme-accent-strong) 72%,white)}
+html[data-app-theme] .proColorSheet{background:var(--theme-panel);border-color:var(--theme-line-strong)}
+html[data-app-theme] .proColorFoot{background:var(--theme-bg);border-color:var(--theme-line)}
+html[data-app-theme] .proColorTrigger{background:color-mix(in srgb,var(--theme-text) 4.5%,transparent)!important;border-color:var(--theme-line)!important}
+html[data-app-theme] .proColorCode{color:color-mix(in srgb,var(--theme-text) 88%,transparent)}
+html[data-app-theme] #cadStandalone{background:var(--theme-bg)!important}
+html[data-app-theme] .cadStandaloneCard{background:var(--theme-panel)!important;border-color:var(--theme-line)!important}
+
+/* Keep semantic meanings independent from decorative theme accent. */
+html[data-app-theme] .tracking-meter[data-quality="1"]>i:nth-child(1),
+html[data-app-theme] .tracking-meter[data-quality="2"]>i:nth-child(-n+2),
+html[data-app-theme] .tracking-meter[data-quality="3"]>i{background:var(--viz-confirmed)}
+
+/* Theme selector */
+.themeSetting{margin:1px 0 5px}.themeSettingHead{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin:2px 1px 9px}.themeSettingHead strong{display:block;font-size:.72rem}.themeSettingHead small{display:block;margin-top:2px;color:var(--theme-muted);font-size:.56rem}.themeCurrentName{flex:0 0 auto;padding:3px 6px;border-radius:999px;background:var(--theme-accent-soft);border:1px solid color-mix(in srgb,var(--theme-accent) 30%,transparent);color:var(--theme-accent-strong);font-size:.52rem;font-weight:800}
+.themeGrid{display:grid;grid-template-columns:1fr;gap:5px}.themeCard{width:100%;min-height:50px!important;margin:0!important;display:grid;grid-template-columns:60px minmax(0,1fr) 18px;gap:9px;align-items:center;padding:6px!important;background:color-mix(in srgb,var(--theme-text) 3%,transparent)!important;border:1px solid var(--theme-line)!important;color:var(--theme-text)!important;text-align:left!important}.themeCard>span:nth-child(2){min-width:0}.themeCard strong{display:block;font-size:.65rem}.themeCard small{display:block;margin-top:2px;color:var(--theme-muted);font-size:.53rem;font-weight:500}.themeCard:after{content:"";width:14px;height:14px;border-radius:50%;border:1px solid var(--theme-line-strong);box-shadow:inset 0 0 0 3px var(--theme-panel)}.themeCard.active{border-color:color-mix(in srgb,var(--theme-accent) 58%,transparent)!important;background:var(--theme-accent-soft)!important}.themeCard.active:after{background:var(--theme-accent);border-color:var(--theme-accent-strong)}
+.themePreview{height:36px;border-radius:7px;display:grid;grid-template-columns:16px 1fr;grid-template-rows:1fr 1fr;gap:3px;padding:4px;border:1px solid rgba(255,255,255,.12);overflow:hidden}.themePreview i{display:block;border-radius:3px}.themePreview i:first-child{grid-row:1/-1}.themePreviewGreen{background:#0b0d0c}.themePreviewGreen i:first-child{background:#55c875}.themePreviewGreen i:nth-child(2){background:#1a201c}.themePreviewGreen i:nth-child(3){background:#9ba59f}.themePreviewBlue{background:#091019}.themePreviewBlue i:first-child{background:#4b9fe8}.themePreviewBlue i:nth-child(2){background:#152333}.themePreviewBlue i:nth-child(3){background:#93a9bb}.themePreviewOrange{background:#11100d}.themePreviewOrange i:first-child{background:#e99a3a}.themePreviewOrange i:nth-child(2){background:#211c14}.themePreviewOrange i:nth-child(3){background:#b0a495}.themePreviewRed{background:#100c0d}.themePreviewRed i:first-child{background:#d65f69}.themePreviewRed i:nth-child(2){background:#211619}.themePreviewRed i:nth-child(3){background:#ad999d}.themePreviewSteel{background:#0e1113}.themePreviewSteel i:first-child{background:#a7b5bd}.themePreviewSteel i:nth-child(2){background:#1d2327}.themePreviewSteel i:nth-child(3){background:#98a4aa}
+.themeHelp{margin-top:8px}.settingsDivider{height:1px;margin:11px 0 8px;background:var(--theme-line)}
+@media(min-width:500px){.themeGrid{grid-template-columns:1fr 1fr}.themeCard:last-child{grid-column:1/-1}}
