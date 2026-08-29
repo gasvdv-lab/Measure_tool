@@ -1,8 +1,8 @@
-import {S,$} from "./state.js?v=0.8.21.7-20260829-1415";
-import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.21.7-20260829-1415";
-import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.21.7-20260829-1415";
-import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.21.7-20260829-1415";
-import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.21.7-20260829-1415";
+import {S,$} from "./state.js?v=0.8.21.8-20260829-1425";
+import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.21.8-20260829-1425";
+import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.21.8-20260829-1425";
+import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.21.8-20260829-1425";
+import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.21.8-20260829-1425";
 
 let samples=[],sampleSource=null,camPos,camQuat,forward;
 
