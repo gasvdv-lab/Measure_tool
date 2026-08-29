@@ -1,8 +1,8 @@
-# Measure AR v0.8.27 — Project Transform Core
+# Measure AR v0.8.27.1 — Core Repair
 
 GitHub Pages: https://gasvdv-lab.github.io/Measure_tool/
 
-## Kernwijzigingen v0.8.27
+## Kernwijzigingen v0.8.27.1
 - Spatial Restore herschrijft `point.position` niet meer: Project Space blijft de geometrische waarheid.
 - Sessietransform wordt alleen voor de actieve AR-sessie gebruikt en niet als brongeometrie opgeslagen.
 - Nieuwe punten na relocalisatie worden terug naar Project Space omgerekend.
@@ -386,3 +386,10 @@ Gebouwd vanaf de door gebruiker bevestigde stabiele v0.8.24 World Lock 2.0 + Sha
 - GPS/richting zijn bewust alleen een **grove voorlokalisatie**. De bestaande 1–4 projectreferenties blijven de precisielaag.
 - Relocalisatie-UX gefixt: **Gebruik vizier** sluit het menu, laat het volledige AR-beeld zien en de witte knop bevestigt het gekozen fysieke referentiepunt.
 - World Lock 2.0 en automatische shape fill blijven ongewijzigd als stabiele core.
+### Core Repair v0.8.27.1
+- Referentie-capture heeft een eigen enable-pad: de witte knop wordt actief bij een actuele geldige WebXR hit, onafhankelijk van de tekenmotor.
+- Projectwissels resetten sessionTransform en World Lock vóór geometrie wordt hersteld.
+- Oude/pending WebXR anchors worden verwijderd en async anchor-creaties uit een vorige context worden genegeerd.
+- Lijnstijl en nieuwe puntmarkers gebruiken de actuele render/world-positie.
+- Spatial save gebruikt de actuele XR-camera-wereldpositie wanneer beschikbaar.
+- Geen losse TEST_RESULTS-bestanden in release-ZIPs.

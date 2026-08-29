@@ -1,7 +1,7 @@
-# Status v0.8.27
+# Status v0.8.27.1
 - [x] Project Transform Core: brongeometrie blijft immutable bij relocalisatie.
 - [x] Precision capture basis + referentie-integriteit.
-- [ ] Fysieke regressietest v0.8.27.
+- [ ] Fysieke regressietest v0.8.27.1 (reference capture, projectwissel, restore, World Lock).
 
 # v0.8.23 Spatial Restore
 
@@ -134,3 +134,5 @@ Project Space blijft de geometrische waarheid. Bij het openen van een opgeslagen
 - [x] Vrij camerabeeld tijdens opnieuw aanwijzen van referenties
 - [ ] Volgende experimentele stap: visual relocalization zonder geprinte marker
 - [ ] Project Space → AR World Space als expliciete sessietransform, zonder brongeometrie te herschrijven
+
+- [x] v0.8.27.1 Core Repair: reference capture + project/anchor lifecycle hardening.

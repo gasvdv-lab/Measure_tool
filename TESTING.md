@@ -1,4 +1,4 @@
-# v0.8.27 gerichte test
+# v0.8.27.1 gerichte test
 1. World Lock: teken lijn/vorm en loop rond.
 2. Shape Fill: sluit vorm; fill moet direct zichtbaar zijn.
 3. Registreer 2-4 refs, save, sluit tab/AR volledig, open opnieuw.
@@ -102,3 +102,9 @@ AR-IN/ROOM: place A→B on a stable surface, confirm both endpoints, then move t
 5. Richt het vizier op het fysieke punt en druk de witte knop. Het relocalisatiescherm moet terugkomen met een vinkje.
 6. Herhaal minstens twee referenties en bereken/apply de uitlijning.
 7. Controleer dat bestaande geometrie na toepassing world-locked blijft en afmetingen niet veranderen.
+
+## Extra regressies v0.8.27.1
+1. Project op locatie plaatsen → Gebruik vizier: witte knop moet actief worden zodra een geldige hit aanwezig is.
+2. Open project B nadat project A uitgelijnd is: B mag geen transform/positie van A erven.
+3. Wissel meerdere keren van project: geen oude anchors of plotselinge terug-sprongen.
+4. Wijzig lijnkleur/dikte na relocalisatie: lijn blijft op dezelfde zichtbare positie.
