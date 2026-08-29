@@ -1,30 +1,31 @@
-import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.25-20260829-1815";
+import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.25-20260829-1905";
 import {
   startTool,cancelTool,setPlacement,setDistance,setConstraint,setAngle,flipSide,setReferenceLine,setSnapMode,
   confirmCandidate,undoToolStep,finishTool,toolLabel,constraintLabel,getActivePoint,referenceRequired,resetDrawingCore
-} from "./drawing-core.js?v=0.8.25-20260829-1815";
+} from "./drawing-core.js?v=0.8.25-20260829-1905";
 import {
   createShape,updateShape,deleteShapeOnly,deleteShapeWithContour,deleteLineRaw,deletePointRaw,renamePoint,updateLine,analyzeContour,
   lineDependencies,pointDependencies,canDeleteLine,canDeletePoint,clearAllGeometry,validateGeometryState,dispose
-} from "./geometry.js?v=0.8.25-20260829-1815";
-import {startAR,applyZoom} from "./ar.js?v=0.8.25-20260829-1815";
-import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.25-20260829-1815";
-import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.25-20260829-1815";
+} from "./geometry.js?v=0.8.25-20260829-1905";
+import {startAR,applyZoom} from "./ar.js?v=0.8.25-20260829-1905";
+import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.25-20260829-1905";
+import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.25-20260829-1905";
 import {
   initProjectStorage,saveCurrentProject,listProjects,loadStoredProject,newProject,duplicateStoredProject,
   deleteStoredProject,renameStoredProject,projectStats,formatStats,getStoredProjectInfo,hasRecovery,recoveryInfo,restoreRecovery,clearRecovery,
   exportCurrentProject,importProjectFile
-} from "./project-storage.js?v=0.8.25-20260829-1815";
+} from "./project-storage.js?v=0.8.25-20260829-1905";
 import {
   captureCurrentGeo,addProjectReference,removeProjectReference,beginRelocalization,cancelRelocalization,
   captureRelocalizationPoint,solveRelocalization,applyRelocalization,relocalizationSummary,beginSpatialRestore
-} from "./relocalization.js?v=0.8.25-20260829-1815";
+} from "./relocalization.js?v=0.8.25-20260829-1905";
 
-import {detachAllPointAnchors} from "./world-lock.js?v=0.8.25-20260829-1815";
+import {detachAllPointAnchors} from "./world-lock.js?v=0.8.25-20260829-1905";
 
 const pages=["home","project","references","relocalize","projects","objects","line","point","walltool","wallcreate","wall","openingcreate","opening","shapecreate","shape","settings","clear"];
 let menuStack=["home"];
 let toastTimer=null;
+let pendingRelocalizationRefId=null;
 
 const el=id=>$(id);
 function bind(id,event,fn){
@@ -228,9 +229,10 @@ function renderRelocalizePage(){
     info.textContent=`${r.name}${detail} · ${S.project.relocalization.captured.some(c=>c.refId===r.id)?"✓ opnieuw aangewezen":"nog aanwijzen"}`;
     const cap=document.createElement("button");cap.className="primary";cap.textContent="Gebruik vizier";
     cap.onclick=()=>{
-      if(!S.currentTarget)throw new Error("Richt eerst het vizier op het fysieke referentiepunt.");
-      captureRelocalizationPoint(r.id,S.currentTarget);
-      renderRelocalizePage();showStatus(`${r.name} opnieuw aangewezen.`);
+      pendingRelocalizationRefId=r.id;
+      returnToArView();
+      el("hint").textContent=`${r.name} aanwijzen · richt het vizier exact op het fysieke punt en druk op de witte knop.`;
+      showStatus(`${r.name}: richt met het vizier en bevestig met de witte knop.`);
     };
     row.append(info,cap);box.append(row);
   }
@@ -469,7 +471,18 @@ export function initUI(){
   bind("hudCancelBtn","click",()=>{runHistoryAction("Tekenfunctie stoppen",()=>cancelTool());syncHud();syncHistoryControls();showStatus("Tekenfunctie gestopt. Bevestigde geometrie blijft bestaan.");});
 
   bind("captureBtn","click",()=>{
-    closePopovers();const r=confirmCandidate();syncHud();
+    closePopovers();
+    if(pendingRelocalizationRefId){
+      const refId=pendingRelocalizationRefId;
+      if(!S.currentTarget)throw new Error("Geen geldig AR-punt onder het vizier. Richt op een herkend oppervlak.");
+      captureRelocalizationPoint(refId,S.currentTarget);
+      pendingRelocalizationRefId=null;
+      openMenu();showPage("relocalize",false);
+      const ref=(S.project.relocalization.references||[]).find(x=>x.id===refId);
+      showStatus(`${ref?.name||"Referentie"} opnieuw aangewezen.`);
+      return;
+    }
+    const r=confirmCandidate();syncHud();
     if(r.type==="point"){el("distance").textContent="—";el("detail").textContent=`Punt ${r.point.name} vastgezet`;el("hint").textContent=`${r.point.name} is vertrekpunt. Stel zo nodig afstand/richting in en bevestig het volgende punt.`;}
     else{el("distance").textContent=fmt(r.line.distance);el("detail").textContent=r.wall?`${r.wall.name} · ${fmt(r.line.distance)}`:`${r.line.name} · ${fmt(r.line.distance)}`;el("hint").textContent=r.wall?`${r.wall.name} geplaatst. ${r.point.name} is nu vertrekpunt voor het volgende muursegment.`:(r.complete?`Lijn voltooid. Bekijk het resultaat en open ☰ voor de volgende functie.`:`${r.point.name} is nu het actieve vertrekpunt.`);}
     verifyState();syncHistoryControls();
