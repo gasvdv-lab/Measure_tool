@@ -350,3 +350,9 @@ Bij het starten van een nieuw project worden World Lock-koppelingen veilig losge
 - Computed/exact-distance points retain the `XRFrame.createAnchor()` fallback in the active local reference space.
 - Stored project geometry remains the source of truth; anchors only control the session-local visible world pose.
 - Current physical gate: a committed A→B line must remain fixed while the phone moves 0.5–2 m.
+
+
+### v0.8.24 hotfix — Shape Fill
+- Een gesloten vorm wordt nu onmiddellijk als vorm aangemaakt en opgevuld.
+- De bestaande kleur, transparantie, randdikte en labels worden gebruikt.
+- De opvulling blijft gekoppeld aan de world-locked hoekpunten.
