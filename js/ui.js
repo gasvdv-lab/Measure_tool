@@ -1,26 +1,26 @@
-import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.24-20260829-1745";
+import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.24-20260829-1805";
 import {
   startTool,cancelTool,setPlacement,setDistance,setConstraint,setAngle,flipSide,setReferenceLine,setSnapMode,
   confirmCandidate,undoToolStep,finishTool,toolLabel,constraintLabel,getActivePoint,referenceRequired,resetDrawingCore
-} from "./drawing-core.js?v=0.8.24-20260829-1745";
+} from "./drawing-core.js?v=0.8.24-20260829-1805";
 import {
   createShape,updateShape,deleteShapeOnly,deleteShapeWithContour,deleteLineRaw,deletePointRaw,renamePoint,updateLine,analyzeContour,
   lineDependencies,pointDependencies,canDeleteLine,canDeletePoint,clearAllGeometry,validateGeometryState,dispose
-} from "./geometry.js?v=0.8.24-20260829-1745";
-import {startAR,applyZoom} from "./ar.js?v=0.8.24-20260829-1745";
-import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.24-20260829-1745";
-import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.24-20260829-1745";
+} from "./geometry.js?v=0.8.24-20260829-1805";
+import {startAR,applyZoom} from "./ar.js?v=0.8.24-20260829-1805";
+import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.24-20260829-1805";
+import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.24-20260829-1805";
 import {
   initProjectStorage,saveCurrentProject,listProjects,loadStoredProject,newProject,duplicateStoredProject,
   deleteStoredProject,renameStoredProject,projectStats,formatStats,getStoredProjectInfo,hasRecovery,recoveryInfo,restoreRecovery,clearRecovery,
   exportCurrentProject,importProjectFile
-} from "./project-storage.js?v=0.8.24-20260829-1745";
+} from "./project-storage.js?v=0.8.24-20260829-1805";
 import {
   captureCurrentGeo,addProjectReference,removeProjectReference,beginRelocalization,cancelRelocalization,
   captureRelocalizationPoint,solveRelocalization,applyRelocalization,relocalizationSummary,beginSpatialRestore
-} from "./relocalization.js?v=0.8.24-20260829-1745";
+} from "./relocalization.js?v=0.8.24-20260829-1805";
 
-import {detachAllPointAnchors} from "./world-lock.js?v=0.8.24-20260829-1745";
+import {detachAllPointAnchors} from "./world-lock.js?v=0.8.24-20260829-1805";
 
 const pages=["home","project","references","relocalize","projects","objects","line","point","walltool","wallcreate","wall","openingcreate","opening","shapecreate","shape","settings","clear"];
 let menuStack=["home"];
@@ -452,7 +452,12 @@ export function initUI(){
   bind("hudFinishBtn","click",()=>{
     const result=finishTool();syncHud();syncHistoryControls();
     if(result.type==="polyline"){el("hint").textContent="Doorlopende lijn voltooid en open gebleven.";}if(result.type==="wall"){el("hint").textContent="Muurpad voltooid. Alle muursegmenten blijven gekoppeld aan hun basislijnen.";}
-    if(result.type==="shape"){const a=analyzeContour(result.contour);el("shapeCreateInfo").textContent=`${result.contour.pointIds.length} punten · ${a.area.toFixed(2)} m² · omtrek ${a.perimeter.toFixed(2)} m`;openMenu();showPage("shapecreate");}
+    if(result.type==="shape"){
+      const a=analyzeContour(result.contour);
+      let nr=1,name=`Vorm ${nr}`;while(S.shapes.some(s=>s.name===name)){nr++;name=`Vorm ${nr}`;}
+      const shape=runHistoryAction("Vorm sluiten en opvullen",()=>createShape(result.contour,{name,fill:el("shapeFill").value||"#4caf50",opacity:el("shapeOpacity").value||.30,border:el("shapeBorder").value||"#ffffff",thickness:el("shapeThickness").value||2,labels:el("shapeLabels").checked}));
+      S.pendingContourId=null;cancelTool();syncHud();syncHistoryControls();afterProjectChange(`Vorm ${shape.name} gesloten en opgevuld · ${a.area.toFixed(2)} m².`);
+    }
   });
   bind("hudCancelBtn","click",()=>{runHistoryAction("Tekenfunctie stoppen",()=>cancelTool());syncHud();syncHistoryControls();showStatus("Tekenfunctie gestopt. Bevestigde geometrie blijft bestaan.");});
 
