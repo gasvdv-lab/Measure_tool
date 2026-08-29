@@ -1,3 +1,18 @@
+# TESTING.md — Measure AR
+
+## Verplichte regressie v0.8.21.2
+Test op smartphone in AR-IN voordat Relocalization verdergaat:
+1. Horizontaal + exact: 0,50 / 1,00 / 2,50 m; eindpunt blijft op gelijke Y en afstand blijft exact.
+2. Verticaal + exact: 0,50 / 1,00 / 2,50 m; kies Omhoog en Omlaag; kandidaat mag niet met camera-positie verschuiven behalve schermprojectie.
+3. Verticaal + AUTO: kandidaat blijft op de verticale as door het actieve punt en uitsluitend aan de gekozen zijde.
+4. Op oppervlak + exact/AUTO: kandidaat blijft in actief vlak.
+5. Parallel + exact/AUTO: beide richtingen testen.
+6. Loodrecht + exact/AUTO: links/rechts testen.
+7. Eigen hoek 30°/45°/90° + exact/AUTO: links/rechts testen.
+8. Vrij + exact/AUTO.
+9. Muur maken → Objecten → Muren: muur moet zichtbaar zijn in lijst en wisbaar zijn.
+10. Undo/Redo na lijn en muur; Objectenlijst en scène moeten synchroon blijven.
+
 # Measure AR — Testing
 
 ## Testcodes
@@ -16,7 +31,7 @@
 
 Niet-uitgevoerde fysieke tests blijven open en worden naar volgende versies meegenomen.
 
-## Directe regressietest v0.8.21.1
+## Directe regressietest v0.8.21.2
 Doel: controle van **exacte afstand + Horizontaal**.
 
 1. Start een polylijn en plaats punt A of kies een bestaand vertrekpunt.

@@ -1,9 +1,23 @@
-# Measure AR v0.8.21.1 — Exact-distance Horizontal Fix
-Build: 20260829-0825
+# Measure AR v0.8.21.2 — Constraint Regression Audit
+Build: 20260829-0915
+
+## v0.8.21.2 — constraint audit / bugfix
+Deze patch volgt op de praktijkmelding dat **Verticaal** instabiel meebewoog en op de eerdere fout bij **Horizontaal + exacte afstand**. De volledige tekenconstraintlaag is opnieuw nagekeken.
+
+Wijzigingen:
+- Exact **Verticaal** is nu camera-onafhankelijk en blijft exact op de verticale as door het actieve vertrekpunt.
+- Verticaal heeft expliciet **omhoog/omlaag** via de richtingschip.
+- AUTO Verticaal blijft op dezelfde verticale as en respecteert de gekozen omhoog/omlaag-richting.
+- AUTO **Parallel / Loodrecht / Eigen hoek** respecteert nu werkelijk de gekozen zijde/richting; voorheen kon `side` algebraïsch wegvallen.
+- Runtime-invariantcontrole toegevoegd: kandidaat moet de gekozen constraint én ingestelde exacte afstand respecteren voordat bevestigen mogelijk is.
+- Constraintwaarden worden gevalideerd; onbekende waarde valt veilig terug op Vrij.
+- Muur-scèneobjecten krijgen een ID-tag en de projectconsistentiecontrole detecteert ontbrekende of verweesde muurweergaven.
+
+**Belangrijk:** echte WebXR-tracking kan niet automatisch worden nagebootst. AUTO-tests valideren code, state en geometrische invariantlogica; AR-IN blijft nodig voor camera/trackinggedrag.
 
 Vaste app-link: https://gasvdv-lab.github.io/Measure_tool/
 
-## Bugfix in v0.8.21.1
+## Bugfix in v0.8.21.2
 Bij **exacte afstand + Horizontaal** werd de richting voorheen rechtstreeks afgeleid van de camera-kijkrichting. Daardoor kon de previewlijn vanuit het actieve vertrekpunt parallel aan de kijkrichting lopen in plaats van naar de positie te wijzen waarop het vizier mikte.
 
 De exacte plaatsing gebruikt nu de geometrische richting **van het actieve vertrekpunt naar de ray/plane-intersectie van het vizier**. Daardoor gelden tegelijk:
@@ -14,11 +28,11 @@ De exacte plaatsing gebruikt nu de geometrische richting **van het actieve vertr
 
 Dezelfde richtingsbasis is ook consistenter gemaakt voor Vrij, Verticaal en Op oppervlak bij exacte afstand. Parallel, Loodrecht en Eigen hoek blijven referentiegestuurd.
 
-## AUTO teststatus v0.8.21.1 — PASS
+## AUTO teststatus v0.8.21.2 — PASS
 - JavaScript syntax van alle modules.
 - Alle relatieve module-importpaden bestaan.
 - Geen dubbele HTML-ID's.
-- Uniforme cache/build-key `0.8.21.1-20260829-0825`.
+- Uniforme cache/build-key `0.8.21.2-20260829-0915`.
 - Numerieke regressietest: oude camera-ray richting verschilt aantoonbaar van actieve-punt→vizier-richting.
 - Exacte horizontale afstand blijft wiskundig exact.
 - Verticale component van de horizontale eindpositie blijft gelijk aan het vertrekpunt.

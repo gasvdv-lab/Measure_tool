@@ -1,13 +1,19 @@
+# Measure AR Roadmap
+
+**Huidige build: v0.8.21.2 — Constraint Regression Audit**
+
+**Actuele gate:** eerst basis-tekenconstraints fysiek valideren (AR-IN/A4 en AR-IN/ROOM) vóór verdere Relocalization-tests.
+
 # Measure AR — Master Roadmap
 
-**Huidige versie:** v0.8.21.1  
+**Huidige versie:** v0.8.21.2  
 **Status:** bugfix op v0.8.21; Relocalization blijft functioneel maar verdere validatie wacht tot constructieregressie is goedgekeurd.
 
 ## Testcodes
 AUTO · PC · AR-IN/A4 · AR-IN/ROOM · AR-OUT
 
 ## Nu
-### v0.8.21.1 — Exacte afstand + Horizontaal bugfix
+### v0.8.21.2 — Exacte afstand + Horizontaal bugfix
 - [x] Richtingsberekening van exacte horizontale plaatsing corrigeren.
 - [x] Preview, opgeslagen punt en ingestelde afstand laten vertrekken van dezelfde kandidaatpositie.
 - [x] Cache/build-id verhogen zodat GitHub Pages geen oude modules mengt.
