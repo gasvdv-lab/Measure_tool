@@ -1,3 +1,26 @@
+# v0.8.28.9 — Professional Color Picker
+
+## Automatische controles
+- [x] JavaScript-syntaxcontrole.
+- [x] Alle lokale ES-module imports bestaan.
+- [x] Geen dubbele DOM-id's.
+- [x] Alle 8 bestaande kleurvelden worden door de gedeelde picker gedetecteerd.
+- [x] Geen externe colorpicker-library toegevoegd.
+- [x] Geen `TEST_RESULTS`-bestand in release.
+
+## Praktijktest — Android
+- [ ] Lijn → Kleur opent de nieuwe picker, niet de native browserpicker.
+- [ ] Snelle themakleur kiezen → Lijn opslaan → lijn krijgt exact die kleur.
+- [ ] Meer kleuren → kleurvlak + hue-slider reageren vloeiend.
+- [ ] HEX invoeren en toepassen werkt.
+- [ ] RGB invoeren en toepassen werkt.
+- [ ] Annuleren bewaart de oorspronkelijke kleur.
+- [ ] Recent gebruikt toont eerder toegepaste kleuren.
+- [ ] Muur tekenen, Muur maken en Muur bewerken gebruiken dezelfde picker.
+- [ ] Vorm opvulling en Rand gebruiken onafhankelijk dezelfde picker.
+- [ ] Bestaande project-, teken- en CAD-flow vertonen geen regressie.
+- [ ] Bestaande openstaande AR/CAD-tests uit eerdere versies blijven uit te voeren.
+
 # v0.8.28.8 — AR HUD Refinement
 
 ## v0.8.28.8 tests

@@ -1,3 +1,20 @@
+# Measure AR v0.8.28.9 — Professional Color Picker
+
+Deze release vervangt de beperkte browserkleurkeuze door één professionele, herbruikbare kleurkiezer voor lijnen, muren, vormopvulling en vormranden. De bestaande objectvelden blijven dezelfde HEX-kleurwaarden gebruiken; geometrie-, CAD-, project- en WebXR-logica zijn niet gewijzigd.
+
+GitHub Pages: https://gasvdv-lab.github.io/Measure_tool/
+
+## Nieuw in v0.8.28.9
+- Office-achtige themakleuren en uitgebreide kleurenmatrix.
+- Recent gebruikte kleuren worden lokaal onthouden.
+- **Meer kleuren…** opent een volledige mobiele picker met verzadiging/helderheid en hue-slider.
+- HEX-invoer en afzonderlijke RGB-velden.
+- Vergelijking **Huidig** versus **Nieuw** vóór toepassen.
+- Knop **Standaard** herstelt de standaardkleur van het betreffende veld.
+- Eén gedeelde component voor lijnkleur, muurkleur, vormopvulling en vormrand.
+- Originele kleurinputs blijven de bronwaarde zodat bestaande save/create-logica compatibel blijft.
+- Geen externe dependency en geen `TEST_RESULTS`-bestand.
+
 # Measure AR v0.8.28.8 — AR HUD Refinement
 
 ## v0.8.28.8 — AR Visualization System

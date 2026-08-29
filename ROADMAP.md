@@ -1,3 +1,18 @@
+# Huidige stap — v0.8.28.9 Professional Color Picker
+
+- [x] Eén professionele colorpicker voor alle huidige kleurvelden.
+- [x] Themakleuren + tintenmatrix.
+- [x] Recente kleuren lokaal onthouden.
+- [x] Geavanceerde HSV-kleurselectie.
+- [x] HEX + RGB invoer en huidig/nieuw-preview.
+- [x] Mobiele bottom-sheet presentatie zonder externe dependency.
+- [ ] Fysieke Android-test van alle kleurvelden.
+- [ ] Later: optionele projectfavorieten/palet.
+- [ ] Later: pipet waar browserondersteuning voldoende betrouwbaar is.
+- [ ] Fysieke AR-praktijktest bij voldoende licht.
+- [ ] CAD-plaatsing verder valideren.
+- [ ] Open relocalisatie/reference-capture bug later opnieuw opnemen.
+
 ## v0.8.28.8 — AR HUD Refinement ✅
 
 ## Huidige stap — v0.8.28.8
