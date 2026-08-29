@@ -1,8 +1,8 @@
-import {S,$,fmt,getPoint,getLine,worldToProject} from "./state.js?v=0.8.28.10-20260829-theme";
-import {createPoint,createLine,ensureLineRendered,deleteLineRaw,deletePointRaw,createContour,dispose,analyzeShapePoints} from "./geometry.js?v=0.8.28.10-20260829-theme";
-import {snapshotProject,commitSnapshot,undoHistory} from "./history.js?v=0.8.28.10-20260829-theme";
-import {queuePointHitAnchor} from "./world-lock.js?v=0.8.28.10-20260829-theme";
-import {createWall,nextWallName} from "./walls.js?v=0.8.28.10-20260829-theme";
+import {S,$,fmt,getPoint,getLine,worldToProject} from "./state.js?v=0.8.29.0-20260829-ai-prototype";
+import {createPoint,createLine,ensureLineRendered,deleteLineRaw,deletePointRaw,createContour,dispose,analyzeShapePoints} from "./geometry.js?v=0.8.29.0-20260829-ai-prototype";
+import {snapshotProject,commitSnapshot,undoHistory} from "./history.js?v=0.8.29.0-20260829-ai-prototype";
+import {queuePointHitAnchor} from "./world-lock.js?v=0.8.29.0-20260829-ai-prototype";
+import {createWall,nextWallName} from "./walls.js?v=0.8.29.0-20260829-ai-prototype";
 
 const REF_MODES=new Set(["parallel","perpendicular","angle"]);
 const TOOL_NAMES={line:"LIJN",polyline:"POLYLIJN",shape:"VORM",stake:"UITZETTEN",wall:"MUUR"};

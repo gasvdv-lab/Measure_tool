@@ -1,11 +1,11 @@
 export const S={
-  version:"0.8.28.10",build:"20260829-theme",
+  version:"0.8.29.0",build:"20260829-ai-prototype",
   THREE:null,renderer:null,scene:null,camera:null,reticle:null,xrSession:null,hitSource:null,hitRequested:false,
   currentTarget:null,currentRawTarget:null,currentHitResult:null,currentXRFrame:null,currentReferenceSpace:null,targetSource:"none",zoom:1,pointPlacementEpoch:0,referenceCaptureId:null,
-  points:[],lines:[],contours:[],shapes:[],walls:[],openings:[],
+  points:[],lines:[],contours:[],shapes:[],walls:[],openings:[],aiObjects:[],
   wallTool:{height:2.40,thickness:.14,side:"center",orientation:"vertical",angle:90,color:"#d7d2c8",opacity:.65,namePrefix:"Muur"},
   pointCounter:0,contourCounter:1,
-  selectedLineId:null,selectedPointId:null,selectedShapeId:null,selectedWallId:null,selectedOpeningId:null,objectPickMode:null,pendingContourId:null,
+  selectedLineId:null,selectedPointId:null,selectedShapeId:null,selectedWallId:null,selectedOpeningId:null,selectedAiObjectId:null,objectPickMode:null,pendingContourId:null,
   defaults:{unit:"cm",lineThickness:2,labels:true},
   tool:{
     kind:null,status:"idle",

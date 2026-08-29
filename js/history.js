@@ -1,8 +1,9 @@
-import {S,getPoint,getLine,getContour} from "./state.js?v=0.8.28.10-20260829-theme";
+import {S,getPoint,getLine,getContour} from "./state.js?v=0.8.29.0-20260829-ai-prototype";
 import {
   createPoint,createLine,createShape,clearAllGeometry,validateGeometryState
-} from "./geometry.js?v=0.8.28.10-20260829-theme";
-import {createWall,createOpening,clearWalls} from "./walls.js?v=0.8.28.10-20260829-theme";
+} from "./geometry.js?v=0.8.29.0-20260829-ai-prototype";
+import {createWall,createOpening,clearWalls} from "./walls.js?v=0.8.29.0-20260829-ai-prototype";
+import {snapshotAiObjects,restoreAiBuilderObjects,clearAiBuilderObjects} from "./ai-builder.js?v=0.8.29.0-20260829-ai-prototype";
 
 function vec(v){return v?{x:v.x,y:v.y,z:v.z}:null;}
 function vec3(v){return v?new S.THREE.Vector3(v.x,v.y,v.z):null;}
@@ -13,7 +14,7 @@ function cloneTx(tx){return tx?JSON.parse(JSON.stringify(tx)):tx;}
 export function snapshotProject(){
   return {
     pointCounter:S.pointCounter,contourCounter:S.contourCounter,
-    selected:{line:S.selectedLineId,point:S.selectedPointId,shape:S.selectedShapeId,wall:S.selectedWallId,opening:S.selectedOpeningId},
+    selected:{line:S.selectedLineId,point:S.selectedPointId,shape:S.selectedShapeId,wall:S.selectedWallId,opening:S.selectedOpeningId,aiObject:S.selectedAiObjectId},
     wallTool:{...S.wallTool},
     points:S.points.map(p=>({id:p.id,name:p.name,position:vec(p.position),surfaceNormal:vec(p.surfaceNormal)})),
     lines:S.lines.map(l=>({
@@ -29,6 +30,7 @@ export function snapshotProject(){
       orientation:w.orientation,angle:w.angle,color:w.color,opacity:w.opacity,visible:w.visible!==false
     })),
     openings:S.openings.map(o=>({id:o.id,name:o.name,wallId:o.wallId,type:o.type,x:o.x,bottom:o.bottom,width:o.width,height:o.height})),
+    aiObjects:snapshotAiObjects(),
     tool:{
       kind:S.tool.kind,status:S.tool.status,activePointId:S.tool.activePointId,firstPointId:S.tool.firstPointId,
       pointIds:[...S.tool.pointIds],lineIds:[...S.tool.lineIds],transactions:S.tool.transactions.map(cloneTx),
@@ -66,7 +68,7 @@ export function restoreProject(snap){
   if(!snap)throw new Error("Historie-snapshot ontbreekt.");
   S.history.restoring=true;
   try{
-    clearWalls();clearAllGeometry();
+    clearAiBuilderObjects();clearWalls();clearAllGeometry();
 
     for(const p of snap.points){
       createPoint(vec3(p.position),{id:p.id,name:p.name,surfaceNormal:vec3(p.surfaceNormal)});
@@ -87,6 +89,7 @@ export function restoreProject(snap){
       const c=getContour(s.contourId);if(!c)throw new Error(`Historie: contour van vorm ${s.name} ontbreekt.`);
       createShape(c,{id:s.id,name:s.name,fill:s.fill,opacity:s.opacity,border:s.border,thickness:s.thickness,labels:s.labels});
     }
+    restoreAiBuilderObjects(snap.aiObjects||[]);
     for(const w of snap.walls){
       const l=getLine(w.lineId);if(!l)throw new Error(`Historie: basislijn van muur ${w.name} ontbreekt.`);
       createWall(l,{...w,id:w.id});
@@ -102,6 +105,7 @@ export function restoreProject(snap){
     S.selectedShapeId=S.shapes.find(x=>x.id===snap.selected.shape)?.id||null;
     S.selectedWallId=S.walls.find(x=>x.id===snap.selected.wall)?.id||null;
     S.selectedOpeningId=S.openings.find(x=>x.id===snap.selected.opening)?.id||null;
+    S.selectedAiObjectId=S.aiObjects.find(x=>x.id===snap.selected.aiObject)?.id||null;
 
     if(snap.wallTool)Object.assign(S.wallTool,snap.wallTool);
     const t=snap.tool;

@@ -1,4 +1,4 @@
-import {S,projectToWorld,worldToProject} from "./state.js?v=0.8.28.10-20260829-theme";
+import {S,projectToWorld,worldToProject} from "./state.js?v=0.8.29.0-20260829-ai-prototype";
 
 const DB_NAME="measurear.cad.v1",STORE="files";
 let loaderPromise=null;

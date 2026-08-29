@@ -1,34 +1,35 @@
-import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.28.10-20260829-theme";
+import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.29.0-20260829-ai-prototype";
 import {
   startTool,cancelTool,setPlacement,setDistance,setConstraint,setAngle,flipSide,setReferenceLine,setSnapMode,
   confirmCandidate,undoToolStep,finishTool,toolLabel,constraintLabel,getActivePoint,referenceRequired,resetDrawingCore
-} from "./drawing-core.js?v=0.8.28.10-20260829-theme";
+} from "./drawing-core.js?v=0.8.29.0-20260829-ai-prototype";
 import {
   createShape,updateShape,deleteShapeOnly,deleteShapeWithContour,deleteLineRaw,deletePointRaw,renamePoint,updateLine,analyzeContour,
   lineDependencies,pointDependencies,canDeleteLine,canDeletePoint,clearAllGeometry,validateGeometryState,dispose
-} from "./geometry.js?v=0.8.28.10-20260829-theme";
-import {startAR,resumeARFromGesture,suspendARForCadImport,applyZoom,resetTrackingSamples} from "./ar.js?v=0.8.28.10-20260829-theme";
-import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.28.10-20260829-theme";
-import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.28.10-20260829-theme";
+} from "./geometry.js?v=0.8.29.0-20260829-ai-prototype";
+import {startAR,resumeARFromGesture,suspendARForCadImport,applyZoom,resetTrackingSamples} from "./ar.js?v=0.8.29.0-20260829-ai-prototype";
+import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.29.0-20260829-ai-prototype";
+import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.29.0-20260829-ai-prototype";
 import {
   initProjectStorage,saveCurrentProject,listProjects,loadStoredProject,newProject,duplicateStoredProject,
   deleteStoredProject,renameStoredProject,projectStats,formatStats,getStoredProjectInfo,hasRecovery,recoveryInfo,restoreRecovery,clearRecovery,
   exportCurrentProject,importProjectFile,markDirtyAndRecover
-} from "./project-storage.js?v=0.8.28.10-20260829-theme";
+} from "./project-storage.js?v=0.8.29.0-20260829-ai-prototype";
 import {
   captureCurrentGeo,addProjectReference,removeProjectReference,clearProjectReferences,beginRelocalization,cancelRelocalization,
   captureRelocalizationPoint,solveRelocalization,applyRelocalization,relocalizationSummary,beginSpatialRestore
-} from "./relocalization.js?v=0.8.28.10-20260829-theme";
+} from "./relocalization.js?v=0.8.29.0-20260829-ai-prototype";
 
-import {captureHybridBaseline,assessHybridLocation,enableHeading} from "./hybrid-localization.js?v=0.8.28.10-20260829-theme";
+import {captureHybridBaseline,assessHybridLocation,enableHeading} from "./hybrid-localization.js?v=0.8.29.0-20260829-ai-prototype";
 
-import {detachAllPointAnchors} from "./world-lock.js?v=0.8.28.10-20260829-theme";
-import {importCadFile,listCadModels,cadStatus,selectCad,beginCadPlacement,rotateCad,moveCadHeight,confirmCadPlacement,cancelCadPlacement,deleteCadModel,clearCadRuntime,restoreCadRuntime} from "./cad.js?v=0.8.28.10-20260829-theme";
-import {initProfessionalColorPickers,refreshProfessionalColorPickers} from "./color-picker.js?v=0.8.28.10-20260829-theme";
-import {initThemeSelector} from "./theme-selector.js?v=0.8.28.10-20260829-theme";
+import {detachAllPointAnchors} from "./world-lock.js?v=0.8.29.0-20260829-ai-prototype";
+import {importCadFile,listCadModels,cadStatus,selectCad,beginCadPlacement,rotateCad,moveCadHeight,confirmCadPlacement,cancelCadPlacement,deleteCadModel,clearCadRuntime,restoreCadRuntime} from "./cad.js?v=0.8.29.0-20260829-ai-prototype";
+import {initProfessionalColorPickers,refreshProfessionalColorPickers} from "./color-picker.js?v=0.8.29.0-20260829-ai-prototype";
+import {initThemeSelector} from "./theme-selector.js?v=0.8.29.0-20260829-ai-prototype";
+import {executeAiPrototype,getAiObject,getAiObjectForShape,toggleAiObjectLock,deleteAiObject,clearAiBuilderObjects,aiObjectSummary} from "./ai-builder.js?v=0.8.29.0-20260829-ai-prototype";
 
 
-const pages=["home","project","references","relocalize","projects","cad","objects","line","point","walltool","wallcreate","wall","openingcreate","opening","shapecreate","shape","settings","clear"];
+const pages=["home","project","references","relocalize","projects","cad","objects","line","point","walltool","wallcreate","wall","openingcreate","opening","shapecreate","shape","aibuilder","settings","clear"];
 let menuStack=["home"];
 let toastTimer=null;
 
@@ -60,7 +61,7 @@ function togglePopover(id){
 }
 function showPage(name,push=true){
   pages.forEach(p=>el("page-"+p)?.classList.remove("active"));const page=el("page-"+name);if(!page)throw new Error(`Menupagina ontbreekt: ${name}`);page.classList.add("active");
-  const titles={home:"Measure AR",project:"Project",references:"Projectreferenties",relocalize:"Projectpositie herstellen",projects:"Mijn projecten",cad:"CAD / 3D-model",objects:"Objecten",line:"Lijn",point:"Punt",walltool:"Muur tekenen",wallcreate:"Muur maken",wall:"Muur",openingcreate:"Opening toevoegen",opening:"Opening",shapecreate:"Vorm opslaan",shape:"Vorm",settings:"Instellingen",clear:"Alles wissen"};
+  const titles={home:"Measure AR",project:"Project",references:"Projectreferenties",relocalize:"Projectpositie herstellen",projects:"Mijn projecten",cad:"CAD / 3D-model",objects:"Objecten",line:"Lijn",point:"Punt",walltool:"Muur tekenen",wallcreate:"Muur maken",wall:"Muur",openingcreate:"Opening toevoegen",opening:"Opening",shapecreate:"Vorm opslaan",shape:"Vorm",aibuilder:"AI Builder · Prototype",settings:"Instellingen",clear:"Alles wissen"};
   el("menuTitle").textContent=titles[name]||name;if(push&&menuStack.at(-1)!==name)menuStack.push(name);el("menuBackBtn").style.visibility=name==="home"?"hidden":"visible";if(name==="objects")renderObjects();if(name==="project")renderProjectPage();if(name==="references")renderReferenceManager();if(name==="relocalize")renderRelocalizePage();if(name==="projects")renderProjectsList();if(name==="cad")renderCadPage();requestAnimationFrame(refreshProfessionalColorPickers);
 }
 function cancelReferenceCapture(){
@@ -325,7 +326,7 @@ function renderCadPage(){
 }
 function renderObjects(){
   const box=el("objectsList");box.innerHTML="";
-  if(!S.walls.length&&!S.shapes.length&&!S.lines.length&&!S.points.length){box.innerHTML='<div class="help">Nog geen objecten.</div>';return;}
+  if(!S.walls.length&&!S.shapes.length&&!S.lines.length&&!S.points.length&&!S.aiObjects.length){box.innerHTML='<div class="help">Nog geen objecten.</div>';return;}
   if(S.walls.length){box.insertAdjacentHTML("beforeend","<h3>Muren</h3>");for(const w of S.walls){
     const row=document.createElement("div");row.className="objectRow";const open=document.createElement("button");open.className="secondary";open.textContent=`${w.name} · ${w.height.toFixed(2)} m`;
     const del=document.createElement("button");del.className="danger";del.textContent="Wis";open.onclick=()=>openWall(w.id);del.onclick=()=>{runHistoryAction(`Muur ${w.name} verwijderen`,()=>deleteWall(w.id));afterProjectChange(`Muur ${w.name} verwijderd.`);};row.append(open,del);box.append(row);
@@ -334,9 +335,13 @@ function renderObjects(){
     const row=document.createElement("div");row.className="objectRow";const open=document.createElement("button");open.className="secondary";open.textContent=`${o.name} · ${o.width.toFixed(2)} × ${o.height.toFixed(2)} m`;
     const del=document.createElement("button");del.className="danger";del.textContent="Wis";open.onclick=()=>openOpening(o.id);del.onclick=()=>{runHistoryAction(`${o.name} verwijderen`,()=>deleteOpening(o.id));afterProjectChange(`${o.name} verwijderd.`);};row.append(open,del);box.append(row);
   }}
+  if(S.aiObjects.length){box.insertAdjacentHTML("beforeend","<h3>AI-concepten · prototype</h3>");for(const o of S.aiObjects){
+    const row=document.createElement("div");row.className="objectRow";const open=document.createElement("button");open.className="secondary";open.textContent=`${o.name} · ${(o.height*100).toFixed(0)} cm${o.locked?" · 🔒":""}`;
+    const del=document.createElement("button");del.className="danger";del.textContent="Wis";open.onclick=()=>{S.selectedAiObjectId=o.id;S.selectedShapeId=o.sourceShapeId;openAiBuilder();};del.onclick=()=>{runHistoryAction(`AI-concept ${o.name} verwijderen`,()=>deleteAiObject(o.id));afterProjectChange(`${o.name} verwijderd.`);renderObjects();};row.append(open,del);box.append(row);
+  }}
   if(S.shapes.length){box.insertAdjacentHTML("beforeend","<h3>Vormen</h3>");for(const s of S.shapes){
     const row=document.createElement("div");row.className="objectRow";const open=document.createElement("button");open.className="secondary";open.textContent=`${s.name} · ${s.area.toFixed(2)} m²`;
-    const del=document.createElement("button");del.className="danger";del.textContent="Wis";open.onclick=()=>openShape(s.id);del.onclick=()=>{runHistoryAction(`Vorm ${s.name} verwijderen`,()=>deleteShapeOnly(s.id));afterProjectChange(`Vorm ${s.name} verwijderd; contour bewaard.`);};row.append(open,del);box.append(row);
+    const del=document.createElement("button");del.className="danger";del.textContent="Wis";open.onclick=()=>openShape(s.id);del.onclick=()=>{runHistoryAction(`Vorm ${s.name} verwijderen`,()=>{const ai=getAiObjectForShape(s.id);if(ai)deleteAiObject(ai.id);deleteShapeOnly(s.id);});afterProjectChange(`Vorm ${s.name} verwijderd; contour bewaard.`);};row.append(open,del);box.append(row);
   }}
   if(S.lines.length){box.insertAdjacentHTML("beforeend","<h3>Lijnen</h3>");for(const l of S.lines){
     const row=document.createElement("div");row.className="objectRow";const open=document.createElement("button");open.className="secondary";open.textContent=`${l.name} · ${fmt(l.distance)}`;
@@ -356,6 +361,15 @@ function openShape(id){
   const s=getShape(id);if(!s)return;S.selectedShapeId=id;el("shapeInfo").textContent=`${s.name} · ${s.area.toFixed(2)} m² · omtrek ${s.perimeter.toFixed(2)} m`;
   el("editShapeName").value=s.name;el("editShapeFill").value=s.fill;el("editShapeBorder").value=s.border;el("editShapeOpacity").value=s.opacity;el("editShapeThickness").value=String(s.thickness);el("editShapeLabels").checked=s.labels;showPage("shape");
 }
+function renderAiBuilder(){
+  const shape=getShape(S.selectedShapeId),obj=shape?getAiObjectForShape(shape.id):getAiObject(S.selectedAiObjectId);
+  if(!shape){el("aiBuilderContext").textContent="Selecteer eerst een vorm via Objecten.";el("aiBuilderStatus").textContent="Geen bronvorm geselecteerd.";el("aiRunBtn").disabled=true;return;}
+  S.selectedShapeId=shape.id;S.selectedAiObjectId=obj?.id||null;el("aiRunBtn").disabled=false;
+  el("aiBuilderContext").textContent=`Bronvorm: ${shape.name} · ${shape.area.toFixed(2)} m². Prototype gebruikt de exacte contour als footprint.`;
+  el("aiBuilderStatus").textContent=aiObjectSummary(obj);el("aiLockBtn").style.display=obj?"block":"none";el("aiDeleteBtn").style.display=obj?"block":"none";el("aiLockBtn").textContent=obj?.locked?"Ontgrendel concept":"🔒 Concept vastzetten";
+  if(obj&&!el("aiPrompt").value.trim())el("aiPrompt").value=`Maak hem ${(obj.height*100).toFixed(0)} cm hoog`;
+}
+function openAiBuilder(){showPage("aibuilder");renderAiBuilder();}
 
 export function initUI(){
   initThemeSelector();
@@ -367,6 +381,7 @@ export function initUI(){
   bind("globalUndoBtn","click",()=>{const e=undoHistory();afterProjectChange(`Ongedaan: ${e.label}`);});
   bind("globalRedoBtn","click",()=>{const e=redoHistory();afterProjectChange(`Opnieuw: ${e.label}`);});
   document.querySelectorAll("[data-page]").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.page)));
+  document.querySelectorAll("[data-ai-example]").forEach(b=>b.addEventListener("click",()=>{el("aiPrompt").value=b.dataset.aiExample||"";}));
 
   bind("saveProjectBtn","click",()=>{
     const e=saveCurrentProject(el("projectName").value,false);renderProjectPage();showStatus(`✓ Project ${e.project.name} opgeslagen.`);closeMenu();
@@ -589,11 +604,19 @@ bind("saveWallBtn","click",()=>{
 
   bind("createShapeBtn","click",()=>{const c=getContour(S.pendingContourId);if(!c)throw new Error("Gesloten contour ontbreekt.");const s=runHistoryAction("Vorm aanmaken",()=>createShape(c,{name:el("shapeName").value,fill:el("shapeFill").value,opacity:el("shapeOpacity").value,border:el("shapeBorder").value,thickness:el("shapeThickness").value,labels:el("shapeLabels").checked}));S.pendingContourId=null;closeMenu();cancelTool();syncHud();showStatus(`Vorm ${s.name} aangemaakt · ${s.area.toFixed(2)} m² · omtrek ${s.perimeter.toFixed(2)} m.`);});
   bind("cancelShapeBtn","click",()=>{S.pendingContourId=null;closeMenu();cancelTool();syncHud();showStatus("Gesloten contour bewaard zonder opvulling.");});
+  bind("openAiBuilderBtn","click",openAiBuilder);
+  bind("aiRunBtn","click",()=>{
+    const shape=getShape(S.selectedShapeId);if(!shape)throw new Error("Selecteer eerst een vorm.");const before=getAiObjectForShape(shape.id);
+    const o=runHistoryAction(before?`AI-concept ${before.name} aanpassen`:`AI-concept op ${shape.name} maken`,()=>executeAiPrototype(shape.id,el("aiPrompt").value));
+    afterProjectChange(`${o.name} ${before?"aangepast":"aangemaakt"} · ${(o.height*100).toFixed(1)} cm hoog.`);renderAiBuilder();
+  });
+  bind("aiLockBtn","click",()=>{const o=getAiObject(S.selectedAiObjectId);if(!o)throw new Error("Geen AI-concept geselecteerd.");runHistoryAction(`${o.name} ${o.locked?"ontgrendelen":"vastzetten"}`,()=>toggleAiObjectLock(o.id));afterProjectChange(`${o.name}: ${o.locked?"vastgezet":"ontgrendeld"}.`);renderAiBuilder();});
+  bind("aiDeleteBtn","click",()=>{const o=getAiObject(S.selectedAiObjectId);if(!o)throw new Error("Geen AI-concept geselecteerd.");runHistoryAction(`AI-concept ${o.name} verwijderen`,()=>deleteAiObject(o.id));afterProjectChange(`${o.name} verwijderd.`);S.selectedAiObjectId=null;renderAiBuilder();});
   bind("saveShapeBtn","click",()=>{const s=getShape(S.selectedShapeId);if(!s)throw new Error("Geen vorm geselecteerd.");runHistoryAction(`Vorm ${s.name} bewerken`,()=>updateShape(s,{name:el("editShapeName").value,fill:el("editShapeFill").value,border:el("editShapeBorder").value,opacity:el("editShapeOpacity").value,thickness:el("editShapeThickness").value,labels:el("editShapeLabels").checked}));afterProjectChange(`Vorm ${s.name} opgeslagen.`);openShape(s.id);});
-  bind("deleteShapeOnlyBtn","click",()=>{const s=getShape(S.selectedShapeId);if(!s)throw new Error("Geen vorm geselecteerd.");runHistoryAction(`Vorm ${s.name} verwijderen`,()=>deleteShapeOnly(s.id));showPage("objects");afterProjectChange(`Vorm ${s.name} verwijderd; contour bewaard.`);});
-  bind("deleteShapeContourBtn","click",()=>{const s=getShape(S.selectedShapeId);if(!s)throw new Error("Geen vorm geselecteerd.");runHistoryAction(`Vorm ${s.name} + contour verwijderen`,()=>deleteShapeWithContour(s.id));showPage("objects");afterProjectChange(`Vorm ${s.name} en contour verwijderd.`);});
+  bind("deleteShapeOnlyBtn","click",()=>{const s=getShape(S.selectedShapeId);if(!s)throw new Error("Geen vorm geselecteerd.");runHistoryAction(`Vorm ${s.name} verwijderen`,()=>{const ai=getAiObjectForShape(s.id);if(ai)deleteAiObject(ai.id);deleteShapeOnly(s.id);});showPage("objects");afterProjectChange(`Vorm ${s.name} verwijderd; gekoppeld AI-concept indien aanwezig ook verwijderd.`);});
+  bind("deleteShapeContourBtn","click",()=>{const s=getShape(S.selectedShapeId);if(!s)throw new Error("Geen vorm geselecteerd.");runHistoryAction(`Vorm ${s.name} + contour verwijderen`,()=>{const ai=getAiObjectForShape(s.id);if(ai)deleteAiObject(ai.id);deleteShapeWithContour(s.id);});showPage("objects");afterProjectChange(`Vorm ${s.name}, contour en gekoppeld AI-concept verwijderd.`);});
 
-  bind("clearAllBtn","click",()=>showPage("clear"));bind("cancelClearBtn","click",()=>showPage("home",false));bind("confirmClearBtn","click",()=>{runHistoryAction("Alles wissen",()=>{clearCadRuntime();S.project.cad={models:[]};clearWalls();clearAllGeometry();clearProjectReferences();resetDrawingCore();});closeMenu();el("distance").textContent="—";el("hint").textContent="Alles gewist. Open ☰ om opnieuw te beginnen.";afterProjectChange("Alles gewist.");});
+  bind("clearAllBtn","click",()=>showPage("clear"));bind("cancelClearBtn","click",()=>showPage("home",false));bind("confirmClearBtn","click",()=>{runHistoryAction("Alles wissen",()=>{clearCadRuntime();S.project.cad={models:[]};clearAiBuilderObjects();clearWalls();clearAllGeometry();clearProjectReferences();resetDrawingCore();});closeMenu();el("distance").textContent="—";el("hint").textContent="Alles gewist. Open ☰ om opnieuw te beginnen.";afterProjectChange("Alles gewist.");});
 
   bind("menuSettingsBtn","click",()=>showPage("settings"));
   bind("defaultUnit","change",()=>{S.defaults.unit=el("defaultUnit").value;el("hudUnit").value=S.defaults.unit;syncHud();});
@@ -606,6 +629,7 @@ bind("saveWallBtn","click",()=>{
   document.addEventListener("measurear:project-restored",()=>{syncHud();syncHistoryControls();renderObjects();syncProjectMeta();});
   document.addEventListener("measurear:project-meta-changed",syncProjectMeta);
   document.addEventListener("measurear:project-loaded",()=>{syncProjectMeta();renderObjects();renderCadPage();syncHistoryControls();});
+  document.addEventListener("measurear:ai-builder-changed",()=>{if(document.getElementById("page-aibuilder")?.classList.contains("active"))renderAiBuilder();});
   document.addEventListener("measurear:cad-changed",()=>{if(document.getElementById("page-cad")?.classList.contains("active"))renderCadPage();syncProjectMeta();});
   document.addEventListener("measurear:cad-return-ready",()=>{menuStack=["home","cad"];showPage("cad",false);renderCadPage();closeMenu();showStatus("CAD geladen · richt het vizier op de gewenste positie.");});
 

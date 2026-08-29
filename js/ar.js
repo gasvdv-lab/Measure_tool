@@ -1,9 +1,10 @@
-import {S,$} from "./state.js?v=0.8.28.10-20260829-theme";
-import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.28.10-20260829-theme";
-import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.28.10-20260829-theme";
-import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.28.10-20260829-theme";
-import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.28.10-20260829-theme";
-import {updateCadFrame,clearCadRuntime} from "./cad.js?v=0.8.28.10-20260829-theme";
+import {S,$} from "./state.js?v=0.8.29.0-20260829-ai-prototype";
+import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.29.0-20260829-ai-prototype";
+import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.29.0-20260829-ai-prototype";
+import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.29.0-20260829-ai-prototype";
+import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.29.0-20260829-ai-prototype";
+import {updateCadFrame,clearCadRuntime} from "./cad.js?v=0.8.29.0-20260829-ai-prototype";
+import {clearAiBuilderObjects} from "./ai-builder.js?v=0.8.29.0-20260829-ai-prototype";
 
 let samples=[],sampleSource=null,camPos,camQuat,forward;
 
@@ -98,7 +99,7 @@ function cleanup(){
     return;
   }
 
-  clearCadRuntime();clearWalls();clearAllGeometry();resetDrawingCore();
+  clearCadRuntime();clearAiBuilderObjects();clearWalls();clearAllGeometry();resetDrawingCore();
   $("overlay").style.display="none";$("app").style.display="grid";
   if($("startArBtn")){$("startArBtn").disabled=false;$("startArBtn").textContent="AR starten";}
   if($("launchStatus"))$("launchStatus").textContent="Tik om AR te starten.";
