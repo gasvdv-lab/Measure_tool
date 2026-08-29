@@ -1,26 +1,26 @@
-import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.22-20260829-1535";
+import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.23-20260829-1605";
 import {
   startTool,cancelTool,setPlacement,setDistance,setConstraint,setAngle,flipSide,setReferenceLine,setSnapMode,
   confirmCandidate,undoToolStep,finishTool,toolLabel,constraintLabel,getActivePoint,referenceRequired,resetDrawingCore
-} from "./drawing-core.js?v=0.8.22-20260829-1535";
+} from "./drawing-core.js?v=0.8.23-20260829-1605";
 import {
   createShape,updateShape,deleteShapeOnly,deleteShapeWithContour,deleteLineRaw,deletePointRaw,renamePoint,updateLine,analyzeContour,
   lineDependencies,pointDependencies,canDeleteLine,canDeletePoint,clearAllGeometry,validateGeometryState,dispose
-} from "./geometry.js?v=0.8.22-20260829-1535";
-import {startAR,applyZoom} from "./ar.js?v=0.8.22-20260829-1535";
-import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.22-20260829-1535";
-import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.22-20260829-1535";
+} from "./geometry.js?v=0.8.23-20260829-1605";
+import {startAR,applyZoom} from "./ar.js?v=0.8.23-20260829-1605";
+import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.23-20260829-1605";
+import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.23-20260829-1605";
 import {
   initProjectStorage,saveCurrentProject,listProjects,loadStoredProject,newProject,duplicateStoredProject,
   deleteStoredProject,renameStoredProject,projectStats,formatStats,getStoredProjectInfo,hasRecovery,recoveryInfo,restoreRecovery,clearRecovery,
   exportCurrentProject,importProjectFile
-} from "./project-storage.js?v=0.8.22-20260829-1535";
+} from "./project-storage.js?v=0.8.23-20260829-1605";
 import {
   captureCurrentGeo,addProjectReference,removeProjectReference,beginRelocalization,cancelRelocalization,
-  captureRelocalizationPoint,solveRelocalization,applyRelocalization,relocalizationSummary
-} from "./relocalization.js?v=0.8.22-20260829-1535";
+  captureRelocalizationPoint,solveRelocalization,applyRelocalization,relocalizationSummary,beginSpatialRestore
+} from "./relocalization.js?v=0.8.23-20260829-1605";
 
-import {detachAllPointAnchors} from "./world-lock.js?v=0.8.22-20260829-1535";
+import {detachAllPointAnchors} from "./world-lock.js?v=0.8.23-20260829-1605";
 
 const pages=["home","project","references","relocalize","projects","objects","line","point","walltool","wallcreate","wall","openingcreate","opening","shapecreate","shape","settings","clear"];
 let menuStack=["home"];
@@ -53,7 +53,7 @@ function togglePopover(id){
 }
 function showPage(name,push=true){
   pages.forEach(p=>el("page-"+p)?.classList.remove("active"));const page=el("page-"+name);if(!page)throw new Error(`Menupagina ontbreekt: ${name}`);page.classList.add("active");
-  const titles={home:"Measure AR",project:"Project",references:"Projectreferenties",relocalize:"Project uitlijnen",projects:"Mijn projecten",objects:"Objecten",line:"Lijn",point:"Punt",walltool:"Muur tekenen",wallcreate:"Muur maken",wall:"Muur",openingcreate:"Opening toevoegen",opening:"Opening",shapecreate:"Vorm opslaan",shape:"Vorm",settings:"Instellingen",clear:"Alles wissen"};
+  const titles={home:"Measure AR",project:"Project",references:"Projectreferenties",relocalize:"Projectpositie herstellen",projects:"Mijn projecten",objects:"Objecten",line:"Lijn",point:"Punt",walltool:"Muur tekenen",wallcreate:"Muur maken",wall:"Muur",openingcreate:"Opening toevoegen",opening:"Opening",shapecreate:"Vorm opslaan",shape:"Vorm",settings:"Instellingen",clear:"Alles wissen"};
   el("menuTitle").textContent=titles[name]||name;if(push&&menuStack.at(-1)!==name)menuStack.push(name);el("menuBackBtn").style.visibility=name==="home"?"hidden":"visible";if(name==="objects")renderObjects();if(name==="project")renderProjectPage();if(name==="references")renderReferenceManager();if(name==="relocalize")renderRelocalizePage();if(name==="projects")renderProjectsList();
 }
 function openMenu(){menuStack=["home"];showPage("home",false);el("menuPanel").classList.add("open");el("menuMeta").textContent=`${S.project.name||"Project"} · v${S.version}`;closePopovers();}
@@ -268,7 +268,13 @@ function renderProjectsList(){
     panel.append(rename,duplicate,del);
     open.onclick=()=>{
       if(S.project.dirty&&(S.points.length||S.lines.length||S.walls.length||S.shapes.length)&&!confirm("Er zijn niet-opgeslagen wijzigingen. Ander project openen en deze wijzigingen verlaten?"))return;
-      const e=loadStoredProject(p.id);afterProjectChange(`✓ Project ${e.project.name} geopend.`);closeMenu();
+      const e=loadStoredProject(p.id);
+      const refs=S.project.relocalization.references?.length||0;
+      if(refs){
+        beginSpatialRestore();
+        showPage("relocalize",false);renderRelocalizePage();
+        showStatus(`Project ${e.project.name} geladen · herstel positie met ${refs} opgeslagen referentiepunt(en).`);
+      }else{afterProjectChange(`✓ Project ${e.project.name} geopend.`);closeMenu();}
     };
     more.onclick=()=>panel.classList.toggle("open");
     duplicate.onclick=()=>{const n=prompt("Naam voor kopie",`${p.name} kopie`);if(!n)return;const e=duplicateStoredProject(p.id,n);showStatus(`✓ Kopie ${e.project.name} opgeslagen.`);renderProjectsList();};
@@ -354,7 +360,7 @@ export function initUI(){
   });
   bind("relocalizeMode","change",()=>renderRelocalizePage());
   bind("startRelocalizeBtn","click",()=>{
-    beginRelocalization(el("relocalizeMode").value);renderRelocalizePage();showStatus("Heruitlijning gestart. Wijs de gewenste referentiepunten opnieuw aan.");
+    beginRelocalization(el("relocalizeMode").value);renderRelocalizePage();showStatus("Positieherstel gestart. Wijs dezelfde fysieke referentiepunten opnieuw aan.");
   });
   let lastRelocalizationResult=null;
   bind("solveRelocalizeBtn","click",()=>{

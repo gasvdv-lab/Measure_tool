@@ -1,5 +1,5 @@
 export const S={
-  version:"0.8.22",build:"20260829-1515",
+  version:"0.8.23",build:"20260829-1605",
   THREE:null,renderer:null,scene:null,camera:null,reticle:null,xrSession:null,hitSource:null,hitRequested:false,
   currentTarget:null,targetSource:"none",zoom:1,pointPlacementEpoch:0,
   points:[],lines:[],contours:[],shapes:[],walls:[],openings:[],

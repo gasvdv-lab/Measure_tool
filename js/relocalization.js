@@ -1,6 +1,6 @@
-import {S,getPoint} from "./state.js?v=0.8.22-20260829-1535";
-import {snapshotProject,restoreProject} from "./history.js?v=0.8.22-20260829-1535";
-import {validateGeometryState} from "./geometry.js?v=0.8.22-20260829-1535";
+import {S,getPoint} from "./state.js?v=0.8.23-20260829-1605";
+import {snapshotProject,restoreProject} from "./history.js?v=0.8.23-20260829-1605";
+import {validateGeometryState} from "./geometry.js?v=0.8.23-20260829-1605";
 
 const EPS=1e-9;
 function v3(x=0,y=0,z=0){return new S.THREE.Vector3(x,y,z);}
@@ -188,6 +188,9 @@ export function applyRelocalization(result){
     const snap=snapshotProject();
     restoreProject(snap);
     const check=validateGeometryState();if(!check.ok)throw new Error(check.errors[0]);
+    const origin=S.project.spatial?.projectOrigin||{x:0,y:0,z:0};
+    const originWorld=applyRigid(v3(origin.x,origin.y,origin.z),result.R,result.t);
+    S.project.spatial={...(S.project.spatial||{}),projectOrigin:{...origin},restoredWorldOrigin:{x:originWorld.x,y:originWorld.y,z:originWorld.z},restoredAt:nowIso()};
     S.project.relocalization.lastResult={
       method:result.method,count:result.count,mean:result.mean,max:result.max,rms:result.rms,quality:result.quality,appliedAt:nowIso()
     };
@@ -204,6 +207,24 @@ export function referenceDistances(){
   const refs=S.project.relocalization.references.map(r=>({...r,p:v3(r.projectPosition.x,r.projectPosition.y,r.projectPosition.z)}));
   const out=[];for(let i=0;i<refs.length;i++)for(let j=i+1;j<refs.length;j++)out.push({a:refs[i].id,b:refs[j].id,distance:refs[i].p.distanceTo(refs[j].p)});
   return out;
+}
+
+export function spatialRestoreStatus(){
+  const refs=S.project.relocalization.references||[];
+  const spatial=S.project.spatial||{};
+  return {
+    ready:refs.length>=2,
+    referenceCount:refs.length,
+    projectOrigin:{...(spatial.projectOrigin||{x:0,y:0,z:0})},
+    recommended:refs.length>=4?"precision":refs.length===3?"3":refs.length===2?"2":"1"
+  };
+}
+
+export function beginSpatialRestore(){
+  const status=spatialRestoreStatus();
+  if(!status.referenceCount)throw new Error("Dit project heeft geen opgeslagen positie-referenties.");
+  beginRelocalization(status.recommended);
+  return status;
 }
 
 export function relocalizationSummary(){
