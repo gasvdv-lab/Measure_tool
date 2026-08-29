@@ -1,4 +1,4 @@
-import {S,$,fmt,pointName,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.21.1-20260829-0825";
+import {S,$,fmt,pointName,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.21.2-20260829-0915";
 
 export function dispose(obj){
   if(!obj||!S.scene)return;
@@ -336,8 +336,17 @@ export function validateGeometryState(){
     for(const pid of s.pointIds||[])if(!pointIds.has(pid))errors.push(`Vorm ${s.name||s.id} verwijst naar ontbrekend punt.`);
     for(const lid of s.lineIds||[])if(!lineIds.has(lid))errors.push(`Vorm ${s.name||s.id} verwijst naar ontbrekende lijn.`);
   }
+  const wallIds=new Set(S.walls.map(w=>w.id)),openingIds=new Set(S.openings.map(o=>o.id));
+  if(wallIds.size!==S.walls.length)errors.push("Dubbele muur-ID.");
+  if(openingIds.size!==S.openings.length)errors.push("Dubbele opening-ID.");
   for(const w of S.walls){
     if(!lineIds.has(w.lineId))errors.push(`Muur ${w.name||w.id} verwijst naar ontbrekende basislijn.`);
+    if(!(Number.isFinite(w.height)&&w.height>0&&Number.isFinite(w.thickness)&&w.thickness>0))errors.push(`Muur ${w.name||w.id} heeft ongeldige afmetingen.`);
+    if(S.scene&&(!w.mesh||w.mesh.parent!==S.scene))errors.push(`Muur ${w.name||w.id} heeft geen geldige scèneweergave.`);
+  }
+  if(S.scene?.traverse){
+    const rendered=[];S.scene.traverse(o=>{if(o?.userData?.measureArType==="wall")rendered.push(o.userData.wallId);});
+    for(const id of rendered)if(!wallIds.has(id))errors.push(`Wees-muur in scène: ${id}.`);
   }
   for(const o of S.openings){
     const w=S.walls.find(x=>x.id===o.wallId);

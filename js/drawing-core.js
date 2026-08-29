@@ -1,7 +1,7 @@
-import {S,$,fmt,getPoint,getLine} from "./state.js?v=0.8.21.1-20260829-0825";
-import {createPoint,createLine,deleteLineRaw,deletePointRaw,createContour,dispose,analyzeShapePoints} from "./geometry.js?v=0.8.21.1-20260829-0825";
-import {snapshotProject,commitSnapshot,undoHistory} from "./history.js?v=0.8.21.1-20260829-0825";
-import {createWall,nextWallName} from "./walls.js?v=0.8.21.1-20260829-0825";
+import {S,$,fmt,getPoint,getLine} from "./state.js?v=0.8.21.2-20260829-0915";
+import {createPoint,createLine,deleteLineRaw,deletePointRaw,createContour,dispose,analyzeShapePoints} from "./geometry.js?v=0.8.21.2-20260829-0915";
+import {snapshotProject,commitSnapshot,undoHistory} from "./history.js?v=0.8.21.2-20260829-0915";
+import {createWall,nextWallName} from "./walls.js?v=0.8.21.2-20260829-0915";
 
 const REF_MODES=new Set(["parallel","perpendicular","angle"]);
 const TOOL_NAMES={line:"LIJN",polyline:"POLYLIJN",shape:"VORM",stake:"UITZETTEN",wall:"MUUR"};
@@ -87,9 +87,10 @@ function directionForExact(ray,hit=null){
     dir=aim.sub(active.position);
     dir.y=0;
   }else if(kind==="vertical"){
-    const aim=closestPointVertical(ray,active.position);
-    if(!aim)throw new Error("Richt het vizier dichter langs de verticale lijn door het vertrekpunt.");
-    dir=aim.sub(active.position);
+    // Exact verticaal moet stabiel zijn: de camera bepaalt niet continu de
+    // eindpositie. De gekozen richting (omhoog/omlaag) bepaalt uitsluitend
+    // het teken; de ingestelde afstand bepaalt de positie.
+    dir=new S.THREE.Vector3(0,S.tool.side>=0?1:-1,0);
   }else if(kind==="surface"){
     const aim=intersectRayPlane(ray,activePlane);
     if(!aim)throw new Error("Richt het vizier duidelijker naar het actieve tekenvlak.");
@@ -118,7 +119,9 @@ function manualCandidate(active,hit,ray){
     return intersectRayPlane(ray,worldHorizontalPlane(active.position));
   }
   if(kind==="vertical"){
-    return closestPointVertical(ray,active.position);
+    const q=closestPointVertical(ray,active.position);if(!q)return null;
+    const dy=Math.abs(q.y-active.position.y);
+    return active.position.clone().add(new S.THREE.Vector3(0,(S.tool.side>=0?1:-1)*dy,0));
   }
   if(kind==="surface"){
     return intersectRayPlane(ray,activePlane);
@@ -132,7 +135,11 @@ function manualCandidate(active,hit,ray){
   }else if(kind==="angle"){
     const ref=requireReference(activePlane);dir=rotateInPlane(ref,activePlane,S.tool.angleDeg*S.tool.side);
   }
-  const delta=raw.clone().sub(active.position),scalar=delta.dot(dir);
+  const delta=raw.clone().sub(active.position);
+  // De gekozen zijde/richting moet ook in AUTO een werkelijk effect hebben.
+  // Voorheen veranderde `side` zowel dir als de projectiescalar van teken,
+  // waardoor beide tekens elkaar ophieven en links/rechts identiek waren.
+  const scalar=Math.abs(delta.dot(dir));
   return active.position.clone().add(dir.clone().multiplyScalar(scalar));
 }
 
@@ -348,7 +355,11 @@ export function setDistance(value,unit="cm"){
   const n=Number(value);if(!Number.isFinite(n)||n<=0)throw new Error("Geef een geldige afstand.");
   S.tool.distanceM=unit==="m"?n:n/100;document.dispatchEvent(new CustomEvent("measurear:tool-settings"));
 }
-export function setConstraint(mode){S.tool.constraint=mode||"free";document.dispatchEvent(new CustomEvent("measurear:tool-settings"));}
+export function setConstraint(mode){
+  const valid=new Set(["free","horizontal","vertical","surface","parallel","perpendicular","angle"]);
+  S.tool.constraint=valid.has(mode)?mode:"free";
+  document.dispatchEvent(new CustomEvent("measurear:tool-settings"));
+}
 export function setAngle(deg){const n=Number(deg);if(!Number.isFinite(n))throw new Error("Ongeldige hoek.");S.tool.angleDeg=n;document.dispatchEvent(new CustomEvent("measurear:tool-settings"));}
 export function flipSide(){S.tool.side*=-1;document.dispatchEvent(new CustomEvent("measurear:tool-settings"));}
 export function setReferenceLine(id){S.tool.referenceLineId=id||null;document.dispatchEvent(new CustomEvent("measurear:tool-settings"));}
@@ -374,6 +385,8 @@ export function updateCandidate({hit=null,hitNormal=null,ray=null}={}){
       if(!pos)throw new Error("Geen geldig kandidaatpunt in deze richting.");
     }
     const snapped=snapCandidate(pos,active);
+    if(active&&!positionSatisfiesConstraint(snapped.position,active,.006))throw new Error("Interne controle: kandidaat voldoet niet aan de gekozen richting.");
+    if(active&&S.tool.placement==="metric"&&Math.abs(active.position.distanceTo(snapped.position)-S.tool.distanceM)>.006)throw new Error("Interne controle: kandidaat wijkt af van de ingestelde afstand.");
     S.tool.candidate={valid:true,position:snapped.position,snappedPointId:snapped.snappedPointId,snappedLineId:snapped.snappedLineId,snapType:snapped.snapType,snapLabel:snapped.snapLabel,surfaceNormal:planeNormal,reason:""};
   }catch(err){
     S.tool.candidate={valid:false,position:null,snappedPointId:null,snappedLineId:null,snapType:null,snapLabel:"",surfaceNormal:null,reason:err.message||String(err)};

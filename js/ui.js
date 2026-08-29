@@ -1,24 +1,24 @@
-import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.21.1-20260829-0825";
+import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.21.2-20260829-0915";
 import {
   startTool,cancelTool,setPlacement,setDistance,setConstraint,setAngle,flipSide,setReferenceLine,setSnapMode,
   confirmCandidate,undoToolStep,finishTool,toolLabel,constraintLabel,getActivePoint,referenceRequired,resetDrawingCore
-} from "./drawing-core.js?v=0.8.21.1-20260829-0825";
+} from "./drawing-core.js?v=0.8.21.2-20260829-0915";
 import {
   createShape,updateShape,deleteShapeOnly,deleteShapeWithContour,deleteLineRaw,deletePointRaw,renamePoint,updateLine,analyzeContour,
   lineDependencies,pointDependencies,canDeleteLine,canDeletePoint,clearAllGeometry,validateGeometryState,dispose
-} from "./geometry.js?v=0.8.21.1-20260829-0825";
-import {startAR,applyZoom} from "./ar.js?v=0.8.21.1-20260829-0825";
-import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.21.1-20260829-0825";
-import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.21.1-20260829-0825";
+} from "./geometry.js?v=0.8.21.2-20260829-0915";
+import {startAR,applyZoom} from "./ar.js?v=0.8.21.2-20260829-0915";
+import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.21.2-20260829-0915";
+import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.21.2-20260829-0915";
 import {
   initProjectStorage,saveCurrentProject,listProjects,loadStoredProject,newProject,duplicateCurrentProject,
   deleteStoredProject,renameStoredProject,projectStats,formatStats,hasRecovery,recoveryInfo,restoreRecovery,clearRecovery,
   exportCurrentProject,importProjectFile
-} from "./project-storage.js?v=0.8.21.1-20260829-0825";
+} from "./project-storage.js?v=0.8.21.2-20260829-0915";
 import {
   captureCurrentGeo,addProjectReference,removeProjectReference,beginRelocalization,cancelRelocalization,
   captureRelocalizationPoint,solveRelocalization,applyRelocalization,relocalizationSummary
-} from "./relocalization.js?v=0.8.21.1-20260829-0825";
+} from "./relocalization.js?v=0.8.21.2-20260829-0915";
 
 const pages=["home","project","references","relocalize","projects","objects","line","point","walltool","wallcreate","wall","openingcreate","opening","shapecreate","shape","settings","clear"];
 let menuStack=["home"];
@@ -93,9 +93,10 @@ function syncHudStatus(){
   el("hudReferenceChip").classList.toggle("optional",!needsRef);
   el("hudReferenceChip").textContent=`Ref: ${ref?.name||"—"}`;
 
-  const sideRelevant=["parallel","perpendicular","angle"].includes(S.tool.constraint);
+  const sideRelevant=["vertical","parallel","perpendicular","angle"].includes(S.tool.constraint);
   el("hudSideChip").classList.toggle("optional",!sideRelevant);
-  if(S.tool.constraint==="parallel")el("hudSideChip").textContent=`Richting: ${S.tool.side>0?"voor":"tegen"}`;
+  if(S.tool.constraint==="vertical")el("hudSideChip").textContent=`Richting: ${S.tool.side>0?"omhoog":"omlaag"}`;
+  else if(S.tool.constraint==="parallel")el("hudSideChip").textContent=`Richting: ${S.tool.side>0?"voor":"tegen"}`;
   else el("hudSideChip").textContent=`Zijde: ${S.tool.side>0?"links":"rechts"}`;
 
   const c=S.tool.candidate;
@@ -373,7 +374,7 @@ export function initUI(){
   });
   bind("hudAngle","input",()=>{setAngle(el("hudAngle").value);syncHud();});
   bind("hudSideBtn","click",()=>{flipSide();showStatus(`Zijde omgekeerd (${S.tool.side>0?"links/positief":"rechts/negatief"}).`);syncHud();});
-  bind("hudSideChip","click",()=>{flipSide();syncHud();showStatus(S.tool.constraint==="parallel"?`Parallelrichting ${S.tool.side>0?"voor":"tegen"} referentie.`:`Zijde ${S.tool.side>0?"links":"rechts"}.`);});
+  bind("hudSideChip","click",()=>{flipSide();syncHud();showStatus(S.tool.constraint==="vertical"?`Verticale richting: ${S.tool.side>0?"omhoog":"omlaag"}.`:S.tool.constraint==="parallel"?`Parallelrichting ${S.tool.side>0?"voor":"tegen"} referentie.`:`Zijde ${S.tool.side>0?"links":"rechts"}.`);});
   bind("hudLastReferenceBtn","click",()=>{
     const l=S.lines.at(-1);if(!l)throw new Error("Er bestaat nog geen lijn om als referentie te gebruiken.");
     setReferenceLine(l.id);syncHud();

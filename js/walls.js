@@ -1,6 +1,6 @@
 
-import {S,getPoint,getLine} from "./state.js?v=0.8.21.1-20260829-0825";
-import {dispose} from "./geometry.js?v=0.8.21.1-20260829-0825";
+import {S,getPoint,getLine} from "./state.js?v=0.8.21.2-20260829-0915";
+import {dispose} from "./geometry.js?v=0.8.21.2-20260829-0915";
 
 function cleanName(name){return String(name||"").trim().replace(/\s+/g," ");}
 export function wallNameExists(name,excludeId=null){
@@ -62,6 +62,7 @@ function buildMesh(wall){
   const openings=S.openings.filter(o=>o.wallId===wall.id).sort((a,b)=>a.x-b.x);
 
   const group=new T.Group();
+  group.userData={...(group.userData||{}),measureArType:"wall",wallId:wall.id};
   const mat=new T.MeshBasicMaterial({
     color:wall.color,transparent:true,opacity:wall.opacity,
     side:T.DoubleSide,depthWrite:false
