@@ -1,3 +1,10 @@
+# Measure AR v0.8.29.1 — CAD Preview
+
+## Nieuw in v0.8.29.1
+CAD-import heeft nu een verplichte 3D-preview buiten WebXR. Na bestandskeuze wordt het GLB/glTF-model eerst in een normale 3D-viewer getoond. De gebruiker kan draaien, zoomen en vaste 3D/boven/vooraanzichten kiezen. Measure AR toont vóór acceptatie de 1:1-afmetingen, mesh- en triangle-aantallen en bestandsgrootte. Een waarschuwing verschijnt bij ongebruikelijk grote modellen; de app schaalt nooit automatisch.
+
+Pas na **Model gebruiken** wordt het bronbestand in IndexedDB opgeslagen en aan het actieve recovery-project gekoppeld. **Terug naar Measure AR en plaatsen** start daarna de bestaande AR-placementflow. De AI Builder uit v0.8.29.0 blijft behouden. De openstaande reference-capturebug bij **Project op locatie plaatsen** is niet onderdeel van deze release.
+
 # Measure AR v0.8.29.0 — AI Builder Prototype
 
 App: https://gasvdv-lab.github.io/Measure_tool/

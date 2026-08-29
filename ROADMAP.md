@@ -1,6 +1,16 @@
 # Measure AR Roadmap
 
-## Huidige versie: v0.8.29.0 — AI Builder Prototype
+## Huidige versie: v0.8.29.1 — CAD Preview
+
+## v0.8.29.1 — CAD Preview ✅
+- [x] GLB/glTF-preview buiten WebXR vóór importacceptatie.
+- [x] Orbit/zoom en vaste 3D-, boven- en vooraanzichten.
+- [x] 1:1-afmetingen, mesh/triangle-aantallen en bestandsgrootte vóór AR tonen.
+- [x] Geen automatische schaalcorrectie; alleen waarschuwing bij verdachte afmetingen.
+- [x] Bestand pas na expliciet **Model gebruiken** in IndexedDB/project opnemen.
+- [ ] AR-ANDROID: preview → Model gebruiken → terug naar AR → CAD plaatsen fysiek testen.
+- [ ] Openstaand: reference-capture / Project op locatie plaatsen later verder repareren.
+
 
 - [x] AI Builder als geïsoleerde experimentele module toegevoegd.
 - [x] Conceptmodus: geselecteerde vorm als exacte footprint.

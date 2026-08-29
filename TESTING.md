@@ -1,3 +1,16 @@
+# Measure AR TESTING
+
+## v0.8.29.1 — CAD Preview
+- [x] AUTO: JavaScript syntaxcontrole.
+- [x] AUTO: relatieve module-imports bestaan.
+- [x] AUTO: release bevat geen TEST_RESULTS-bestanden.
+- [ ] PC/ANDROID: GLB kiezen → preview zichtbaar.
+- [ ] PC/ANDROID: orbit/zoom + 3D/boven/voor.
+- [ ] PC/ANDROID: afmetingen vergelijken met bronmodel.
+- [ ] AR-ANDROID: Model gebruiken → terug naar AR → 1:1 plaatsing.
+- [ ] AR-ANDROID: bestaand project/geometrie blijft behouden tijdens previewflow.
+- [ ] OPEN: Project op locatie plaatsen / reference-capturebug blijft geparkeerd.
+
 # Testing — Measure AR
 
 ## v0.8.29.0 — AI Builder Prototype

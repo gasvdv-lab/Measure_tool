@@ -2,7 +2,7 @@
 
 Actuele cumulatieve modulehandleiding. Bij iedere release moet dit document worden bijgewerkt wanneer een module of werking verandert.
 
-**Huidige appversie:** v0.8.29.0
+**Huidige appversie:** v0.8.29.1
 
 ## 1. AR Core
 **Status:** actief / core.  
@@ -78,3 +78,9 @@ Projectmutaties worden als snapshots bijgehouden. Vanaf v0.8.29.0 vallen AI-conc
 ## 13. Toekomstige Measure Engine
 **Status:** gepland.  
 De meetfunctionaliteit wordt later aanzienlijk uitgebreid. Dezelfde meetengine moet uiteindelijk ook op CAD- en Buildergeometrie kunnen werken.
+
+
+## CAD Preview
+**Status:** actief vanaf v0.8.29.1.
+
+Losse niet-AR 3D-preview tussen bestandskeuze en CAD-placement. Toont het model 1:1, vaste aanzichten, afmetingen en modelcomplexiteit. De preview verandert de geometrie of schaal niet. Pas na expliciete acceptatie wordt het model aan het project toegevoegd.
