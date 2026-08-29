@@ -1,6 +1,6 @@
 # Measure AR — TESTING
 
-## Huidige verplichte gate — v0.8.21.5 Project Manager Stability
+## Huidige verplichte gate — v0.8.21.6 Project Manager Stability
 - `AR-IN`: twee projecten opslaan en kruislings openen.
 - `AR-IN`: project kopiëren zonder actieve scène te wijzigen.
 - `AR-IN`: niet-actief en actief project wissen.
@@ -17,7 +17,7 @@
 - **AR-IN/ROOM** — smartphone binnen op meterschaal.
 - **AR-OUT** — smartphone buiten voor terrein/GPS/nauwkeurigheid.
 
-## Huidige verplichte gate — v0.8.21.5 Shape Closure + World Lock
+## Huidige verplichte gate — v0.8.21.6 Shape Closure + World Lock
 Voer deze test **eerst** uit. Stop bij een fout en ga niet verder met Relocalization.
 
 1. Start een volledig nieuwe AR-sessie.
@@ -59,3 +59,13 @@ Niet-uitgevoerde fysieke tests blijven open en worden naar volgende versies meeg
 
 ## A4-testbench
 Een gestandaardiseerd afdrukbaar testblad blijft gepland. Afdrukken op 100% schaal, nooit 'passen aan pagina'.
+
+
+## v0.8.21.6 — Project Manager UX
+- Projectmanager blijft een overlay boven de actieve AR-sessie.
+- Openen, Opslaan, Opslaan als, Nieuw, Importeren en Herstel sluiten de manager en keren terug naar AR.
+- Wissen, Hernoemen en Kopiëren blijven in Mijn projecten.
+- Mijn projecten gebruikt duidelijke kaarten met ACTIEF-status, statistieken, Openen en een compact Meer-menu.
+- Zichtbare toast-feedback voor opslaan/openen/kopiëren/hernoemen/wissen.
+- Permanente projectstatus in de AR-topbalk: opgeslagen of gewijzigd.
+- Startscherm wordt niet gebruikt als bestemming van Project Manager-acties.

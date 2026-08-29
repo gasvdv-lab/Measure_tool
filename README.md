@@ -1,10 +1,10 @@
-# Measure AR v0.8.21.5 — Project Manager Stability
+# Measure AR v0.8.21.6 — Project Manager Stability
 Build: 20260829-1305
 
 ## Doel van deze upgrade
 Deze versie stabiliseert het volledige projectbeheer. De AR-tekenengine en World Lock worden bewust niet functioneel uitgebreid.
 
-## Nieuw in v0.8.21.5
+## Nieuw in v0.8.21.6
 - **Kopiëren zonder projectwissel:** een opgeslagen project wordt rechtstreeks uit storage gekopieerd; het bronproject wordt niet eerst geopend.
 - **Veilig wissen:** na wissen blijft `Mijn projecten` geopend. Een niet-actief project wissen verandert de huidige scène niet.
 - **Actief project wissen zonder werkverlies:** de geopende geometrie blijft bestaan als `Niet-opgeslagen kopie van ...`, krijgt een nieuwe ID en recovery.
@@ -20,8 +20,8 @@ Deze versie stabiliseert het volledige projectbeheer. De AR-tekenengine en World
 
 Vaste app-link: https://gasvdv-lab.github.io/Measure_tool/
 
-## AUTO teststatus v0.8.21.5
-Zie `TEST_RESULTS_v0.8.21.5.md`. De releasecontrole omvat syntax/imports/cache-key plus gerichte broninvarianten voor save/open/copy/delete/recovery/import.
+## AUTO teststatus v0.8.21.6
+Zie `TEST_RESULTS_v0.8.21.6.md`. De releasecontrole omvat syntax/imports/cache-key plus gerichte broninvarianten voor save/open/copy/delete/recovery/import.
 
 ## Praktijktest projectbeheer
 1. Sla Project A en Project B op.
@@ -50,10 +50,10 @@ Zie `TEST_RESULTS_v0.8.21.5.md`. De releasecontrole omvat syntax/imports/cache-k
 
 Vaste app-link: https://gasvdv-lab.github.io/Measure_tool/
 
-## AUTO teststatus v0.8.21.5
+## AUTO teststatus v0.8.21.6
 - JavaScript-syntax van alle modules.
 - Alle relatieve ES-module-imports bestaan.
-- Uniforme cache/build-key `0.8.21.5-20260829-1305`.
+- Uniforme cache/build-key `0.8.21.6-20260829-1408`.
 - WebXR `anchors` is optioneel en `hit-test` blijft required.
 - Point create/delete lifecycle is gekoppeld aan World Lock queue/cleanup.
 - Projectpositie en worldPosition zijn gescheiden.
@@ -304,3 +304,13 @@ Vaste app-link:
 https://gasvdv-lab.github.io/Measure_tool/
 
 Upload de volledige inhoud van deze ZIP naar GitHub. `js/relocalization.js` is nieuw en moet mee.
+
+
+## v0.8.21.6 — Project Manager UX
+- Projectmanager blijft een overlay boven de actieve AR-sessie.
+- Openen, Opslaan, Opslaan als, Nieuw, Importeren en Herstel sluiten de manager en keren terug naar AR.
+- Wissen, Hernoemen en Kopiëren blijven in Mijn projecten.
+- Mijn projecten gebruikt duidelijke kaarten met ACTIEF-status, statistieken, Openen en een compact Meer-menu.
+- Zichtbare toast-feedback voor opslaan/openen/kopiëren/hernoemen/wissen.
+- Permanente projectstatus in de AR-topbalk: opgeslagen of gewijzigd.
+- Startscherm wordt niet gebruikt als bestemming van Project Manager-acties.

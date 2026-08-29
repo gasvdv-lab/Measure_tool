@@ -1,6 +1,6 @@
 # Measure AR — Master Roadmap
 
-**Huidige versie:** v0.8.21.5 — Project Manager Stability  
+**Huidige versie:** v0.8.21.6 — Project Manager Stability  
 **Huidige gate:** Project Manager Stability praktisch valideren; World Lock voor eenvoudige en samengestelde geometrie is door de gebruiker positief getest.
 
 ## Testcodes
@@ -8,7 +8,7 @@
 
 ## Nu — Core herstel
 
-### v0.8.21.5 — Project Manager Stability
+### v0.8.21.6 — Project Manager Stability
 - [x] Projectkopie loskoppelen van `loadStoredProject()`.
 - [x] Wissen van project laat `Mijn projecten` open.
 - [x] Niet-actief project wissen wijzigt actieve scène niet.
@@ -23,7 +23,7 @@
 - [ ] **AR-IN:** A/B save-open-copy-delete workflow praktisch valideren.
 - [ ] **AR-IN:** herstart + recovery + import/export praktisch valideren.
 
-### v0.8.21.5 — Shape Closure Fix
+### v0.8.21.6 — Shape Closure Fix
 - [x] WebXR Anchors als optionele sessiefeature toevoegen.
 - [x] Session-local anchor manager toevoegen.
 - [x] Projectpositie en actuele AR-worldpositie scheiden.
@@ -78,3 +78,13 @@
 - Objectlijsten alleen contextueel tonen.
 - Back/menu-navigatie altijd betrouwbaar houden.
 - De functie **Meten** blijft expliciet gepland voor de grote Measure Engine.
+
+
+## v0.8.21.6 — Project Manager UX
+- Projectmanager blijft een overlay boven de actieve AR-sessie.
+- Openen, Opslaan, Opslaan als, Nieuw, Importeren en Herstel sluiten de manager en keren terug naar AR.
+- Wissen, Hernoemen en Kopiëren blijven in Mijn projecten.
+- Mijn projecten gebruikt duidelijke kaarten met ACTIEF-status, statistieken, Openen en een compact Meer-menu.
+- Zichtbare toast-feedback voor opslaan/openen/kopiëren/hernoemen/wissen.
+- Permanente projectstatus in de AR-topbalk: opgeslagen of gewijzigd.
+- Startscherm wordt niet gebruikt als bestemming van Project Manager-acties.

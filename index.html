@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#111111">
-  <title>Measure AR v0.8.21.5</title>
-  <link rel="stylesheet" href="./css/app.css?v=0.8.21.5-20260829-1305">
+  <title>Measure AR v0.8.21.6</title>
+  <link rel="stylesheet" href="./css/app.css?v=0.8.21.6-20260829-1408">
 </head>
 <body>
 <div id="app">
@@ -13,18 +13,19 @@
     <div class="logo">⌖</div><h1>Measure AR</h1>
     <p id="launchStatus">Tik om AR te starten.</p>
     <div id="startupRecovery" class="help" style="display:none"></div>
-    <div id="buildInfo" class="build">v0.8.21.5 · Project Manager Stability · 20260829-1305</div>
+    <div id="buildInfo" class="build">v0.8.21.6 · Project Manager UX · 20260829-1408</div>
     <button id="startArBtn" class="primary">AR starten</button>
     <div id="error" class="error"></div>
   </main>
 </div>
 
 <div id="overlay">
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <header id="topbar">
     <div class="status">
       <div id="stage">Kies een tekenfunctie</div>
       <div id="distance">—</div>
-      <div id="detail"></div>
+      <div id="detail"></div><div id="projectQuickState" class="projectQuickState">Nieuw project · niet opgeslagen</div>
       <div id="stability">Stabiliteit: —</div>
     </div>
     <button id="menuBtn" class="menuBtn">☰</button>
@@ -33,7 +34,7 @@
   <aside id="menuPanel">
     <div class="menuHead">
       <button id="menuBackBtn" class="secondary">‹</button>
-      <div><strong id="menuTitle">Measure AR</strong><small id="menuMeta">v0.8.21.5</small></div>
+      <div><strong id="menuTitle">Measure AR</strong><small id="menuMeta">v0.8.21.6</small></div>
       <button id="menuCloseBtn" class="secondary">✕</button>
     </div>
     <div class="menuBody">
@@ -119,7 +120,10 @@
 
       <section id="page-projects" class="page">
         <h3>Mijn projecten</h3>
-        <div id="projectsList" class="menuCard"></div>
+        <div class="menuCard projectListIntro">
+          <div class="help">Tik op <strong>Openen</strong> om een project te laden. Beheeracties blijven in dit scherm; openen brengt je automatisch terug naar AR.</div>
+        </div>
+        <div id="projectsList" class="menuCard projectsGrid"></div>
       </section>
 
       <section id="page-objects" class="page"><h3>Objecten</h3><div id="objectsList" class="menuCard"></div></section>
@@ -351,6 +355,6 @@
   <div id="hint">Open ☰ en kies wat je wilt tekenen.</div>
 </div>
 
-<script type="module" src="./js/bootstrap.js?v=0.8.21.5-20260829-1305"></script>
+<script type="module" src="./js/bootstrap.js?v=0.8.21.6-20260829-1408"></script>
 </body>
 </html>
