@@ -1,8 +1,8 @@
-import {S,getPoint,getLine,getContour} from "./state.js?v=0.8.28.2-20260829-2100";
+import {S,getPoint,getLine,getContour} from "./state.js?v=0.8.28.3-20260829-2125";
 import {
   createPoint,createLine,createShape,clearAllGeometry,validateGeometryState
-} from "./geometry.js?v=0.8.28.2-20260829-2100";
-import {createWall,createOpening,clearWalls} from "./walls.js?v=0.8.28.2-20260829-2100";
+} from "./geometry.js?v=0.8.28.3-20260829-2125";
+import {createWall,createOpening,clearWalls} from "./walls.js?v=0.8.28.3-20260829-2125";
 
 function vec(v){return v?{x:v.x,y:v.y,z:v.z}:null;}
 function vec3(v){return v?new S.THREE.Vector3(v.x,v.y,v.z):null;}

@@ -1,9 +1,9 @@
-import {S,$} from "./state.js?v=0.8.28.2-20260829-2100";
-import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.28.2-20260829-2100";
-import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.28.2-20260829-2100";
-import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.28.2-20260829-2100";
-import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.28.2-20260829-2100";
-import {updateCadFrame,clearCadRuntime} from "./cad.js?v=0.8.28.2-20260829-2100";
+import {S,$} from "./state.js?v=0.8.28.3-20260829-2125";
+import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.28.3-20260829-2125";
+import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.28.3-20260829-2125";
+import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.28.3-20260829-2125";
+import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.28.3-20260829-2125";
+import {updateCadFrame,clearCadRuntime} from "./cad.js?v=0.8.28.3-20260829-2125";
 
 let samples=[],sampleSource=null,camPos,camQuat,forward;
 
@@ -42,16 +42,35 @@ export function applyZoom(v){
   S.zoom=Math.max(1,Math.min(4,v));if($("zoomValue"))$("zoomValue").textContent=S.zoom.toFixed(1)+"×";
   if(S.camera){S.camera.fov=70/S.zoom;S.camera.updateProjectionMatrix();}
 }
+const sessionOptions={requiredFeatures:["hit-test"],optionalFeatures:["dom-overlay","anchors"],domOverlay:{root:document.body}};
+async function activateSession(session){
+  await loadThree();if(!S.renderer)init();
+  S.xrSession=session;configureWorldLock(session);await withTimeout(S.renderer.xr.setSession(session),6000,"AR-renderer koppelen");
+  S.renderer.domElement.style.display="block";$("app").style.display="none";$("overlay").style.display="block";
+  document.dispatchEvent(new CustomEvent("measurear:ar-ready"));
+  session.addEventListener("end",cleanup,{once:true});S.renderer.setAnimationLoop(render);return session;
+}
 export async function startAR(){
   if(!navigator.xr)throw new Error("WebXR niet beschikbaar in deze browser.");
   const supported=await withTimeout(navigator.xr.isSessionSupported("immersive-ar"),6000,"WebXR-ondersteuning controleren");
   if(!supported)throw new Error("Immersive AR is niet beschikbaar op dit toestel.");
   await loadThree();if(!S.renderer)init();
-  const session=await withTimeout(navigator.xr.requestSession("immersive-ar",{requiredFeatures:["hit-test"],optionalFeatures:["dom-overlay","anchors"],domOverlay:{root:document.body}}),10000,"AR-sessie starten");
-  S.xrSession=session;configureWorldLock(session);await withTimeout(S.renderer.xr.setSession(session),6000,"AR-renderer koppelen");
-  S.renderer.domElement.style.display="block";$("app").style.display="none";$("overlay").style.display="block";
-  document.dispatchEvent(new CustomEvent("measurear:ar-ready"));
-  session.addEventListener("end",cleanup,{once:true});S.renderer.setAnimationLoop(render);
+  const session=await withTimeout(navigator.xr.requestSession("immersive-ar",sessionOptions),10000,"AR-sessie starten");
+  return activateSession(session);
+}
+// Voor een hervatknop moet requestSession rechtstreeks in dezelfde gebruikers-tik
+// worden aangeroepen. Geen voorafgaande await/isSessionSupported: Android Chrome
+// kan anders de vereiste transient user activation verliezen.
+export async function resumeARFromGesture(){
+  if(!navigator.xr)throw new Error("WebXR niet beschikbaar in deze browser.");
+  if(S.xrSession)return S.xrSession;
+  let sessionPromise;
+  try{sessionPromise=navigator.xr.requestSession("immersive-ar",sessionOptions);}
+  catch(err){throw new Error(`AR hervatten kon niet starten: ${err?.message||err}`);}
+  try{
+    const [session]=await Promise.all([withTimeout(sessionPromise,10000,"AR hervatten"),loadThree()]);
+    return await activateSession(session);
+  }catch(err){throw new Error(`AR hervatten mislukt: ${err?.message||err}`);}
 }
 function cleanup(){
   const externalPicker=S.externalPicker;

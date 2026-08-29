@@ -1,29 +1,29 @@
-import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.28.2-20260829-2100";
+import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.28.3-20260829-2125";
 import {
   startTool,cancelTool,setPlacement,setDistance,setConstraint,setAngle,flipSide,setReferenceLine,setSnapMode,
   confirmCandidate,undoToolStep,finishTool,toolLabel,constraintLabel,getActivePoint,referenceRequired,resetDrawingCore
-} from "./drawing-core.js?v=0.8.28.2-20260829-2100";
+} from "./drawing-core.js?v=0.8.28.3-20260829-2125";
 import {
   createShape,updateShape,deleteShapeOnly,deleteShapeWithContour,deleteLineRaw,deletePointRaw,renamePoint,updateLine,analyzeContour,
   lineDependencies,pointDependencies,canDeleteLine,canDeletePoint,clearAllGeometry,validateGeometryState,dispose
-} from "./geometry.js?v=0.8.28.2-20260829-2100";
-import {startAR,applyZoom,resetTrackingSamples} from "./ar.js?v=0.8.28.2-20260829-2100";
-import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.28.2-20260829-2100";
-import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.28.2-20260829-2100";
+} from "./geometry.js?v=0.8.28.3-20260829-2125";
+import {startAR,resumeARFromGesture,applyZoom,resetTrackingSamples} from "./ar.js?v=0.8.28.3-20260829-2125";
+import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.28.3-20260829-2125";
+import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.28.3-20260829-2125";
 import {
   initProjectStorage,saveCurrentProject,listProjects,loadStoredProject,newProject,duplicateStoredProject,
   deleteStoredProject,renameStoredProject,projectStats,formatStats,getStoredProjectInfo,hasRecovery,recoveryInfo,restoreRecovery,clearRecovery,
   exportCurrentProject,importProjectFile,markDirtyAndRecover
-} from "./project-storage.js?v=0.8.28.2-20260829-2100";
+} from "./project-storage.js?v=0.8.28.3-20260829-2125";
 import {
   captureCurrentGeo,addProjectReference,removeProjectReference,clearProjectReferences,beginRelocalization,cancelRelocalization,
   captureRelocalizationPoint,solveRelocalization,applyRelocalization,relocalizationSummary,beginSpatialRestore
-} from "./relocalization.js?v=0.8.28.2-20260829-2100";
+} from "./relocalization.js?v=0.8.28.3-20260829-2125";
 
-import {captureHybridBaseline,assessHybridLocation,enableHeading} from "./hybrid-localization.js?v=0.8.28.2-20260829-2100";
+import {captureHybridBaseline,assessHybridLocation,enableHeading} from "./hybrid-localization.js?v=0.8.28.3-20260829-2125";
 
-import {detachAllPointAnchors} from "./world-lock.js?v=0.8.28.2-20260829-2100";
-import {importCadFile,listCadModels,cadStatus,selectCad,beginCadPlacement,rotateCad,moveCadHeight,confirmCadPlacement,cancelCadPlacement,deleteCadModel,clearCadRuntime} from "./cad.js?v=0.8.28.2-20260829-2100";
+import {detachAllPointAnchors} from "./world-lock.js?v=0.8.28.3-20260829-2125";
+import {importCadFile,listCadModels,cadStatus,selectCad,beginCadPlacement,rotateCad,moveCadHeight,confirmCadPlacement,cancelCadPlacement,deleteCadModel,clearCadRuntime,restoreCadRuntime} from "./cad.js?v=0.8.28.3-20260829-2125";
 
 const pages=["home","project","references","relocalize","projects","cad","objects","line","point","walltool","wallcreate","wall","openingcreate","opening","shapecreate","shape","settings","clear"];
 let menuStack=["home"];
@@ -437,9 +437,22 @@ export function initUI(){
   bind("cadResumeArBtn","click",async()=>{
     const models=listCadModels(),targetId=cadStatus().active?.id||models.find(m=>!m.placed)?.id||models.at(-1)?.id;
     if(!targetId)throw new Error("Geen CAD-model om te plaatsen.");
-    const restored=new Promise(resolve=>{let done=false;const finish=()=>{if(done)return;done=true;clearTimeout(timer);document.removeEventListener("measurear:cad-changed",finish);resolve();};const timer=setTimeout(finish,2500);document.addEventListener("measurear:cad-changed",finish,{once:true});});
-    await startAR();await restored;selectCad(targetId);beginCadPlacement(targetId);S.externalPicker=null;S.cadPickerLifecycle={active:false,returned:false};sessionStorage.removeItem("measurear.cadPickerActive");renderCadPage();returnToArView();
-    el("hint").textContent="AR hervat. Richt het vizier op de gewenste CAD-positie; open ☰ → CAD om te draaien/verhogen en te bevestigen.";showStatus("AR hervat · CAD-plaatsing actief.");
+    const btn=el("cadResumeArBtn"),oldText=btn.textContent;btn.disabled=true;btn.textContent="AR wordt hervat…";showStatus("AR wordt hervat…");
+    try{
+      // requestSession gebeurt onmiddellijk vanuit deze tik; dit is essentieel op Android Chrome.
+      await resumeARFromGesture();
+      // De vorige XR-sessie bevatte het CAD-object niet meer: expliciet opnieuw laden.
+      await restoreCadRuntime();
+      selectCad(targetId);beginCadPlacement(targetId);
+      S.externalPicker=null;S.cadPickerLifecycle={active:false,returned:false};sessionStorage.removeItem("measurear.cadPickerActive");
+      renderCadPage();returnToArView();
+      el("hint").textContent="AR hervat. Richt het vizier op de gewenste CAD-positie; open ☰ → CAD om te draaien/verhogen en te bevestigen.";showStatus("AR hervat · CAD-plaatsing actief.");
+    }catch(err){
+      // CAD-importtransactie actief houden: een resume-fout mag nooit naar Home leiden.
+      S.externalPicker={kind:"cad",page:"cad"};S.cadPickerLifecycle={active:true,returned:true};sessionStorage.setItem("measurear.cadPickerActive","1");
+      showPage("cad",false);el("menuPanel").classList.add("open");renderCadPage();
+      throw err;
+    }finally{btn.disabled=false;btn.textContent=oldText;}
   });
   bind("cadRotateLeftBtn","click",()=>{rotateCad(-5);markDirtyAndRecover();renderCadPage();});
   bind("cadRotateRightBtn","click",()=>{rotateCad(5);markDirtyAndRecover();renderCadPage();});

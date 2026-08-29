@@ -1,4 +1,4 @@
-import {S} from "./state.js?v=0.8.28.2-20260829-2100";
+import {S} from "./state.js?v=0.8.28.3-20260829-2125";
 
 function nowIso(){return new Date().toISOString();}
 function normDeg(v){return ((v%360)+360)%360;}
