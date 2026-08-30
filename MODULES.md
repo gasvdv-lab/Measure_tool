@@ -1,3 +1,16 @@
+# Module-update v0.8.36 — Clearance & Collision 2.0
+
+## Clearance Engine
+**Status:** foundation geïntegreerd; fysieke AR-gate vereist.
+
+Nieuwe module `js/clearance.js` behandelt object-object vrije ruimte als afzonderlijk meetobject. Ondersteunde doelen in deze fase: muren, shapes, AI Builder-objecten en geplaatste CAD-modellen. De engine gebruikt de actuele 3D-begrenzing uit de scene en berekent deterministisch X/Y/Z-scheiding, kortste Euclidische vrije ruimte, aanraking en AABB-overlap.
+
+Een opgeslagen clearancecheck bevat objectreferenties, naam, minimale vereiste afstand, eenheid en timestamps. Checks gaan mee in History/Undo/Redo en project snapshots/recovery.
+
+**Bewuste beperking:** v0.8.36 is AABB-gebaseerd. Dit is nog geen exacte mesh-collision, swept-volume of bewegingsruimte-engine.
+
+---
+
 # Module-update v0.8.35
 
 ## Measure Engine — Volume / Clearance Foundation

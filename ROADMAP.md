@@ -1,3 +1,20 @@
+# Measure AR roadmap — bijgewerkt v0.8.36
+
+## Huidige Measure Engine-fase
+- [x] v0.8.30 Measure Engine Foundation
+- [x] v0.8.31 Select/Edit + mm
+- [x] v0.8.32 Polyline + hoeken
+- [x] v0.8.32.1 Horizontal Axis Lock
+- [x] v0.8.33 Area Measurement
+- [x] v0.8.34 Height & Vertical Measurements
+- [x] v0.8.35 Volume / Clearance Foundation
+- [x] v0.8.36 Clearance & Collision 2.0 — object-object AABB, minimale vrije ruimte, opgeslagen checks
+- [ ] Volgende: Spatial Object / universele Select & Edit foundation
+
+De brede productvisie blijft **Measure · Place · Create · Experience · Verify**, met Capture contextueel. Wegenis-/bedrijfsspecifieke workflows horen niet in deze app.
+
+---
+
 # Measure AR roadmap — bijgewerkt v0.8.35
 
 ## Huidige Measure Engine-fase

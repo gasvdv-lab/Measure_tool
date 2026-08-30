@@ -1,3 +1,26 @@
+# Measure AR v0.8.36 — Clearance & Collision 2.0
+
+GitHub Pages: https://gasvdv-lab.github.io/Measure_tool/
+
+Deze release bouwt rechtstreeks verder op v0.8.35 en maakt vrije-ruimtecontrole objectgericht.
+
+## Nieuw in v0.8.36
+- Nieuwe pagina **Metingen → Vrije ruimte / collision**.
+- Kies twee ruimtelijke objecten: muur, vorm, AI-object of geplaatst CAD-model.
+- Deterministische 3D-bounding-boxanalyse berekent de kortste vrije ruimte tussen beide objecten.
+- Collision wordt gemeld wanneer de 3D-begrenzingen elkaar overlappen.
+- Stel een minimale vrije ruimte in en krijg **✓ voldoende** of **⚠ tekort** met marge/tekort.
+- Resultaat toont ook scheiding per X/Y/Z-as.
+- Vrije-ruimtecontroles worden als echte projectmeetobjecten opgeslagen en gaan mee in Undo/Redo, project save/recovery en heropenen.
+- mm/cm/m worden ondersteund voor de clearancecontrole.
+- De bestaande lijn-clearance uit v0.8.35 blijft beschikbaar.
+- Geen wijziging aan WebXR hit-test, World Lock of de bewezen punt-/lijnplaatsing.
+
+### Technische grens
+Deze versie gebruikt **axis-aligned 3D bounding boxes (AABB)**. Dat is snel, voorspelbaar en geschikt als foundation voor “past dit hier?”, maar is nog geen exacte mesh-tegen-mesh collision engine. Bij gedraaide of sterk onregelmatige modellen kan de begrenzing dus conservatief zijn.
+
+---
+
 
 ## v0.8.35 — Volume / Clearance Foundation
 

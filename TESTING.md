@@ -1,3 +1,34 @@
+# v0.8.36 — Clearance & Collision 2.0 — gerichte tests
+
+## AUTO
+- [x] JavaScript-syntaxcontrole op alle lokale JS-modules.
+- [x] Lokale importpaden bestaan.
+- [x] Eén uniforme build-ID `0.8.36-20260830-clearance-collision-2`.
+- [x] ZIP-integriteit controleren vóór release.
+
+## PC / zonder echte AR
+- [ ] Project openen met bestaande objecten: **Metingen → Vrije ruimte / collision** opent zonder fout.
+- [ ] Minder dan twee geschikte objecten geeft een duidelijke melding en blokkeert opslaan.
+- [ ] mm/cm/m wijzigen verandert alleen de presentatie/ingevoerde minimummaat.
+
+## AR-IN/ROOM
+1. Maak twee ruimtelijke objecten, bij voorkeur twee muren of een muur + AI-volume.
+2. Open **☰ → Metingen → Vrije ruimte / collision**.
+3. Kies Object A en Object B en tik **Analyseer nu**.
+4. Controleer dat een zichtbare tussenruimte als positieve vrije ruimte verschijnt.
+5. Stel een minimum kleiner dan de gemeten vrije ruimte in: verwacht **✓ marge**.
+6. Stel een minimum groter dan de gemeten vrije ruimte in: verwacht **⚠ tekort**.
+7. Maak/plaats de objecten zo dat hun 3D-begrenzingen overlappen: verwacht **⚠ COLLISION**.
+8. Sla de controle op. Controleer dat hij onder **Metingen** verschijnt.
+9. Test Undo/Redo.
+10. Sla het project op, heropen het en controleer dat de clearancecontrole bewaard blijft.
+11. Regressie: gewone lijn, polyline/hoeken, oppervlak, hoogte, volume en Horizontaal · asvast blijven werken.
+
+### CAD-test
+Wanneer een geplaatst CAD-model beschikbaar is, herhaal een controle **CAD ↔ muur/AI-object**. Na projectherstel kan de check tijdelijk “object niet beschikbaar” tonen totdat het CAD-model opnieuw in de scene geladen is.
+
+---
+
 # v0.8.35 gerichte tests
 
 ## AUTO

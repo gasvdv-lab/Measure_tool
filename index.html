@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#111111">
   <script>try{document.documentElement.dataset.appTheme=localStorage.getItem("measurear.ui.theme.v1")||"technical-green"}catch{document.documentElement.dataset.appTheme="technical-green"}</script>
   <title>Measure AR v0.8.30</title>
-  <link rel="stylesheet" href="./css/app.css?v=0.8.35-20260830-volume-clearance-foundation">
+  <link rel="stylesheet" href="./css/app.css?v=0.8.36-20260830-clearance-collision-2">
 </head>
 <body>
 <div id="app">
@@ -158,7 +158,25 @@
       <section id="page-measurements" class="page">
         <h3>Metingen</h3><div class="menuCard">
           <div id="measurementsSummary" class="help">Nog geen metingen.</div>
+          <button data-page="clearance" class="primary">Vrije ruimte / collision</button>
           <div id="measurementsList"></div>
+        </div>
+      </section>
+
+
+      <section id="page-clearance" class="page">
+        <h3>Vrije ruimte / collision</h3><div class="menuCard">
+          <p class="help">Vergelijk twee ruimtelijke objecten. v0.8.36 gebruikt hun 3D-begrenzing (bounding box): snel en deterministisch, maar nog geen exacte mesh-tegen-mesh botsingsanalyse.</p>
+          <div id="clearanceNoTargets" class="help"></div>
+          <label>Naam<input id="clearanceName" maxlength="40"></label>
+          <label>Object A<select id="clearanceObjectA"></select></label>
+          <label>Object B<select id="clearanceObjectB"></select></label>
+          <div class="grid2"><label>Minimum<input id="clearanceRequired" type="number" min="0" step="0.1" value="0"></label><label>Eenheid<select id="clearanceUnit"><option value="mm">mm</option><option value="cm" selected>cm</option><option value="m">m</option></select></label></div>
+          <button id="clearanceAnalyzeBtn" class="secondary">Analyseer nu</button>
+          <div id="clearanceResult" class="help">Kies twee objecten.</div>
+          <button id="clearanceSaveBtn" class="primary">Controle opslaan</button>
+          <button id="clearanceNewBtn" class="secondary">Nieuwe controle</button>
+          <h3>Opgeslagen controles</h3><div id="clearanceSavedList"></div>
         </div>
       </section>
 
@@ -447,6 +465,6 @@
   <div id="hint">Open ☰ en kies wat je wilt tekenen.</div>
 </div>
 
-<script type="module" src="./js/bootstrap.js?v=0.8.35-20260830-volume-clearance-foundation"></script>
+<script type="module" src="./js/bootstrap.js?v=0.8.36-20260830-clearance-collision-2"></script>
 </body>
 </html>
