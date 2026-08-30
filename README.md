@@ -1,3 +1,30 @@
+# Measure AR v0.8.31 — Measure Select & Edit + mm
+
+GitHub Pages: https://gasvdv-lab.github.io/Measure_tool/
+
+Deze release bouwt rechtstreeks verder op de fysiek geslaagde v0.8.30 Measure Engine Foundation. De bewezen punt → punt → lijn-meetketen blijft ongemoeid.
+
+## Nieuw in v0.8.31
+- **Metingen** is nu de expliciete ingang om bestaande afstandsmetingen te selecteren en te bewerken.
+- Bestaande metingen blijven bewerkbaar op naam, eenheid, kleur, dikte, lijnzichtbaarheid en maatlabelzichtbaarheid.
+- **Millimeter (mm)** is toegevoegd naast cm en m.
+- mm werkt zowel voor individuele meetlabels als voor de standaard meeteenheid en de exacte-afstand-HUD.
+- De interne metrische geometrie blijft in meter opgeslagen; alleen invoer/weergave wordt omgerekend. Daardoor veranderen afmetingen niet bij wisselen van eenheid.
+- Undo/Redo en projectopslag blijven de gekozen meeteenheid en bewerkeigenschappen bewaren.
+
+## Stabiele gate
+De gebruiker heeft v0.8.30 fysiek getest: de lijnmeting werkt correct. v0.8.30 geldt daarom als geslaagde Measure Engine Foundation-gate.
+
+## Testdoel v0.8.31
+1. Teken een lijn en controleer de gemeten lengte.
+2. Open **☰ → Metingen** en selecteer de lijn.
+3. Wijzig naam, kleur/dikte, zichtbaarheid en maatlabel.
+4. Wissel de eenheid tussen **mm ↔ cm ↔ m** en controleer dat alleen de weergave verandert.
+5. Stel **mm** als standaardeenheid in en maak een nieuwe exacte-afstandsmeting.
+6. Test Undo/Redo en project opslaan/heropenen.
+
+---
+
 # Measure AR v0.8.30 — Measure Engine Foundation
 
 GitHub Pages: https://gasvdv-lab.github.io/Measure_tool/

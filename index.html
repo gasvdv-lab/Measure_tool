@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#111111">
   <script>try{document.documentElement.dataset.appTheme=localStorage.getItem("measurear.ui.theme.v1")||"technical-green"}catch{document.documentElement.dataset.appTheme="technical-green"}</script>
   <title>Measure AR v0.8.30</title>
-  <link rel="stylesheet" href="./css/app.css?v=0.8.30-20260830-measure-engine-foundation">
+  <link rel="stylesheet" href="./css/app.css?v=0.8.31-20260830-measure-select-edit-mm">
 </head>
 <body>
 <div id="app">
@@ -165,7 +165,7 @@
       <section id="page-objects" class="page"><h3>Objecten</h3><div id="objectsList" class="menuCard"></div></section>
 
       <section id="page-line" class="page">
-        <h3>Lijn</h3><div class="menuCard">
+        <h3>Meting / lijn</h3><div class="menuCard">
           <div id="lineInfo" class="help">—</div>
           <label>Naam<input id="editLineName" maxlength="40"></label>
           <div class="grid2">
@@ -173,11 +173,11 @@
             <label>Dikte<select id="editLineThickness"><option value="1">1 · fijn</option><option value="2">2 · normaal</option><option value="3">3 · duidelijk</option><option value="4">4 · zwaar</option></select></label>
           </div>
           <div class="grid2">
-            <label>Eenheid<select id="editLineUnit"><option value="cm">cm</option><option value="m">m</option></select></label>
+            <label>Eenheid<select id="editLineUnit"><option value="mm">mm</option><option value="cm">cm</option><option value="m">m</option></select></label>
             <label class="check"><input id="editLineVisible" type="checkbox" checked> Lijn tonen</label>
           </div>
           <label class="check"><input id="editLineLabels" type="checkbox" checked> Maatlabel tonen</label>
-          <button id="saveLineBtn" class="primary">Lijn opslaan</button>
+          <button id="saveLineBtn" class="primary">Meting opslaan</button>
           <button id="lineFromStartBtn" class="secondary">Nieuwe lijn vanaf start</button>
           <button id="lineFromEndBtn" class="secondary">Nieuwe lijn vanaf einde</button>
           <button id="useReferenceBtn" class="secondary">Gebruik als referentielijn</button>
@@ -352,7 +352,7 @@
             <div class="help themeHelp">Het thema verandert de interface. Betekeniskleuren voor geldig, waarschuwing en fout blijven behouden.</div>
           </div>
           <div class="settingsDivider"></div>
-          <label>Eenheid<select id="defaultUnit"><option value="cm" selected>centimeter</option><option value="m">meter</option></select></label>
+          <label>Eenheid<select id="defaultUnit"><option value="mm">millimeter</option><option value="cm" selected>centimeter</option><option value="m">meter</option></select></label>
           <label>Lijndikte<select id="defaultThickness"><option value="1">1 · fijn</option><option value="2" selected>2 · normaal</option><option value="3">3 · duidelijk</option><option value="4">4 · zwaar</option></select></label>
           <label class="check"><input id="defaultLabels" type="checkbox" checked> Labels tonen</label>
         </div>
@@ -409,7 +409,7 @@
 
   <div id="distancePopover" class="hudPopover distancePopover">
     <button id="hudAutoBtn" class="secondary">AUTO · camera bepaalt afstand</button>
-    <div class="hudDistanceRow"><input id="hudDistance" type="number" min=".01" step=".1" value="100"><select id="hudUnit"><option value="cm" selected>cm</option><option value="m">m</option></select><button id="hudUseDistanceBtn" class="primary">Gebruik</button></div>
+    <div class="hudDistanceRow"><input id="hudDistance" type="number" min=".01" step=".1" value="100"><select id="hudUnit"><option value="mm">mm</option><option value="cm" selected>cm</option><option value="m">m</option></select><button id="hudUseDistanceBtn" class="primary">Gebruik</button></div>
     <div class="help">Dit stelt alleen de volgende plaatsing in. De witte ronde knop bevestigt altijd het punt.</div>
   </div>
 
@@ -425,6 +425,6 @@
   <div id="hint">Open ☰ en kies wat je wilt tekenen.</div>
 </div>
 
-<script type="module" src="./js/bootstrap.js?v=0.8.30-20260830-measure-engine-foundation"></script>
+<script type="module" src="./js/bootstrap.js?v=0.8.31-20260830-measure-select-edit-mm"></script>
 </body>
 </html>

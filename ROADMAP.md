@@ -1,6 +1,6 @@
 # Measure AR — actuele roadmapstatus
 
-**Huidige versie:** v0.8.30 — Measure Engine Foundation  
+**Huidige versie:** v0.8.31 — Measure Select & Edit + mm  
 **Stabiele baseline:** v0.8.29.1.3 fysiek geslaagd: surface hit → punt A → punt B → lijn.  
 **Actieve ontwikkelfase:** Measure Engine.  
 **CAD:** voorlopig geparkeerd; bestaande CAD-code blijft behouden voor latere hervatting.
@@ -14,7 +14,15 @@
 - [x] Lijn- en maatlabelzichtbaarheid per meting.
 - [x] Nieuwe meetvelden opgenomen in Undo/Redo en project snapshot/recovery.
 - [x] Alle interne ES-module imports gebruiken opnieuw één build-ID.
-- [ ] AR-ANDROID: volledige v0.8.30 praktijktest uitvoeren.
+- [x] AR-ANDROID: v0.8.30 basispraktijktest geslaagd — lijnmeting werkt.
+- [ ] AR-ANDROID: v0.8.31 Select/Edit + mm praktijktest uitvoeren.
+
+## v0.8.31 — Measure Select & Edit + mm
+- [x] Bestaande afstandsmetingen selecteren via **Metingen**.
+- [x] Naam, eenheid, kleur, dikte, lijn- en labelzichtbaarheid bewerken.
+- [x] Millimeter (mm) toevoegen aan labels, instellingen en exacte-afstand-HUD.
+- [x] Geometrische bronwaarde intern in meter behouden.
+- [ ] AR-ANDROID: fysieke v0.8.31 regressietest.
 
 ## Eerstvolgende Measure Engine-stappen
 1. **Measure 2 — Select/Edit interaction:** universele selectie van ruimtelijke objecten vanuit AR, niet alleen via lijsten.

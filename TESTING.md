@@ -1,8 +1,37 @@
+# v0.8.31 — Measure Select & Edit + mm
+
+## Automatisch uitgevoerd
+- [x] JavaScript-syntaxcontrole op alle JS-bestanden.
+- [x] Alle interne ES-module imports gebruiken exact build-ID `0.8.31-20260830-measure-select-edit-mm`.
+- [x] mm toegevoegd aan individuele meeteenheid, standaardeenheid en exacte-afstand-HUD.
+- [x] Interne afstand blijft meter; mm-conversie gebruikt 1 m = 1000 mm.
+- [x] README.md, ROADMAP.md, TESTING.md en MODULES.md aanwezig.
+
+## Fysiek op Android/Chrome/WebXR — uitvoeren
+- [ ] AR start en surface-detectie blijft werken.
+- [ ] Punt A → punt B → lijn blijft correct meten.
+- [ ] ☰ → Metingen → bestaande meting selecteren.
+- [ ] Naam wijzigen en opslaan.
+- [ ] Eenheid mm → cm → m wisselen; geometrie blijft exact dezelfde lengte.
+- [ ] Eenheid mm toont een passend millimeterlabel.
+- [ ] Kleur/dikte wijzigen.
+- [ ] Lijnzichtbaarheid en maatlabelzichtbaarheid afzonderlijk aan/uit.
+- [ ] Instellingen → standaard mm → nieuwe lijn krijgt mm als weergave-eenheid.
+- [ ] Exacte afstand in HUD met mm invoeren en controleren.
+- [ ] Undo/Redo herstelt de bewerkte meeteigenschappen.
+- [ ] Project opslaan → heropenen bewaart mm/cm/m en overige meeteigenschappen.
+- [ ] Polyline/vorm/muurfuncties vertonen geen regressie.
+
+## Bevestigd uit v0.8.30
+- [x] AR-ANDROID: lijnmeting is fysiek getest en werkt correct.
+
+---
+
 # v0.8.30 — Measure Engine Foundation
 
 ## Automatisch uitgevoerd
 - [x] JavaScript-syntaxcontrole op alle JS-bestanden.
-- [x] Alle interne ES-module imports gebruiken exact build-ID `0.8.30-20260830-measure-engine-foundation`.
+- [x] Alle interne ES-module imports gebruiken exact build-ID `0.8.31-20260830-measure-select-edit-mm`.
 - [x] Nieuwe DOM-elementen voor Metingen en lijn-eigenschappen aanwezig.
 - [x] README.md, ROADMAP.md, TESTING.md en MODULES.md aanwezig.
 

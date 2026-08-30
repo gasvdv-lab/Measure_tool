@@ -1,13 +1,16 @@
-# v0.8.30 — Measure Engine Foundation
+# v0.8.31 — Measure Select & Edit + mm
 
 ## Measure Engine
 **Status:** actief in opbouw.
 
-De eerste Measure Engine-laag maakt een gewone AR-lijn expliciet tot een persistent afstandsmeetobject. Elke meting kent zijn start- en eindpunt, metrische lengte, naam, voorkeureenheid (cm/m), kleur, dikte, lijnzichtbaarheid, maatlabelzichtbaarheid en aanmaak-/wijzigmoment.
+De eerste Measure Engine-laag maakt een gewone AR-lijn expliciet tot een persistent afstandsmeetobject. Elke meting kent zijn start- en eindpunt, metrische lengte, naam, voorkeureenheid (mm/cm/m), kleur, dikte, lijnzichtbaarheid, maatlabelzichtbaarheid en aanmaak-/wijzigmoment.
 
 **Gebruik:** teken via **Lijn**, open daarna **☰ → Metingen**. Vanuit de meetlijst kan de lijn worden geopend en aangepast. De meetdata wordt meegenomen in Undo/Redo en de bestaande projectopslag/recovery.
 
 **Architectuur:** de broncoördinaten van punten blijven de geometrische waarheid. De lengte wordt uit de punten bepaald; presentatie-eenheid en visuele stijl zijn eigenschappen van het meetobject. Hierdoor kan dezelfde engine later worden uitgebreid naar polylines, hoeken, oppervlakten, hoogtes, volumes en uiteindelijk CAD-metingen.
+
+### Select & Edit-laag — v0.8.31
+De bestaande afstandsmeting kan vanuit **Metingen** worden geselecteerd en aangepast zonder de geometrische lengte te herschrijven. Bewerkbare presentatie-eigenschappen zijn naam, mm/cm/m, kleur, dikte, lijnzichtbaarheid en maatlabelzichtbaarheid. De bronafstand blijft metrisch in meter opgeslagen; eenheidswissels veranderen alleen invoer/weergave.
 
 ## CAD
 **Status:** functioneel aanwezig maar ontwikkeltraject voorlopig geparkeerd. De bestaande implementatie wordt niet verwijderd en kan later opnieuw op de Measure Engine worden aangesloten.
@@ -26,7 +29,7 @@ v0.8.29.1.2 voegt uitsluitend een live XR hit-test diagnose-HUD toe.
 
 Actuele cumulatieve modulehandleiding. Bij iedere release moet dit document worden bijgewerkt wanneer een module of werking verandert.
 
-**Huidige appversie:** v0.8.30
+**Huidige appversie:** v0.8.31
 
 ## 1. AR Core
 **Status:** actief / core.  
