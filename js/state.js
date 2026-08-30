@@ -1,5 +1,5 @@
 export const S={
-  version:"0.8.34",build:"20260830-height-vertical-measurement",
+  version:"0.8.35",build:"20260830-volume-clearance-foundation",
   THREE:null,renderer:null,scene:null,camera:null,reticle:null,xrSession:null,hitSource:null,hitRequested:false,
   currentTarget:null,currentRawTarget:null,currentHitResult:null,currentXRFrame:null,currentReferenceSpace:null,targetSource:"none",zoom:1,pointPlacementEpoch:0,referenceCaptureId:null,
   points:[],lines:[],contours:[],shapes:[],walls:[],openings:[],aiObjects:[],
@@ -60,6 +60,12 @@ export function fmtAreaUnit(m2,unit="m"){
   if(unit==="mm")return `${(m2*1000000).toFixed(0)} mm²`;
   if(unit==="cm")return `${(m2*10000).toFixed(1)} cm²`;
   return `${m2.toFixed(m2<10?3:2)} m²`;
+}
+export function fmtVolumeUnit(m3,unit="m"){
+  if(!Number.isFinite(m3))return "—";
+  if(unit==="mm")return `${(m3*1000000000).toFixed(0)} mm³`;
+  if(unit==="cm")return `${(m3*1000000).toFixed(1)} cm³`;
+  return `${m3.toFixed(m3<10?3:2)} m³`;
 }
 export function pointName(i){
   const c=String.fromCharCode(65+(i%26)),n=Math.floor(i/26);

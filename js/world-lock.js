@@ -1,4 +1,4 @@
-import {S,getPoint} from "./state.js?v=0.8.34-20260830-height-vertical-measurement";
+import {S,getPoint} from "./state.js?v=0.8.35-20260830-volume-clearance-foundation";
 
 // Session-local WebXR anchor manager.
 // Project coordinates remain immutable in point.position/point.locked.

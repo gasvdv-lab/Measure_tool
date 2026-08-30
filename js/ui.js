@@ -1,32 +1,32 @@
-import {S,$,fmt,fmtLine,fmtAreaUnit,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.34-20260830-height-vertical-measurement";
+import {S,$,fmt,fmtLine,fmtAreaUnit,fmtVolumeUnit,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.35-20260830-volume-clearance-foundation";
 import {
   startTool,cancelTool,setPlacement,setDistance,setConstraint,setAngle,flipSide,setReferenceLine,setSnapMode,
   confirmCandidate,undoToolStep,finishTool,toolLabel,constraintLabel,getActivePoint,referenceRequired,resetDrawingCore
-} from "./drawing-core.js?v=0.8.34-20260830-height-vertical-measurement";
+} from "./drawing-core.js?v=0.8.35-20260830-volume-clearance-foundation";
 import {
   createShape,updateShape,deleteShapeOnly,deleteShapeWithContour,deleteLineRaw,deletePointRaw,renamePoint,updateLine,analyzeContour,analyzePolyline,updatePolyline,
   lineDependencies,pointDependencies,canDeleteLine,canDeletePoint,clearAllGeometry,validateGeometryState,dispose
-} from "./geometry.js?v=0.8.34-20260830-height-vertical-measurement";
-import {startAR,resumeARFromGesture,suspendARForCadImport,applyZoom,resetTrackingSamples} from "./ar.js?v=0.8.34-20260830-height-vertical-measurement";
-import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.34-20260830-height-vertical-measurement";
-import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.34-20260830-height-vertical-measurement";
+} from "./geometry.js?v=0.8.35-20260830-volume-clearance-foundation";
+import {startAR,resumeARFromGesture,suspendARForCadImport,applyZoom,resetTrackingSamples} from "./ar.js?v=0.8.35-20260830-volume-clearance-foundation";
+import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.35-20260830-volume-clearance-foundation";
+import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.35-20260830-volume-clearance-foundation";
 import {
   initProjectStorage,saveCurrentProject,listProjects,loadStoredProject,newProject,duplicateStoredProject,
   deleteStoredProject,renameStoredProject,projectStats,formatStats,getStoredProjectInfo,hasRecovery,recoveryInfo,restoreRecovery,clearRecovery,
   exportCurrentProject,importProjectFile,markDirtyAndRecover
-} from "./project-storage.js?v=0.8.34-20260830-height-vertical-measurement";
+} from "./project-storage.js?v=0.8.35-20260830-volume-clearance-foundation";
 import {
   captureCurrentGeo,addProjectReference,removeProjectReference,clearProjectReferences,beginRelocalization,cancelRelocalization,
   captureRelocalizationPoint,solveRelocalization,applyRelocalization,relocalizationSummary,beginSpatialRestore
-} from "./relocalization.js?v=0.8.34-20260830-height-vertical-measurement";
+} from "./relocalization.js?v=0.8.35-20260830-volume-clearance-foundation";
 
-import {captureHybridBaseline,assessHybridLocation,enableHeading} from "./hybrid-localization.js?v=0.8.34-20260830-height-vertical-measurement";
+import {captureHybridBaseline,assessHybridLocation,enableHeading} from "./hybrid-localization.js?v=0.8.35-20260830-volume-clearance-foundation";
 
-import {detachAllPointAnchors} from "./world-lock.js?v=0.8.34-20260830-height-vertical-measurement";
-import {importCadFile,listCadModels,cadStatus,selectCad,beginCadPlacement,rotateCad,moveCadHeight,confirmCadPlacement,cancelCadPlacement,deleteCadModel,clearCadRuntime,restoreCadRuntime} from "./cad.js?v=0.8.34-20260830-height-vertical-measurement";
-import {initProfessionalColorPickers,refreshProfessionalColorPickers} from "./color-picker.js?v=0.8.34-20260830-height-vertical-measurement";
-import {initThemeSelector} from "./theme-selector.js?v=0.8.34-20260830-height-vertical-measurement";
-import {executeAiPrototype,getAiObject,getAiObjectForShape,toggleAiObjectLock,deleteAiObject,clearAiBuilderObjects,aiObjectSummary} from "./ai-builder.js?v=0.8.34-20260830-height-vertical-measurement";
+import {detachAllPointAnchors} from "./world-lock.js?v=0.8.35-20260830-volume-clearance-foundation";
+import {importCadFile,listCadModels,cadStatus,selectCad,beginCadPlacement,rotateCad,moveCadHeight,confirmCadPlacement,cancelCadPlacement,deleteCadModel,clearCadRuntime,restoreCadRuntime} from "./cad.js?v=0.8.35-20260830-volume-clearance-foundation";
+import {initProfessionalColorPickers,refreshProfessionalColorPickers} from "./color-picker.js?v=0.8.35-20260830-volume-clearance-foundation";
+import {initThemeSelector} from "./theme-selector.js?v=0.8.35-20260830-volume-clearance-foundation";
+import {executeAiPrototype,getAiObject,getAiObjectForShape,toggleAiObjectLock,deleteAiObject,clearAiBuilderObjects,aiObjectSummary} from "./ai-builder.js?v=0.8.35-20260830-volume-clearance-foundation";
 
 
 const pages=["home","project","references","relocalize","projects","cad","objects","measurements","polyline","line","point","walltool","wallcreate","wall","openingcreate","opening","shapecreate","shape","aibuilder","settings","clear"];
@@ -342,6 +342,12 @@ function openLineEditor(l){
   el("editLineThickness").value=String(l.thickness||2);el("editLineLabels").checked=l.labelsVisible!==false;
   if(el("editLineVisible"))el("editLineVisible").checked=l.visible!==false;
   if(el("editLineUnit"))el("editLineUnit").value=l.unit||S.defaults.unit||"cm";
+  if(el("editLineClearance"))el("editLineClearance").checked=Boolean(l.clearanceEnabled);
+  if(el("editLineClearanceRequired"))el("editLineClearanceRequired").value=Number.isFinite(Number(l.clearanceRequiredM))?(Number(l.clearanceRequiredM)*100).toFixed(1):"";
+  if(el("lineClearanceInfo")){
+    if(l.clearanceEnabled&&Number.isFinite(Number(l.clearanceRequiredM))){const margin=l.distance-Number(l.clearanceRequiredM);el("lineClearanceInfo").textContent=`Vrije maat ${fmtMeasureUnit(l.distance,unit)} · vereist ${fmtMeasureUnit(Number(l.clearanceRequiredM),unit)} · ${margin>=0?`✓ marge ${fmtMeasureUnit(margin,unit)}`:`⚠ tekort ${fmtMeasureUnit(Math.abs(margin),unit)}`}`;}
+    else el("lineClearanceInfo").textContent="Optioneel: gebruik deze afstand als vrije-ruimtecontrole.";
+  }
   showPage("line");
 }
 function fmtMeasureUnit(m,unit){
@@ -370,7 +376,7 @@ function renderMeasurements(){
   if(!count){box.innerHTML='<div class="help">Maak eerst een lijn, doorlopende lijn of gesloten vorm.</div>';return;}
   for(const sh of areas){
     const row=document.createElement("div");row.className="objectRow measurementRow";
-    const open=document.createElement("button");open.className="secondary";open.textContent=`${sh.name} · ${fmtAreaUnit(sh.area,"m")} · omtrek ${fmtMeasureUnit(sh.perimeter,"m")}`;open.onclick=()=>openShape(sh.id);
+    const open=document.createElement("button");open.className="secondary";{const vol=sh.volumeEnabled&&Number.isFinite(Number(sh.volumeHeightM))?sh.area*Number(sh.volumeHeightM):null;open.textContent=`${sh.name} · ${fmtAreaUnit(sh.area,"m")} · omtrek ${fmtMeasureUnit(sh.perimeter,"m")}${Number.isFinite(vol)?` · volume ${fmtVolumeUnit(vol,"m")}`:""}`;}open.onclick=()=>openShape(sh.id);
     row.append(open);box.append(row);
   }
   for(const {c,a} of polyAnalyses){
@@ -380,7 +386,9 @@ function renderMeasurements(){
   }
   for(const l of lines){
     const a=getPoint(l.startId),b=getPoint(l.endId),row=document.createElement("div");row.className="objectRow measurementRow";
-    const open=document.createElement("button");open.className="secondary";const m=analyzeLineMeasurement(l);open.textContent=m.vertical?`${l.name} · hoogte ${fmtMeasureUnit(m.height,l.unit||"cm")} · ${a?.name||"?"}→${b?.name||"?"}`:`${l.name} · ${fmtLine(l)} · ΔH ${fmtMeasureUnit(m.height,l.unit||"cm")} · ${a?.name||"?"}→${b?.name||"?"}`;
+    const open=document.createElement("button");open.className="secondary";const m=analyzeLineMeasurement(l);
+    const clearance=l.clearanceEnabled&&Number.isFinite(Number(l.clearanceRequiredM))?` · clearance ${l.distance>=Number(l.clearanceRequiredM)?"✓":"⚠"}`:"";
+    open.textContent=(m.vertical?`${l.name} · hoogte ${fmtMeasureUnit(m.height,l.unit||"cm")} · ${a?.name||"?"}→${b?.name||"?"}`:`${l.name} · ${fmtLine(l)} · ΔH ${fmtMeasureUnit(m.height,l.unit||"cm")} · ${a?.name||"?"}→${b?.name||"?"}`)+clearance;
     const del=document.createElement("button");del.className="danger";del.textContent="Wis";open.onclick=()=>openLineEditor(l);
     del.onclick=()=>{const d=lineDependencies(l.id);if(d.walls.length||d.shapes.length||d.contours.length){showStatus("Deze meting is gekoppeld aan een muur, vorm of contour.",true);return;}runHistoryAction(`Meting ${l.name} verwijderen`,()=>deleteLineRaw(l.id));afterProjectChange(`Meting ${l.name} verwijderd.`);renderMeasurements();};
     row.append(open,del);box.append(row);
@@ -417,8 +425,14 @@ function renderObjects(){
   }}
 }
 function openShape(id){
-  const s=getShape(id);if(!s)return;S.selectedShapeId=id;el("shapeInfo").textContent=`${s.name} · ${s.area.toFixed(2)} m² · omtrek ${s.perimeter.toFixed(2)} m`;
-  el("editShapeName").value=s.name;el("editShapeFill").value=s.fill;el("editShapeBorder").value=s.border;el("editShapeOpacity").value=s.opacity;el("editShapeThickness").value=String(s.thickness);el("editShapeLabels").checked=s.labels;showPage("shape");
+  const s=getShape(id);if(!s)return;S.selectedShapeId=id;
+  const vol=s.volumeEnabled&&Number.isFinite(Number(s.volumeHeightM))?s.area*Number(s.volumeHeightM):null;
+  el("shapeInfo").textContent=`${s.name} · ${s.area.toFixed(2)} m² · omtrek ${s.perimeter.toFixed(2)} m${Number.isFinite(vol)?` · volume ${fmtVolumeUnit(vol,"m")}`:""}`;
+  el("editShapeName").value=s.name;el("editShapeFill").value=s.fill;el("editShapeBorder").value=s.border;el("editShapeOpacity").value=s.opacity;el("editShapeThickness").value=String(s.thickness);el("editShapeLabels").checked=s.labels;
+  if(el("editShapeVolume"))el("editShapeVolume").checked=Boolean(s.volumeEnabled);
+  if(el("editShapeVolumeHeight"))el("editShapeVolumeHeight").value=Number.isFinite(Number(s.volumeHeightM))?(Number(s.volumeHeightM)).toFixed(3):"";
+  if(el("shapeVolumeInfo"))el("shapeVolumeInfo").textContent=Number.isFinite(vol)?`Volume = ${s.area.toFixed(3)} m² × ${Number(s.volumeHeightM).toFixed(3)} m = ${fmtVolumeUnit(vol,"m")}`:"Optioneel: geef een hoogte/diepte op om volume uit deze footprint te berekenen.";
+  showPage("shape");
 }
 function renderAiBuilder(){
   const shape=getShape(S.selectedShapeId),obj=shape?getAiObjectForShape(shape.id):getAiObject(S.selectedAiObjectId);
@@ -613,7 +627,9 @@ export function initUI(){
 
   bind("saveLineBtn","click",()=>{
     const l=getLine(S.selectedLineId);if(!l)throw new Error("Geen lijn geselecteerd.");
-    runHistoryAction(`Lijn ${l.name} bewerken`,()=>updateLine(l,{name:el("editLineName").value,color:el("editLineColor").value,thickness:el("editLineThickness").value,labels:el("editLineLabels").checked,visible:el("editLineVisible").checked,unit:el("editLineUnit").value}));
+    const clearanceEnabled=Boolean(el("editLineClearance")?.checked);const reqCm=Number(el("editLineClearanceRequired")?.value);
+    if(clearanceEnabled&&(!Number.isFinite(reqCm)||reqCm<0))throw new Error("Geef een geldige vereiste vrije maat in cm.");
+    runHistoryAction(`Lijn ${l.name} bewerken`,()=>updateLine(l,{name:el("editLineName").value,color:el("editLineColor").value,thickness:el("editLineThickness").value,labels:el("editLineLabels").checked,visible:el("editLineVisible").checked,unit:el("editLineUnit").value,clearanceEnabled,clearanceRequiredM:clearanceEnabled?reqCm/100:null}));
     afterProjectChange(`Lijn ${l.name} opgeslagen.`);el("lineInfo").textContent=`${l.name} · ${fmtLine(l)}`;
   });
   bind("savePointBtn","click",()=>{
@@ -677,7 +693,10 @@ bind("saveWallBtn","click",()=>{
   });
   bind("aiLockBtn","click",()=>{const o=getAiObject(S.selectedAiObjectId);if(!o)throw new Error("Geen AI-concept geselecteerd.");runHistoryAction(`${o.name} ${o.locked?"ontgrendelen":"vastzetten"}`,()=>toggleAiObjectLock(o.id));afterProjectChange(`${o.name}: ${o.locked?"vastgezet":"ontgrendeld"}.`);renderAiBuilder();});
   bind("aiDeleteBtn","click",()=>{const o=getAiObject(S.selectedAiObjectId);if(!o)throw new Error("Geen AI-concept geselecteerd.");runHistoryAction(`AI-concept ${o.name} verwijderen`,()=>deleteAiObject(o.id));afterProjectChange(`${o.name} verwijderd.`);S.selectedAiObjectId=null;renderAiBuilder();});
-  bind("saveShapeBtn","click",()=>{const s=getShape(S.selectedShapeId);if(!s)throw new Error("Geen vorm geselecteerd.");runHistoryAction(`Vorm ${s.name} bewerken`,()=>updateShape(s,{name:el("editShapeName").value,fill:el("editShapeFill").value,border:el("editShapeBorder").value,opacity:el("editShapeOpacity").value,thickness:el("editShapeThickness").value,labels:el("editShapeLabels").checked}));afterProjectChange(`Vorm ${s.name} opgeslagen.`);openShape(s.id);});
+  bind("saveShapeBtn","click",()=>{const s=getShape(S.selectedShapeId);if(!s)throw new Error("Geen vorm geselecteerd.");
+    const volumeEnabled=Boolean(el("editShapeVolume")?.checked),heightM=Number(el("editShapeVolumeHeight")?.value);
+    if(volumeEnabled&&(!Number.isFinite(heightM)||heightM<=0))throw new Error("Geef een geldige volumehoogte/diepte in meter.");
+    runHistoryAction(`Vorm ${s.name} bewerken`,()=>updateShape(s,{name:el("editShapeName").value,fill:el("editShapeFill").value,border:el("editShapeBorder").value,opacity:el("editShapeOpacity").value,thickness:el("editShapeThickness").value,labels:el("editShapeLabels").checked,volumeEnabled,volumeHeightM:volumeEnabled?heightM:null}));afterProjectChange(`Vorm ${s.name} opgeslagen.`);openShape(s.id);});
   bind("deleteShapeOnlyBtn","click",()=>{const s=getShape(S.selectedShapeId);if(!s)throw new Error("Geen vorm geselecteerd.");runHistoryAction(`Vorm ${s.name} verwijderen`,()=>{const ai=getAiObjectForShape(s.id);if(ai)deleteAiObject(ai.id);deleteShapeOnly(s.id);});showPage("objects");afterProjectChange(`Vorm ${s.name} verwijderd; gekoppeld AI-concept indien aanwezig ook verwijderd.`);});
   bind("deleteShapeContourBtn","click",()=>{const s=getShape(S.selectedShapeId);if(!s)throw new Error("Geen vorm geselecteerd.");runHistoryAction(`Vorm ${s.name} + contour verwijderen`,()=>{const ai=getAiObjectForShape(s.id);if(ai)deleteAiObject(ai.id);deleteShapeWithContour(s.id);});showPage("objects");afterProjectChange(`Vorm ${s.name}, contour en gekoppeld AI-concept verwijderd.`);});
 

@@ -1,8 +1,8 @@
-import {S,getPoint} from "./state.js?v=0.8.34-20260830-height-vertical-measurement";
-import {snapshotProject,restoreProject} from "./history.js?v=0.8.34-20260830-height-vertical-measurement";
-import {validateGeometryState,syncWorldLockedGeometry} from "./geometry.js?v=0.8.34-20260830-height-vertical-measurement";
-import {syncWorldLockedWalls} from "./walls.js?v=0.8.34-20260830-height-vertical-measurement";
-import {detachAllPointAnchors,queuePointAnchor} from "./world-lock.js?v=0.8.34-20260830-height-vertical-measurement";
+import {S,getPoint} from "./state.js?v=0.8.35-20260830-volume-clearance-foundation";
+import {snapshotProject,restoreProject} from "./history.js?v=0.8.35-20260830-volume-clearance-foundation";
+import {validateGeometryState,syncWorldLockedGeometry} from "./geometry.js?v=0.8.35-20260830-volume-clearance-foundation";
+import {syncWorldLockedWalls} from "./walls.js?v=0.8.35-20260830-volume-clearance-foundation";
+import {detachAllPointAnchors,queuePointAnchor} from "./world-lock.js?v=0.8.35-20260830-volume-clearance-foundation";
 
 const EPS=1e-9;
 function v3(x=0,y=0,z=0){return new S.THREE.Vector3(x,y,z);}

@@ -1,9 +1,9 @@
-import {S,getPoint,getLine,getContour} from "./state.js?v=0.8.34-20260830-height-vertical-measurement";
+import {S,getPoint,getLine,getContour} from "./state.js?v=0.8.35-20260830-volume-clearance-foundation";
 import {
   createPoint,createLine,createShape,clearAllGeometry,validateGeometryState
-} from "./geometry.js?v=0.8.34-20260830-height-vertical-measurement";
-import {createWall,createOpening,clearWalls} from "./walls.js?v=0.8.34-20260830-height-vertical-measurement";
-import {snapshotAiObjects,restoreAiBuilderObjects,clearAiBuilderObjects} from "./ai-builder.js?v=0.8.34-20260830-height-vertical-measurement";
+} from "./geometry.js?v=0.8.35-20260830-volume-clearance-foundation";
+import {createWall,createOpening,clearWalls} from "./walls.js?v=0.8.35-20260830-volume-clearance-foundation";
+import {snapshotAiObjects,restoreAiBuilderObjects,clearAiBuilderObjects} from "./ai-builder.js?v=0.8.35-20260830-volume-clearance-foundation";
 
 function vec(v){return v?{x:v.x,y:v.y,z:v.z}:null;}
 function vec3(v){return v?new S.THREE.Vector3(v.x,v.y,v.z):null;}
@@ -20,11 +20,13 @@ export function snapshotProject(){
     lines:S.lines.map(l=>({
       id:l.id,name:l.name,autoName:l.autoName!==false,startId:l.startId,endId:l.endId,
       thickness:l.thickness,color:l.color,labelsVisible:l.labelsVisible!==false,visible:l.visible!==false,unit:l.unit||"cm",kind:l.kind||"distance",
-      createdAt:l.createdAt||null,updatedAt:l.updatedAt||null,ownerType:l.ownerType||null,ownerId:l.ownerId||null
+      createdAt:l.createdAt||null,updatedAt:l.updatedAt||null,ownerType:l.ownerType||null,ownerId:l.ownerId||null,
+      clearanceEnabled:Boolean(l.clearanceEnabled),clearanceRequiredM:Number.isFinite(Number(l.clearanceRequiredM))?Number(l.clearanceRequiredM):null
     })),
     contours:S.contours.map(c=>({id:c.id,name:c.name,pointIds:[...c.pointIds],lineIds:[...c.lineIds],closed:Boolean(c.closed),kind:c.kind,measurement:c.measurement===true,unit:c.unit||"cm",createdAt:c.createdAt||null,updatedAt:c.updatedAt||null})),
     shapes:S.shapes.map(s=>({
-      id:s.id,name:s.name,contourId:s.contourId,fill:s.fill,opacity:s.opacity,border:s.border,thickness:s.thickness,labels:s.labels!==false
+      id:s.id,name:s.name,contourId:s.contourId,fill:s.fill,opacity:s.opacity,border:s.border,thickness:s.thickness,labels:s.labels!==false,
+      volumeEnabled:Boolean(s.volumeEnabled),volumeHeightM:Number.isFinite(Number(s.volumeHeightM))?Number(s.volumeHeightM):null
     })),
     walls:S.walls.map(w=>({
       id:w.id,name:w.name,lineId:w.lineId,height:w.height,thickness:w.thickness,side:w.side,
@@ -79,7 +81,8 @@ export function restoreProject(snap){
       if(!a||!b)throw new Error(`Historie: punten voor lijn ${l.name} ontbreken.`);
       createLine(a,b,{
         id:l.id,name:l.name,autoName:l.autoName,color:l.color,thickness:l.thickness,
-        labelsVisible:l.labelsVisible,visible:l.visible,unit:l.unit,createdAt:l.createdAt,updatedAt:l.updatedAt,ownerType:l.ownerType,ownerId:l.ownerId
+        labelsVisible:l.labelsVisible,visible:l.visible,unit:l.unit,createdAt:l.createdAt,updatedAt:l.updatedAt,ownerType:l.ownerType,ownerId:l.ownerId,
+        clearanceEnabled:l.clearanceEnabled,clearanceRequiredM:l.clearanceRequiredM
       });
     }
     S.contours.length=0;
@@ -88,7 +91,7 @@ export function restoreProject(snap){
     }
     for(const s of snap.shapes){
       const c=getContour(s.contourId);if(!c)throw new Error(`Historie: contour van vorm ${s.name} ontbreekt.`);
-      createShape(c,{id:s.id,name:s.name,fill:s.fill,opacity:s.opacity,border:s.border,thickness:s.thickness,labels:s.labels});
+      createShape(c,{id:s.id,name:s.name,fill:s.fill,opacity:s.opacity,border:s.border,thickness:s.thickness,labels:s.labels,volumeEnabled:s.volumeEnabled,volumeHeightM:s.volumeHeightM});
     }
     restoreAiBuilderObjects(snap.aiObjects||[]);
     for(const w of snap.walls){

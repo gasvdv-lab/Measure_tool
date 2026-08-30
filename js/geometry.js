@@ -1,4 +1,4 @@
-import {S,$,fmt,fmtLine,pointName,getPoint,getLine,getContour,getShape,projectToWorld} from "./state.js?v=0.8.34-20260830-height-vertical-measurement";
+import {S,$,fmt,fmtLine,pointName,getPoint,getLine,getContour,getShape,projectToWorld} from "./state.js?v=0.8.35-20260830-volume-clearance-foundation";
 
 export function renderPosition(p){return p?.worldPosition||p?.position||null;}
 
@@ -103,7 +103,7 @@ export function findLineBetween(aId,bId){
   return S.lines.find(l=>(l.startId===aId&&l.endId===bId)||(l.startId===bId&&l.endId===aId))||null;
 }
 
-export function createLine(a,b,{color="#ffffff",thickness=null,ownerType=null,ownerId=null,id=null,name=null,autoName=true,labelsVisible=true,visible=true,unit=null,createdAt=null,updatedAt=null}={}){
+export function createLine(a,b,{color="#ffffff",thickness=null,ownerType=null,ownerId=null,id=null,name=null,autoName=true,labelsVisible=true,visible=true,unit=null,createdAt=null,updatedAt=null,clearanceEnabled=false,clearanceRequiredM=null}={}){
   if(!a||!b)throw new Error("Start- of eindpunt ontbreekt.");
   if(a.id===b.id)throw new Error("Begin- en eindpunt mogen niet hetzelfde zijn.");
   if(findLineBetween(a.id,b.id))throw new Error("Deze lijn bestaat al.");
@@ -116,6 +116,7 @@ export function createLine(a,b,{color="#ffffff",thickness=null,ownerType=null,ow
     startId:a.id,endId:b.id,distance,kind:"distance",unit:unit||S.defaults.unit||"cm",
     createdAt:createdAt||new Date().toISOString(),updatedAt:updatedAt||createdAt||new Date().toISOString(),
     thickness:t,color,ownerType,ownerId,visible:visible!==false,
+    clearanceEnabled:Boolean(clearanceEnabled),clearanceRequiredM:Number.isFinite(Number(clearanceRequiredM))?Math.max(0,Number(clearanceRequiredM)):null,
     labelsVisible:labelsVisible!==false,
     object:makeLineMesh(renderPosition(a),renderPosition(b),color,t),
     label:null
@@ -193,7 +194,10 @@ export function updateLine(line,opts={}){
   const labels=opts.labels??line.labelsVisible;
   const visible=opts.visible??line.visible;
   const unit=["mm","cm","m"].includes(opts.unit)?opts.unit:(line.unit||S.defaults.unit||"cm");
-  line.unit=unit;line.updatedAt=new Date().toISOString();
+  line.unit=unit;
+  if(opts.clearanceEnabled!==undefined)line.clearanceEnabled=Boolean(opts.clearanceEnabled);
+  if(opts.clearanceRequiredM!==undefined){const req=Number(opts.clearanceRequiredM);line.clearanceRequiredM=Number.isFinite(req)&&req>=0?req:null;}
+  line.updatedAt=new Date().toISOString();
   setLineStyle(line,{color,thickness,labels,visible});
   refreshLineLabel(line);
   return line;
@@ -326,7 +330,7 @@ function shapeNameExists(name,excludeId=null){
   return S.shapes.some(s=>s.id!==excludeId&&s.name.toLocaleLowerCase("nl")===k);
 }
 
-export function createShape(contour,{name,fill="#4caf50",opacity=.30,border="#ffffff",thickness=2,labels=true,id=null}){
+export function createShape(contour,{name,fill="#4caf50",opacity=.30,border="#ffffff",thickness=2,labels=true,id=null,volumeHeightM=null,volumeEnabled=false}={}){
   name=String(name||"").trim();
   if(!name)throw new Error("Naam is verplicht.");
   if(shapeNameExists(name))throw new Error("Deze vormnaam bestaat al.");
@@ -340,6 +344,7 @@ export function createShape(contour,{name,fill="#4caf50",opacity=.30,border="#ff
     id:id||"s"+crypto.randomUUID(),name,contourId:contour.id,
     pointIds:[...contour.pointIds],lineIds:[...contour.lineIds],
     mesh,area,perimeter,winding:analysis.winding,maxPlaneError:analysis.maxPlaneError,fill,opacity:Number(opacity),border,thickness:Number(thickness)||2,labels:labels!==false,
+    volumeEnabled:Boolean(volumeEnabled),volumeHeightM:Number.isFinite(Number(volumeHeightM))?Math.max(0,Number(volumeHeightM)):null,
     plane:{origin:plane.origin.clone(),normal:plane.normal.clone(),u:plane.u.clone(),v:plane.v.clone()}
   };
   S.shapes.push(s);
@@ -354,6 +359,8 @@ export function updateShape(shape,opts={}){
   if(shapeNameExists(newName,shape.id))throw new Error("Deze vormnaam bestaat al.");
   shape.name=newName;shape.fill=opts.fill??shape.fill;shape.opacity=Number(opts.opacity??shape.opacity);
   shape.border=opts.border??shape.border;shape.thickness=Number(opts.thickness??shape.thickness)||2;shape.labels=opts.labels??shape.labels;
+  if(opts.volumeEnabled!==undefined)shape.volumeEnabled=Boolean(opts.volumeEnabled);
+  if(opts.volumeHeightM!==undefined){const h=Number(opts.volumeHeightM);shape.volumeHeightM=Number.isFinite(h)&&h>=0?h:null;}
   if(shape.mesh?.material){shape.mesh.material.color.set(shape.fill);shape.mesh.material.opacity=shape.opacity;}
   for(const lid of shape.lineIds)setLineStyle(getLine(lid),{color:shape.border,thickness:shape.thickness,labels:shape.labels});
 }
