@@ -1,6 +1,6 @@
 
-import {S,getPoint,getLine} from "./state.js?v=0.8.32.1-20260830-horizontal-axis-lock";
-import {dispose,renderPosition} from "./geometry.js?v=0.8.32.1-20260830-horizontal-axis-lock";
+import {S,getPoint,getLine} from "./state.js?v=0.8.33-20260830-area-measurement";
+import {dispose,renderPosition} from "./geometry.js?v=0.8.33-20260830-area-measurement";
 
 function cleanName(name){return String(name||"").trim().replace(/\s+/g," ");}
 export function wallNameExists(name,excludeId=null){

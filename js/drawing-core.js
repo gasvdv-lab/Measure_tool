@@ -1,8 +1,8 @@
-import {S,$,fmt,getPoint,getLine,worldToProject} from "./state.js?v=0.8.32.1-20260830-horizontal-axis-lock";
-import {createPoint,createLine,ensureLineRendered,deleteLineRaw,deletePointRaw,createContour,dispose,analyzeShapePoints} from "./geometry.js?v=0.8.32.1-20260830-horizontal-axis-lock";
-import {snapshotProject,commitSnapshot,undoHistory} from "./history.js?v=0.8.32.1-20260830-horizontal-axis-lock";
-import {queuePointHitAnchor} from "./world-lock.js?v=0.8.32.1-20260830-horizontal-axis-lock";
-import {createWall,nextWallName} from "./walls.js?v=0.8.32.1-20260830-horizontal-axis-lock";
+import {S,$,fmt,getPoint,getLine,worldToProject} from "./state.js?v=0.8.33-20260830-area-measurement";
+import {createPoint,createLine,ensureLineRendered,deleteLineRaw,deletePointRaw,createContour,dispose,analyzeShapePoints} from "./geometry.js?v=0.8.33-20260830-area-measurement";
+import {snapshotProject,commitSnapshot,undoHistory} from "./history.js?v=0.8.33-20260830-area-measurement";
+import {queuePointHitAnchor} from "./world-lock.js?v=0.8.33-20260830-area-measurement";
+import {createWall,nextWallName} from "./walls.js?v=0.8.33-20260830-area-measurement";
 
 const REF_MODES=new Set(["parallel","perpendicular","angle"]);
 const TOOL_NAMES={line:"LIJN",polyline:"POLYLIJN",shape:"VORM",stake:"UITZETTEN",wall:"MUUR"};

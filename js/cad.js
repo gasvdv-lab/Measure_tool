@@ -1,4 +1,4 @@
-import {S,projectToWorld,worldToProject} from "./state.js?v=0.8.32.1-20260830-horizontal-axis-lock";
+import {S,projectToWorld,worldToProject} from "./state.js?v=0.8.33-20260830-area-measurement";
 
 const DB_NAME="measurear.cad.v1",STORE="files";
 let loaderPromise=null;

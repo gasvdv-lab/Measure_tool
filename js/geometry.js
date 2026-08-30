@@ -1,4 +1,4 @@
-import {S,$,fmt,fmtLine,pointName,getPoint,getLine,getContour,getShape,projectToWorld} from "./state.js?v=0.8.32.1-20260830-horizontal-axis-lock";
+import {S,$,fmt,fmtLine,pointName,getPoint,getLine,getContour,getShape,projectToWorld} from "./state.js?v=0.8.33-20260830-area-measurement";
 
 export function renderPosition(p){return p?.worldPosition||p?.position||null;}
 

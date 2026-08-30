@@ -1,5 +1,5 @@
-import {startAR,resumeARFromGesture} from "./ar.js?v=0.8.32.1-20260830-horizontal-axis-lock";
-import {$} from "./state.js?v=0.8.32.1-20260830-horizontal-axis-lock";
+import {startAR,resumeARFromGesture} from "./ar.js?v=0.8.33-20260830-area-measurement";
+import {$} from "./state.js?v=0.8.33-20260830-area-measurement";
 const VERSION="0.8.32",BUILD="20260830-polyline-angles";
 const pendingCadId=sessionStorage.getItem("measurear.pendingCadPlacement");
 let uiReadyPromise;
@@ -11,13 +11,13 @@ function showFatal(message){
   if(btn){btn.disabled=false;btn.textContent="Opnieuw proberen";}
 }
 async function lazyInitUI(){
-  try{const mod=await import("./ui.js?v=0.8.32.1-20260830-horizontal-axis-lock");mod.initUI();if(document.documentElement.dataset.uiReady!=="1")throw new Error("UI-binding niet voltooid.");return true;}
+  try{const mod=await import("./ui.js?v=0.8.33-20260830-area-measurement");mod.initUI();if(document.documentElement.dataset.uiReady!=="1")throw new Error("UI-binding niet voltooid.");return true;}
   catch(err){console.error("UI init failed",err);showFatal(`UI-fout · v${VERSION} build ${BUILD}\n${err.message||err}`);return false;}
 }
 async function finishPendingCad(id){
   const [{restoreRecovery},{restoreCadRuntime,selectCad,beginCadPlacement}]=await Promise.all([
-    import("./project-storage.js?v=0.8.32.1-20260830-horizontal-axis-lock"),
-    import("./cad.js?v=0.8.32.1-20260830-horizontal-axis-lock")
+    import("./project-storage.js?v=0.8.33-20260830-area-measurement"),
+    import("./cad.js?v=0.8.33-20260830-area-measurement")
   ]);
   restoreRecovery();
   await restoreCadRuntime();

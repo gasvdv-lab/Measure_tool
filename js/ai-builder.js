@@ -1,5 +1,5 @@
-import {S,getShape,getPoint} from "./state.js?v=0.8.32.1-20260830-horizontal-axis-lock";
-import {analyzeShapePoints,dispose} from "./geometry.js?v=0.8.32.1-20260830-horizontal-axis-lock";
+import {S,getShape,getPoint} from "./state.js?v=0.8.33-20260830-area-measurement";
+import {analyzeShapePoints,dispose} from "./geometry.js?v=0.8.33-20260830-area-measurement";
 
 const DEFAULT_COLOR="#b98b5f";
 const MIN_HEIGHT=.01,MAX_HEIGHT=10;
