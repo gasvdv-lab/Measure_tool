@@ -1,3 +1,9 @@
+# v0.8.36.4.1 — PWA Version Sync Fix ✅ (AUTO) / ⏳ (AR)
+
+- Synchroniseert zichtbare versie, manifest/icon cache-busters, service-workerregistratie en module build-ID’s.
+- Geen wijziging aan AR-, World Lock-, meet-, CAD- of constraintgeometrie.
+- PWA-updategate: na GitHub upload app volledig sluiten en opnieuw openen; startscherm moet v0.8.36.4.1 tonen.
+
 # v0.8.36.4 — Full UI Action Audit ✅ (AUTO) / ⏳ (AR)
 
 - [x] Alle statische menu-/HUD-knoppen geïnventariseerd.
@@ -7,7 +13,7 @@
 - [x] Geen wijziging aan World Lock/geometrische waarheid.
 - [ ] Fysieke Android/PWA menu-smoketest.
 
-# v0.8.36.3 — PWA Install ✅
+# v0.8.36.4.1 — PWA Install ✅
 - [x] Productnaam zichtbaar gewijzigd naar **AR construct**.
 - [x] Web App Manifest + appiconen.
 - [x] Android/Chrome standalone-installatie.

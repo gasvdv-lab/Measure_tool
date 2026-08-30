@@ -1,3 +1,9 @@
+# AR construct — v0.8.36.4.1
+
+- Synchroniseert zichtbare versie, manifest/icon cache-busters, service-workerregistratie en module build-ID’s.
+- Geen wijziging aan AR-, World Lock-, meet-, CAD- of constraintgeometrie.
+- PWA-updategate: na GitHub upload app volledig sluiten en opnieuw openen; startscherm moet v0.8.36.4.1 tonen.
+
 # AR construct v0.8.36.4 — Full UI Action Audit
 
 Deze maintenance-release is een volledige statische audit van alle zichtbare knoppen en bedieningselementen in `index.html` en `cad-import.html`. De gevonden concrete defecten zijn hersteld: **AR hervatten en CAD plaatsen** had wel een zichtbare knop maar geen event-handler; daarnaast rapporteerde `bootstrap.js` nog de oude v0.8.36.2 build-identiteit. De CAD-knop hervat AR nu vanuit de vereiste user gesture, herstelt CAD-runtime, selecteert het actieve/eerste model en start plaatsing. De producttitel in het hoofdmenu is AR construct. PWA, World Lock, Measure Engine en constraints zijn functioneel ongemoeid gelaten.
@@ -5,7 +11,7 @@ Deze maintenance-release is een volledige statische audit van alle zichtbare kno
 ## Audit gate
 AUTO: JS syntax, lokale imports, HTML-ID ↔ JS-referenties, zichtbare knop ↔ handler/declaratieve actie, uniforme module build-ID en ZIP-integriteit. AR: menu-smoketest en CAD-resume blijven fysiek te bevestigen.
 
-# AR construct v0.8.36.3 — PWA Install
+# AR construct v0.8.36.4.1 — PWA Install
 
 De app heet vanaf deze release zichtbaar **AR construct**. Deze release voegt PWA-installatie toe zonder de AR-, World Lock-, meet- of constraintlogica te wijzigen.
 

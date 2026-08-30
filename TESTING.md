@@ -1,3 +1,9 @@
+# v0.8.36.4.1 — PWA Version Sync Fix
+
+- Synchroniseert zichtbare versie, manifest/icon cache-busters, service-workerregistratie en module build-ID’s.
+- Geen wijziging aan AR-, World Lock-, meet-, CAD- of constraintgeometrie.
+- PWA-updategate: na GitHub upload app volledig sluiten en opnieuw openen; startscherm moet v0.8.36.4.1 tonen.
+
 # v0.8.36.4 — UI Action Audit
 
 ## AUTO
@@ -11,7 +17,7 @@
 ## AR/PWA
 Open elk hoofdmenu-item één keer; test Opslaan, Mijn projecten, Metingen, Objecten, Instellingen, Undo/Redo, teken-HUD, Loodrecht 90°, Eigen hoek en CAD → AR hervatten. Controleer dat geen knop stil niets doet.
 
-# v0.8.36.3 — PWA Install
+# v0.8.36.4.1 — PWA Install
 
 - **AUTO** manifest JSON geldig; vereiste iconen aanwezig; service worker en PWA-module syntactisch geldig.
 - **PC** installatie-/standalonegedrag waar ondersteund controleren.
