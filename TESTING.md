@@ -1,3 +1,11 @@
+# v0.8.29.1.1 — Surface Detection Repair tests
+
+- **AUTO:** JavaScript syntax, lokale imports en ZIP-integriteit.
+- **AR-IN/ROOM:** start AR in normale verlichting, beweeg de camera rustig over vloer/tafel en controleer dat het vizier groen wordt zodra ARCore een oppervlak levert.
+- **AR-IN/ROOM:** teken daarna één lijn en één vorm op een herkend oppervlak.
+- **AR-IN/ROOM:** beëindig AR, start opnieuw en herhaal om de hit-testbron opnieuw te initialiseren.
+- **Regressie:** CAD Preview en bestaande World Lock-functionaliteit mogen niet veranderen.
+
 # Measure AR TESTING
 
 ## v0.8.29.1 — CAD Preview

@@ -1,3 +1,7 @@
+# v0.8.29.1.1 module-update
+
+**AR Hit-Test / Surface Targeting** — onderhoudsfix: de viewer hit-testbron wordt pas als actief gemarkeerd nadat WebXR hem werkelijk heeft aangemaakt. Bij een tijdelijke aanvraagfout volgt maximaal eenmaal per seconde een nieuwe poging. Er worden geen fictieve oppervlakken of ruimere geometrische toleranties gebruikt.
+
 # Measure AR — Modules
 
 Actuele cumulatieve modulehandleiding. Bij iedere release moet dit document worden bijgewerkt wanneer een module of werking verandert.
