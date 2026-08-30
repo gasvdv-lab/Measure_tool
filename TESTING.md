@@ -1,3 +1,10 @@
+# v0.8.36.3 — PWA Install
+
+- **AUTO** manifest JSON geldig; vereiste iconen aanwezig; service worker en PWA-module syntactisch geldig.
+- **PC** installatie-/standalonegedrag waar ondersteund controleren.
+- **AR-IN/ROOM / AR-OUT** na installatie: AR starten en regressie lijn + loodrecht/eigen hoek uitvoeren.
+- Verwachting: installatie verandert niets aan geometrie, World Lock of projectopslag.
+
 ## v0.8.36.2.2 gerichte AR-test
 1. Teken AB en voltooi de lijn.
 2. Kies Loodrecht 90° + AB. Richt midden op AB: witte knop moet actief worden; plaats vertrekpunt en teken loodrechte lijn.

@@ -1,3 +1,14 @@
+# v0.8.36.3 — PWA / Installatiemodule
+
+## `manifest.webmanifest`
+Definieert **AR construct** als installeerbare webapp, standalone startgedrag en appiconen.
+
+## `js/pwa.js`
+Registreert de service worker, vangt de Android/Chrome-installatieprompt op en beheert de knop **Installeer AR construct**.
+
+## `service-worker.js`
+Minimale network-only service worker. Bewust geen cache-first app-code om regressies door oude JS-builds te voorkomen.
+
 ## v0.8.36.2.2 wijziging — drawing-core
 `setConstraint()` herbewapent een voltooide gewone lijntool voor een volgende constraintlijn. Dit repareert de state-machine overgang `complete → drawing` die ontbrak.
 

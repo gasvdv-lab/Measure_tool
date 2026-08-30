@@ -1,3 +1,26 @@
+# AR construct v0.8.36.3 — PWA Install
+
+De app heet vanaf deze release zichtbaar **AR construct**. Deze release voegt PWA-installatie toe zonder de AR-, World Lock-, meet- of constraintlogica te wijzigen.
+
+- Installeerbaar op ondersteunde Android/Chrome-toestellen vanaf GitHub Pages.
+- `manifest.webmanifest`, 192/512-pictogrammen en een service worker toegevoegd.
+- Standalone-weergave zonder normale Chrome-adresbalk wanneer als app gestart.
+- Eigen knop **Installeer AR construct** verschijnt wanneer Chrome de installatieprompt beschikbaar stelt.
+- De service worker gebruikt bewust netwerk-only fetches: geen app-codecache die oude JS-versies kan vasthouden.
+- Bestaande projectopslag/keys blijven ongewijzigd zodat projecten niet verloren gaan door de productnaamwijziging.
+
+Vaste app-link: https://gasvdv-lab.github.io/Measure_tool/
+
+## Installatietest
+1. Open de vaste app-link in Chrome via HTTPS.
+2. Wacht tot **Installeer AR construct** verschijnt, of gebruik Chrome-menu → **App installeren / Toevoegen aan startscherm**.
+3. Bevestig.
+4. Start **AR construct** via het nieuwe icoon.
+5. Controleer dat de app standalone opent en AR normaal start.
+6. Regressie: teken een vrije lijn en test Loodrecht/Eigen hoek; gedrag moet identiek zijn aan v0.8.36.2.2.
+
+---
+
 # v0.8.36.2.2 — Capture Rearm Fix
 
 Fix: na een voltooide lijn kan **Loodrecht 90°** of **Eigen hoek** opnieuw tekenen. De lijntool wordt correct terug in `drawing` gezet. Loodrecht laat eerst een vertrekpunt op de referentielijn kiezen; Eigen hoek vertrekt vanaf het laatst geplaatste punt. World Lock is niet gewijzigd.

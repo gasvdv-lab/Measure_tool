@@ -4,17 +4,25 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#111111">
+  <meta name="application-name" content="AR construct">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="AR construct">
+  <link rel="manifest" href="./manifest.webmanifest?v=0.8.36.3">
+  <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png?v=0.8.36.3">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png?v=0.8.36.3">
   <script>try{document.documentElement.dataset.appTheme=localStorage.getItem("measurear.ui.theme.v1")||"technical-green"}catch{document.documentElement.dataset.appTheme="technical-green"}</script>
-  <title>Measure AR v0.8.30</title>
-  <link rel="stylesheet" href="./css/app.css?v=0.8.36.2.2-20260830-capture-rearm-fix">
+  <title>AR construct</title>
+  <link rel="stylesheet" href="./css/app.css?v=0.8.36.3-20260830-pwa-install">
 </head>
 <body>
 <div id="app">
   <main id="launchScreen" class="startCard directFallback">
-    <div class="logo">⌖</div><h1>Measure AR</h1>
+    <div class="logo">⌖</div><h1>AR construct</h1>
     <p id="launchStatus">Tik om AR te starten.</p>
     <div id="startupRecovery" class="help" style="display:none"></div>
-    <div id="buildInfo" class="build">v0.8.30 · Measure Engine Foundation · 20260830</div>
+    <div id="buildInfo" class="build">v0.8.36.3 · PWA Install · 20260830</div>
+    <button id="installPwaBtn" class="secondary" hidden>Installeer AR construct</button>
     <button id="startArBtn" class="primary">AR starten</button>
     <div id="error" class="error"></div>
   </main>
@@ -38,7 +46,7 @@
   <aside id="menuPanel">
     <div class="menuHead">
       <button id="menuBackBtn" class="secondary">‹</button>
-      <div><strong id="menuTitle">Measure AR</strong><small id="menuMeta">v0.8.30 MEASURE ENGINE</small></div>
+      <div><strong id="menuTitle">AR construct</strong><small id="menuMeta">v0.8.36.3</small></div>
       <button id="menuCloseBtn" class="secondary">✕</button>
     </div>
     <div class="menuBody">
@@ -484,6 +492,6 @@
   <div id="hint">Open ☰ en kies wat je wilt tekenen.</div>
 </div>
 
-<script type="module" src="./js/bootstrap.js?v=0.8.36.2.2-20260830-capture-rearm-fix"></script>
+<script type="module" src="./js/bootstrap.js?v=0.8.36.3-20260830-pwa-install"></script>
 </body>
 </html>

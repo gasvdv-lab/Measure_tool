@@ -1,3 +1,10 @@
+# v0.8.36.3 — PWA Install ✅
+- [x] Productnaam zichtbaar gewijzigd naar **AR construct**.
+- [x] Web App Manifest + appiconen.
+- [x] Android/Chrome standalone-installatie.
+- [x] Network-only service worker om stale codecache te vermijden.
+- [x] Geen wijziging aan AR/World Lock/Measure Engine/constraints.
+
 ## v0.8.36.2.2 — Capture Rearm Fix ✅ codefix / AR-test vereist
 - Fix witte bevestigingsknop die inactief bleef na keuze Loodrecht/Eigen hoek op een reeds voltooide lijn.
 - Geen wijziging aan World Lock of geometrische hoekberekening.
