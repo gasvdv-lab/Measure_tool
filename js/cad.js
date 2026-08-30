@@ -1,4 +1,4 @@
-import {S,projectToWorld,worldToProject} from "./state.js?v=0.8.37.1-20260830-rigid-world-lock";
+import {S,projectToWorld,worldToProject} from "./state.js?v=0.8.37.2-20260830-cad-placement-repair";
 
 const DB_NAME="measurear.cad.v1",STORE="files";
 let loaderPromise=null;
@@ -16,7 +16,11 @@ async function loadLoader(){
   if(!loaderPromise)loaderPromise=import("https://esm.sh/three@0.167.1/examples/jsm/loaders/GLTFLoader.js").then(m=>m.GLTFLoader);
   return loaderPromise;
 }
-function runtime(){if(!S.cadRuntime)S.cadRuntime={objects:new Map(),activeId:null,placing:false,offsetY:0};return S.cadRuntime;}
+function runtime(){
+  if(!S.cadRuntime)S.cadRuntime={objects:new Map(),activeId:null,placing:false,targetLocked:false,offsetY:0};
+  if(typeof S.cadRuntime.targetLocked!=="boolean")S.cadRuntime.targetLocked=false;
+  return S.cadRuntime;
+}
 function ensureCadState(){if(!S.project.cad)S.project.cad={models:[]};if(!Array.isArray(S.project.cad.models))S.project.cad.models=[];return S.project.cad;}
 function meta(id){return ensureCadState().models.find(m=>m.id===id)||null;}
 function disposeObject(root){
@@ -38,6 +42,8 @@ async function instantiate(m,blob){
   const raw=await parseBlob(blob),pivot=makePivot(raw),rt=runtime();
   S.scene.add(pivot);rt.objects.set(m.id,pivot);
   const p=m.position||{x:0,y:0,z:0},w=projectToWorld(new S.THREE.Vector3(p.x,p.y,p.z));pivot.position.copy(w);pivot.rotation.y=Number(m.yaw)||0;pivot.scale.set(1,1,1);
+  // Een nog niet geplaatst model mag nooit bij projectorigin verschijnen.
+  pivot.visible=Boolean(m.placed&&m.position);
   return pivot;
 }
 export async function importCadFile(file){
@@ -65,24 +71,40 @@ export function listCadModels(){return ensureCadState().models;}
 export function activeCad(){return meta(runtime().activeId);}
 export function selectCad(id){if(!meta(id))throw new Error("CAD-model niet gevonden.");runtime().activeId=id;return meta(id);}
 export function beginCadPlacement(id){
-  const m=selectCad(id),rt=runtime();rt.placing=true;rt.offsetY=0;m.placed=false;document.dispatchEvent(new CustomEvent("measurear:cad-changed"));return m;
+  const m=selectCad(id),rt=runtime();rt.placing=true;rt.targetLocked=false;rt.offsetY=0;
+  const o=rt.objects.get(m.id);if(o)o.visible=false;
+  document.dispatchEvent(new CustomEvent("measurear:cad-changed"));return m;
+}
+export function isCadTargeting(){const rt=runtime();return Boolean(rt.placing&&rt.activeId&&!rt.targetLocked);}
+export function captureCadTarget(){
+  const rt=runtime(),m=activeCad();if(!m||!rt.placing)throw new Error("Geen CAD-plaatsing actief.");
+  const target=S.currentRawTarget||S.currentTarget;if(!target)throw new Error("Nog geen geldig oppervlak onder het vizier.");
+  const o=rt.objects.get(m.id);if(!o)throw new Error("CAD-model is niet geladen.");
+  o.position.copy(target);o.position.y+=rt.offsetY;o.visible=true;rt.targetLocked=true;
+  document.dispatchEvent(new CustomEvent("measurear:cad-changed"));return m;
 }
 export function rotateCad(deltaDeg){const m=activeCad();if(!m)throw new Error("Geen CAD-model geselecteerd.");m.yaw=(Number(m.yaw)||0)+deltaDeg*Math.PI/180;const o=runtime().objects.get(m.id);if(o)o.rotation.y=m.yaw;document.dispatchEvent(new CustomEvent("measurear:cad-changed"));}
 export function moveCadHeight(deltaM){const m=activeCad();if(!m)throw new Error("Geen CAD-model geselecteerd.");const rt=runtime();rt.offsetY+=deltaM;if(!rt.placing){m.position.y+=deltaM;const o=rt.objects.get(m.id);if(o)o.position.copy(projectToWorld(new S.THREE.Vector3(m.position.x,m.position.y,m.position.z)));}document.dispatchEvent(new CustomEvent("measurear:cad-changed"));}
 export function confirmCadPlacement(){
   const rt=runtime(),m=activeCad();if(!m)throw new Error("Geen CAD-model geselecteerd.");const o=rt.objects.get(m.id);if(!o)throw new Error("CAD-model is niet geladen.");
-  const pp=worldToProject(o.position);m.position={x:pp.x,y:pp.y,z:pp.z};m.placed=true;rt.placing=false;rt.offsetY=0;document.dispatchEvent(new CustomEvent("measurear:cad-changed"));return m;
+  if(!rt.targetLocked)throw new Error("Kies eerst de locatie met de witte knop.");
+  const pp=worldToProject(o.position);m.position={x:pp.x,y:pp.y,z:pp.z};m.placed=true;rt.placing=false;rt.targetLocked=false;rt.offsetY=0;o.visible=true;document.dispatchEvent(new CustomEvent("measurear:cad-changed"));return m;
 }
-export function cancelCadPlacement(){const rt=runtime(),m=activeCad();if(!m)return;if(!m.placed){deleteCadModel(m.id);return;}rt.placing=false;rt.offsetY=0;const o=rt.objects.get(m.id);if(o)o.position.copy(projectToWorld(new S.THREE.Vector3(m.position.x,m.position.y,m.position.z)));document.dispatchEvent(new CustomEvent("measurear:cad-changed"));}
-export function deleteCadModel(id){const rt=runtime(),o=rt.objects.get(id);disposeObject(o);rt.objects.delete(id);ensureCadState().models=ensureCadState().models.filter(m=>m.id!==id);if(rt.activeId===id){rt.activeId=null;rt.placing=false;}document.dispatchEvent(new CustomEvent("measurear:cad-changed"));}
+export function cancelCadPlacement(){const rt=runtime(),m=activeCad();if(!m)return;rt.placing=false;rt.targetLocked=false;rt.offsetY=0;const o=rt.objects.get(m.id);if(m.placed&&m.position){if(o){o.position.copy(projectToWorld(new S.THREE.Vector3(m.position.x,m.position.y,m.position.z)));o.visible=true;}}else if(o){o.visible=false;}document.dispatchEvent(new CustomEvent("measurear:cad-changed"));}
+export function deleteCadModel(id){const rt=runtime(),o=rt.objects.get(id);disposeObject(o);rt.objects.delete(id);ensureCadState().models=ensureCadState().models.filter(m=>m.id!==id);if(rt.activeId===id){rt.activeId=null;rt.placing=false;rt.targetLocked=false;}document.dispatchEvent(new CustomEvent("measurear:cad-changed"));}
 export function updateCadFrame(){
   const rt=runtime();if(!S.THREE)return;
-  for(const m of ensureCadState().models){const o=rt.objects.get(m.id);if(!o)continue;o.rotation.y=Number(m.yaw)||0;o.scale.set(1,1,1);if(rt.placing&&rt.activeId===m.id){const t=S.currentRawTarget||S.currentTarget;if(t){o.position.copy(t);o.position.y+=rt.offsetY;}}else if(m.position){o.position.copy(projectToWorld(new S.THREE.Vector3(m.position.x,m.position.y,m.position.z)));}}
+  for(const m of ensureCadState().models){const o=rt.objects.get(m.id);if(!o)continue;o.rotation.y=Number(m.yaw)||0;o.scale.set(1,1,1);
+    if(rt.placing&&rt.activeId===m.id){
+      if(!rt.targetLocked){o.visible=false;}else{o.visible=true;}
+    }else if(m.placed&&m.position){o.visible=true;o.position.copy(projectToWorld(new S.THREE.Vector3(m.position.x,m.position.y,m.position.z)));}
+    else{o.visible=false;}
+  }
 }
-export function clearCadRuntime(){const rt=runtime();for(const o of rt.objects.values())disposeObject(o);rt.objects.clear();rt.activeId=null;rt.placing=false;rt.offsetY=0;}
+export function clearCadRuntime(){const rt=runtime();for(const o of rt.objects.values())disposeObject(o);rt.objects.clear();rt.activeId=null;rt.placing=false;rt.targetLocked=false;rt.offsetY=0;}
 export async function restoreCadRuntime(){
   clearCadRuntime();if(!S.THREE||!S.scene)return;
   for(const m of ensureCadState().models){try{const blob=await getBlob(m.fileKey);if(blob)await instantiate(m,blob);else m.missingFile=true;}catch(err){console.warn("CAD restore failed",m.name,err);m.missingFile=true;}}
   document.dispatchEvent(new CustomEvent("measurear:cad-changed"));
 }
-export function cadStatus(){const rt=runtime(),m=activeCad();return {count:ensureCadState().models.length,active:m,placing:rt.placing,loaded:rt.objects.size};}
+export function cadStatus(){const rt=runtime(),m=activeCad();return {count:ensureCadState().models.length,active:m,placing:rt.placing,targetLocked:rt.targetLocked,loaded:rt.objects.size};}

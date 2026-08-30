@@ -1,10 +1,10 @@
-import {S,$} from "./state.js?v=0.8.37.1-20260830-rigid-world-lock";
-import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.37.1-20260830-rigid-world-lock";
-import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.37.1-20260830-rigid-world-lock";
-import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.37.1-20260830-rigid-world-lock";
-import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.37.1-20260830-rigid-world-lock";
-import {updateCadFrame,clearCadRuntime} from "./cad.js?v=0.8.37.1-20260830-rigid-world-lock";
-import {clearAiBuilderObjects,syncWorldLockedAiObjects} from "./ai-builder.js?v=0.8.37.1-20260830-rigid-world-lock";
+import {S,$} from "./state.js?v=0.8.37.2-20260830-cad-placement-repair";
+import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.37.2-20260830-cad-placement-repair";
+import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.37.2-20260830-cad-placement-repair";
+import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.37.2-20260830-cad-placement-repair";
+import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.37.2-20260830-cad-placement-repair";
+import {updateCadFrame,clearCadRuntime,isCadTargeting} from "./cad.js?v=0.8.37.2-20260830-cad-placement-repair";
+import {clearAiBuilderObjects,syncWorldLockedAiObjects} from "./ai-builder.js?v=0.8.37.2-20260830-cad-placement-repair";
 
 let samples=[],sampleSource=null,camPos,camQuat,forward;
 const xrDiag={viewer:"pending",hitSource:"pending",hits:0,pose:false,target:false,error:""};
@@ -26,6 +26,8 @@ function init(){
   const T=S.THREE;S.scene=new T.Scene();S.camera=new T.PerspectiveCamera(70,innerWidth/innerHeight,.01,100);
   S.renderer=new T.WebGLRenderer({alpha:true,antialias:true});S.renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));S.renderer.setSize(innerWidth,innerHeight);
   S.renderer.xr.enabled=true;S.renderer.xr.setReferenceSpaceType("local");S.renderer.domElement.style.display="none";document.body.appendChild(S.renderer.domElement);
+  const hemi=new T.HemisphereLight(0xffffff,0x505050,1.8);hemi.name="AR construct CAD hemi";S.scene.add(hemi);
+  const dir=new T.DirectionalLight(0xffffff,1.35);dir.name="AR construct CAD key";dir.position.set(2,4,3);S.scene.add(dir);
   S.reticle=new T.Mesh(new T.RingGeometry(.035,.045,40).rotateX(-Math.PI/2),new T.MeshBasicMaterial({color:0x69ff9a}));
   S.reticle.matrixAutoUpdate=false;S.reticle.visible=false;S.scene.add(S.reticle);
 }
@@ -163,7 +165,7 @@ function render(_,frame){
 
   updateCandidate({hit,hitNormal:normal,ray:cameraRay()});
   const referenceCaptureAllowed=Boolean(S.referenceCaptureId&&S.currentRawTarget&&S.currentHitResult&&S.targetSource==="hit");
-  $("captureBtn").disabled=!(referenceCaptureAllowed||isCaptureAllowed());
+  $("captureBtn").disabled=!(referenceCaptureAllowed||(isCadTargeting()&&Boolean(S.currentRawTarget||S.currentTarget))||isCaptureAllowed());
 
   const c=S.tool.candidate;
   if(S.tool.kind&&S.tool.status==="drawing"){

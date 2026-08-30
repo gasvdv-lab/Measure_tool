@@ -1,5 +1,5 @@
 export const S={
-  version:"0.8.37.1",build:"20260830-rigid-world-lock",
+  version:"0.8.37.2",build:"20260830-cad-placement-repair",
   THREE:null,renderer:null,scene:null,camera:null,reticle:null,xrSession:null,hitSource:null,hitRequested:false,
   currentTarget:null,currentRawTarget:null,currentHitResult:null,currentXRFrame:null,currentReferenceSpace:null,targetSource:"none",zoom:1,pointPlacementEpoch:0,referenceCaptureId:null,
   points:[],lines:[],contours:[],shapes:[],walls:[],openings:[],aiObjects:[],clearances:[],
@@ -36,7 +36,7 @@ export const S={
       mode:"auto"
     }
   },
-  cadRuntime:{objects:new Map(),activeId:null,placing:false,offsetY:0},
+  cadRuntime:{objects:new Map(),activeId:null,placing:false,targetLocked:false,offsetY:0},
   externalPicker:null,
   cadPickerLifecycle:{active:false,returned:false},
   xrEndIntent:null

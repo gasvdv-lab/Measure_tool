@@ -1,5 +1,5 @@
-import {S,getShape,getPoint,projectToWorld} from "./state.js?v=0.8.37.1-20260830-rigid-world-lock";
-import {analyzeShapePoints,dispose} from "./geometry.js?v=0.8.37.1-20260830-rigid-world-lock";
+import {S,getShape,getPoint,projectToWorld} from "./state.js?v=0.8.37.2-20260830-cad-placement-repair";
+import {analyzeShapePoints,dispose} from "./geometry.js?v=0.8.37.2-20260830-cad-placement-repair";
 
 const DEFAULT_COLOR="#b98b5f";
 const MIN_HEIGHT=.01,MAX_HEIGHT=10;

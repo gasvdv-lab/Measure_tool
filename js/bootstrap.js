@@ -1,7 +1,7 @@
-import {initPwaInstall} from "./pwa.js?v=0.8.37.1-20260830-rigid-world-lock";
-import {startAR,resumeARFromGesture} from "./ar.js?v=0.8.37.1-20260830-rigid-world-lock";
-import {$} from "./state.js?v=0.8.37.1-20260830-rigid-world-lock";
-const VERSION="0.8.37.1",BUILD="20260830-pwa-version-sync-fix";
+import {initPwaInstall} from "./pwa.js?v=0.8.37.2-20260830-cad-placement-repair";
+import {startAR,resumeARFromGesture} from "./ar.js?v=0.8.37.2-20260830-cad-placement-repair";
+import {$} from "./state.js?v=0.8.37.2-20260830-cad-placement-repair";
+const VERSION="0.8.37.2",BUILD="20260830-cad-placement-repair";
 const pendingCadId=sessionStorage.getItem("measurear.pendingCadPlacement");
 let uiReadyPromise;
 
@@ -12,13 +12,13 @@ function showFatal(message){
   if(btn){btn.disabled=false;btn.textContent="Opnieuw proberen";}
 }
 async function lazyInitUI(){
-  try{const mod=await import("./ui.js?v=0.8.37.1-20260830-rigid-world-lock");mod.initUI();if(document.documentElement.dataset.uiReady!=="1")throw new Error("UI-binding niet voltooid.");return true;}
+  try{const mod=await import("./ui.js?v=0.8.37.2-20260830-cad-placement-repair");mod.initUI();if(document.documentElement.dataset.uiReady!=="1")throw new Error("UI-binding niet voltooid.");return true;}
   catch(err){console.error("UI init failed",err);showFatal(`UI-fout · v${VERSION} build ${BUILD}\n${err.message||err}`);return false;}
 }
 async function finishPendingCad(id){
   const [{restoreRecovery},{restoreCadRuntime,selectCad,beginCadPlacement}]=await Promise.all([
-    import("./project-storage.js?v=0.8.37.1-20260830-rigid-world-lock"),
-    import("./cad.js?v=0.8.37.1-20260830-rigid-world-lock")
+    import("./project-storage.js?v=0.8.37.2-20260830-cad-placement-repair"),
+    import("./cad.js?v=0.8.37.2-20260830-cad-placement-repair")
   ]);
   restoreRecovery();
   await restoreCadRuntime();
@@ -26,7 +26,7 @@ async function finishPendingCad(id){
   sessionStorage.removeItem("measurear.pendingCadPlacement");
   history.replaceState(null,"","./index.html");
   document.dispatchEvent(new CustomEvent("measurear:cad-return-ready",{detail:{id}}));
-  const hint=$("hint");if(hint)hint.textContent="CAD geladen. Richt het vizier op de gewenste positie; open ☰ → CAD om te bevestigen.";
+  const hint=$("hint");if(hint)hint.textContent="CAD geladen. Richt het vizier op de gewenste locatie en druk op de witte ronde knop.";
 }
 async function startFromUserGesture(){
   const status=$("launchStatus"),btn=$("startArBtn"),error=$("error");

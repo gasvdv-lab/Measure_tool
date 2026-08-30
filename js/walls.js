@@ -1,6 +1,6 @@
 
-import {S,getPoint,getLine} from "./state.js?v=0.8.37.1-20260830-rigid-world-lock";
-import {dispose,renderPosition} from "./geometry.js?v=0.8.37.1-20260830-rigid-world-lock";
+import {S,getPoint,getLine} from "./state.js?v=0.8.37.2-20260830-cad-placement-repair";
+import {dispose,renderPosition} from "./geometry.js?v=0.8.37.2-20260830-cad-placement-repair";
 
 function cleanName(name){return String(name||"").trim().replace(/\s+/g," ");}
 export function wallNameExists(name,excludeId=null){

@@ -1,34 +1,34 @@
-import {S,$,fmt,fmtLine,fmtAreaUnit,fmtVolumeUnit,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.37.1-20260830-rigid-world-lock";
+import {S,$,fmt,fmtLine,fmtAreaUnit,fmtVolumeUnit,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.37.2-20260830-cad-placement-repair";
 import {
   startTool,cancelTool,setPlacement,setDistance,setConstraint,setAxisDirection,setPerpendicularMode,setAngle,flipSide,setReferenceLine,setSnapMode,
   confirmCandidate,undoToolStep,finishTool,toolLabel,constraintLabel,getActivePoint,referenceRequired,resetDrawingCore
-} from "./drawing-core.js?v=0.8.37.1-20260830-rigid-world-lock";
+} from "./drawing-core.js?v=0.8.37.2-20260830-cad-placement-repair";
 import {
   createShape,updateShape,deleteShapeOnly,deleteShapeWithContour,deleteLineRaw,deletePointRaw,renamePoint,updateLine,analyzeContour,analyzePolyline,updatePolyline,
   lineDependencies,pointDependencies,canDeleteLine,canDeletePoint,clearAllGeometry,validateGeometryState,dispose
-} from "./geometry.js?v=0.8.37.1-20260830-rigid-world-lock";
-import {startAR,resumeARFromGesture,suspendARForCadImport,applyZoom,resetTrackingSamples} from "./ar.js?v=0.8.37.1-20260830-rigid-world-lock";
-import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.37.1-20260830-rigid-world-lock";
-import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.37.1-20260830-rigid-world-lock";
+} from "./geometry.js?v=0.8.37.2-20260830-cad-placement-repair";
+import {startAR,resumeARFromGesture,suspendARForCadImport,applyZoom,resetTrackingSamples} from "./ar.js?v=0.8.37.2-20260830-cad-placement-repair";
+import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.37.2-20260830-cad-placement-repair";
+import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.37.2-20260830-cad-placement-repair";
 import {
   initProjectStorage,saveCurrentProject,listProjects,loadStoredProject,newProject,duplicateStoredProject,
   deleteStoredProject,renameStoredProject,projectStats,formatStats,getStoredProjectInfo,hasRecovery,recoveryInfo,restoreRecovery,clearRecovery,
   exportCurrentProject,importProjectFile,markDirtyAndRecover
-} from "./project-storage.js?v=0.8.37.1-20260830-rigid-world-lock";
+} from "./project-storage.js?v=0.8.37.2-20260830-cad-placement-repair";
 import {
   captureCurrentGeo,addProjectReference,removeProjectReference,clearProjectReferences,beginRelocalization,cancelRelocalization,
   captureRelocalizationPoint,solveRelocalization,applyRelocalization,relocalizationSummary,beginSpatialRestore
-} from "./relocalization.js?v=0.8.37.1-20260830-rigid-world-lock";
+} from "./relocalization.js?v=0.8.37.2-20260830-cad-placement-repair";
 
-import {captureHybridBaseline,assessHybridLocation,enableHeading} from "./hybrid-localization.js?v=0.8.37.1-20260830-rigid-world-lock";
+import {captureHybridBaseline,assessHybridLocation,enableHeading} from "./hybrid-localization.js?v=0.8.37.2-20260830-cad-placement-repair";
 
-import {detachAllPointAnchors} from "./world-lock.js?v=0.8.37.1-20260830-rigid-world-lock";
-import {importCadFile,listCadModels,cadStatus,selectCad,beginCadPlacement,rotateCad,moveCadHeight,confirmCadPlacement,cancelCadPlacement,deleteCadModel,clearCadRuntime,restoreCadRuntime} from "./cad.js?v=0.8.37.1-20260830-rigid-world-lock";
-import {initProfessionalColorPickers,refreshProfessionalColorPickers} from "./color-picker.js?v=0.8.37.1-20260830-rigid-world-lock";
-import {initThemeSelector} from "./theme-selector.js?v=0.8.37.1-20260830-rigid-world-lock";
-import {executeAiPrototype,getAiObject,getAiObjectForShape,toggleAiObjectLock,deleteAiObject,clearAiBuilderObjects,aiObjectSummary} from "./ai-builder.js?v=0.8.37.1-20260830-rigid-world-lock";
-import {listClearanceTargets,analyzeClearance,clearanceStatus,getClearance,createClearance,updateClearance,deleteClearance,clearClearances} from "./clearance.js?v=0.8.37.1-20260830-rigid-world-lock";
-import {selectSpatialObject,listSpatialObjects} from "./spatial-objects.js?v=0.8.37.1-20260830-rigid-world-lock";
+import {detachAllPointAnchors} from "./world-lock.js?v=0.8.37.2-20260830-cad-placement-repair";
+import {importCadFile,listCadModels,cadStatus,selectCad,beginCadPlacement,isCadTargeting,captureCadTarget,rotateCad,moveCadHeight,confirmCadPlacement,cancelCadPlacement,deleteCadModel,clearCadRuntime,restoreCadRuntime} from "./cad.js?v=0.8.37.2-20260830-cad-placement-repair";
+import {initProfessionalColorPickers,refreshProfessionalColorPickers} from "./color-picker.js?v=0.8.37.2-20260830-cad-placement-repair";
+import {initThemeSelector} from "./theme-selector.js?v=0.8.37.2-20260830-cad-placement-repair";
+import {executeAiPrototype,getAiObject,getAiObjectForShape,toggleAiObjectLock,deleteAiObject,clearAiBuilderObjects,aiObjectSummary} from "./ai-builder.js?v=0.8.37.2-20260830-cad-placement-repair";
+import {listClearanceTargets,analyzeClearance,clearanceStatus,getClearance,createClearance,updateClearance,deleteClearance,clearClearances} from "./clearance.js?v=0.8.37.2-20260830-cad-placement-repair";
+import {selectSpatialObject,listSpatialObjects} from "./spatial-objects.js?v=0.8.37.2-20260830-cad-placement-repair";
 
 
 const pages=["home","project","references","relocalize","projects","cad","objects","measurements","clearance","polyline","line","point","walltool","wallcreate","wall","openingcreate","opening","shapecreate","shape","aibuilder","settings","clear"];
@@ -333,7 +333,10 @@ function renderCadPage(){
     del.onclick=()=>{deleteCadModel(m.id);markDirtyAndRecover();renderCadPage();showStatus(`CAD ${m.name} verwijderd.`);};
     row.append(b,del);box.append(row);
   }
-  const active=st.active;el("cadPlacementControls").style.display=S.xrSession&&active?"block":"none";
+  const active=st.active;el("cadPlacementControls").style.display=S.xrSession&&active&&st.placing?"block":"none";
+  const placeHelp=el("cadPlacementHelp"),confirm=el("cadConfirmBtn");
+  if(placeHelp)placeHelp.textContent=st.targetLocked?"Locatie gekozen. Controleer het model, pas rotatie/hoogte aan en bevestig definitief.":"Richt het vizier op de gewenste locatie en druk op de witte ronde knop. Het model blijft verborgen tot je de locatie kiest.";
+  if(confirm)confirm.disabled=Boolean(st.placing&&!st.targetLocked);
 }
 function analyzeLineMeasurement(l){
   const a=getPoint(l?.startId),b=getPoint(l?.endId);
@@ -681,6 +684,11 @@ export function initUI(){
   bind("hudCancelBtn","click",()=>{runHistoryAction("Tekenfunctie stoppen",()=>cancelTool());syncHud();syncHistoryControls();showStatus("Tekenfunctie gestopt. Bevestigde geometrie blijft bestaan.");});
 
   bind("captureBtn","click",()=>{
+    if(isCadTargeting()){
+      captureCadTarget();renderCadPage();syncHud();
+      el("hint").textContent="CAD-locatie gekozen. Open ☰ → CAD om rotatie/hoogte aan te passen en definitief te bevestigen.";
+      showStatus("CAD-locatie vastgelegd. Model is nu zichtbaar als preview.");return;
+    }
     if(S.referenceCaptureId){
       const ref=S.project.relocalization.references.find(x=>x.id===S.referenceCaptureId);
       if(!ref)throw new Error("Referentiepunt niet gevonden.");
@@ -803,7 +811,7 @@ bind("saveWallBtn","click",()=>{
   document.addEventListener("measurear:project-loaded",()=>{syncProjectMeta();renderObjects();renderCadPage();syncHistoryControls();});
   document.addEventListener("measurear:ai-builder-changed",()=>{if(document.getElementById("page-aibuilder")?.classList.contains("active"))renderAiBuilder();});
   document.addEventListener("measurear:cad-changed",()=>{if(document.getElementById("page-cad")?.classList.contains("active"))renderCadPage();syncProjectMeta();});
-  document.addEventListener("measurear:cad-return-ready",()=>{menuStack=["home","cad"];showPage("cad",false);renderCadPage();closeMenu();showStatus("CAD geladen · richt het vizier op de gewenste positie.");});
+  document.addEventListener("measurear:cad-return-ready",()=>{menuStack=["home","cad"];showPage("cad",false);renderCadPage();closeMenu();showStatus("CAD geladen · richt het vizier en druk op de witte knop om de locatie te kiezen.");});
 
   initProjectStorage();
   enableHeading().catch(()=>{});

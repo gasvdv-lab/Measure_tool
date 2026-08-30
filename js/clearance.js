@@ -1,4 +1,4 @@
-import {S} from "./state.js?v=0.8.37.1-20260830-rigid-world-lock";
+import {S} from "./state.js?v=0.8.37.2-20260830-cad-placement-repair";
 
 function now(){return new Date().toISOString();}
 function cleanName(v){return String(v||"").trim().replace(/\s+/g," ");}
