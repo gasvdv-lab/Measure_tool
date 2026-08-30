@@ -1,4 +1,4 @@
-# AR construct v0.8.37.1 — Spatial Objects + Universal Select/Edit
+# AR construct v0.8.37.2 — Spatial Objects + Universal Select/Edit
 
 Deze release introduceert één gemeenschappelijk Spatial Object-register voor punten, lijnen, vormen, muren, openingen, AI-concepten en CAD-modellen. Objecten worden vanuit Objecten via één selectiecontract gekozen en vervolgens naar hun bestaande, bewezen editor geleid. CAD is nu ook zichtbaar in de centrale objectlijst. De geometrische waarheid, World Lock-kalibratie en tekenketen uit v0.8.36.4.2 zijn niet herschreven.
 
@@ -544,7 +544,7 @@ AR-IN/ROOM: place A→B on a stable surface, confirm both endpoints, then move t
 - [AR-IN/A4] Combineer 90° en Eigen hoek met exacte afstand.
 - [AR-IN/ROOM] Controleer dat lijnen/vormen na tekenen fysiek op hun positie blijven (World Lock regressie).
 
-## v0.8.37.1 — Rigid World Lock stability gate
+## v0.8.37.2 — Rigid World Lock stability gate
 - [AUTO] All JavaScript parses successfully.
 - [AUTO] All local ES-module imports resolve and use one build id.
 - [AR-IN/A4] Point A remains physically fixed while moving the phone.

@@ -1,4 +1,4 @@
-# AR construct v0.8.37.1 — Spatial Objects + Universal Select/Edit
+# AR construct v0.8.37.2 — Spatial Objects + Universal Select/Edit
 
 Deze release introduceert één gemeenschappelijk Spatial Object-register voor punten, lijnen, vormen, muren, openingen, AI-concepten en CAD-modellen. Objecten worden vanuit Objecten via één selectiecontract gekozen en vervolgens naar hun bestaande, bewezen editor geleid. CAD is nu ook zichtbaar in de centrale objectlijst. De geometrische waarheid, World Lock-kalibratie en tekenketen uit v0.8.36.4.2 zijn niet herschreven.
 
@@ -406,7 +406,7 @@ GitHub Pages: https://gasvdv-lab.github.io/Measure_tool/
 - Exacte afstand blijft combineerbaar met asvast, 90° en eigen hoek.
 - World Lock-reparatie uit v0.8.36.1 blijft behouden.
 
-## v0.8.37.1 — Rigid World Lock Repair
+## v0.8.37.2 — Rigid World Lock Repair
 Stability repair after physical AR regression in v0.8.37. Committed project geometry is now treated as one rigid spatial frame. WebXR anchors may correct the pose of that frame, but individual anchors may never independently move vertices. This invariant applies to points, lines, polylines, shapes, walls, AI volumes and CAD placement through the shared project↔world transform. Anchor failover is calibrated to the existing transform to prevent a jump when the master anchor changes.
 
 Physical AR validation is still required before this build becomes the stable baseline.

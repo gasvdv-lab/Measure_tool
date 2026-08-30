@@ -1,4 +1,4 @@
-const SW_VERSION="0.8.37.1";
+const SW_VERSION="0.8.37.2";
 self.addEventListener("install",()=>self.skipWaiting());
 self.addEventListener("activate",event=>event.waitUntil(self.clients.claim()));
 self.addEventListener("fetch",event=>{

@@ -1,6 +1,6 @@
 # AR construct roadmap
 
-- [x] v0.8.37.1 Spatial Objects + Universal Select/Edit — gemeenschappelijk objectregister, selectiecontract en centrale CAD-selectie.
+- [x] v0.8.37.2 Spatial Objects + Universal Select/Edit — gemeenschappelijk objectregister, selectiecontract en centrale CAD-selectie.
 - [ ] v0.8.38 Work Planes & Environment Context
 - [ ] v0.8.39 Object Placement 2.0
 - [ ] v0.8.40 Object Library
@@ -462,7 +462,7 @@ Project Space blijft de geometrische waarheid. Bij het openen van een opgeslagen
 Openstaand blijft: `Project op locatie plaatsen` / witte referentie-captureknop.
 - [x] v0.8.36.2 — Direction & Angle Constraint Repair: expliciete asrichting, betrouwbare 90° op referentielijn en eigen hoek op referentielijn.
 
-### v0.8.37.1 — Rigid World Lock Repair
+### v0.8.37.2 — Rigid World Lock Repair
 - [x] Replace independent per-point visual anchor corrections with one rigid project-frame correction.
 - [x] Preserve immutable project geometry.
 - [x] Calibrate master-anchor acquisition/failover without a visual jump.

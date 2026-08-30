@@ -1,4 +1,4 @@
-# AR construct v0.8.37.1 — Spatial Objects + Universal Select/Edit
+# AR construct v0.8.37.2 — Spatial Objects + Universal Select/Edit
 
 Deze release introduceert één gemeenschappelijk Spatial Object-register voor punten, lijnen, vormen, muren, openingen, AI-concepten en CAD-modellen. Objecten worden vanuit Objecten via één selectiecontract gekozen en vervolgens naar hun bestaande, bewezen editor geleid. CAD is nu ook zichtbaar in de centrale objectlijst. De geometrische waarheid, World Lock-kalibratie en tekenketen uit v0.8.36.4.2 zijn niet herschreven.
 
@@ -230,5 +230,5 @@ Losse niet-AR 3D-preview tussen bestandskeuze en CAD-placement. Toont het model 
 ### Direction & Angle Constraint Engine — v0.8.36.2
 De tekenkern behandelt asvast, parallel, loodrecht en eigen hoek als deterministische richtingsconstraints. Asvast ondersteunt expliciete X+/X−/Z+/Z− keuze; referentieconstraints gebruiken een gekozen bestaande lijn en een expliciete zijde.
 
-## Rigid World Lock — v0.8.37.1
+## Rigid World Lock — v0.8.37.2
 World Lock now operates on the complete project as one rigid body. The first healthy WebXR anchor acts as the session master. Its pose delta becomes one shared project-frame transform. Additional anchors can be created as fallback/diagnostic anchors but are prohibited from independently changing point positions. `point.position` remains immutable project geometry; `projectToWorld()` / `worldToProject()` apply the shared rigid correction. Lines, shapes, walls, AI objects and CAD therefore share one spatial frame.
