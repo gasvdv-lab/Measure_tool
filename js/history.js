@@ -1,9 +1,9 @@
-import {S,getPoint,getLine,getContour} from "./state.js?v=0.8.29.1.3-20260830-state-fix";
+import {S,getPoint,getLine,getContour} from "./state.js?v=0.8.30-20260830-measure-engine-foundation";
 import {
   createPoint,createLine,createShape,clearAllGeometry,validateGeometryState
-} from "./geometry.js?v=0.8.29.1.3-20260830-state-fix";
-import {createWall,createOpening,clearWalls} from "./walls.js?v=0.8.29.1.3-20260830-state-fix";
-import {snapshotAiObjects,restoreAiBuilderObjects,clearAiBuilderObjects} from "./ai-builder.js?v=0.8.29.1.3-20260830-state-fix";
+} from "./geometry.js?v=0.8.30-20260830-measure-engine-foundation";
+import {createWall,createOpening,clearWalls} from "./walls.js?v=0.8.30-20260830-measure-engine-foundation";
+import {snapshotAiObjects,restoreAiBuilderObjects,clearAiBuilderObjects} from "./ai-builder.js?v=0.8.30-20260830-measure-engine-foundation";
 
 function vec(v){return v?{x:v.x,y:v.y,z:v.z}:null;}
 function vec3(v){return v?new S.THREE.Vector3(v.x,v.y,v.z):null;}
@@ -19,7 +19,8 @@ export function snapshotProject(){
     points:S.points.map(p=>({id:p.id,name:p.name,position:vec(p.position),surfaceNormal:vec(p.surfaceNormal)})),
     lines:S.lines.map(l=>({
       id:l.id,name:l.name,autoName:l.autoName!==false,startId:l.startId,endId:l.endId,
-      thickness:l.thickness,color:l.color,labelsVisible:l.labelsVisible!==false,ownerType:l.ownerType||null,ownerId:l.ownerId||null
+      thickness:l.thickness,color:l.color,labelsVisible:l.labelsVisible!==false,visible:l.visible!==false,unit:l.unit||"cm",kind:l.kind||"distance",
+      createdAt:l.createdAt||null,updatedAt:l.updatedAt||null,ownerType:l.ownerType||null,ownerId:l.ownerId||null
     })),
     contours:S.contours.map(c=>({id:c.id,name:c.name,pointIds:[...c.pointIds],lineIds:[...c.lineIds],closed:Boolean(c.closed),kind:c.kind})),
     shapes:S.shapes.map(s=>({
@@ -78,7 +79,7 @@ export function restoreProject(snap){
       if(!a||!b)throw new Error(`Historie: punten voor lijn ${l.name} ontbreken.`);
       createLine(a,b,{
         id:l.id,name:l.name,autoName:l.autoName,color:l.color,thickness:l.thickness,
-        labelsVisible:l.labelsVisible,ownerType:l.ownerType,ownerId:l.ownerId
+        labelsVisible:l.labelsVisible,visible:l.visible,unit:l.unit,createdAt:l.createdAt,updatedAt:l.updatedAt,ownerType:l.ownerType,ownerId:l.ownerId
       });
     }
     S.contours.length=0;

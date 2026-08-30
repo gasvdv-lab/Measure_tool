@@ -1,10 +1,10 @@
-import {S,$} from "./state.js?v=0.8.29.1.3-20260830-state-fix";
-import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.29.1.3-20260830-state-fix";
-import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.29.1.3-20260830-state-fix";
-import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.29.1.3-20260830-state-fix";
-import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.29.1.3-20260830-state-fix";
-import {updateCadFrame,clearCadRuntime} from "./cad.js?v=0.8.29.1.3-20260830-state-fix";
-import {clearAiBuilderObjects} from "./ai-builder.js?v=0.8.29.1.3-20260830-state-fix";
+import {S,$} from "./state.js?v=0.8.30-20260830-measure-engine-foundation";
+import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.30-20260830-measure-engine-foundation";
+import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.30-20260830-measure-engine-foundation";
+import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.30-20260830-measure-engine-foundation";
+import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.30-20260830-measure-engine-foundation";
+import {updateCadFrame,clearCadRuntime} from "./cad.js?v=0.8.30-20260830-measure-engine-foundation";
+import {clearAiBuilderObjects} from "./ai-builder.js?v=0.8.30-20260830-measure-engine-foundation";
 
 let samples=[],sampleSource=null,camPos,camQuat,forward;
 const xrDiag={viewer:"pending",hitSource:"pending",hits:0,pose:false,target:false,error:""};

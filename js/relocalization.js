@@ -1,8 +1,8 @@
-import {S,getPoint} from "./state.js?v=0.8.29.1.3-20260830-state-fix";
-import {snapshotProject,restoreProject} from "./history.js?v=0.8.29.1.3-20260830-state-fix";
-import {validateGeometryState,syncWorldLockedGeometry} from "./geometry.js?v=0.8.29.1.3-20260830-state-fix";
-import {syncWorldLockedWalls} from "./walls.js?v=0.8.29.1.3-20260830-state-fix";
-import {detachAllPointAnchors,queuePointAnchor} from "./world-lock.js?v=0.8.29.1.3-20260830-state-fix";
+import {S,getPoint} from "./state.js?v=0.8.30-20260830-measure-engine-foundation";
+import {snapshotProject,restoreProject} from "./history.js?v=0.8.30-20260830-measure-engine-foundation";
+import {validateGeometryState,syncWorldLockedGeometry} from "./geometry.js?v=0.8.30-20260830-measure-engine-foundation";
+import {syncWorldLockedWalls} from "./walls.js?v=0.8.30-20260830-measure-engine-foundation";
+import {detachAllPointAnchors,queuePointAnchor} from "./world-lock.js?v=0.8.30-20260830-measure-engine-foundation";
 
 const EPS=1e-9;
 function v3(x=0,y=0,z=0){return new S.THREE.Vector3(x,y,z);}

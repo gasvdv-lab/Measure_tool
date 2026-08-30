@@ -1,4 +1,4 @@
-import {S,$,fmt,pointName,getPoint,getLine,getContour,getShape,projectToWorld} from "./state.js?v=0.8.29.1.3-20260830-state-fix";
+import {S,$,fmt,fmtLine,pointName,getPoint,getLine,getContour,getShape,projectToWorld} from "./state.js?v=0.8.30-20260830-measure-engine-foundation";
 
 export function renderPosition(p){return p?.worldPosition||p?.position||null;}
 
@@ -103,7 +103,7 @@ export function findLineBetween(aId,bId){
   return S.lines.find(l=>(l.startId===aId&&l.endId===bId)||(l.startId===bId&&l.endId===aId))||null;
 }
 
-export function createLine(a,b,{color="#ffffff",thickness=null,ownerType=null,ownerId=null,id=null,name=null,autoName=true,labelsVisible=true}={}){
+export function createLine(a,b,{color="#ffffff",thickness=null,ownerType=null,ownerId=null,id=null,name=null,autoName=true,labelsVisible=true,visible=true,unit=null,createdAt=null,updatedAt=null}={}){
   if(!a||!b)throw new Error("Start- of eindpunt ontbreekt.");
   if(a.id===b.id)throw new Error("Begin- en eindpunt mogen niet hetzelfde zijn.");
   if(findLineBetween(a.id,b.id))throw new Error("Deze lijn bestaat al.");
@@ -113,12 +113,15 @@ export function createLine(a,b,{color="#ffffff",thickness=null,ownerType=null,ow
   const l={
     id:id||"l"+crypto.randomUUID(),name:String(name||a.name+b.name).trim(),
     autoName:name?Boolean(autoName):true,
-    startId:a.id,endId:b.id,distance,
-    thickness:t,color,ownerType,ownerId,
+    startId:a.id,endId:b.id,distance,kind:"distance",unit:unit||S.defaults.unit||"cm",
+    createdAt:createdAt||new Date().toISOString(),updatedAt:updatedAt||createdAt||new Date().toISOString(),
+    thickness:t,color,ownerType,ownerId,visible:visible!==false,
     labelsVisible:labelsVisible!==false,
     object:makeLineMesh(renderPosition(a),renderPosition(b),color,t),
-    label:makeLineLabel(`${String(name||a.name+b.name).trim()} · ${fmt(distance)}`)
+    label:null
   };
+  l.label=makeLineLabel(`${l.name} · ${fmtLine(l)}`);
+  l.object.visible=l.visible;
   S.lines.push(l);
   syncLineObject(l);
   return l;
@@ -133,20 +136,22 @@ export function ensureLineRendered(line){
   }else if(S.scene&&line.object.parent!==S.scene){
     S.scene.add(line.object);
   }
-  if(!line.label)line.label=makeLineLabel(`${line.name} · ${fmt(line.distance)}`);
+  if(!line.label)line.label=makeLineLabel(`${line.name} · ${fmtLine(line)}`);
+  line.visible=line.visible!==false;if(line.object)line.object.visible=line.visible;
   line.labelsVisible=line.labelsVisible!==false;
-  line.label.style.display=line.labelsVisible?"block":"none";
+  line.label.style.display=line.labelsVisible&&line.visible?"block":"none";
   syncLineObject(line);
   return line;
 }
 
-export function setLineStyle(line,{color=line.color,thickness=line.thickness,labels=true}={}){
+export function setLineStyle(line,{color=line.color,thickness=line.thickness,labels=true,visible=line.visible}={}){
   if(!line)return;
   line.color=color;line.thickness=Number(thickness)||2;
   if(line.object)dispose(line.object);
   const a=getPoint(line.startId),b=getPoint(line.endId);
   if(a&&b)line.object=makeLineMesh(renderPosition(a),renderPosition(b),line.color,line.thickness);
-  line.labelsVisible=labels!==false;if(line.label)line.label.style.display=line.labelsVisible?"block":"none";
+  line.visible=visible!==false;if(line.object)line.object.visible=line.visible;
+  line.labelsVisible=labels!==false;if(line.label)line.label.style.display=line.labelsVisible&&line.visible?"block":"none";
 }
 
 
@@ -160,7 +165,7 @@ export function lineNameExists(name,excludeId=null){
   return S.lines.some(l=>l.id!==excludeId&&l.name.toLocaleLowerCase("nl")===key);
 }
 function refreshLineLabel(line){
-  if(line?.label)line.label.textContent=`${line.name} · ${fmt(line.distance)}`;
+  if(line?.label)line.label.textContent=`${line.name} · ${fmtLine(line)}`;
 }
 export function renamePoint(point,name){
   if(!point)throw new Error("Punt ontbreekt.");
@@ -186,7 +191,10 @@ export function updateLine(line,opts={}){
   const color=opts.color??line.color;
   const thickness=Number(opts.thickness??line.thickness)||2;
   const labels=opts.labels??line.labelsVisible;
-  setLineStyle(line,{color,thickness,labels});
+  const visible=opts.visible??line.visible;
+  const unit=["cm","m"].includes(opts.unit)?opts.unit:(line.unit||S.defaults.unit||"cm");
+  line.unit=unit;line.updatedAt=new Date().toISOString();
+  setLineStyle(line,{color,thickness,labels,visible});
   refreshLineLabel(line);
   return line;
 }
@@ -337,7 +345,7 @@ export function updateLabels(){
   const show=S.defaults.labels,xrCam=S.renderer.xr.getCamera(S.camera),w=innerWidth,h=innerHeight;
   for(const l of S.lines){
     if(!l.label)continue;
-    if(!show||l.labelsVisible===false){l.label.style.display="none";continue;}
+    if(!show||l.labelsVisible===false||l.visible===false){l.label.style.display="none";continue;}
     const a=getPoint(l.startId),b=getPoint(l.endId);if(!a||!b){l.label.style.display="none";continue;}
     const pa=renderPosition(a).clone().project(xrCam),pb=renderPosition(b).clone().project(xrCam);
     if(pa.z<-1||pa.z>1||pb.z<-1||pb.z>1){l.label.style.display="none";continue;}

@@ -1,4 +1,4 @@
-import {S,getPoint} from "./state.js?v=0.8.29.1.3-20260830-state-fix";
+import {S,getPoint} from "./state.js?v=0.8.30-20260830-measure-engine-foundation";
 
 // Session-local WebXR anchor manager.
 // Project coordinates remain immutable in point.position/point.locked.

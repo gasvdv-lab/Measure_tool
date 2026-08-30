@@ -1,5 +1,5 @@
 export const S={
-  version:"0.8.29.1.3",build:"20260830-state-fix",
+  version:"0.8.30",build:"20260830-measure-engine-foundation",
   THREE:null,renderer:null,scene:null,camera:null,reticle:null,xrSession:null,hitSource:null,hitRequested:false,
   currentTarget:null,currentRawTarget:null,currentHitResult:null,currentXRFrame:null,currentReferenceSpace:null,targetSource:"none",zoom:1,pointPlacementEpoch:0,referenceCaptureId:null,
   points:[],lines:[],contours:[],shapes:[],walls:[],openings:[],aiObjects:[],
@@ -47,6 +47,13 @@ export function fmt(m){
   if(!Number.isFinite(m))return "—";
   return m<1?`${(m*100).toFixed(1)} cm`:m<10?`${m.toFixed(3)} m`:`${m.toFixed(2)} m`;
 }
+export function fmtUnit(m,unit="auto"){
+  if(!Number.isFinite(m))return "—";
+  if(unit==="cm")return `${(m*100).toFixed(1)} cm`;
+  if(unit==="m")return `${m.toFixed(m<10?3:2)} m`;
+  return fmt(m);
+}
+export function fmtLine(line){return fmtUnit(line?.distance,line?.unit||"auto");}
 export function pointName(i){
   const c=String.fromCharCode(65+(i%26)),n=Math.floor(i/26);
   return n?c+n:c;
