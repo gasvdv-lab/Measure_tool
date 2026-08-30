@@ -1,3 +1,12 @@
+# v0.8.36.4 — Full UI Action Audit ✅ (AUTO) / ⏳ (AR)
+
+- [x] Alle statische menu-/HUD-knoppen geïnventariseerd.
+- [x] Ontbrekende handler `cadResumeArBtn` hersteld.
+- [x] Bootstrap-versie/build gelijkgetrokken met release.
+- [x] Hoofdmenu-productnaam AR construct.
+- [x] Geen wijziging aan World Lock/geometrische waarheid.
+- [ ] Fysieke Android/PWA menu-smoketest.
+
 # v0.8.36.3 — PWA Install ✅
 - [x] Productnaam zichtbaar gewijzigd naar **AR construct**.
 - [x] Web App Manifest + appiconen.

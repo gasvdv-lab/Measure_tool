@@ -1,3 +1,16 @@
+# v0.8.36.4 — UI Action Audit
+
+## AUTO
+- JS syntax alle modules.
+- Lokale module-imports bestaan.
+- Alle door JS gerefereerde HTML-ID's bestaan.
+- Alle statische knoppen hebben een expliciete handler of een ondersteunde declaratieve `data-*` actie.
+- Module build-ID's consistent.
+- ZIP-integriteit.
+
+## AR/PWA
+Open elk hoofdmenu-item één keer; test Opslaan, Mijn projecten, Metingen, Objecten, Instellingen, Undo/Redo, teken-HUD, Loodrecht 90°, Eigen hoek en CAD → AR hervatten. Controleer dat geen knop stil niets doet.
+
 # v0.8.36.3 — PWA Install
 
 - **AUTO** manifest JSON geldig; vereiste iconen aanwezig; service worker en PWA-module syntactisch geldig.

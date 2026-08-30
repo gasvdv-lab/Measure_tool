@@ -1,3 +1,7 @@
+# v0.8.36.4 — UI Action Audit
+
+De UI-bindingslaag is integraal gecontroleerd. `cadResumeArBtn` is nu gekoppeld aan `resumeARFromGesture()` + `restoreCadRuntime()` + CAD-placement. Dit is noodzakelijk omdat WebXR hervatten vanuit een directe gebruikersactie moet gebeuren. Overige functionele modules zijn niet inhoudelijk gewijzigd.
+
 # v0.8.36.3 — PWA / Installatiemodule
 
 ## `manifest.webmanifest`
