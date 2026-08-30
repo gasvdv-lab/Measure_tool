@@ -1,3 +1,17 @@
+# Roadmap-update v0.8.34
+
+- [x] v0.8.30 Measure Engine Foundation
+- [x] v0.8.31 Select/Edit + mm
+- [x] v0.8.32 Polyline + hoeken
+- [x] v0.8.32.1 Horizontal Axis Lock
+- [x] v0.8.33 Area Measurement
+- [x] v0.8.34 Height & Vertical Measurements
+- [ ] v0.8.35 Volume / Clearance Foundation
+
+De brede productrichting blijft Measure · Place · Create · Experience · Verify. CAD blijft in de roadmap maar is niet de huidige ontwikkelfocus.
+
+---
+
 # Measure AR — actuele roadmapstatus
 
 **Huidige versie:** v0.8.32.1 — Horizontal Axis Lock  

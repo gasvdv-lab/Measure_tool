@@ -1,3 +1,21 @@
+# v0.8.34 — Height & Vertical Measurements
+
+## AR-IN/ROOM
+- [ ] Schuine lijn: 3D-lengte, ΔH en horizontale projectie zichtbaar en plausibel.
+- [ ] Verticale constraint: lijn wordt als hoogte herkend.
+- [ ] mm/cm/m wijzigen verandert alleen presentatie, niet geometrie.
+- [ ] Gesloten vorm verschijnt in Metingen met oppervlakte + omtrek.
+- [ ] Undo/Redo.
+- [ ] Opslaan/heropenen.
+- [ ] Regressie: gewone lijn, polyline/hoeken, Horizontaal · asvast.
+
+## AUTO
+- [x] JavaScript syntaxcontrole.
+- [x] Eén uniforme build-ID voor ES-modules.
+- [x] ZIP-integriteitscontrole.
+
+---
+
 # v0.8.32.1 — Horizontal Axis Lock
 
 ## Automatisch uitgevoerd

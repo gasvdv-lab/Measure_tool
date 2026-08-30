@@ -1,3 +1,17 @@
+# Module-update v0.8.34
+
+## Measure Engine — Height & Vertical
+**Status:** actief, fysieke AR-gate vereist.
+
+Een lijn blijft de geometrische bron. De Measure Engine leidt daar deterministisch drie grootheden uit af: 3D-lengte, absoluut hoogteverschil en horizontale projectie. Een vrijwel verticale lijn (maximaal 25 mm horizontale afwijking) wordt als hoogtemeting gepresenteerd. De bestaande verticale tekenconstraint levert daarmee een directe hoogteworkflow zonder een tweede geometriesysteem te introduceren.
+
+## Area Measurement
+**Status:** geïntegreerd in Metingen.
+
+Gesloten shapes gebruiken de bestaande vlakke-contouranalyse voor oppervlakte en omtrek. De area formatter is nu expliciet onderdeel van de gedeelde state-formatters.
+
+---
+
 # v0.8.32.1 module-update — Horizontal Axis Lock
 
 **Drawing Core / Constraints**
