@@ -1,5 +1,5 @@
-import {S,getShape,getPoint} from "./state.js?v=0.8.30-20260830-measure-engine-foundation";
-import {analyzeShapePoints,dispose} from "./geometry.js?v=0.8.30-20260830-measure-engine-foundation";
+import {S,getShape,getPoint} from "./state.js?v=0.8.31-20260830-measure-select-edit-mm";
+import {analyzeShapePoints,dispose} from "./geometry.js?v=0.8.31-20260830-measure-select-edit-mm";
 
 const DEFAULT_COLOR="#b98b5f";
 const MIN_HEIGHT=.01,MAX_HEIGHT=10;

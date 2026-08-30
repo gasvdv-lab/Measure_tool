@@ -1,4 +1,4 @@
-import {S,projectToWorld,worldToProject} from "./state.js?v=0.8.30-20260830-measure-engine-foundation";
+import {S,projectToWorld,worldToProject} from "./state.js?v=0.8.31-20260830-measure-select-edit-mm";
 
 const DB_NAME="measurear.cad.v1",STORE="files";
 let loaderPromise=null;

@@ -1,5 +1,5 @@
 export const S={
-  version:"0.8.30",build:"20260830-measure-engine-foundation",
+  version:"0.8.31",build:"20260830-measure-select-edit-mm",
   THREE:null,renderer:null,scene:null,camera:null,reticle:null,xrSession:null,hitSource:null,hitRequested:false,
   currentTarget:null,currentRawTarget:null,currentHitResult:null,currentXRFrame:null,currentReferenceSpace:null,targetSource:"none",zoom:1,pointPlacementEpoch:0,referenceCaptureId:null,
   points:[],lines:[],contours:[],shapes:[],walls:[],openings:[],aiObjects:[],
@@ -49,6 +49,7 @@ export function fmt(m){
 }
 export function fmtUnit(m,unit="auto"){
   if(!Number.isFinite(m))return "—";
+  if(unit==="mm")return `${(m*1000).toFixed(0)} mm`;
   if(unit==="cm")return `${(m*100).toFixed(1)} cm`;
   if(unit==="m")return `${m.toFixed(m<10?3:2)} m`;
   return fmt(m);

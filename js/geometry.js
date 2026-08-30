@@ -1,4 +1,4 @@
-import {S,$,fmt,fmtLine,pointName,getPoint,getLine,getContour,getShape,projectToWorld} from "./state.js?v=0.8.30-20260830-measure-engine-foundation";
+import {S,$,fmt,fmtLine,pointName,getPoint,getLine,getContour,getShape,projectToWorld} from "./state.js?v=0.8.31-20260830-measure-select-edit-mm";
 
 export function renderPosition(p){return p?.worldPosition||p?.position||null;}
 
@@ -192,7 +192,7 @@ export function updateLine(line,opts={}){
   const thickness=Number(opts.thickness??line.thickness)||2;
   const labels=opts.labels??line.labelsVisible;
   const visible=opts.visible??line.visible;
-  const unit=["cm","m"].includes(opts.unit)?opts.unit:(line.unit||S.defaults.unit||"cm");
+  const unit=["mm","cm","m"].includes(opts.unit)?opts.unit:(line.unit||S.defaults.unit||"cm");
   line.unit=unit;line.updatedAt=new Date().toISOString();
   setLineStyle(line,{color,thickness,labels,visible});
   refreshLineLabel(line);

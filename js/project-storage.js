@@ -1,11 +1,11 @@
-import {S} from "./state.js?v=0.8.30-20260830-measure-engine-foundation";
-import {snapshotProject,restoreProject,clearHistory} from "./history.js?v=0.8.30-20260830-measure-engine-foundation";
-import {clearAllGeometry,validateGeometryState} from "./geometry.js?v=0.8.30-20260830-measure-engine-foundation";
-import {clearWalls} from "./walls.js?v=0.8.30-20260830-measure-engine-foundation";
-import {resetDrawingCore} from "./drawing-core.js?v=0.8.30-20260830-measure-engine-foundation";
-import {detachAllPointAnchors} from "./world-lock.js?v=0.8.30-20260830-measure-engine-foundation";
-import {clearCadRuntime,restoreCadRuntime} from "./cad.js?v=0.8.30-20260830-measure-engine-foundation";
-import {clearAiBuilderObjects} from "./ai-builder.js?v=0.8.30-20260830-measure-engine-foundation";
+import {S} from "./state.js?v=0.8.31-20260830-measure-select-edit-mm";
+import {snapshotProject,restoreProject,clearHistory} from "./history.js?v=0.8.31-20260830-measure-select-edit-mm";
+import {clearAllGeometry,validateGeometryState} from "./geometry.js?v=0.8.31-20260830-measure-select-edit-mm";
+import {clearWalls} from "./walls.js?v=0.8.31-20260830-measure-select-edit-mm";
+import {resetDrawingCore} from "./drawing-core.js?v=0.8.31-20260830-measure-select-edit-mm";
+import {detachAllPointAnchors} from "./world-lock.js?v=0.8.31-20260830-measure-select-edit-mm";
+import {clearCadRuntime,restoreCadRuntime} from "./cad.js?v=0.8.31-20260830-measure-select-edit-mm";
+import {clearAiBuilderObjects} from "./ai-builder.js?v=0.8.31-20260830-measure-select-edit-mm";
 
 export const PROJECT_SCHEMA_VERSION=1;
 const INDEX_KEY="measurear.projects.v1.index";

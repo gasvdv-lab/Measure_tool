@@ -1,8 +1,8 @@
-import {S,$,fmt,getPoint,getLine,worldToProject} from "./state.js?v=0.8.30-20260830-measure-engine-foundation";
-import {createPoint,createLine,ensureLineRendered,deleteLineRaw,deletePointRaw,createContour,dispose,analyzeShapePoints} from "./geometry.js?v=0.8.30-20260830-measure-engine-foundation";
-import {snapshotProject,commitSnapshot,undoHistory} from "./history.js?v=0.8.30-20260830-measure-engine-foundation";
-import {queuePointHitAnchor} from "./world-lock.js?v=0.8.30-20260830-measure-engine-foundation";
-import {createWall,nextWallName} from "./walls.js?v=0.8.30-20260830-measure-engine-foundation";
+import {S,$,fmt,getPoint,getLine,worldToProject} from "./state.js?v=0.8.31-20260830-measure-select-edit-mm";
+import {createPoint,createLine,ensureLineRendered,deleteLineRaw,deletePointRaw,createContour,dispose,analyzeShapePoints} from "./geometry.js?v=0.8.31-20260830-measure-select-edit-mm";
+import {snapshotProject,commitSnapshot,undoHistory} from "./history.js?v=0.8.31-20260830-measure-select-edit-mm";
+import {queuePointHitAnchor} from "./world-lock.js?v=0.8.31-20260830-measure-select-edit-mm";
+import {createWall,nextWallName} from "./walls.js?v=0.8.31-20260830-measure-select-edit-mm";
 
 const REF_MODES=new Set(["parallel","perpendicular","angle"]);
 const TOOL_NAMES={line:"LIJN",polyline:"POLYLIJN",shape:"VORM",stake:"UITZETTEN",wall:"MUUR"};
@@ -355,7 +355,7 @@ export function cancelTool(){
 export function setPlacement(mode){S.tool.placement=mode==="metric"?"metric":"manual";document.dispatchEvent(new CustomEvent("measurear:tool-settings"));}
 export function setDistance(value,unit="cm"){
   const n=Number(value);if(!Number.isFinite(n)||n<=0)throw new Error("Geef een geldige afstand.");
-  S.tool.distanceM=unit==="m"?n:n/100;document.dispatchEvent(new CustomEvent("measurear:tool-settings"));
+  S.tool.distanceM=unit==="m"?n:unit==="mm"?n/1000:n/100;document.dispatchEvent(new CustomEvent("measurear:tool-settings"));
 }
 export function setConstraint(mode){
   const valid=new Set(["free","horizontal","vertical","surface","parallel","perpendicular","angle"]);

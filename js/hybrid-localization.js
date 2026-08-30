@@ -1,4 +1,4 @@
-import {S} from "./state.js?v=0.8.30-20260830-measure-engine-foundation";
+import {S} from "./state.js?v=0.8.31-20260830-measure-select-edit-mm";
 
 function nowIso(){return new Date().toISOString();}
 function normDeg(v){return ((v%360)+360)%360;}

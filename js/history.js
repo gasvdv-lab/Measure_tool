@@ -1,9 +1,9 @@
-import {S,getPoint,getLine,getContour} from "./state.js?v=0.8.30-20260830-measure-engine-foundation";
+import {S,getPoint,getLine,getContour} from "./state.js?v=0.8.31-20260830-measure-select-edit-mm";
 import {
   createPoint,createLine,createShape,clearAllGeometry,validateGeometryState
-} from "./geometry.js?v=0.8.30-20260830-measure-engine-foundation";
-import {createWall,createOpening,clearWalls} from "./walls.js?v=0.8.30-20260830-measure-engine-foundation";
-import {snapshotAiObjects,restoreAiBuilderObjects,clearAiBuilderObjects} from "./ai-builder.js?v=0.8.30-20260830-measure-engine-foundation";
+} from "./geometry.js?v=0.8.31-20260830-measure-select-edit-mm";
+import {createWall,createOpening,clearWalls} from "./walls.js?v=0.8.31-20260830-measure-select-edit-mm";
+import {snapshotAiObjects,restoreAiBuilderObjects,clearAiBuilderObjects} from "./ai-builder.js?v=0.8.31-20260830-measure-select-edit-mm";
 
 function vec(v){return v?{x:v.x,y:v.y,z:v.z}:null;}
 function vec3(v){return v?new S.THREE.Vector3(v.x,v.y,v.z):null;}

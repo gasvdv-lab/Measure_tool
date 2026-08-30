@@ -1,32 +1,32 @@
-import {S,$,fmt,fmtLine,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.30-20260830-measure-engine-foundation";
+import {S,$,fmt,fmtLine,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.31-20260830-measure-select-edit-mm";
 import {
   startTool,cancelTool,setPlacement,setDistance,setConstraint,setAngle,flipSide,setReferenceLine,setSnapMode,
   confirmCandidate,undoToolStep,finishTool,toolLabel,constraintLabel,getActivePoint,referenceRequired,resetDrawingCore
-} from "./drawing-core.js?v=0.8.30-20260830-measure-engine-foundation";
+} from "./drawing-core.js?v=0.8.31-20260830-measure-select-edit-mm";
 import {
   createShape,updateShape,deleteShapeOnly,deleteShapeWithContour,deleteLineRaw,deletePointRaw,renamePoint,updateLine,analyzeContour,
   lineDependencies,pointDependencies,canDeleteLine,canDeletePoint,clearAllGeometry,validateGeometryState,dispose
-} from "./geometry.js?v=0.8.30-20260830-measure-engine-foundation";
-import {startAR,resumeARFromGesture,suspendARForCadImport,applyZoom,resetTrackingSamples} from "./ar.js?v=0.8.30-20260830-measure-engine-foundation";
-import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.30-20260830-measure-engine-foundation";
-import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.30-20260830-measure-engine-foundation";
+} from "./geometry.js?v=0.8.31-20260830-measure-select-edit-mm";
+import {startAR,resumeARFromGesture,suspendARForCadImport,applyZoom,resetTrackingSamples} from "./ar.js?v=0.8.31-20260830-measure-select-edit-mm";
+import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.31-20260830-measure-select-edit-mm";
+import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.31-20260830-measure-select-edit-mm";
 import {
   initProjectStorage,saveCurrentProject,listProjects,loadStoredProject,newProject,duplicateStoredProject,
   deleteStoredProject,renameStoredProject,projectStats,formatStats,getStoredProjectInfo,hasRecovery,recoveryInfo,restoreRecovery,clearRecovery,
   exportCurrentProject,importProjectFile,markDirtyAndRecover
-} from "./project-storage.js?v=0.8.30-20260830-measure-engine-foundation";
+} from "./project-storage.js?v=0.8.31-20260830-measure-select-edit-mm";
 import {
   captureCurrentGeo,addProjectReference,removeProjectReference,clearProjectReferences,beginRelocalization,cancelRelocalization,
   captureRelocalizationPoint,solveRelocalization,applyRelocalization,relocalizationSummary,beginSpatialRestore
-} from "./relocalization.js?v=0.8.30-20260830-measure-engine-foundation";
+} from "./relocalization.js?v=0.8.31-20260830-measure-select-edit-mm";
 
-import {captureHybridBaseline,assessHybridLocation,enableHeading} from "./hybrid-localization.js?v=0.8.30-20260830-measure-engine-foundation";
+import {captureHybridBaseline,assessHybridLocation,enableHeading} from "./hybrid-localization.js?v=0.8.31-20260830-measure-select-edit-mm";
 
-import {detachAllPointAnchors} from "./world-lock.js?v=0.8.30-20260830-measure-engine-foundation";
-import {importCadFile,listCadModels,cadStatus,selectCad,beginCadPlacement,rotateCad,moveCadHeight,confirmCadPlacement,cancelCadPlacement,deleteCadModel,clearCadRuntime,restoreCadRuntime} from "./cad.js?v=0.8.30-20260830-measure-engine-foundation";
-import {initProfessionalColorPickers,refreshProfessionalColorPickers} from "./color-picker.js?v=0.8.30-20260830-measure-engine-foundation";
-import {initThemeSelector} from "./theme-selector.js?v=0.8.30-20260830-measure-engine-foundation";
-import {executeAiPrototype,getAiObject,getAiObjectForShape,toggleAiObjectLock,deleteAiObject,clearAiBuilderObjects,aiObjectSummary} from "./ai-builder.js?v=0.8.30-20260830-measure-engine-foundation";
+import {detachAllPointAnchors} from "./world-lock.js?v=0.8.31-20260830-measure-select-edit-mm";
+import {importCadFile,listCadModels,cadStatus,selectCad,beginCadPlacement,rotateCad,moveCadHeight,confirmCadPlacement,cancelCadPlacement,deleteCadModel,clearCadRuntime,restoreCadRuntime} from "./cad.js?v=0.8.31-20260830-measure-select-edit-mm";
+import {initProfessionalColorPickers,refreshProfessionalColorPickers} from "./color-picker.js?v=0.8.31-20260830-measure-select-edit-mm";
+import {initThemeSelector} from "./theme-selector.js?v=0.8.31-20260830-measure-select-edit-mm";
+import {executeAiPrototype,getAiObject,getAiObjectForShape,toggleAiObjectLock,deleteAiObject,clearAiBuilderObjects,aiObjectSummary} from "./ai-builder.js?v=0.8.31-20260830-measure-select-edit-mm";
 
 
 const pages=["home","project","references","relocalize","projects","cad","objects","measurements","line","point","walltool","wallcreate","wall","openingcreate","opening","shapecreate","shape","aibuilder","settings","clear"];
@@ -99,8 +99,9 @@ function afterProjectChange(message=""){
 function unitDistanceText(){
   if(S.tool.placement==="manual")return "AUTO ▾";
   const unit=el("hudUnit")?.value||S.defaults.unit;
-  const n=unit==="cm"?S.tool.distanceM*100:S.tool.distanceM;
-  return `${Number(n.toFixed(unit==="cm"?1:3))} ${unit} ▾`;
+  const n=unit==="mm"?S.tool.distanceM*1000:unit==="cm"?S.tool.distanceM*100:S.tool.distanceM;
+  const decimals=unit==="mm"?0:unit==="cm"?1:3;
+  return `${Number(n.toFixed(decimals))} ${unit} ▾`;
 }
 function populateReference(){
   const s=el("hudReference");if(!s)return;const old=S.tool.referenceLineId;s.innerHTML="";

@@ -1,6 +1,6 @@
 
-import {S,getPoint,getLine} from "./state.js?v=0.8.30-20260830-measure-engine-foundation";
-import {dispose,renderPosition} from "./geometry.js?v=0.8.30-20260830-measure-engine-foundation";
+import {S,getPoint,getLine} from "./state.js?v=0.8.31-20260830-measure-select-edit-mm";
+import {dispose,renderPosition} from "./geometry.js?v=0.8.31-20260830-measure-select-edit-mm";
 
 function cleanName(name){return String(name||"").trim().replace(/\s+/g," ");}
 export function wallNameExists(name,excludeId=null){
