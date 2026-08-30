@@ -1,4 +1,4 @@
-import {S,$,fmt,pointName,getPoint,getLine,getContour,getShape,projectToWorld} from "./state.js?v=0.8.29.1.1-20260830-hit-source-repair";
+import {S,$,fmt,pointName,getPoint,getLine,getContour,getShape,projectToWorld} from "./state.js?v=0.8.29.1-20260830-cad-preview";
 
 export function renderPosition(p){return p?.worldPosition||p?.position||null;}
 

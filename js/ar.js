@@ -1,13 +1,18 @@
-import {S,$} from "./state.js?v=0.8.29.1.1-20260830-hit-source-repair";
-import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.29.1.1-20260830-hit-source-repair";
-import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.29.1.1-20260830-hit-source-repair";
-import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.29.1.1-20260830-hit-source-repair";
-import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.29.1.1-20260830-hit-source-repair";
-import {updateCadFrame,clearCadRuntime} from "./cad.js?v=0.8.29.1.1-20260830-hit-source-repair";
-import {clearAiBuilderObjects} from "./ai-builder.js?v=0.8.29.1.1-20260830-hit-source-repair";
+import {S,$} from "./state.js?v=0.8.29.1.2-20260830-xr-diagnostic";
+import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.29.1.2-20260830-xr-diagnostic";
+import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.29.1.2-20260830-xr-diagnostic";
+import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.29.1.2-20260830-xr-diagnostic";
+import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.29.1.2-20260830-xr-diagnostic";
+import {updateCadFrame,clearCadRuntime} from "./cad.js?v=0.8.29.1.2-20260830-xr-diagnostic";
+import {clearAiBuilderObjects} from "./ai-builder.js?v=0.8.29.1.2-20260830-xr-diagnostic";
 
 let samples=[],sampleSource=null,camPos,camQuat,forward;
-let hitSourceRequestPending=false,lastHitSourceRequestAt=0;
+const xrDiag={viewer:"pending",hitSource:"pending",hits:0,pose:false,target:false,error:""};
+function updateXrDiag(){
+  const el=$("xrDiag");if(!el)return;
+  const ok=v=>v===true?"✓":v===false?"✕":"…";
+  el.textContent=`XR ✓ · Viewer ${ok(xrDiag.viewer)} · HitSource ${ok(xrDiag.hitSource)} · Hits ${xrDiag.hits} · Pose ${ok(xrDiag.pose)} · Target ${ok(xrDiag.target)}${xrDiag.error?` · ${xrDiag.error}`:""}`;
+}
 
 function withTimeout(promise,ms,label){
   return Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(new Error(`${label} duurde langer dan ${Math.round(ms/1000)} s.`)),ms))]);
@@ -80,7 +85,7 @@ function cleanup(){
   const cadPickerProtected=externalPicker?.kind==="cad"||S.cadPickerLifecycle?.active||sessionStorage.getItem("measurear.cadPickerActive")==="1";
   resetWorldLock();resetTrackingSamples();S.renderer?.setAnimationLoop(null);
   if(S.renderer?.domElement)S.renderer.domElement.style.display="none";
-  S.xrSession=null;S.hitSource=null;S.hitRequested=false;hitSourceRequestPending=false;lastHitSourceRequestAt=0;S.currentTarget=null;S.currentRawTarget=null;S.currentHitResult=null;S.currentXRFrame=null;S.currentReferenceSpace=null;S.targetSource="none";S.referenceCaptureId=null;
+  S.xrSession=null;S.hitSource=null;S.hitRequested=false;S.currentTarget=null;S.currentRawTarget=null;S.currentHitResult=null;S.currentXRFrame=null;S.currentReferenceSpace=null;S.targetSource="none";S.referenceCaptureId=null;
 
   // Veilige CAD-import: AR is bewust gestopt VOORDAT de native file picker opent.
   // Geen project/runtime wissen en niet naar Home: toon de gewone DOM-importworkspace.
@@ -123,34 +128,36 @@ function render(_,frame){
   if(!frame)return;
   const ref=S.renderer.xr.getReferenceSpace(),session=S.renderer.xr.getSession();
   S.currentXRFrame=frame;S.currentReferenceSpace=ref;
-  // Request the viewer hit-test source robustly. Previously hitRequested was set
-  // before the async request had succeeded. A transient ARCore/WebXR failure then
-  // left the whole session without a hit source and therefore without drawable surfaces.
-  const now=performance.now();
-  if(!S.hitSource&&!hitSourceRequestPending&&(!lastHitSourceRequestAt||now-lastHitSourceRequestAt>=1000)){
-    hitSourceRequestPending=true;lastHitSourceRequestAt=now;
-    session.requestReferenceSpace("viewer")
-      .then(v=>session.requestHitTestSource({space:v}))
-      .then(source=>{
-        if(S.xrSession===session){S.hitSource=source;S.hitRequested=true;}
-        else{try{source.cancel?.();}catch{}}
-      })
-      .catch(()=>{S.hitRequested=false;})
-      .finally(()=>{hitSourceRequestPending=false;});
+  if(!S.hitRequested){
+    xrDiag.viewer="pending";xrDiag.hitSource="pending";xrDiag.error="";updateXrDiag();
+    session.requestReferenceSpace("viewer").then(v=>{
+      xrDiag.viewer=true;updateXrDiag();
+      return session.requestHitTestSource({space:v});
+    }).then(s=>{
+      S.hitSource=s;xrDiag.hitSource=Boolean(s);updateXrDiag();
+    }).catch(err=>{
+      xrDiag.hitSource=false;if(xrDiag.viewer==="pending")xrDiag.viewer=false;
+      xrDiag.error=(err?.name||"hit-test fout");updateXrDiag();
+    });
+    S.hitRequested=true;
   }
   let hit=null,pose=null,normal=null;
+  xrDiag.hits=0;xrDiag.pose=false;xrDiag.target=false;
   if(S.hitSource){
-    const r=frame.getHitTestResults(S.hitSource);
-    if(r.length){S.currentHitResult=r[0];pose=r[0].getPose(ref);if(pose)hit=new S.THREE.Vector3(pose.transform.position.x,pose.transform.position.y,pose.transform.position.z);}
+    try{
+      const r=frame.getHitTestResults(S.hitSource);xrDiag.hits=r.length;
+      if(r.length){S.currentHitResult=r[0];pose=r[0].getPose(ref);xrDiag.pose=Boolean(pose);if(pose)hit=new S.THREE.Vector3(pose.transform.position.x,pose.transform.position.y,pose.transform.position.z);}
+    }catch(err){xrDiag.error=err?.name||"getHitTestResults fout";}
   }
   if(hit&&pose){
-    S.reticle.visible=true;S.reticle.matrix.fromArray(pose.transform.matrix);
+    xrDiag.target=true;S.reticle.visible=true;S.reticle.matrix.fromArray(pose.transform.matrix);
     try{const q=new S.THREE.Quaternion().setFromRotationMatrix(S.reticle.matrix);normal=new S.THREE.Vector3(0,1,0).applyQuaternion(q).normalize();}catch{}
     addSample(hit,"hit");hit=filteredHit(hit);S.currentRawTarget=new S.THREE.Vector3(pose.transform.position.x,pose.transform.position.y,pose.transform.position.z);S.currentTarget=hit;S.targetSource="hit";$("aim").className="hit";
   }else{
     S.reticle.visible=false;S.currentTarget=null;S.currentRawTarget=null;S.currentHitResult=null;S.targetSource="none";$("aim").className="";
   }
 
+  updateXrDiag();
   const worldLockChanged=updateWorldLock(frame,ref);
   if(worldLockChanged)syncWorldLockedWalls();
 
