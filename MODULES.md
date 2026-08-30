@@ -1,3 +1,6 @@
+## v0.8.36.2.2 wijziging — drawing-core
+`setConstraint()` herbewapent een voltooide gewone lijntool voor een volgende constraintlijn. Dit repareert de state-machine overgang `complete → drawing` die ontbrak.
+
 # Module-update v0.8.36.2.1
 
 ## Direction & Angle Constraint Engine

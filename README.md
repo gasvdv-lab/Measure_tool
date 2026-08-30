@@ -1,3 +1,7 @@
+# v0.8.36.2.2 — Capture Rearm Fix
+
+Fix: na een voltooide lijn kan **Loodrecht 90°** of **Eigen hoek** opnieuw tekenen. De lijntool wordt correct terug in `drawing` gezet. Loodrecht laat eerst een vertrekpunt op de referentielijn kiezen; Eigen hoek vertrekt vanaf het laatst geplaatste punt. World Lock is niet gewijzigd.
+
 # Measure AR v0.8.36.2.1 — Angle Constraint UX & 3D Perpendicular Fix
 
 Deze correctierelease bouwt op v0.8.36.2 en laat World Lock/meetkern ongemoeid.

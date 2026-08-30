@@ -1,3 +1,9 @@
+## v0.8.36.2.2 gerichte AR-test
+1. Teken AB en voltooi de lijn.
+2. Kies Loodrecht 90° + AB. Richt midden op AB: witte knop moet actief worden; plaats vertrekpunt en teken loodrechte lijn.
+3. Teken/gebruik AB, kies Eigen hoek + AB + 30°: witte knop moet actief worden en nieuwe lijn moet vanaf het laatste punt getekend kunnen worden.
+4. Controleer dat AB en nieuwe lijnen op positie blijven.
+
 # v0.8.36.2.1 — gerichte fysieke test
 
 1. **AR-IN/ROOM**: Eigen hoek → referentielijn → hoek instellen → zijde → **Klaar · tekenen**. Verwacht: groot paneel sluit en camera blijft vrij.

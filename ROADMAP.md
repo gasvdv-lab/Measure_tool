@@ -1,3 +1,7 @@
+## v0.8.36.2.2 — Capture Rearm Fix ✅ codefix / AR-test vereist
+- Fix witte bevestigingsknop die inactief bleef na keuze Loodrecht/Eigen hoek op een reeds voltooide lijn.
+- Geen wijziging aan World Lock of geometrische hoekberekening.
+
 # Actuele status — v0.8.36.2.1
 
 - [x] Direction & Angle Constraint repair
