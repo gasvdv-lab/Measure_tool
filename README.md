@@ -1,8 +1,14 @@
-# AR construct — v0.8.36.4.1
+# AR construct v0.8.36.4.2 — Full Stability Audit
+
+Maintenance release na volledige statische regressie-audit. Kritieke fix: WebXR-anchoracquisitie krijgt per punt een vaste kalibratie-offset, zodat een reeds bevestigd punt niet kan verspringen zodra de async anchor beschikbaar wordt. Projectgeometrie (`position`/`locked`) blijft immutable; alleen de renderpose (`worldPosition`) volgt tracking.
+
+AUTO gate: alle JS syntax, lokale imports, HTML-ID referenties, uniforme module build-ID, PWA-versies en ZIP-integriteit gecontroleerd. AR gate blijft fysiek: punt, lijn, polyline, vorm, muur, constraints, project save/restore, CAD en PWA-update.
+
+# AR construct — v0.8.36.4.2
 
 - Synchroniseert zichtbare versie, manifest/icon cache-busters, service-workerregistratie en module build-ID’s.
 - Geen wijziging aan AR-, World Lock-, meet-, CAD- of constraintgeometrie.
-- PWA-updategate: na GitHub upload app volledig sluiten en opnieuw openen; startscherm moet v0.8.36.4.1 tonen.
+- PWA-updategate: na GitHub upload app volledig sluiten en opnieuw openen; startscherm moet v0.8.36.4.2 tonen.
 
 # AR construct v0.8.36.4 — Full UI Action Audit
 
@@ -11,7 +17,7 @@ Deze maintenance-release is een volledige statische audit van alle zichtbare kno
 ## Audit gate
 AUTO: JS syntax, lokale imports, HTML-ID ↔ JS-referenties, zichtbare knop ↔ handler/declaratieve actie, uniforme module build-ID en ZIP-integriteit. AR: menu-smoketest en CAD-resume blijven fysiek te bevestigen.
 
-# AR construct v0.8.36.4.1 — PWA Install
+# AR construct v0.8.36.4.2 — PWA Install
 
 De app heet vanaf deze release zichtbaar **AR construct**. Deze release voegt PWA-installatie toe zonder de AR-, World Lock-, meet- of constraintlogica te wijzigen.
 

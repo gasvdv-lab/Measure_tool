@@ -1,8 +1,14 @@
-# v0.8.36.4.1 — PWA Version Sync Fix ✅ (AUTO) / ⏳ (AR)
+# v0.8.36.4.2 — Full Stability Audit
+
+- [x] Volledige statische regressie-audit.
+- [x] No-jump anchor calibration toegevoegd; bevestigde geometrie mag niet verspringen bij anchor acquisition.
+- [ ] Fysieke Android/WebXR regressiegate door gebruiker.
+
+# v0.8.36.4.2 — PWA Version Sync Fix ✅ (AUTO) / ⏳ (AR)
 
 - Synchroniseert zichtbare versie, manifest/icon cache-busters, service-workerregistratie en module build-ID’s.
 - Geen wijziging aan AR-, World Lock-, meet-, CAD- of constraintgeometrie.
-- PWA-updategate: na GitHub upload app volledig sluiten en opnieuw openen; startscherm moet v0.8.36.4.1 tonen.
+- PWA-updategate: na GitHub upload app volledig sluiten en opnieuw openen; startscherm moet v0.8.36.4.2 tonen.
 
 # v0.8.36.4 — Full UI Action Audit ✅ (AUTO) / ⏳ (AR)
 
@@ -13,7 +19,7 @@
 - [x] Geen wijziging aan World Lock/geometrische waarheid.
 - [ ] Fysieke Android/PWA menu-smoketest.
 
-# v0.8.36.4.1 — PWA Install ✅
+# v0.8.36.4.2 — PWA Install ✅
 - [x] Productnaam zichtbaar gewijzigd naar **AR construct**.
 - [x] Web App Manifest + appiconen.
 - [x] Android/Chrome standalone-installatie.

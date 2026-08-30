@@ -1,14 +1,20 @@
-# v0.8.36.4.1 — PWA Version Sync Fix
+# v0.8.36.4.2 — Full Stability Audit
+
+- [x] Volledige statische regressie-audit.
+- [x] No-jump anchor calibration toegevoegd; bevestigde geometrie mag niet verspringen bij anchor acquisition.
+- [ ] Fysieke Android/WebXR regressiegate door gebruiker.
+
+# v0.8.36.4.2 — PWA Version Sync Fix
 
 - Synchroniseert zichtbare versie, manifest/icon cache-busters, service-workerregistratie en module build-ID’s.
 - Geen wijziging aan AR-, World Lock-, meet-, CAD- of constraintgeometrie.
-- PWA-updategate: na GitHub upload app volledig sluiten en opnieuw openen; startscherm moet v0.8.36.4.1 tonen.
+- PWA-updategate: na GitHub upload app volledig sluiten en opnieuw openen; startscherm moet v0.8.36.4.2 tonen.
 
 # v0.8.36.4 — UI Action Audit
 
 De UI-bindingslaag is integraal gecontroleerd. `cadResumeArBtn` is nu gekoppeld aan `resumeARFromGesture()` + `restoreCadRuntime()` + CAD-placement. Dit is noodzakelijk omdat WebXR hervatten vanuit een directe gebruikersactie moet gebeuren. Overige functionele modules zijn niet inhoudelijk gewijzigd.
 
-# v0.8.36.4.1 — PWA / Installatiemodule
+# v0.8.36.4.2 — PWA / Installatiemodule
 
 ## `manifest.webmanifest`
 Definieert **AR construct** als installeerbare webapp, standalone startgedrag en appiconen.

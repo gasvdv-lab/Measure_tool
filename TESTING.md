@@ -1,8 +1,14 @@
-# v0.8.36.4.1 — PWA Version Sync Fix
+# v0.8.36.4.2 — Full Stability Audit
+
+- [x] Volledige statische regressie-audit.
+- [x] No-jump anchor calibration toegevoegd; bevestigde geometrie mag niet verspringen bij anchor acquisition.
+- [ ] Fysieke Android/WebXR regressiegate door gebruiker.
+
+# v0.8.36.4.2 — PWA Version Sync Fix
 
 - Synchroniseert zichtbare versie, manifest/icon cache-busters, service-workerregistratie en module build-ID’s.
 - Geen wijziging aan AR-, World Lock-, meet-, CAD- of constraintgeometrie.
-- PWA-updategate: na GitHub upload app volledig sluiten en opnieuw openen; startscherm moet v0.8.36.4.1 tonen.
+- PWA-updategate: na GitHub upload app volledig sluiten en opnieuw openen; startscherm moet v0.8.36.4.2 tonen.
 
 # v0.8.36.4 — UI Action Audit
 
@@ -17,7 +23,7 @@
 ## AR/PWA
 Open elk hoofdmenu-item één keer; test Opslaan, Mijn projecten, Metingen, Objecten, Instellingen, Undo/Redo, teken-HUD, Loodrecht 90°, Eigen hoek en CAD → AR hervatten. Controleer dat geen knop stil niets doet.
 
-# v0.8.36.4.1 — PWA Install
+# v0.8.36.4.2 — PWA Install
 
 - **AUTO** manifest JSON geldig; vereiste iconen aanwezig; service worker en PWA-module syntactisch geldig.
 - **PC** installatie-/standalonegedrag waar ondersteund controleren.
