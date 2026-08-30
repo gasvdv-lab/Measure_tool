@@ -1,6 +1,6 @@
 
-import {S,getPoint,getLine} from "./state.js?v=0.8.36.3-20260830-pwa-install";
-import {dispose,renderPosition} from "./geometry.js?v=0.8.36.3-20260830-pwa-install";
+import {S,getPoint,getLine} from "./state.js?v=0.8.36.4-20260830-ui-action-audit";
+import {dispose,renderPosition} from "./geometry.js?v=0.8.36.4-20260830-ui-action-audit";
 
 function cleanName(name){return String(name||"").trim().replace(/\s+/g," ");}
 export function wallNameExists(name,excludeId=null){

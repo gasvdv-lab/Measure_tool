@@ -1,8 +1,8 @@
-import {S,getPoint} from "./state.js?v=0.8.36.3-20260830-pwa-install";
-import {snapshotProject,restoreProject} from "./history.js?v=0.8.36.3-20260830-pwa-install";
-import {validateGeometryState,syncWorldLockedGeometry} from "./geometry.js?v=0.8.36.3-20260830-pwa-install";
-import {syncWorldLockedWalls} from "./walls.js?v=0.8.36.3-20260830-pwa-install";
-import {detachAllPointAnchors,queuePointAnchor} from "./world-lock.js?v=0.8.36.3-20260830-pwa-install";
+import {S,getPoint} from "./state.js?v=0.8.36.4-20260830-ui-action-audit";
+import {snapshotProject,restoreProject} from "./history.js?v=0.8.36.4-20260830-ui-action-audit";
+import {validateGeometryState,syncWorldLockedGeometry} from "./geometry.js?v=0.8.36.4-20260830-ui-action-audit";
+import {syncWorldLockedWalls} from "./walls.js?v=0.8.36.4-20260830-ui-action-audit";
+import {detachAllPointAnchors,queuePointAnchor} from "./world-lock.js?v=0.8.36.4-20260830-ui-action-audit";
 
 const EPS=1e-9;
 function v3(x=0,y=0,z=0){return new S.THREE.Vector3(x,y,z);}

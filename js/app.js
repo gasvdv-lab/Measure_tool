@@ -1,1 +1,1 @@
-export {initUI} from "./ui.js?v=0.8.36.3-20260830-pwa-install";
+export {initUI} from "./ui.js?v=0.8.36.4-20260830-ui-action-audit";

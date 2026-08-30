@@ -1,4 +1,4 @@
-import {S,$,fmt,fmtLine,pointName,getPoint,getLine,getContour,getShape,projectToWorld} from "./state.js?v=0.8.36.3-20260830-pwa-install";
+import {S,$,fmt,fmtLine,pointName,getPoint,getLine,getContour,getShape,projectToWorld} from "./state.js?v=0.8.36.4-20260830-ui-action-audit";
 
 export function renderPosition(p){return p?.worldPosition||p?.position||null;}
 

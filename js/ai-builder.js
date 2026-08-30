@@ -1,5 +1,5 @@
-import {S,getShape,getPoint} from "./state.js?v=0.8.36.3-20260830-pwa-install";
-import {analyzeShapePoints,dispose} from "./geometry.js?v=0.8.36.3-20260830-pwa-install";
+import {S,getShape,getPoint} from "./state.js?v=0.8.36.4-20260830-ui-action-audit";
+import {analyzeShapePoints,dispose} from "./geometry.js?v=0.8.36.4-20260830-ui-action-audit";
 
 const DEFAULT_COLOR="#b98b5f";
 const MIN_HEIGHT=.01,MAX_HEIGHT=10;

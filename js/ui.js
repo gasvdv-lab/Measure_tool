@@ -1,33 +1,33 @@
-import {S,$,fmt,fmtLine,fmtAreaUnit,fmtVolumeUnit,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.36.3-20260830-pwa-install";
+import {S,$,fmt,fmtLine,fmtAreaUnit,fmtVolumeUnit,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.36.4-20260830-ui-action-audit";
 import {
   startTool,cancelTool,setPlacement,setDistance,setConstraint,setAxisDirection,setPerpendicularMode,setAngle,flipSide,setReferenceLine,setSnapMode,
   confirmCandidate,undoToolStep,finishTool,toolLabel,constraintLabel,getActivePoint,referenceRequired,resetDrawingCore
-} from "./drawing-core.js?v=0.8.36.3-20260830-pwa-install";
+} from "./drawing-core.js?v=0.8.36.4-20260830-ui-action-audit";
 import {
   createShape,updateShape,deleteShapeOnly,deleteShapeWithContour,deleteLineRaw,deletePointRaw,renamePoint,updateLine,analyzeContour,analyzePolyline,updatePolyline,
   lineDependencies,pointDependencies,canDeleteLine,canDeletePoint,clearAllGeometry,validateGeometryState,dispose
-} from "./geometry.js?v=0.8.36.3-20260830-pwa-install";
-import {startAR,resumeARFromGesture,suspendARForCadImport,applyZoom,resetTrackingSamples} from "./ar.js?v=0.8.36.3-20260830-pwa-install";
-import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.36.3-20260830-pwa-install";
-import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.36.3-20260830-pwa-install";
+} from "./geometry.js?v=0.8.36.4-20260830-ui-action-audit";
+import {startAR,resumeARFromGesture,suspendARForCadImport,applyZoom,resetTrackingSamples} from "./ar.js?v=0.8.36.4-20260830-ui-action-audit";
+import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.36.4-20260830-ui-action-audit";
+import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.36.4-20260830-ui-action-audit";
 import {
   initProjectStorage,saveCurrentProject,listProjects,loadStoredProject,newProject,duplicateStoredProject,
   deleteStoredProject,renameStoredProject,projectStats,formatStats,getStoredProjectInfo,hasRecovery,recoveryInfo,restoreRecovery,clearRecovery,
   exportCurrentProject,importProjectFile,markDirtyAndRecover
-} from "./project-storage.js?v=0.8.36.3-20260830-pwa-install";
+} from "./project-storage.js?v=0.8.36.4-20260830-ui-action-audit";
 import {
   captureCurrentGeo,addProjectReference,removeProjectReference,clearProjectReferences,beginRelocalization,cancelRelocalization,
   captureRelocalizationPoint,solveRelocalization,applyRelocalization,relocalizationSummary,beginSpatialRestore
-} from "./relocalization.js?v=0.8.36.3-20260830-pwa-install";
+} from "./relocalization.js?v=0.8.36.4-20260830-ui-action-audit";
 
-import {captureHybridBaseline,assessHybridLocation,enableHeading} from "./hybrid-localization.js?v=0.8.36.3-20260830-pwa-install";
+import {captureHybridBaseline,assessHybridLocation,enableHeading} from "./hybrid-localization.js?v=0.8.36.4-20260830-ui-action-audit";
 
-import {detachAllPointAnchors} from "./world-lock.js?v=0.8.36.3-20260830-pwa-install";
-import {importCadFile,listCadModels,cadStatus,selectCad,beginCadPlacement,rotateCad,moveCadHeight,confirmCadPlacement,cancelCadPlacement,deleteCadModel,clearCadRuntime,restoreCadRuntime} from "./cad.js?v=0.8.36.3-20260830-pwa-install";
-import {initProfessionalColorPickers,refreshProfessionalColorPickers} from "./color-picker.js?v=0.8.36.3-20260830-pwa-install";
-import {initThemeSelector} from "./theme-selector.js?v=0.8.36.3-20260830-pwa-install";
-import {executeAiPrototype,getAiObject,getAiObjectForShape,toggleAiObjectLock,deleteAiObject,clearAiBuilderObjects,aiObjectSummary} from "./ai-builder.js?v=0.8.36.3-20260830-pwa-install";
-import {listClearanceTargets,analyzeClearance,clearanceStatus,getClearance,createClearance,updateClearance,deleteClearance,clearClearances} from "./clearance.js?v=0.8.36.3-20260830-pwa-install";
+import {detachAllPointAnchors} from "./world-lock.js?v=0.8.36.4-20260830-ui-action-audit";
+import {importCadFile,listCadModels,cadStatus,selectCad,beginCadPlacement,rotateCad,moveCadHeight,confirmCadPlacement,cancelCadPlacement,deleteCadModel,clearCadRuntime,restoreCadRuntime} from "./cad.js?v=0.8.36.4-20260830-ui-action-audit";
+import {initProfessionalColorPickers,refreshProfessionalColorPickers} from "./color-picker.js?v=0.8.36.4-20260830-ui-action-audit";
+import {initThemeSelector} from "./theme-selector.js?v=0.8.36.4-20260830-ui-action-audit";
+import {executeAiPrototype,getAiObject,getAiObjectForShape,toggleAiObjectLock,deleteAiObject,clearAiBuilderObjects,aiObjectSummary} from "./ai-builder.js?v=0.8.36.4-20260830-ui-action-audit";
+import {listClearanceTargets,analyzeClearance,clearanceStatus,getClearance,createClearance,updateClearance,deleteClearance,clearClearances} from "./clearance.js?v=0.8.36.4-20260830-ui-action-audit";
 
 
 const pages=["home","project","references","relocalize","projects","cad","objects","measurements","clearance","polyline","line","point","walltool","wallcreate","wall","openingcreate","opening","shapecreate","shape","aibuilder","settings","clear"];
@@ -62,7 +62,7 @@ function togglePopover(id){
 }
 function showPage(name,push=true){
   pages.forEach(p=>el("page-"+p)?.classList.remove("active"));const page=el("page-"+name);if(!page)throw new Error(`Menupagina ontbreekt: ${name}`);page.classList.add("active");
-  const titles={home:"Measure AR",project:"Project",references:"Projectreferenties",relocalize:"Projectpositie herstellen",projects:"Mijn projecten",cad:"CAD / 3D-model",objects:"Objecten",measurements:"Metingen",clearance:"Vrije ruimte / collision",polyline:"Doorlopende meting",line:"Lijn",point:"Punt",walltool:"Muur tekenen",wallcreate:"Muur maken",wall:"Muur",openingcreate:"Opening toevoegen",opening:"Opening",shapecreate:"Vorm opslaan",shape:"Vorm",aibuilder:"AI Builder · Prototype",settings:"Instellingen",clear:"Alles wissen"};
+  const titles={home:"AR construct",project:"Project",references:"Projectreferenties",relocalize:"Projectpositie herstellen",projects:"Mijn projecten",cad:"CAD / 3D-model",objects:"Objecten",measurements:"Metingen",clearance:"Vrije ruimte / collision",polyline:"Doorlopende meting",line:"Lijn",point:"Punt",walltool:"Muur tekenen",wallcreate:"Muur maken",wall:"Muur",openingcreate:"Opening toevoegen",opening:"Opening",shapecreate:"Vorm opslaan",shape:"Vorm",aibuilder:"AI Builder · Prototype",settings:"Instellingen",clear:"Alles wissen"};
   el("menuTitle").textContent=titles[name]||name;if(push&&menuStack.at(-1)!==name)menuStack.push(name);el("menuBackBtn").style.visibility=name==="home"?"hidden":"visible";if(name==="objects")renderObjects();if(name==="measurements")renderMeasurements();if(name==="clearance")renderClearancePage();if(name==="project")renderProjectPage();if(name==="references")renderReferenceManager();if(name==="relocalize")renderRelocalizePage();if(name==="projects")renderProjectsList();if(name==="cad")renderCadPage();requestAnimationFrame(refreshProfessionalColorPickers);
 }
 function cancelReferenceCapture(){
@@ -558,6 +558,14 @@ export function initUI(){
       await suspendARForCadImport();
       location.assign("./cad-import.html");
     }catch(e){console.error(e);showStatus(`CAD-import kon niet starten: ${e.message||e}`,true);}
+  });
+  bind("cadResumeArBtn","click",async()=>{
+    const models=listCadModels();if(!models.length)throw new Error("Geen CAD-model beschikbaar.");
+    await resumeARFromGesture();
+    await restoreCadRuntime();
+    const active=cadStatus().active||models[0];
+    selectCad(active.id);beginCadPlacement(active.id);renderCadPage();returnToArView();
+    el("hint").textContent=`${active.name}: AR hervat. Richt op positie en open ☰ → CAD om plaatsing te bevestigen.`;
   });
   bind("cadRotateLeftBtn","click",()=>{rotateCad(-5);markDirtyAndRecover();renderCadPage();});
   bind("cadRotateRightBtn","click",()=>{rotateCad(5);markDirtyAndRecover();renderCadPage();});

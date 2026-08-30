@@ -1,4 +1,4 @@
-import {S} from "./state.js?v=0.8.36.3-20260830-pwa-install";
+import {S} from "./state.js?v=0.8.36.4-20260830-ui-action-audit";
 
 function now(){return new Date().toISOString();}
 function cleanName(v){return String(v||"").trim().replace(/\s+/g," ");}

@@ -1,4 +1,4 @@
-import {S,projectToWorld,worldToProject} from "./state.js?v=0.8.36.3-20260830-pwa-install";
+import {S,projectToWorld,worldToProject} from "./state.js?v=0.8.36.4-20260830-ui-action-audit";
 
 const DB_NAME="measurear.cad.v1",STORE="files";
 let loaderPromise=null;

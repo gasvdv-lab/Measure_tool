@@ -1,4 +1,4 @@
-import {S,getPoint} from "./state.js?v=0.8.36.3-20260830-pwa-install";
+import {S,getPoint} from "./state.js?v=0.8.36.4-20260830-ui-action-audit";
 
 // Session-local WebXR anchor manager.
 // Project coordinates remain immutable in point.position/point.locked.
