@@ -1,10 +1,10 @@
-import {S,getPoint,getLine,getContour} from "./state.js?v=0.8.36.4-20260830-ui-action-audit";
+import {S,getPoint,getLine,getContour} from "./state.js?v=0.8.36.4.1-20260830-pwa-version-sync-fix";
 import {
   createPoint,createLine,createShape,clearAllGeometry,validateGeometryState
-} from "./geometry.js?v=0.8.36.4-20260830-ui-action-audit";
-import {createWall,createOpening,clearWalls} from "./walls.js?v=0.8.36.4-20260830-ui-action-audit";
-import {snapshotAiObjects,restoreAiBuilderObjects,clearAiBuilderObjects} from "./ai-builder.js?v=0.8.36.4-20260830-ui-action-audit";
-import {snapshotClearances,restoreClearances,clearClearances} from "./clearance.js?v=0.8.36.4-20260830-ui-action-audit";
+} from "./geometry.js?v=0.8.36.4.1-20260830-pwa-version-sync-fix";
+import {createWall,createOpening,clearWalls} from "./walls.js?v=0.8.36.4.1-20260830-pwa-version-sync-fix";
+import {snapshotAiObjects,restoreAiBuilderObjects,clearAiBuilderObjects} from "./ai-builder.js?v=0.8.36.4.1-20260830-pwa-version-sync-fix";
+import {snapshotClearances,restoreClearances,clearClearances} from "./clearance.js?v=0.8.36.4.1-20260830-pwa-version-sync-fix";
 
 function vec(v){return v?{x:v.x,y:v.y,z:v.z}:null;}
 function vec3(v){return v?new S.THREE.Vector3(v.x,v.y,v.z):null;}
