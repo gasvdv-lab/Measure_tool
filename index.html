@@ -8,12 +8,12 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="AR construct">
-  <link rel="manifest" href="./manifest.webmanifest?v=0.8.37.2">
-  <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png?v=0.8.37.2">
-  <link rel="apple-touch-icon" href="./icons/icon-192.png?v=0.8.37.2">
+  <link rel="manifest" href="./manifest.webmanifest?v=0.8.37.3">
+  <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png?v=0.8.37.3">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png?v=0.8.37.3">
   <script>try{document.documentElement.dataset.appTheme=localStorage.getItem("measurear.ui.theme.v1")||"technical-green"}catch{document.documentElement.dataset.appTheme="technical-green"}</script>
   <title>AR construct</title>
-  <link rel="stylesheet" href="./css/app.css?v=0.8.37.2-20260830-cad-placement-repair">
+  <link rel="stylesheet" href="./css/app.css?v=0.8.37.3-20260830-cad-geometry-registration">
 </head>
 <body>
 <div id="app">
@@ -21,7 +21,7 @@
     <div class="logo">⌖</div><h1>AR construct</h1>
     <p id="launchStatus">Tik om AR te starten.</p>
     <div id="startupRecovery" class="help" style="display:none"></div>
-    <div id="buildInfo" class="build">v0.8.37.2 · CAD Placement Repair · 20260830</div>
+    <div id="buildInfo" class="build">v0.8.37.3 · CAD Geometry Registration · 20260830</div>
     <button id="installPwaBtn" class="secondary" hidden>Installeer AR construct</button>
     <button id="startArBtn" class="primary">AR starten</button>
     <div id="error" class="error"></div>
@@ -46,7 +46,7 @@
   <aside id="menuPanel">
     <div class="menuHead">
       <button id="menuBackBtn" class="secondary">‹</button>
-      <div><strong id="menuTitle">AR construct</strong><small id="menuMeta">v0.8.37.2</small></div>
+      <div><strong id="menuTitle">AR construct</strong><small id="menuMeta">v0.8.37.3</small></div>
       <button id="menuCloseBtn" class="secondary">✕</button>
     </div>
     <div class="menuBody">
@@ -157,6 +157,16 @@
             <div id="cadPlacementHelp" class="help">Richt het vizier op de gewenste locatie en druk op de witte ronde knop. Het model blijft verborgen tot je de locatie kiest.</div>
             <div class="grid2"><button id="cadRotateLeftBtn" class="secondary">↶ 5°</button><button id="cadRotateRightBtn" class="secondary">↷ 5°</button></div>
             <div class="grid2"><button id="cadDownBtn" class="secondary">− 1 cm hoogte</button><button id="cadUpBtn" class="secondary">+ 1 cm hoogte</button></div>
+            <div id="cadRegistrationControls" class="menuCard" style="margin-top:12px">
+              <h3>Exact uitlijnen op vorm</h3>
+              <div class="help">Koppel een CAD-hoek exact aan een hoek van een getekende vorm. De aangrenzende randen bepalen de rotatie. De CAD-schaal blijft altijd exact 1:1.</div>
+              <label>CAD-hoek<select id="cadRegCadCorner"><option value="0">C1 · linksvoor</option><option value="1">C2 · rechtsvoor</option><option value="2">C3 · rechtsachter</option><option value="3">C4 · linksachter</option></select></label>
+              <label>AR-vorm<select id="cadRegShape"></select></label>
+              <label>Hoek van vorm<select id="cadRegShapeCorner"></select></label>
+              <label>Randrichting<select id="cadRegDirection"><option value="next">naar volgende hoek</option><option value="previous">naar vorige hoek</option></select></label>
+              <button id="cadRegisterShapeBtn" class="primary">Lijn CAD exact uit</button>
+              <div id="cadRegistrationInfo" class="help">Geen registratie uitgevoerd.</div>
+            </div>
             <button id="cadConfirmBtn" class="primary">Plaats CAD hier</button>
             <button id="cadCancelBtn" class="secondary">Annuleren</button>
           </div>
@@ -492,6 +502,6 @@
   <div id="hint">Open ☰ en kies wat je wilt tekenen.</div>
 </div>
 
-<script type="module" src="./js/bootstrap.js?v=0.8.37.2-20260830-cad-placement-repair"></script>
+<script type="module" src="./js/bootstrap.js?v=0.8.37.3-20260830-cad-geometry-registration"></script>
 </body>
 </html>

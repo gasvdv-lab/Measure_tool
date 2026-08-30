@@ -1,4 +1,4 @@
-# AR construct roadmap
+# AR construct Roadmap
 
 - [x] v0.8.37.2 Spatial Objects + Universal Select/Edit — gemeenschappelijk objectregister, selectiecontract en centrale CAD-selectie.
 - [ ] v0.8.38 Work Planes & Environment Context
@@ -469,3 +469,5 @@ Openstaand blijft: `Project op locatie plaatsen` / witte referentie-captureknop.
 - [x] Route CAD through the same project/world transform.
 - [x] Synchronize wall and AI rendering with rigid World Lock changes.
 - [ ] Physical AR stability gate on Android/Chrome.
+
+- [x] **v0.8.37.3 CAD ↔ Geometry Registration** — hoek-op-hoek + randrichting, exacte positie/yaw, schaal invariant 1.000.

@@ -1,4 +1,4 @@
-# AR construct v0.8.37.2 — Spatial Objects + Universal Select/Edit
+# AR construct v0.8.37.3 — CAD ↔ Geometry Registration
 
 Deze release introduceert één gemeenschappelijk Spatial Object-register voor punten, lijnen, vormen, muren, openingen, AI-concepten en CAD-modellen. Objecten worden vanuit Objecten via één selectiecontract gekozen en vervolgens naar hun bestaande, bewezen editor geleid. CAD is nu ook zichtbaar in de centrale objectlijst. De geometrische waarheid, World Lock-kalibratie en tekenketen uit v0.8.36.4.2 zijn niet herschreven.
 
@@ -556,3 +556,13 @@ AR-IN/ROOM: place A→B on a stable surface, confirm both endpoints, then move t
 - [AR-IN/ROOM] CAD object remains 1:1 and follows the same project/world transform.
 - [AR-IN/A4] Delete the first/master point where allowed; remaining project must not jump during anchor failover.
 - [AR-IN/A4] 90° and custom-angle constraints remain functional after the repair.
+
+## v0.8.37.3 fysieke gate
+1. Teken een vorm die ongeveer overeenkomt met de CAD-footprint.
+2. Importeer GLB en controleer 1:1 afmetingen.
+3. Open CAD → Exact uitlijnen op vorm.
+4. Kies CAD-hoek en overeenkomstige vormhoek.
+5. Kies volgende/vorige rand en druk **Lijn CAD exact uit**.
+6. Controleer dat gekozen hoeken samenvallen en randen parallel liggen.
+7. Controleer gemeld maatverschil; CAD mag niet schalen.
+8. Loop rond: vorm en CAD moeten samen rigide op locatie blijven.
