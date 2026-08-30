@@ -1,6 +1,6 @@
-# v0.8.29.1.1 module-update
+# Tijdelijke diagnostiek
 
-**AR Hit-Test / Surface Targeting** — onderhoudsfix: de viewer hit-testbron wordt pas als actief gemarkeerd nadat WebXR hem werkelijk heeft aangemaakt. Bij een tijdelijke aanvraagfout volgt maximaal eenmaal per seconde een nieuwe poging. Er worden geen fictieve oppervlakken of ruimere geometrische toleranties gebruikt.
+v0.8.29.1.2 voegt uitsluitend een live XR hit-test diagnose-HUD toe.
 
 # Measure AR — Modules
 

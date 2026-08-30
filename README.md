@@ -1,6 +1,6 @@
-# Measure AR v0.8.29.1.1 — Surface Detection Repair
+# Measure AR v0.8.29.1.2 — XR Surface Diagnostic
 
-Deze onderhoudsrelease herstelt de opstart van de WebXR hit-testbron. In v0.8.29.1 kon een tijdelijke fout tijdens `requestReferenceSpace("viewer")` of `requestHitTestSource()` de sessie permanent zonder hit-testbron laten, omdat de aanvraag al als uitgevoerd werd gemarkeerd. De app probeert de aanvraag nu gecontroleerd opnieuw totdat een geldige hit-testbron bestaat. De meet-/tekengeometrie, smoothing, World Lock en CAD Preview zijn inhoudelijk niet gewijzigd.
+Diagnostische release op basis van v0.8.29.1. Geen surface-toleranties of geometrie gewijzigd. Live HUD toont Viewer, HitSource, Hits, Pose en Target.
 
 # Measure AR v0.8.29.1 — CAD Preview
 

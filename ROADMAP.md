@@ -1,10 +1,6 @@
-# Update v0.8.29.1.1
+# Diagnostische tussenrelease v0.8.29.1.2
 
-- [x] Gerichte regressieanalyse oppervlakdetectie v0.8.29.0 ↔ v0.8.29.1.
-- [x] Vastgesteld: AR/hit-testcode was functioneel identiek tussen beide versies; CAD Preview zelf veroorzaakte geen wijziging in de detectielogica.
-- [x] Robuuste retry toegevoegd voor het aanmaken van de WebXR hit-testbron.
-- [ ] **AR-IN/ROOM:** bevestigen dat vloer/tafel/wand weer consequent een groen geldig hitpunt geeft.
-- [ ] Bestaande open reference-capturebug blijft apart geparkeerd.
+Surface-detection oorzaak isoleren vóór verdere featureontwikkeling.
 
 # Measure AR Roadmap
 
