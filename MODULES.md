@@ -1,3 +1,22 @@
+# v0.8.32 module-update — Measure Engine: Polyline & Angles
+
+**Measure Engine / geometry.js**
+- `analyzePolyline()` berekent segmentlengtes, totaallengte en hoeken vanuit permanente Project Space-punten.
+- `updatePolyline()` beheert naam/eenheid zonder brongeometrie te herschalen.
+- Open polylines krijgen meetmetadata (unit/timestamps/measurement).
+
+**Drawing Core**
+- De bestaande polyline-tekenflow blijft gelijk; pas bij Voltooien worden segmenten gekoppeld aan het polyline-meetobject.
+
+**UI / Metingen**
+- Metingen toont zowel losse afstandsmetingen als doorlopende meetobjecten.
+- Polyline-detail toont elk segment, de totale lengte en elke tussenhoek.
+
+**History / Storage**
+- Polyline-meetmetadata wordt in snapshots meegenomen.
+
+---
+
 # v0.8.31 — Measure Select & Edit + mm
 
 ## Measure Engine

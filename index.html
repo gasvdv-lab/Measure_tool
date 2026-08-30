@@ -164,6 +164,17 @@
 
       <section id="page-objects" class="page"><h3>Objecten</h3><div id="objectsList" class="menuCard"></div></section>
 
+      <section id="page-polyline" class="page">
+        <h3>Doorlopende meting</h3><div class="menuCard">
+          <div id="polylineInfo" class="help">—</div>
+          <label>Naam<input id="editPolylineName" maxlength="40"></label>
+          <label>Eenheid<select id="editPolylineUnit"><option value="mm">mm</option><option value="cm">cm</option><option value="m">m</option></select></label>
+          <button id="savePolylineBtn" class="primary">Doorlopende meting opslaan</button>
+          <div id="polylineSegments" class="help"></div>
+          <div id="polylineAngles" class="help"></div>
+        </div>
+      </section>
+
       <section id="page-line" class="page">
         <h3>Meting / lijn</h3><div class="menuCard">
           <div id="lineInfo" class="help">—</div>

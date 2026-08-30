@@ -1,3 +1,14 @@
+# v0.8.32 — aanvullende tests
+
+- **AUTO:** JavaScript-syntax, interne module-imports, één gedeelde build-ID en ZIP-integriteit.
+- **AR-IN/ROOM:** Doorlopende lijn A→B→C tekenen en voltooien; totale lengte en hoek B controleren.
+- **AR-IN/ROOM:** A→B→C→D; segmenten, totaal en twee tussenhoeken controleren.
+- **AR-IN/ROOM:** mm/cm/m wisselen zonder geometriewijziging.
+- **AR-IN/ROOM:** Undo/Redo en project save/reopen.
+- **AR-IN/ROOM regressie:** gewone punt→punt→lijnmeting blijft werken.
+
+---
+
 # v0.8.31 — Measure Select & Edit + mm
 
 ## Automatisch uitgevoerd

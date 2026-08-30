@@ -1,3 +1,29 @@
+# Measure AR v0.8.32 — Polyline & Angle Measurements
+
+GitHub Pages: https://gasvdv-lab.github.io/Measure_tool/
+
+Deze release bouwt verder op v0.8.31 zonder de bewezen punt-/lijnplaatsing of World Lock-logica te wijzigen. De bestaande **Doorlopende lijn** wordt nu een expliciet meetobject.
+
+## Nieuw in v0.8.32
+- Een open polyline wordt na **Voltooien** opgeslagen als **doorlopende meting**.
+- De app berekent de lengte van ieder segment én de totale trajectlengte.
+- Voor ieder tussenpunt wordt de geometrische hoek tussen de twee aangrenzende segmenten berekend (0–180°; een rechte voortzetting is 180°).
+- **Metingen** toont doorlopende metingen apart, zonder de segmenten dubbel bij de totale meetobjecten op te tellen.
+- Een doorlopende meting kan worden geopend met segmentlengtes en hoeken per tussenpunt.
+- Naam en eenheid mm/cm/m kunnen per doorlopende meting worden gewijzigd. De onderliggende geometrie blijft in meter.
+- Polyline-meetmetadata wordt meegenomen in Undo/Redo en project snapshot/recovery.
+
+## Testdoel v0.8.32
+1. Teken via **Doorlopende lijn** minstens A → B → C en kies **Voltooien**.
+2. Open **☰ → Metingen** en controleer de totaallengte.
+3. Open de doorlopende meting en vergelijk AB, BC en de hoek bij B met de getekende situatie.
+4. Teken ook A → B → C → D en controleer dat er twee hoeken worden weergegeven.
+5. Wissel mm ↔ cm ↔ m; alleen de weergave mag veranderen.
+6. Test Undo/Redo en project opslaan/heropenen.
+7. Regressie: maak daarna één gewone lijn en controleer dat de bestaande v0.8.30/v0.8.31 lijnmeting nog correct werkt.
+
+---
+
 # Measure AR v0.8.31 — Measure Select & Edit + mm
 
 GitHub Pages: https://gasvdv-lab.github.io/Measure_tool/

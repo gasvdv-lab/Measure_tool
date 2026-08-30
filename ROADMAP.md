@@ -1,6 +1,6 @@
 # Measure AR — actuele roadmapstatus
 
-**Huidige versie:** v0.8.31 — Measure Select & Edit + mm  
+**Huidige versie:** v0.8.32 — Polyline & Angle Measurements  
 **Stabiele baseline:** v0.8.29.1.3 fysiek geslaagd: surface hit → punt A → punt B → lijn.  
 **Actieve ontwikkelfase:** Measure Engine.  
 **CAD:** voorlopig geparkeerd; bestaande CAD-code blijft behouden voor latere hervatting.
@@ -16,6 +16,7 @@
 - [x] Alle interne ES-module imports gebruiken opnieuw één build-ID.
 - [x] AR-ANDROID: v0.8.30 basispraktijktest geslaagd — lijnmeting werkt.
 - [ ] AR-ANDROID: v0.8.31 Select/Edit + mm praktijktest uitvoeren.
+- [ ] AR-ANDROID: v0.8.32 Polyline & Angle Measurements praktijktest uitvoeren.
 
 ## v0.8.31 — Measure Select & Edit + mm
 - [x] Bestaande afstandsmetingen selecteren via **Metingen**.
@@ -24,9 +25,19 @@
 - [x] Geometrische bronwaarde intern in meter behouden.
 - [ ] AR-ANDROID: fysieke v0.8.31 regressietest.
 
+
+## v0.8.32 — Polyline & Angle Measurements
+- [x] Bestaande Doorlopende lijn als expliciet meetobject registreren.
+- [x] Segmentlengtes en totale trajectlengte berekenen.
+- [x] Hoeken op alle tussenpunten berekenen.
+- [x] Polyline-meetdetails tonen via **Metingen**.
+- [x] Naam en mm/cm/m per polyline-meting.
+- [x] Metadata in Undo/Redo en project snapshot/recovery.
+- [ ] AR-ANDROID: fysieke v0.8.32 praktijktest.
+
 ## Eerstvolgende Measure Engine-stappen
 1. **Measure 2 — Select/Edit interaction:** universele selectie van ruimtelijke objecten vanuit AR, niet alleen via lijsten.
-2. **Measure 3 — Polyline & hoekmetingen:** segmentlengtes, totaallengte en hoeken als meetobjecten.
+2. **Measure 3 — Polyline & hoekmetingen:** ✅ foundation in v0.8.32; later AR-selectie/hoeklabels verfijnen.
 3. **Measure 4 — Oppervlakte:** gesloten meetcontouren met oppervlakte en omtrek.
 4. **Measure 5 — Hoogte / verticaal / loodrecht:** betrouwbare hoogte- en offsetmetingen.
 5. **Measure 6 — Volume & clearance:** volumes, vrije ruimte en ruimtelijke relaties.
