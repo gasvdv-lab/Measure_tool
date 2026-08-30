@@ -1,32 +1,32 @@
-import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.29.2-20260830-navigation-core";
+import {S,$,fmt,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.29.1-20260830-cad-preview";
 import {
   startTool,cancelTool,setPlacement,setDistance,setConstraint,setAngle,flipSide,setReferenceLine,setSnapMode,
   confirmCandidate,undoToolStep,finishTool,toolLabel,constraintLabel,getActivePoint,referenceRequired,resetDrawingCore
-} from "./drawing-core.js?v=0.8.29.2-20260830-navigation-core";
+} from "./drawing-core.js?v=0.8.29.1-20260830-cad-preview";
 import {
   createShape,updateShape,deleteShapeOnly,deleteShapeWithContour,deleteLineRaw,deletePointRaw,renamePoint,updateLine,analyzeContour,
   lineDependencies,pointDependencies,canDeleteLine,canDeletePoint,clearAllGeometry,validateGeometryState,dispose
-} from "./geometry.js?v=0.8.29.2-20260830-navigation-core";
-import {startAR,resumeARFromGesture,suspendARForCadImport,applyZoom,resetTrackingSamples} from "./ar.js?v=0.8.29.2-20260830-navigation-core";
-import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.29.2-20260830-navigation-core";
-import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.29.2-20260830-navigation-core";
+} from "./geometry.js?v=0.8.29.1-20260830-cad-preview";
+import {startAR,resumeARFromGesture,suspendARForCadImport,applyZoom,resetTrackingSamples} from "./ar.js?v=0.8.29.1-20260830-cad-preview";
+import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.29.1-20260830-cad-preview";
+import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.29.1-20260830-cad-preview";
 import {
   initProjectStorage,saveCurrentProject,listProjects,loadStoredProject,newProject,duplicateStoredProject,
   deleteStoredProject,renameStoredProject,projectStats,formatStats,getStoredProjectInfo,hasRecovery,recoveryInfo,restoreRecovery,clearRecovery,
   exportCurrentProject,importProjectFile,markDirtyAndRecover
-} from "./project-storage.js?v=0.8.29.2-20260830-navigation-core";
+} from "./project-storage.js?v=0.8.29.1-20260830-cad-preview";
 import {
   captureCurrentGeo,addProjectReference,removeProjectReference,clearProjectReferences,beginRelocalization,cancelRelocalization,
   captureRelocalizationPoint,solveRelocalization,applyRelocalization,relocalizationSummary,beginSpatialRestore
-} from "./relocalization.js?v=0.8.29.2-20260830-navigation-core";
+} from "./relocalization.js?v=0.8.29.1-20260830-cad-preview";
 
-import {captureHybridBaseline,assessHybridLocation,enableHeading} from "./hybrid-localization.js?v=0.8.29.2-20260830-navigation-core";
+import {captureHybridBaseline,assessHybridLocation,enableHeading} from "./hybrid-localization.js?v=0.8.29.1-20260830-cad-preview";
 
-import {detachAllPointAnchors} from "./world-lock.js?v=0.8.29.2-20260830-navigation-core";
-import {importCadFile,listCadModels,cadStatus,selectCad,beginCadPlacement,rotateCad,moveCadHeight,confirmCadPlacement,cancelCadPlacement,deleteCadModel,clearCadRuntime,restoreCadRuntime} from "./cad.js?v=0.8.29.2-20260830-navigation-core";
-import {initProfessionalColorPickers,refreshProfessionalColorPickers} from "./color-picker.js?v=0.8.29.2-20260830-navigation-core";
-import {initThemeSelector} from "./theme-selector.js?v=0.8.29.2-20260830-navigation-core";
-import {executeAiPrototype,getAiObject,getAiObjectForShape,toggleAiObjectLock,deleteAiObject,clearAiBuilderObjects,aiObjectSummary} from "./ai-builder.js?v=0.8.29.2-20260830-navigation-core";
+import {detachAllPointAnchors} from "./world-lock.js?v=0.8.29.1-20260830-cad-preview";
+import {importCadFile,listCadModels,cadStatus,selectCad,beginCadPlacement,rotateCad,moveCadHeight,confirmCadPlacement,cancelCadPlacement,deleteCadModel,clearCadRuntime,restoreCadRuntime} from "./cad.js?v=0.8.29.1-20260830-cad-preview";
+import {initProfessionalColorPickers,refreshProfessionalColorPickers} from "./color-picker.js?v=0.8.29.1-20260830-cad-preview";
+import {initThemeSelector} from "./theme-selector.js?v=0.8.29.1-20260830-cad-preview";
+import {executeAiPrototype,getAiObject,getAiObjectForShape,toggleAiObjectLock,deleteAiObject,clearAiBuilderObjects,aiObjectSummary} from "./ai-builder.js?v=0.8.29.1-20260830-cad-preview";
 
 
 const pages=["home","project","references","relocalize","projects","cad","objects","line","point","walltool","wallcreate","wall","openingcreate","opening","shapecreate","shape","aibuilder","settings","clear"];
@@ -632,11 +632,6 @@ bind("saveWallBtn","click",()=>{
   document.addEventListener("measurear:ai-builder-changed",()=>{if(document.getElementById("page-aibuilder")?.classList.contains("active"))renderAiBuilder();});
   document.addEventListener("measurear:cad-changed",()=>{if(document.getElementById("page-cad")?.classList.contains("active"))renderCadPage();syncProjectMeta();});
   document.addEventListener("measurear:cad-return-ready",()=>{menuStack=["home","cad"];showPage("cad",false);renderCadPage();closeMenu();showStatus("CAD geladen · richt het vizier op de gewenste positie.");});
-  document.addEventListener("measurear:start-intent",e=>{
-    const intent=e.detail?.intent;
-    if(intent==="projects"){openMenu();showPage("projects");return;}
-    if(intent==="measure"||intent==="create"){openMenu();showPage("home",false);return;}
-  });
 
   initProjectStorage();
   enableHeading().catch(()=>{});

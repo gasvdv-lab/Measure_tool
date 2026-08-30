@@ -1,1 +1,1 @@
-export {initUI} from "./ui.js?v=0.8.29.2-20260830-navigation-core";
+export {initUI} from "./ui.js?v=0.8.29.1-20260830-cad-preview";

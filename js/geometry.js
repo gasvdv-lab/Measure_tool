@@ -1,4 +1,4 @@
-import {S,$,fmt,pointName,getPoint,getLine,getContour,getShape,projectToWorld} from "./state.js?v=0.8.29.2-20260830-navigation-core";
+import {S,$,fmt,pointName,getPoint,getLine,getContour,getShape,projectToWorld} from "./state.js?v=0.8.29.1-20260830-cad-preview";
 
 export function renderPosition(p){return p?.worldPosition||p?.position||null;}
 

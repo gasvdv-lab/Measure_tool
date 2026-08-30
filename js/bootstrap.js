@@ -1,8 +1,7 @@
-import {startAR,resumeARFromGesture} from "./ar.js?v=0.8.29.2-20260830-navigation-core";
-import {$} from "./state.js?v=0.8.29.2-20260830-navigation-core";
-const VERSION="0.8.29.2",BUILD="20260830-navigation-core";
+import {startAR,resumeARFromGesture} from "./ar.js?v=0.8.29.1-20260830-cad-preview";
+import {$} from "./state.js?v=0.8.29.1-20260830-cad-preview";
+const VERSION="0.8.29.1",BUILD="20260830-cad-preview";
 const pendingCadId=sessionStorage.getItem("measurear.pendingCadPlacement");
-let requestedIntent="direct";
 let uiReadyPromise;
 
 function showFatal(message){
@@ -12,13 +11,13 @@ function showFatal(message){
   if(btn){btn.disabled=false;btn.textContent="Opnieuw proberen";}
 }
 async function lazyInitUI(){
-  try{const mod=await import("./ui.js?v=0.8.29.2-20260830-navigation-core");mod.initUI();if(document.documentElement.dataset.uiReady!=="1")throw new Error("UI-binding niet voltooid.");return true;}
+  try{const mod=await import("./ui.js?v=0.8.29.1-20260830-cad-preview");mod.initUI();if(document.documentElement.dataset.uiReady!=="1")throw new Error("UI-binding niet voltooid.");return true;}
   catch(err){console.error("UI init failed",err);showFatal(`UI-fout · v${VERSION} build ${BUILD}\n${err.message||err}`);return false;}
 }
 async function finishPendingCad(id){
   const [{restoreRecovery},{restoreCadRuntime,selectCad,beginCadPlacement}]=await Promise.all([
-    import("./project-storage.js?v=0.8.29.2-20260830-navigation-core"),
-    import("./cad.js?v=0.8.29.2-20260830-navigation-core")
+    import("./project-storage.js?v=0.8.29.1-20260830-cad-preview"),
+    import("./cad.js?v=0.8.29.1-20260830-cad-preview")
   ]);
   restoreRecovery();
   await restoreCadRuntime();
@@ -36,7 +35,6 @@ async function startFromUserGesture(){
     if(pendingCadId)await resumeARFromGesture();else await startAR();
     const uiOk=await uiReadyPromise;if(!uiOk)throw new Error("UI kon niet worden geladen.");
     if(pendingCadId)await finishPendingCad(pendingCadId);
-    else if(requestedIntent!=="direct")document.dispatchEvent(new CustomEvent("measurear:start-intent",{detail:{intent:requestedIntent}}));
   }catch(err){console.error(err);if(status)status.textContent="AR kon niet starten.";if(error){error.style.display="block";error.textContent=`v${VERSION} · build ${BUILD}\n${err.message||err}`;}if(btn){btn.disabled=false;btn.textContent=pendingCadId?"Opnieuw: AR starten en CAD plaatsen":"Opnieuw proberen";}}
 }
 if(pendingCadId){
@@ -45,11 +43,6 @@ if(pendingCadId){
   if(btn)btn.textContent="AR starten en CAD plaatsen";
   if(build)build.textContent=`v${VERSION} · CAD klaar voor plaatsing`;
 }
-$("startArBtn")?.addEventListener("click",()=>{requestedIntent="direct";startFromUserGesture();});
-document.querySelectorAll("[data-start-intent]").forEach(btn=>btn.addEventListener("click",()=>{
-  const intent=btn.dataset.startIntent;
-  if(intent==="place"){location.href="./cad-import.html";return;}
-  requestedIntent=intent||"direct";startFromUserGesture();
-}));
+$("startArBtn")?.addEventListener("click",startFromUserGesture);
 window.addEventListener("error",e=>console.error(e.error||e.message));window.addEventListener("unhandledrejection",e=>console.error(e.reason));
 uiReadyPromise=lazyInitUI();
