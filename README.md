@@ -1,26 +1,3 @@
-# Measure AR v0.8.29.2 — Startinterface / Navigation Core
-
-App: https://gasvdv-lab.github.io/Measure_tool/
-
-## Nieuw in v0.8.29.2
-De startinterface is herwerkt rond de brede, domeinonafhankelijke productvisie. De gebruiker kiest nu vanuit **Meten · Plaatsen · Maken · Ervaren · Controleren** in plaats van eerst een technische AR-functie te moeten begrijpen. **Ervaren** en **Controleren** zijn bewust zichtbaar maar nog uitgeschakeld: ze leggen de toekomstige navigatiestructuur vast zonder niet-bestaande functionaliteit te simuleren.
-
-- **Meten** start AR en opent de bestaande meet-/tekengereedschappen.
-- **Plaatsen** opent rechtstreeks de bestaande aparte CAD-import/previewpagina, dus zonder eerst WebXR te starten.
-- **Maken** start AR en opent de bestaande create/tekenomgeving.
-- **Projecten** start AR en opent het bestaande projectoverzicht.
-- **AR direct starten** blijft beschikbaar als technische snelweg.
-- De AR-, World Lock-, geometry-, CAD-placement- en projectopslaglogica zijn inhoudelijk niet herschreven.
-- De bekende reference-capturebug bij **Project op locatie plaatsen** blijft open en is niet als opgelost gemarkeerd.
-- Geen `TEST_RESULTS`-bestanden in de release.
-
-## Test v0.8.29.2
-**PC:** startpagina toont de vijf hoofdrichtingen; Plaatsen opent CAD Preview; Ervaren/Controleren zijn zichtbaar maar niet actief.
-
-**AR-IN:** test Meten, Maken, Projecten en AR direct starten afzonderlijk. Controleer dat de AR-sessie normaal start, het juiste bestaande menu opent en tekenen/World Lock niet is gewijzigd.
-
----
-
 # Measure AR v0.8.29.1 — CAD Preview
 
 ## Nieuw in v0.8.29.1
@@ -165,6 +142,3 @@ GitHub Pages: https://gasvdv-lab.github.io/Measure_tool/
 - AR-weergave gebruikt Project Transform zonder bronafmetingen te wijzigen.
 - CAD-schaal blijft 1.0.
 - Geen losse TEST_RESULTS-bestanden in release-ZIPs.
-
-## Productrichting vanaf v0.8.29.1
-Measure AR groeit domeinonafhankelijk rond **Measure · Place · Create · Experience · Verify**, met Capture als contextuele laag. Nieuwe modules worden ontworpen richting gedeelde Spatial Objects, universele Select/Edit, constraints/relaties, Environment Context, Clearance/Collision, Object Library, Variants/Scenes en Presentation/Experience. AI interpreteert intentie; exacte geometrie en berekeningen blijven deterministisch. Wegenis- en bedrijfsspecifieke wegenbouwworkflows vallen buiten deze app. De eerstvolgende geplande functionele release is **v0.8.29.2 — Startinterface / Navigation Core**; daarbij blijft de stabiele AR/World Lock/geometry-core ongemoeid.

@@ -84,7 +84,3 @@ De meetfunctionaliteit wordt later aanzienlijk uitgebreid. Dezelfde meetengine m
 **Status:** actief vanaf v0.8.29.1.
 
 Losse niet-AR 3D-preview tussen bestandskeuze en CAD-placement. Toont het model 1:1, vaste aanzichten, afmetingen en modelcomplexiteit. De preview verandert de geometrie of schaal niet. Pas na expliciete acceptatie wordt het model aan het project toegevoegd.
-
-
-## Productrichting vanaf v0.8.29.1
-Measure AR groeit domeinonafhankelijk rond **Measure · Place · Create · Experience · Verify**, met Capture als contextuele laag. Nieuwe modules worden ontworpen richting gedeelde Spatial Objects, universele Select/Edit, constraints/relaties, Environment Context, Clearance/Collision, Object Library, Variants/Scenes en Presentation/Experience. AI interpreteert intentie; exacte geometrie en berekeningen blijven deterministisch. Wegenis- en bedrijfsspecifieke wegenbouwworkflows vallen buiten deze app. **v0.8.29.2 — Startinterface / Navigation Core** is nu gebouwd. De startlaag routeert taakgericht naar bestaande functies zonder de stabiele AR/World Lock/geometry-core te herschrijven. **Plaatsen** gebruikt rechtstreeks de aparte CAD-import/previewflow; **Ervaren** en **Controleren** zijn zichtbaar als toekomstige hoofdrichtingen maar nog niet actief. De volgende geplande stap is **v0.8.29.3 — CAD Preview 2.0**.

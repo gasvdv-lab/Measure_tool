@@ -5,29 +5,17 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#111111">
   <script>try{document.documentElement.dataset.appTheme=localStorage.getItem("measurear.ui.theme.v1")||"technical-green"}catch{document.documentElement.dataset.appTheme="technical-green"}</script>
-  <title>Measure AR v0.8.29.2</title>
-  <link rel="stylesheet" href="./css/app.css?v=0.8.29.2-20260830-navigation-core">
+  <title>Measure AR v0.8.29.1</title>
+  <link rel="stylesheet" href="./css/app.css?v=0.8.29.1-20260830-cad-preview">
 </head>
 <body>
 <div id="app">
-  <main id="launchScreen" class="startCard startHub directFallback">
-    <div class="launchBrand"><div class="logo">⌖</div><div><h1>Measure AR</h1><div class="launchTagline">Digitale ruimte, op ware grootte.</div></div></div>
-    <p id="launchStatus">Wat wil je doen?</p>
-    <div id="startupRecovery" class="help launchRecovery" style="display:none"></div>
-
-    <div class="intentGrid" aria-label="Startfuncties">
-      <button class="intentCard" data-start-intent="measure"><span class="intentIcon">⌖</span><span><strong>Meten</strong><small>Meet en teken in de echte ruimte</small></span><b>›</b></button>
-      <button class="intentCard" data-start-intent="place"><span class="intentIcon">◇</span><span><strong>Plaatsen</strong><small>Importeer en bekijk een 3D-object 1:1</small></span><b>›</b></button>
-      <button class="intentCard" data-start-intent="create"><span class="intentIcon">＋</span><span><strong>Maken</strong><small>Teken, bouw en gebruik AI Builder</small></span><b>›</b></button>
-      <button class="intentCard futureIntent" disabled><span class="intentIcon">◎</span><span><strong>Ervaren</strong><small>Beleef ontwerpen op hun echte locatie · later</small></span></button>
-      <button class="intentCard futureIntent" disabled><span class="intentIcon">✓</span><span><strong>Controleren</strong><small>Vergelijk werkelijkheid en ontwerp · later</small></span></button>
-    </div>
-
-    <div class="launchUtilities">
-      <button class="secondary" data-start-intent="projects">Projecten</button>
-      <button id="startArBtn" class="secondary">AR direct starten</button>
-    </div>
-    <div id="buildInfo" class="build">v0.8.29.2 · Navigation Core · 20260830</div>
+  <main id="launchScreen" class="startCard directFallback">
+    <div class="logo">⌖</div><h1>Measure AR</h1>
+    <p id="launchStatus">Tik om AR te starten.</p>
+    <div id="startupRecovery" class="help" style="display:none"></div>
+    <div id="buildInfo" class="build">v0.8.29.1 · Professional Color Picker · 20260829</div>
+    <button id="startArBtn" class="primary">AR starten</button>
     <div id="error" class="error"></div>
   </main>
 
@@ -49,12 +37,12 @@
   <aside id="menuPanel">
     <div class="menuHead">
       <button id="menuBackBtn" class="secondary">‹</button>
-      <div><strong id="menuTitle">Measure AR</strong><small id="menuMeta">v0.8.29.2</small></div>
+      <div><strong id="menuTitle">Measure AR</strong><small id="menuMeta">v0.8.29.1</small></div>
       <button id="menuCloseBtn" class="secondary">✕</button>
     </div>
     <div class="menuBody">
       <section id="page-home" class="page active">
-        <h3>Meten & maken</h3>
+        <h3>Wat wil je tekenen?</h3>
         <div class="menuCard navList">
           <button id="quickLineBtn">Lijn <small>A → B en klaar</small></button>
           <button id="quickPolylineBtn">Doorlopende lijn <small>A → B → C → D → …</small></button>
@@ -424,6 +412,6 @@
   <div id="hint">Open ☰ en kies wat je wilt tekenen.</div>
 </div>
 
-<script type="module" src="./js/bootstrap.js?v=0.8.29.2-20260830-navigation-core"></script>
+<script type="module" src="./js/bootstrap.js?v=0.8.29.1-20260830-cad-preview"></script>
 </body>
 </html>
