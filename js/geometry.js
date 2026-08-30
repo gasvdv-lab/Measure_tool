@@ -1,4 +1,4 @@
-import {S,$,fmt,pointName,getPoint,getLine,getContour,getShape,projectToWorld} from "./state.js?v=0.8.29.1-20260830-cad-preview";
+import {S,$,fmt,pointName,getPoint,getLine,getContour,getShape,projectToWorld} from "./state.js?v=0.8.29.1.3-20260830-state-fix";
 
 export function renderPosition(p){return p?.worldPosition||p?.position||null;}
 
@@ -13,6 +13,7 @@ export function dispose(obj){
 }
 
 function makePointMarker(color){
+  if(!S.THREE||!S.scene)throw new Error("Rendering state niet geïnitialiseerd (THREE/scene ontbreekt).");
   const T=S.THREE,g=new T.Group();
   const pin=new T.Mesh(new T.SphereGeometry(.014,18,12),new T.MeshBasicMaterial({color}));
   const halo=new T.Mesh(new T.RingGeometry(.022,.029,32),new T.MeshBasicMaterial({color,side:T.DoubleSide,transparent:true,opacity:.95}));

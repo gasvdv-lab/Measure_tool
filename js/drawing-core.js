@@ -1,8 +1,8 @@
-import {S,$,fmt,getPoint,getLine,worldToProject} from "./state.js?v=0.8.29.1-20260830-cad-preview";
-import {createPoint,createLine,ensureLineRendered,deleteLineRaw,deletePointRaw,createContour,dispose,analyzeShapePoints} from "./geometry.js?v=0.8.29.1-20260830-cad-preview";
-import {snapshotProject,commitSnapshot,undoHistory} from "./history.js?v=0.8.29.1-20260830-cad-preview";
-import {queuePointHitAnchor} from "./world-lock.js?v=0.8.29.1-20260830-cad-preview";
-import {createWall,nextWallName} from "./walls.js?v=0.8.29.1-20260830-cad-preview";
+import {S,$,fmt,getPoint,getLine,worldToProject} from "./state.js?v=0.8.29.1.3-20260830-state-fix";
+import {createPoint,createLine,ensureLineRendered,deleteLineRaw,deletePointRaw,createContour,dispose,analyzeShapePoints} from "./geometry.js?v=0.8.29.1.3-20260830-state-fix";
+import {snapshotProject,commitSnapshot,undoHistory} from "./history.js?v=0.8.29.1.3-20260830-state-fix";
+import {queuePointHitAnchor} from "./world-lock.js?v=0.8.29.1.3-20260830-state-fix";
+import {createWall,nextWallName} from "./walls.js?v=0.8.29.1.3-20260830-state-fix";
 
 const REF_MODES=new Set(["parallel","perpendicular","angle"]);
 const TOOL_NAMES={line:"LIJN",polyline:"POLYLIJN",shape:"VORM",stake:"UITZETTEN",wall:"MUUR"};
@@ -285,6 +285,7 @@ function snapCandidate(pos,active){
 
 function previewObjects(){
   if(S.preview.point&&S.preview.line)return;
+  if(!S.THREE||!S.scene)throw new Error("Rendering state niet geïnitialiseerd (THREE/scene ontbreekt).");
   const T=S.THREE;
   const p=new T.Group();
   const sphere=new T.Mesh(new T.SphereGeometry(.018,16,10),new T.MeshBasicMaterial({color:0xffd166,transparent:true,opacity:.8}));
