@@ -1,6 +1,6 @@
 
-import {S,getPoint,getLine} from "./state.js?v=0.8.32-20260830-polyline-angles";
-import {dispose,renderPosition} from "./geometry.js?v=0.8.32-20260830-polyline-angles";
+import {S,getPoint,getLine} from "./state.js?v=0.8.32.1-20260830-horizontal-axis-lock";
+import {dispose,renderPosition} from "./geometry.js?v=0.8.32.1-20260830-horizontal-axis-lock";
 
 function cleanName(name){return String(name||"").trim().replace(/\s+/g," ");}
 export function wallNameExists(name,excludeId=null){

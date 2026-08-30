@@ -1,4 +1,4 @@
-import {S,getPoint} from "./state.js?v=0.8.32-20260830-polyline-angles";
+import {S,getPoint} from "./state.js?v=0.8.32.1-20260830-horizontal-axis-lock";
 
 // Session-local WebXR anchor manager.
 // Project coordinates remain immutable in point.position/point.locked.

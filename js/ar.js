@@ -1,10 +1,10 @@
-import {S,$} from "./state.js?v=0.8.32-20260830-polyline-angles";
-import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.32-20260830-polyline-angles";
-import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.32-20260830-polyline-angles";
-import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.32-20260830-polyline-angles";
-import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.32-20260830-polyline-angles";
-import {updateCadFrame,clearCadRuntime} from "./cad.js?v=0.8.32-20260830-polyline-angles";
-import {clearAiBuilderObjects} from "./ai-builder.js?v=0.8.32-20260830-polyline-angles";
+import {S,$} from "./state.js?v=0.8.32.1-20260830-horizontal-axis-lock";
+import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.32.1-20260830-horizontal-axis-lock";
+import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.32.1-20260830-horizontal-axis-lock";
+import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.32.1-20260830-horizontal-axis-lock";
+import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.32.1-20260830-horizontal-axis-lock";
+import {updateCadFrame,clearCadRuntime} from "./cad.js?v=0.8.32.1-20260830-horizontal-axis-lock";
+import {clearAiBuilderObjects} from "./ai-builder.js?v=0.8.32.1-20260830-horizontal-axis-lock";
 
 let samples=[],sampleSource=null,camPos,camQuat,forward;
 const xrDiag={viewer:"pending",hitSource:"pending",hits:0,pose:false,target:false,error:""};

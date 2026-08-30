@@ -1,11 +1,11 @@
-import {S} from "./state.js?v=0.8.32-20260830-polyline-angles";
-import {snapshotProject,restoreProject,clearHistory} from "./history.js?v=0.8.32-20260830-polyline-angles";
-import {clearAllGeometry,validateGeometryState} from "./geometry.js?v=0.8.32-20260830-polyline-angles";
-import {clearWalls} from "./walls.js?v=0.8.32-20260830-polyline-angles";
-import {resetDrawingCore} from "./drawing-core.js?v=0.8.32-20260830-polyline-angles";
-import {detachAllPointAnchors} from "./world-lock.js?v=0.8.32-20260830-polyline-angles";
-import {clearCadRuntime,restoreCadRuntime} from "./cad.js?v=0.8.32-20260830-polyline-angles";
-import {clearAiBuilderObjects} from "./ai-builder.js?v=0.8.32-20260830-polyline-angles";
+import {S} from "./state.js?v=0.8.32.1-20260830-horizontal-axis-lock";
+import {snapshotProject,restoreProject,clearHistory} from "./history.js?v=0.8.32.1-20260830-horizontal-axis-lock";
+import {clearAllGeometry,validateGeometryState} from "./geometry.js?v=0.8.32.1-20260830-horizontal-axis-lock";
+import {clearWalls} from "./walls.js?v=0.8.32.1-20260830-horizontal-axis-lock";
+import {resetDrawingCore} from "./drawing-core.js?v=0.8.32.1-20260830-horizontal-axis-lock";
+import {detachAllPointAnchors} from "./world-lock.js?v=0.8.32.1-20260830-horizontal-axis-lock";
+import {clearCadRuntime,restoreCadRuntime} from "./cad.js?v=0.8.32.1-20260830-horizontal-axis-lock";
+import {clearAiBuilderObjects} from "./ai-builder.js?v=0.8.32.1-20260830-horizontal-axis-lock";
 
 export const PROJECT_SCHEMA_VERSION=1;
 const INDEX_KEY="measurear.projects.v1.index";

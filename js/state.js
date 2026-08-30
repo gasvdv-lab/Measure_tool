@@ -1,5 +1,5 @@
 export const S={
-  version:"0.8.32",build:"20260830-polyline-angles",
+  version:"0.8.32.1",build:"20260830-horizontal-axis-lock",
   THREE:null,renderer:null,scene:null,camera:null,reticle:null,xrSession:null,hitSource:null,hitRequested:false,
   currentTarget:null,currentRawTarget:null,currentHitResult:null,currentXRFrame:null,currentReferenceSpace:null,targetSource:"none",zoom:1,pointPlacementEpoch:0,referenceCaptureId:null,
   points:[],lines:[],contours:[],shapes:[],walls:[],openings:[],aiObjects:[],

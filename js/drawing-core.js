@@ -1,8 +1,8 @@
-import {S,$,fmt,getPoint,getLine,worldToProject} from "./state.js?v=0.8.32-20260830-polyline-angles";
-import {createPoint,createLine,ensureLineRendered,deleteLineRaw,deletePointRaw,createContour,dispose,analyzeShapePoints} from "./geometry.js?v=0.8.32-20260830-polyline-angles";
-import {snapshotProject,commitSnapshot,undoHistory} from "./history.js?v=0.8.32-20260830-polyline-angles";
-import {queuePointHitAnchor} from "./world-lock.js?v=0.8.32-20260830-polyline-angles";
-import {createWall,nextWallName} from "./walls.js?v=0.8.32-20260830-polyline-angles";
+import {S,$,fmt,getPoint,getLine,worldToProject} from "./state.js?v=0.8.32.1-20260830-horizontal-axis-lock";
+import {createPoint,createLine,ensureLineRendered,deleteLineRaw,deletePointRaw,createContour,dispose,analyzeShapePoints} from "./geometry.js?v=0.8.32.1-20260830-horizontal-axis-lock";
+import {snapshotProject,commitSnapshot,undoHistory} from "./history.js?v=0.8.32.1-20260830-horizontal-axis-lock";
+import {queuePointHitAnchor} from "./world-lock.js?v=0.8.32.1-20260830-horizontal-axis-lock";
+import {createWall,nextWallName} from "./walls.js?v=0.8.32.1-20260830-horizontal-axis-lock";
 
 const REF_MODES=new Set(["parallel","perpendicular","angle"]);
 const TOOL_NAMES={line:"LIJN",polyline:"POLYLIJN",shape:"VORM",stake:"UITZETTEN",wall:"MUUR"};
@@ -24,6 +24,16 @@ function makePlane(origin,normal,preferred=null){
 }
 function worldHorizontalPlane(origin){
   return makePlane(origin,new S.THREE.Vector3(0,1,0),new S.THREE.Vector3(1,0,0));
+}
+function horizontalAxisDirection(active,aim){
+  if(!active||!aim)return null;
+  const d=aim.clone().sub(active.position);
+  d.y=0;
+  if(d.lengthSq()<1e-10)return null;
+  // Orthogonal/"kaarsrecht" mode: snap to the nearest horizontal project axis.
+  // X and Z remain the deterministic geometric axes; only the sign follows the reticle.
+  if(Math.abs(d.x)>=Math.abs(d.z))return new S.THREE.Vector3(d.x>=0?1:-1,0,0);
+  return new S.THREE.Vector3(0,0,d.z>=0?1:-1);
 }
 function planeFromPoint(p,rayDir=null){
   const n=p.surfaceNormal?.clone?.()||new S.THREE.Vector3(0,1,0);
@@ -87,6 +97,10 @@ function directionForExact(ray,hit=null){
     if(!aim)throw new Error("Richt het vizier duidelijker naar het horizontale vlak vanaf het vertrekpunt.");
     dir=aim.sub(active.position);
     dir.y=0;
+  }else if(kind==="axis"){
+    const aim=intersectRayPlane(ray,worldHorizontalPlane(active.position));
+    if(!aim)throw new Error("Richt het vizier duidelijker naar het horizontale vlak vanaf het vertrekpunt.");
+    dir=horizontalAxisDirection(active,aim);
   }else if(kind==="vertical"){
     // Exact verticaal moet stabiel zijn: de camera bepaalt niet continu de
     // eindpositie. De gekozen richting (omhoog/omlaag) bepaalt uitsluitend
@@ -118,6 +132,15 @@ function manualCandidate(active,hit,ray){
   }
   if(kind==="horizontal"){
     return intersectRayPlane(ray,worldHorizontalPlane(active.position));
+  }
+  if(kind==="axis"){
+    const aim=intersectRayPlane(ray,worldHorizontalPlane(active.position));
+    if(!aim)return null;
+    const dir=horizontalAxisDirection(active,aim);
+    if(!dir)return null;
+    const delta=aim.clone().sub(active.position);
+    const scalar=Math.abs(delta.dot(dir));
+    return active.position.clone().add(dir.multiplyScalar(scalar));
   }
   if(kind==="vertical"){
     const q=closestPointVertical(ray,active.position);if(!q)return null;
@@ -152,6 +175,7 @@ function constraintExpectedDirection(active,rawPos){
     const d=rawPos.clone().sub(active.position);d.y=0;
     return d.lengthSq()>1e-10?d.normalize():null;
   }
+  if(kind==="axis")return horizontalAxisDirection(active,rawPos);
   if(kind==="vertical")return new S.THREE.Vector3(0,rawPos.y>=active.position.y?1:-1,0);
   if(kind==="surface"){
     const d=rawPos.clone().sub(active.position);
@@ -176,6 +200,10 @@ function positionSatisfiesConstraint(pos,active,tolerance=.025){
   const d=pos.clone().sub(active.position);
 
   if(kind==="horizontal")return Math.abs(d.y)<=tolerance;
+  if(kind==="axis"){
+    if(Math.abs(d.y)>tolerance)return false;
+    return Math.min(Math.abs(d.x),Math.abs(d.z))<=tolerance;
+  }
   if(kind==="vertical")return Math.hypot(d.x,d.z)<=tolerance;
   if(kind==="surface")return Math.abs(d.dot(plane.normal))<=tolerance;
 
@@ -335,7 +363,7 @@ function resetSession(keepSettings=true){
 }
 export function toolLabel(){return TOOL_NAMES[S.tool.kind]||"TEKENEN";}
 export function constraintLabel(){
-  return ({free:"Vrij",horizontal:"Horizontaal",vertical:"Verticaal",surface:"Op oppervlak",parallel:"Parallel",perpendicular:"Loodrecht",angle:"Eigen hoek"})[S.tool.constraint]||"Vrij";
+  return ({free:"Vrij",horizontal:"Horizontaal · vrij",axis:"Horizontaal · asvast",vertical:"Verticaal",surface:"Op oppervlak",parallel:"Parallel",perpendicular:"Loodrecht",angle:"Eigen hoek"})[S.tool.constraint]||"Vrij";
 }
 export function getActivePoint(){return getPoint(S.tool.activePointId);}
 export function startTool(kind,{startPointId=null}={}){
@@ -361,7 +389,7 @@ export function setDistance(value,unit="cm"){
   S.tool.distanceM=unit==="m"?n:unit==="mm"?n/1000:n/100;document.dispatchEvent(new CustomEvent("measurear:tool-settings"));
 }
 export function setConstraint(mode){
-  const valid=new Set(["free","horizontal","vertical","surface","parallel","perpendicular","angle"]);
+  const valid=new Set(["free","horizontal","axis","vertical","surface","parallel","perpendicular","angle"]);
   S.tool.constraint=valid.has(mode)?mode:"free";
   document.dispatchEvent(new CustomEvent("measurear:tool-settings"));
 }
