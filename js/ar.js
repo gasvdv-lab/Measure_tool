@@ -1,12 +1,13 @@
-import {S,$} from "./state.js?v=0.8.29.1-20260830-cad-preview";
-import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.29.1-20260830-cad-preview";
-import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.29.1-20260830-cad-preview";
-import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.29.1-20260830-cad-preview";
-import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.29.1-20260830-cad-preview";
-import {updateCadFrame,clearCadRuntime} from "./cad.js?v=0.8.29.1-20260830-cad-preview";
-import {clearAiBuilderObjects} from "./ai-builder.js?v=0.8.29.1-20260830-cad-preview";
+import {S,$} from "./state.js?v=0.8.29.1.1-20260830-hit-source-repair";
+import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.29.1.1-20260830-hit-source-repair";
+import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.29.1.1-20260830-hit-source-repair";
+import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.29.1.1-20260830-hit-source-repair";
+import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.29.1.1-20260830-hit-source-repair";
+import {updateCadFrame,clearCadRuntime} from "./cad.js?v=0.8.29.1.1-20260830-hit-source-repair";
+import {clearAiBuilderObjects} from "./ai-builder.js?v=0.8.29.1.1-20260830-hit-source-repair";
 
 let samples=[],sampleSource=null,camPos,camQuat,forward;
+let hitSourceRequestPending=false,lastHitSourceRequestAt=0;
 
 function withTimeout(promise,ms,label){
   return Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(new Error(`${label} duurde langer dan ${Math.round(ms/1000)} s.`)),ms))]);
@@ -79,7 +80,7 @@ function cleanup(){
   const cadPickerProtected=externalPicker?.kind==="cad"||S.cadPickerLifecycle?.active||sessionStorage.getItem("measurear.cadPickerActive")==="1";
   resetWorldLock();resetTrackingSamples();S.renderer?.setAnimationLoop(null);
   if(S.renderer?.domElement)S.renderer.domElement.style.display="none";
-  S.xrSession=null;S.hitSource=null;S.hitRequested=false;S.currentTarget=null;S.currentRawTarget=null;S.currentHitResult=null;S.currentXRFrame=null;S.currentReferenceSpace=null;S.targetSource="none";S.referenceCaptureId=null;
+  S.xrSession=null;S.hitSource=null;S.hitRequested=false;hitSourceRequestPending=false;lastHitSourceRequestAt=0;S.currentTarget=null;S.currentRawTarget=null;S.currentHitResult=null;S.currentXRFrame=null;S.currentReferenceSpace=null;S.targetSource="none";S.referenceCaptureId=null;
 
   // Veilige CAD-import: AR is bewust gestopt VOORDAT de native file picker opent.
   // Geen project/runtime wissen en niet naar Home: toon de gewone DOM-importworkspace.
@@ -122,9 +123,20 @@ function render(_,frame){
   if(!frame)return;
   const ref=S.renderer.xr.getReferenceSpace(),session=S.renderer.xr.getSession();
   S.currentXRFrame=frame;S.currentReferenceSpace=ref;
-  if(!S.hitRequested){
-    session.requestReferenceSpace("viewer").then(v=>session.requestHitTestSource({space:v}).then(s=>S.hitSource=s)).catch(()=>{});
-    S.hitRequested=true;
+  // Request the viewer hit-test source robustly. Previously hitRequested was set
+  // before the async request had succeeded. A transient ARCore/WebXR failure then
+  // left the whole session without a hit source and therefore without drawable surfaces.
+  const now=performance.now();
+  if(!S.hitSource&&!hitSourceRequestPending&&(!lastHitSourceRequestAt||now-lastHitSourceRequestAt>=1000)){
+    hitSourceRequestPending=true;lastHitSourceRequestAt=now;
+    session.requestReferenceSpace("viewer")
+      .then(v=>session.requestHitTestSource({space:v}))
+      .then(source=>{
+        if(S.xrSession===session){S.hitSource=source;S.hitRequested=true;}
+        else{try{source.cancel?.();}catch{}}
+      })
+      .catch(()=>{S.hitRequested=false;})
+      .finally(()=>{hitSourceRequestPending=false;});
   }
   let hit=null,pose=null,normal=null;
   if(S.hitSource){

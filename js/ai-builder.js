@@ -1,5 +1,5 @@
-import {S,getShape,getPoint} from "./state.js?v=0.8.29.1-20260830-cad-preview";
-import {analyzeShapePoints,dispose} from "./geometry.js?v=0.8.29.1-20260830-cad-preview";
+import {S,getShape,getPoint} from "./state.js?v=0.8.29.1.1-20260830-hit-source-repair";
+import {analyzeShapePoints,dispose} from "./geometry.js?v=0.8.29.1.1-20260830-hit-source-repair";
 
 const DEFAULT_COLOR="#b98b5f";
 const MIN_HEIGHT=.01,MAX_HEIGHT=10;
