@@ -1,3 +1,7 @@
+# v0.8.36.1 — World Lock Position Repair
+
+Onderhoudsrelease op v0.8.36. Herstelt de WebXR-anchorroute zodat één mislukte anchor niet de volledige sessie naar lokale tracking terugzet en surface hit-anchors niet onterecht afhankelijk zijn van `XRFrame.createAnchor()`. Geen nieuwe meetfunctionaliteit.
+
 # Measure AR v0.8.36 — Clearance & Collision 2.0
 
 GitHub Pages: https://gasvdv-lab.github.io/Measure_tool/
@@ -324,3 +328,9 @@ GitHub Pages: https://gasvdv-lab.github.io/Measure_tool/
 - AR-weergave gebruikt Project Transform zonder bronafmetingen te wijzigen.
 - CAD-schaal blijft 1.0.
 - Geen losse TEST_RESULTS-bestanden in release-ZIPs.
+## v0.8.36.2 — Direction & Angle Constraint Repair
+- Horizontaal · asvast heeft nu een expliciete X+/X−/Z+/Z− richtingkeuze die na selectie vergrendeld blijft.
+- Loodrecht 90° gebruikt een bestaande referentielijn en laat links/rechts kiezen.
+- Eigen hoek gebruikt dezelfde referentie-engine: opgegeven hoek + gekozen zijde bepalen de exacte richting.
+- Exacte afstand blijft combineerbaar met asvast, 90° en eigen hoek.
+- World Lock-reparatie uit v0.8.36.1 blijft behouden.

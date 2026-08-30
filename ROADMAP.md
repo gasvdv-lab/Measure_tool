@@ -1,3 +1,8 @@
+# Update v0.8.36.1
+
+- [x] World Lock position repair: robuustere per-point anchorafhandeling.
+- [ ] Fysieke AR-gate: punten, lijnen en vormen moeten na plaatsing op hun fysieke positie blijven.
+
 # Measure AR roadmap — bijgewerkt v0.8.36
 
 ## Huidige Measure Engine-fase
@@ -397,3 +402,4 @@ Project Space blijft de geometrische waarheid. Bij het openen van een opgeslagen
 - [ ] AR-ANDROID: bestaand project met geometrie → CAD importeren → geometrie/project blijven behouden.
 
 Openstaand blijft: `Project op locatie plaatsen` / witte referentie-captureknop.
+- [x] v0.8.36.2 — Direction & Angle Constraint Repair: expliciete asrichting, betrouwbare 90° op referentielijn en eigen hoek op referentielijn.

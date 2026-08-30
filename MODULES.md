@@ -1,3 +1,7 @@
+# v0.8.36.1 modulewijziging
+
+**World Lock** — per-point WebXR anchor repair. Surface-confirmed points prefer `XRHitTestResult.createAnchor()` independently of `XRFrame.createAnchor()`. Een individuele anchorfout schakelt World Lock niet langer globaal uit. Project Space blijft geometrische waarheid.
+
 # Module-update v0.8.36 — Clearance & Collision 2.0
 
 ## Clearance Engine
@@ -175,3 +179,6 @@ De foundation voor persistente afstandsmeetobjecten is actief. Volgende lagen zi
 **Status:** actief vanaf v0.8.29.1.
 
 Losse niet-AR 3D-preview tussen bestandskeuze en CAD-placement. Toont het model 1:1, vaste aanzichten, afmetingen en modelcomplexiteit. De preview verandert de geometrie of schaal niet. Pas na expliciete acceptatie wordt het model aan het project toegevoegd.
+
+### Direction & Angle Constraint Engine — v0.8.36.2
+De tekenkern behandelt asvast, parallel, loodrecht en eigen hoek als deterministische richtingsconstraints. Asvast ondersteunt expliciete X+/X−/Z+/Z− keuze; referentieconstraints gebruiken een gekozen bestaande lijn en een expliciete zijde.

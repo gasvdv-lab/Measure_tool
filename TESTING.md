@@ -1,3 +1,10 @@
+# v0.8.36.1 fysieke AR-gate
+
+1. AR-IN/ROOM: teken een vrije lijn op een duidelijk oppervlak. Loop zijwaarts en rond de lijn; ze moet op dezelfde fysieke plek blijven.
+2. AR-IN/ROOM: teken een gesloten vorm en loop eromheen; contour en vulling moeten vast blijven.
+3. AR-IN/ROOM: test Horizontaal · asvast; ook berekende eindpunten moeten stabiel blijven.
+4. Controleer World Lock-status: anchorfout van één punt mag volgende punten niet uitschakelen.
+
 # v0.8.36 — Clearance & Collision 2.0 — gerichte tests
 
 ## AUTO
@@ -470,3 +477,10 @@ AR-IN/ROOM: place A→B on a stable surface, confirm both endpoints, then move t
 2. Open project B nadat project A uitgelijnd is: B mag geen transform/positie van A erven.
 3. Wissel meerdere keren van project: geen oude anchors of plotselinge terug-sprongen.
 4. Wijzig lijnkleur/dikte na relocalisatie: lijn blijft op dezelfde zichtbare positie.
+## v0.8.36.2
+- [AUTO] JS syntax/imports/ZIP-integriteit.
+- [AR-IN/A4] Asvast: kies elk van X+/X−/Z+/Z− en controleer dat richting niet omspringt tijdens richten.
+- [AR-IN/A4] Teken lijn A-B, gebruik die als referentie, teken een tweede lijn met Loodrecht 90° links en rechts.
+- [AR-IN/A4] Eigen hoek: referentielijn + 30°; test beide zijden.
+- [AR-IN/A4] Combineer 90° en Eigen hoek met exacte afstand.
+- [AR-IN/ROOM] Controleer dat lijnen/vormen na tekenen fysiek op hun positie blijven (World Lock regressie).
