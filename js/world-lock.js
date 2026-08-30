@@ -1,4 +1,4 @@
-import {S,getPoint} from "./state.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
+import {S,getPoint} from "./state.js?v=0.8.36.2.2-20260830-capture-rearm-fix";
 
 // Session-local WebXR anchor manager.
 // Project coordinates remain immutable in point.position/point.locked.

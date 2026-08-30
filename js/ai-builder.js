@@ -1,5 +1,5 @@
-import {S,getShape,getPoint} from "./state.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
-import {analyzeShapePoints,dispose} from "./geometry.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
+import {S,getShape,getPoint} from "./state.js?v=0.8.36.2.2-20260830-capture-rearm-fix";
+import {analyzeShapePoints,dispose} from "./geometry.js?v=0.8.36.2.2-20260830-capture-rearm-fix";
 
 const DEFAULT_COLOR="#b98b5f";
 const MIN_HEIGHT=.01,MAX_HEIGHT=10;

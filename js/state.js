@@ -1,5 +1,5 @@
 export const S={
-  version:"0.8.36.2.1",build:"20260830-angle-ux-3d-perpendicular",
+  version:"0.8.36.2.2",build:"20260830-capture-rearm-fix",
   THREE:null,renderer:null,scene:null,camera:null,reticle:null,xrSession:null,hitSource:null,hitRequested:false,
   currentTarget:null,currentRawTarget:null,currentHitResult:null,currentXRFrame:null,currentReferenceSpace:null,targetSource:"none",zoom:1,pointPlacementEpoch:0,referenceCaptureId:null,
   points:[],lines:[],contours:[],shapes:[],walls:[],openings:[],aiObjects:[],clearances:[],

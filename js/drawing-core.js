@@ -1,8 +1,8 @@
-import {S,$,fmt,getPoint,getLine,worldToProject} from "./state.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
-import {createPoint,createLine,ensureLineRendered,deleteLineRaw,deletePointRaw,createContour,dispose,analyzeShapePoints} from "./geometry.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
-import {snapshotProject,commitSnapshot,undoHistory} from "./history.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
-import {queuePointHitAnchor} from "./world-lock.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
-import {createWall,nextWallName} from "./walls.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
+import {S,$,fmt,getPoint,getLine,worldToProject} from "./state.js?v=0.8.36.2.2-20260830-capture-rearm-fix";
+import {createPoint,createLine,ensureLineRendered,deleteLineRaw,deletePointRaw,createContour,dispose,analyzeShapePoints} from "./geometry.js?v=0.8.36.2.2-20260830-capture-rearm-fix";
+import {snapshotProject,commitSnapshot,undoHistory} from "./history.js?v=0.8.36.2.2-20260830-capture-rearm-fix";
+import {queuePointHitAnchor} from "./world-lock.js?v=0.8.36.2.2-20260830-capture-rearm-fix";
+import {createWall,nextWallName} from "./walls.js?v=0.8.36.2.2-20260830-capture-rearm-fix";
 
 const REF_MODES=new Set(["parallel","perpendicular","angle"]);
 const TOOL_NAMES={line:"LIJN",polyline:"POLYLIJN",shape:"VORM",stake:"UITZETTEN",wall:"MUUR"};
@@ -447,6 +447,32 @@ export function setConstraint(mode){
   const valid=new Set(["free","horizontal","axis","vertical","surface","parallel","perpendicular","angle"]);
   S.tool.constraint=valid.has(mode)?mode:"free";
   if(S.tool.constraint!=="axis")S.tool.axisDirection=null;
+
+  // Een gewone LIJN wordt na het plaatsen van AB op `complete` gezet. De HUD blijft
+  // daarna zichtbaar, zodat de gebruiker AB meteen als referentie kan gebruiken.
+  // Voorheen bleef `status === complete`; updateCandidate() stopte dan volledig en
+  // de witte bevestigingsknop kon nooit opnieuw actief worden.
+  // Herbewapen daarom de lijntool zodra vanuit een voltooide lijn een richting wordt
+  // gekozen. Loodrecht kiest eerst een nieuw vertrekpunt op de referentielijn; de
+  // overige richtingen vertrekken logisch vanaf het laatst geplaatste punt.
+  if(S.tool.kind==="line"&&S.tool.status==="complete"){
+    const last=getActivePoint();
+    S.tool.status="drawing";
+    S.tool.transactions=[];
+    S.tool.lineIds=[];
+    S.tool.candidate=null;
+    if(S.tool.constraint==="perpendicular"){
+      S.tool.activePointId=null;
+      S.tool.firstPointId=null;
+      S.tool.pointIds=[];
+      S.tool.activePlane=null;
+    }else if(last){
+      S.tool.activePointId=last.id;
+      S.tool.firstPointId=last.id;
+      S.tool.pointIds=[last.id];
+      S.tool.activePlane=planeFromPoint(last);
+    }
+  }
   document.dispatchEvent(new CustomEvent("measurear:tool-settings"));
 }
 export function setAxisDirection(direction){

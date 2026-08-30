@@ -1,6 +1,6 @@
 
-import {S,getPoint,getLine} from "./state.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
-import {dispose,renderPosition} from "./geometry.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
+import {S,getPoint,getLine} from "./state.js?v=0.8.36.2.2-20260830-capture-rearm-fix";
+import {dispose,renderPosition} from "./geometry.js?v=0.8.36.2.2-20260830-capture-rearm-fix";
 
 function cleanName(name){return String(name||"").trim().replace(/\s+/g," ");}
 export function wallNameExists(name,excludeId=null){

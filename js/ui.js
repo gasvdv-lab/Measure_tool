@@ -1,33 +1,33 @@
-import {S,$,fmt,fmtLine,fmtAreaUnit,fmtVolumeUnit,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
+import {S,$,fmt,fmtLine,fmtAreaUnit,fmtVolumeUnit,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.36.2.2-20260830-capture-rearm-fix";
 import {
   startTool,cancelTool,setPlacement,setDistance,setConstraint,setAxisDirection,setPerpendicularMode,setAngle,flipSide,setReferenceLine,setSnapMode,
   confirmCandidate,undoToolStep,finishTool,toolLabel,constraintLabel,getActivePoint,referenceRequired,resetDrawingCore
-} from "./drawing-core.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
+} from "./drawing-core.js?v=0.8.36.2.2-20260830-capture-rearm-fix";
 import {
   createShape,updateShape,deleteShapeOnly,deleteShapeWithContour,deleteLineRaw,deletePointRaw,renamePoint,updateLine,analyzeContour,analyzePolyline,updatePolyline,
   lineDependencies,pointDependencies,canDeleteLine,canDeletePoint,clearAllGeometry,validateGeometryState,dispose
-} from "./geometry.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
-import {startAR,resumeARFromGesture,suspendARForCadImport,applyZoom,resetTrackingSamples} from "./ar.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
-import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
-import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
+} from "./geometry.js?v=0.8.36.2.2-20260830-capture-rearm-fix";
+import {startAR,resumeARFromGesture,suspendARForCadImport,applyZoom,resetTrackingSamples} from "./ar.js?v=0.8.36.2.2-20260830-capture-rearm-fix";
+import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.36.2.2-20260830-capture-rearm-fix";
+import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.36.2.2-20260830-capture-rearm-fix";
 import {
   initProjectStorage,saveCurrentProject,listProjects,loadStoredProject,newProject,duplicateStoredProject,
   deleteStoredProject,renameStoredProject,projectStats,formatStats,getStoredProjectInfo,hasRecovery,recoveryInfo,restoreRecovery,clearRecovery,
   exportCurrentProject,importProjectFile,markDirtyAndRecover
-} from "./project-storage.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
+} from "./project-storage.js?v=0.8.36.2.2-20260830-capture-rearm-fix";
 import {
   captureCurrentGeo,addProjectReference,removeProjectReference,clearProjectReferences,beginRelocalization,cancelRelocalization,
   captureRelocalizationPoint,solveRelocalization,applyRelocalization,relocalizationSummary,beginSpatialRestore
-} from "./relocalization.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
+} from "./relocalization.js?v=0.8.36.2.2-20260830-capture-rearm-fix";
 
-import {captureHybridBaseline,assessHybridLocation,enableHeading} from "./hybrid-localization.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
+import {captureHybridBaseline,assessHybridLocation,enableHeading} from "./hybrid-localization.js?v=0.8.36.2.2-20260830-capture-rearm-fix";
 
-import {detachAllPointAnchors} from "./world-lock.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
-import {importCadFile,listCadModels,cadStatus,selectCad,beginCadPlacement,rotateCad,moveCadHeight,confirmCadPlacement,cancelCadPlacement,deleteCadModel,clearCadRuntime,restoreCadRuntime} from "./cad.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
-import {initProfessionalColorPickers,refreshProfessionalColorPickers} from "./color-picker.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
-import {initThemeSelector} from "./theme-selector.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
-import {executeAiPrototype,getAiObject,getAiObjectForShape,toggleAiObjectLock,deleteAiObject,clearAiBuilderObjects,aiObjectSummary} from "./ai-builder.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
-import {listClearanceTargets,analyzeClearance,clearanceStatus,getClearance,createClearance,updateClearance,deleteClearance,clearClearances} from "./clearance.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
+import {detachAllPointAnchors} from "./world-lock.js?v=0.8.36.2.2-20260830-capture-rearm-fix";
+import {importCadFile,listCadModels,cadStatus,selectCad,beginCadPlacement,rotateCad,moveCadHeight,confirmCadPlacement,cancelCadPlacement,deleteCadModel,clearCadRuntime,restoreCadRuntime} from "./cad.js?v=0.8.36.2.2-20260830-capture-rearm-fix";
+import {initProfessionalColorPickers,refreshProfessionalColorPickers} from "./color-picker.js?v=0.8.36.2.2-20260830-capture-rearm-fix";
+import {initThemeSelector} from "./theme-selector.js?v=0.8.36.2.2-20260830-capture-rearm-fix";
+import {executeAiPrototype,getAiObject,getAiObjectForShape,toggleAiObjectLock,deleteAiObject,clearAiBuilderObjects,aiObjectSummary} from "./ai-builder.js?v=0.8.36.2.2-20260830-capture-rearm-fix";
+import {listClearanceTargets,analyzeClearance,clearanceStatus,getClearance,createClearance,updateClearance,deleteClearance,clearClearances} from "./clearance.js?v=0.8.36.2.2-20260830-capture-rearm-fix";
 
 
 const pages=["home","project","references","relocalize","projects","cad","objects","measurements","clearance","polyline","line","point","walltool","wallcreate","wall","openingcreate","opening","shapecreate","shape","aibuilder","settings","clear"];

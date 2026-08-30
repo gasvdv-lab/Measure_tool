@@ -1,10 +1,10 @@
-import {S,$} from "./state.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
-import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
-import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
-import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
-import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
-import {updateCadFrame,clearCadRuntime} from "./cad.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
-import {clearAiBuilderObjects} from "./ai-builder.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
+import {S,$} from "./state.js?v=0.8.36.2.2-20260830-capture-rearm-fix";
+import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.36.2.2-20260830-capture-rearm-fix";
+import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.36.2.2-20260830-capture-rearm-fix";
+import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.36.2.2-20260830-capture-rearm-fix";
+import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.36.2.2-20260830-capture-rearm-fix";
+import {updateCadFrame,clearCadRuntime} from "./cad.js?v=0.8.36.2.2-20260830-capture-rearm-fix";
+import {clearAiBuilderObjects} from "./ai-builder.js?v=0.8.36.2.2-20260830-capture-rearm-fix";
 
 let samples=[],sampleSource=null,camPos,camQuat,forward;
 const xrDiag={viewer:"pending",hitSource:"pending",hits:0,pose:false,target:false,error:""};

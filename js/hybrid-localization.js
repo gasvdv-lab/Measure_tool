@@ -1,4 +1,4 @@
-import {S} from "./state.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
+import {S} from "./state.js?v=0.8.36.2.2-20260830-capture-rearm-fix";
 
 function nowIso(){return new Date().toISOString();}
 function normDeg(v){return ((v%360)+360)%360;}
