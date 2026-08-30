@@ -1,5 +1,5 @@
-import {S,getShape,getPoint} from "./state.js?v=0.8.36.2.2-20260830-capture-rearm-fix";
-import {analyzeShapePoints,dispose} from "./geometry.js?v=0.8.36.2.2-20260830-capture-rearm-fix";
+import {S,getShape,getPoint} from "./state.js?v=0.8.36.3-20260830-pwa-install";
+import {analyzeShapePoints,dispose} from "./geometry.js?v=0.8.36.3-20260830-pwa-install";
 
 const DEFAULT_COLOR="#b98b5f";
 const MIN_HEIGHT=.01,MAX_HEIGHT=10;

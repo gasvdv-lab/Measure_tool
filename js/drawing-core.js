@@ -1,8 +1,8 @@
-import {S,$,fmt,getPoint,getLine,worldToProject} from "./state.js?v=0.8.36.2.2-20260830-capture-rearm-fix";
-import {createPoint,createLine,ensureLineRendered,deleteLineRaw,deletePointRaw,createContour,dispose,analyzeShapePoints} from "./geometry.js?v=0.8.36.2.2-20260830-capture-rearm-fix";
-import {snapshotProject,commitSnapshot,undoHistory} from "./history.js?v=0.8.36.2.2-20260830-capture-rearm-fix";
-import {queuePointHitAnchor} from "./world-lock.js?v=0.8.36.2.2-20260830-capture-rearm-fix";
-import {createWall,nextWallName} from "./walls.js?v=0.8.36.2.2-20260830-capture-rearm-fix";
+import {S,$,fmt,getPoint,getLine,worldToProject} from "./state.js?v=0.8.36.3-20260830-pwa-install";
+import {createPoint,createLine,ensureLineRendered,deleteLineRaw,deletePointRaw,createContour,dispose,analyzeShapePoints} from "./geometry.js?v=0.8.36.3-20260830-pwa-install";
+import {snapshotProject,commitSnapshot,undoHistory} from "./history.js?v=0.8.36.3-20260830-pwa-install";
+import {queuePointHitAnchor} from "./world-lock.js?v=0.8.36.3-20260830-pwa-install";
+import {createWall,nextWallName} from "./walls.js?v=0.8.36.3-20260830-pwa-install";
 
 const REF_MODES=new Set(["parallel","perpendicular","angle"]);
 const TOOL_NAMES={line:"LIJN",polyline:"POLYLIJN",shape:"VORM",stake:"UITZETTEN",wall:"MUUR"};

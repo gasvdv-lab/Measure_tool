@@ -1,4 +1,4 @@
-import {S,getPoint} from "./state.js?v=0.8.36.2.2-20260830-capture-rearm-fix";
+import {S,getPoint} from "./state.js?v=0.8.36.3-20260830-pwa-install";
 
 // Session-local WebXR anchor manager.
 // Project coordinates remain immutable in point.position/point.locked.

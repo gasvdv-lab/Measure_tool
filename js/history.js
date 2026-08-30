@@ -1,10 +1,10 @@
-import {S,getPoint,getLine,getContour} from "./state.js?v=0.8.36.2.2-20260830-capture-rearm-fix";
+import {S,getPoint,getLine,getContour} from "./state.js?v=0.8.36.3-20260830-pwa-install";
 import {
   createPoint,createLine,createShape,clearAllGeometry,validateGeometryState
-} from "./geometry.js?v=0.8.36.2.2-20260830-capture-rearm-fix";
-import {createWall,createOpening,clearWalls} from "./walls.js?v=0.8.36.2.2-20260830-capture-rearm-fix";
-import {snapshotAiObjects,restoreAiBuilderObjects,clearAiBuilderObjects} from "./ai-builder.js?v=0.8.36.2.2-20260830-capture-rearm-fix";
-import {snapshotClearances,restoreClearances,clearClearances} from "./clearance.js?v=0.8.36.2.2-20260830-capture-rearm-fix";
+} from "./geometry.js?v=0.8.36.3-20260830-pwa-install";
+import {createWall,createOpening,clearWalls} from "./walls.js?v=0.8.36.3-20260830-pwa-install";
+import {snapshotAiObjects,restoreAiBuilderObjects,clearAiBuilderObjects} from "./ai-builder.js?v=0.8.36.3-20260830-pwa-install";
+import {snapshotClearances,restoreClearances,clearClearances} from "./clearance.js?v=0.8.36.3-20260830-pwa-install";
 
 function vec(v){return v?{x:v.x,y:v.y,z:v.z}:null;}
 function vec3(v){return v?new S.THREE.Vector3(v.x,v.y,v.z):null;}

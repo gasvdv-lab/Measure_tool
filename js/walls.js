@@ -1,6 +1,6 @@
 
-import {S,getPoint,getLine} from "./state.js?v=0.8.36.2.2-20260830-capture-rearm-fix";
-import {dispose,renderPosition} from "./geometry.js?v=0.8.36.2.2-20260830-capture-rearm-fix";
+import {S,getPoint,getLine} from "./state.js?v=0.8.36.3-20260830-pwa-install";
+import {dispose,renderPosition} from "./geometry.js?v=0.8.36.3-20260830-pwa-install";
 
 function cleanName(name){return String(name||"").trim().replace(/\s+/g," ");}
 export function wallNameExists(name,excludeId=null){
