@@ -1,4 +1,4 @@
-import {S,projectToWorld,worldToProject} from "./state.js?v=0.8.33-20260830-area-measurement";
+import {S,projectToWorld,worldToProject} from "./state.js?v=0.8.34-20260830-height-vertical-measurement";
 
 const DB_NAME="measurear.cad.v1",STORE="files";
 let loaderPromise=null;

@@ -1,5 +1,5 @@
-import {S,getShape,getPoint} from "./state.js?v=0.8.33-20260830-area-measurement";
-import {analyzeShapePoints,dispose} from "./geometry.js?v=0.8.33-20260830-area-measurement";
+import {S,getShape,getPoint} from "./state.js?v=0.8.34-20260830-height-vertical-measurement";
+import {analyzeShapePoints,dispose} from "./geometry.js?v=0.8.34-20260830-height-vertical-measurement";
 
 const DEFAULT_COLOR="#b98b5f";
 const MIN_HEIGHT=.01,MAX_HEIGHT=10;

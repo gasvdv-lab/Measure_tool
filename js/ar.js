@@ -1,10 +1,10 @@
-import {S,$} from "./state.js?v=0.8.33-20260830-area-measurement";
-import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.33-20260830-area-measurement";
-import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.33-20260830-area-measurement";
-import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.33-20260830-area-measurement";
-import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.33-20260830-area-measurement";
-import {updateCadFrame,clearCadRuntime} from "./cad.js?v=0.8.33-20260830-area-measurement";
-import {clearAiBuilderObjects} from "./ai-builder.js?v=0.8.33-20260830-area-measurement";
+import {S,$} from "./state.js?v=0.8.34-20260830-height-vertical-measurement";
+import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.34-20260830-height-vertical-measurement";
+import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.34-20260830-height-vertical-measurement";
+import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.34-20260830-height-vertical-measurement";
+import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.34-20260830-height-vertical-measurement";
+import {updateCadFrame,clearCadRuntime} from "./cad.js?v=0.8.34-20260830-height-vertical-measurement";
+import {clearAiBuilderObjects} from "./ai-builder.js?v=0.8.34-20260830-height-vertical-measurement";
 
 let samples=[],sampleSource=null,camPos,camQuat,forward;
 const xrDiag={viewer:"pending",hitSource:"pending",hits:0,pose:false,target:false,error:""};

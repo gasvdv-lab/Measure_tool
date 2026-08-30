@@ -1,32 +1,32 @@
-import {S,$,fmt,fmtLine,fmtAreaUnit,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.33-20260830-area-measurement";
+import {S,$,fmt,fmtLine,fmtAreaUnit,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.34-20260830-height-vertical-measurement";
 import {
   startTool,cancelTool,setPlacement,setDistance,setConstraint,setAngle,flipSide,setReferenceLine,setSnapMode,
   confirmCandidate,undoToolStep,finishTool,toolLabel,constraintLabel,getActivePoint,referenceRequired,resetDrawingCore
-} from "./drawing-core.js?v=0.8.33-20260830-area-measurement";
+} from "./drawing-core.js?v=0.8.34-20260830-height-vertical-measurement";
 import {
   createShape,updateShape,deleteShapeOnly,deleteShapeWithContour,deleteLineRaw,deletePointRaw,renamePoint,updateLine,analyzeContour,analyzePolyline,updatePolyline,
   lineDependencies,pointDependencies,canDeleteLine,canDeletePoint,clearAllGeometry,validateGeometryState,dispose
-} from "./geometry.js?v=0.8.33-20260830-area-measurement";
-import {startAR,resumeARFromGesture,suspendARForCadImport,applyZoom,resetTrackingSamples} from "./ar.js?v=0.8.33-20260830-area-measurement";
-import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.33-20260830-area-measurement";
-import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.33-20260830-area-measurement";
+} from "./geometry.js?v=0.8.34-20260830-height-vertical-measurement";
+import {startAR,resumeARFromGesture,suspendARForCadImport,applyZoom,resetTrackingSamples} from "./ar.js?v=0.8.34-20260830-height-vertical-measurement";
+import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.34-20260830-height-vertical-measurement";
+import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.34-20260830-height-vertical-measurement";
 import {
   initProjectStorage,saveCurrentProject,listProjects,loadStoredProject,newProject,duplicateStoredProject,
   deleteStoredProject,renameStoredProject,projectStats,formatStats,getStoredProjectInfo,hasRecovery,recoveryInfo,restoreRecovery,clearRecovery,
   exportCurrentProject,importProjectFile,markDirtyAndRecover
-} from "./project-storage.js?v=0.8.33-20260830-area-measurement";
+} from "./project-storage.js?v=0.8.34-20260830-height-vertical-measurement";
 import {
   captureCurrentGeo,addProjectReference,removeProjectReference,clearProjectReferences,beginRelocalization,cancelRelocalization,
   captureRelocalizationPoint,solveRelocalization,applyRelocalization,relocalizationSummary,beginSpatialRestore
-} from "./relocalization.js?v=0.8.33-20260830-area-measurement";
+} from "./relocalization.js?v=0.8.34-20260830-height-vertical-measurement";
 
-import {captureHybridBaseline,assessHybridLocation,enableHeading} from "./hybrid-localization.js?v=0.8.33-20260830-area-measurement";
+import {captureHybridBaseline,assessHybridLocation,enableHeading} from "./hybrid-localization.js?v=0.8.34-20260830-height-vertical-measurement";
 
-import {detachAllPointAnchors} from "./world-lock.js?v=0.8.33-20260830-area-measurement";
-import {importCadFile,listCadModels,cadStatus,selectCad,beginCadPlacement,rotateCad,moveCadHeight,confirmCadPlacement,cancelCadPlacement,deleteCadModel,clearCadRuntime,restoreCadRuntime} from "./cad.js?v=0.8.33-20260830-area-measurement";
-import {initProfessionalColorPickers,refreshProfessionalColorPickers} from "./color-picker.js?v=0.8.33-20260830-area-measurement";
-import {initThemeSelector} from "./theme-selector.js?v=0.8.33-20260830-area-measurement";
-import {executeAiPrototype,getAiObject,getAiObjectForShape,toggleAiObjectLock,deleteAiObject,clearAiBuilderObjects,aiObjectSummary} from "./ai-builder.js?v=0.8.33-20260830-area-measurement";
+import {detachAllPointAnchors} from "./world-lock.js?v=0.8.34-20260830-height-vertical-measurement";
+import {importCadFile,listCadModels,cadStatus,selectCad,beginCadPlacement,rotateCad,moveCadHeight,confirmCadPlacement,cancelCadPlacement,deleteCadModel,clearCadRuntime,restoreCadRuntime} from "./cad.js?v=0.8.34-20260830-height-vertical-measurement";
+import {initProfessionalColorPickers,refreshProfessionalColorPickers} from "./color-picker.js?v=0.8.34-20260830-height-vertical-measurement";
+import {initThemeSelector} from "./theme-selector.js?v=0.8.34-20260830-height-vertical-measurement";
+import {executeAiPrototype,getAiObject,getAiObjectForShape,toggleAiObjectLock,deleteAiObject,clearAiBuilderObjects,aiObjectSummary} from "./ai-builder.js?v=0.8.34-20260830-height-vertical-measurement";
 
 
 const pages=["home","project","references","relocalize","projects","cad","objects","measurements","polyline","line","point","walltool","wallcreate","wall","openingcreate","opening","shapecreate","shape","aibuilder","settings","clear"];
@@ -325,10 +325,19 @@ function renderCadPage(){
   }
   const active=st.active;el("cadPlacementControls").style.display=S.xrSession&&active?"block":"none";
 }
+function analyzeLineMeasurement(l){
+  const a=getPoint(l?.startId),b=getPoint(l?.endId);
+  if(!a||!b)return {height:NaN,horizontal:NaN,vertical:false,signedHeight:NaN};
+  const dx=b.position.x-a.position.x,dy=b.position.y-a.position.y,dz=b.position.z-a.position.z;
+  const horizontal=Math.hypot(dx,dz),height=Math.abs(dy);
+  return {height,horizontal,vertical:horizontal<=.025&&height>.001,signedHeight:dy};
+}
 function openLineEditor(l){
   if(!l)return;
   S.selectedLineId=l.id;
-  el("lineInfo").textContent=`${l.name} · ${fmtLine(l)} · ${getPoint(l.startId)?.name||"?"} → ${getPoint(l.endId)?.name||"?"}`;
+  const m=analyzeLineMeasurement(l),unit=l.unit||S.defaults.unit||"cm";
+  const detail=m.vertical?` · hoogte ${fmtMeasureUnit(m.height,unit)}`:` · Δhoogte ${fmtMeasureUnit(m.height,unit)} · horizontaal ${fmtMeasureUnit(m.horizontal,unit)}`;
+  el("lineInfo").textContent=`${l.name} · ${fmtLine(l)}${detail} · ${getPoint(l.startId)?.name||"?"} → ${getPoint(l.endId)?.name||"?"}`;
   el("editLineName").value=l.name;el("editLineColor").value=l.color||"#ffffff";
   el("editLineThickness").value=String(l.thickness||2);el("editLineLabels").checked=l.labelsVisible!==false;
   if(el("editLineVisible"))el("editLineVisible").checked=l.visible!==false;
@@ -354,10 +363,16 @@ function renderMeasurements(){
   const lines=S.lines.filter(l=>l.ownerType!=="wallbase"&&l.ownerType!=="polyline");
   const polylines=S.contours.filter(c=>c.kind==="polyline"&&!c.closed);
   const polyAnalyses=polylines.map(c=>({c,a:analyzePolyline(c)}));
+  const areas=S.shapes.filter(s=>Number.isFinite(s.area));
   const total=lines.reduce((n,l)=>n+(Number.isFinite(l.distance)?l.distance:0),0)+polyAnalyses.reduce((n,x)=>n+x.a.totalLength,0);
-  const count=lines.length+polylines.length;
-  if(summary)summary.textContent=count?`${count} meetobject(en) · gecombineerde lengte ${fmt(total)}`:"Nog geen afstandsmetingen.";
-  if(!count){box.innerHTML='<div class="help">Maak eerst een lijn of doorlopende lijn.</div>';return;}
+  const count=lines.length+polylines.length+areas.length;
+  if(summary)summary.textContent=count?`${count} meetobject(en) · lijnlengte ${fmt(total)}${areas.length?` · ${areas.length} oppervlakte(n)`:""}`:"Nog geen metingen.";
+  if(!count){box.innerHTML='<div class="help">Maak eerst een lijn, doorlopende lijn of gesloten vorm.</div>';return;}
+  for(const sh of areas){
+    const row=document.createElement("div");row.className="objectRow measurementRow";
+    const open=document.createElement("button");open.className="secondary";open.textContent=`${sh.name} · ${fmtAreaUnit(sh.area,"m")} · omtrek ${fmtMeasureUnit(sh.perimeter,"m")}`;open.onclick=()=>openShape(sh.id);
+    row.append(open);box.append(row);
+  }
   for(const {c,a} of polyAnalyses){
     const row=document.createElement("div");row.className="objectRow measurementRow";
     const open=document.createElement("button");open.className="secondary";open.textContent=`${c.name} · totaal ${fmtMeasureUnit(a.totalLength,c.unit||"cm")} · ${a.angles.length} hoek(en)`;open.onclick=()=>openPolylineEditor(c);
@@ -365,7 +380,7 @@ function renderMeasurements(){
   }
   for(const l of lines){
     const a=getPoint(l.startId),b=getPoint(l.endId),row=document.createElement("div");row.className="objectRow measurementRow";
-    const open=document.createElement("button");open.className="secondary";open.textContent=`${l.name} · ${fmtLine(l)} · ${a?.name||"?"}→${b?.name||"?"}`;
+    const open=document.createElement("button");open.className="secondary";const m=analyzeLineMeasurement(l);open.textContent=m.vertical?`${l.name} · hoogte ${fmtMeasureUnit(m.height,l.unit||"cm")} · ${a?.name||"?"}→${b?.name||"?"}`:`${l.name} · ${fmtLine(l)} · ΔH ${fmtMeasureUnit(m.height,l.unit||"cm")} · ${a?.name||"?"}→${b?.name||"?"}`;
     const del=document.createElement("button");del.className="danger";del.textContent="Wis";open.onclick=()=>openLineEditor(l);
     del.onclick=()=>{const d=lineDependencies(l.id);if(d.walls.length||d.shapes.length||d.contours.length){showStatus("Deze meting is gekoppeld aan een muur, vorm of contour.",true);return;}runHistoryAction(`Meting ${l.name} verwijderen`,()=>deleteLineRaw(l.id));afterProjectChange(`Meting ${l.name} verwijderd.`);renderMeasurements();};
     row.append(open,del);box.append(row);

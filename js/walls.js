@@ -1,6 +1,6 @@
 
-import {S,getPoint,getLine} from "./state.js?v=0.8.33-20260830-area-measurement";
-import {dispose,renderPosition} from "./geometry.js?v=0.8.33-20260830-area-measurement";
+import {S,getPoint,getLine} from "./state.js?v=0.8.34-20260830-height-vertical-measurement";
+import {dispose,renderPosition} from "./geometry.js?v=0.8.34-20260830-height-vertical-measurement";
 
 function cleanName(name){return String(name||"").trim().replace(/\s+/g," ");}
 export function wallNameExists(name,excludeId=null){

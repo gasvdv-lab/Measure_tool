@@ -1,4 +1,4 @@
-import {S,$,fmt,fmtLine,pointName,getPoint,getLine,getContour,getShape,projectToWorld} from "./state.js?v=0.8.33-20260830-area-measurement";
+import {S,$,fmt,fmtLine,pointName,getPoint,getLine,getContour,getShape,projectToWorld} from "./state.js?v=0.8.34-20260830-height-vertical-measurement";
 
 export function renderPosition(p){return p?.worldPosition||p?.position||null;}
 
