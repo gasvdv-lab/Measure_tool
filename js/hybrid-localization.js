@@ -1,4 +1,4 @@
-import {S} from "./state.js?v=0.8.37.2-20260830-cad-placement-repair";
+import {S} from "./state.js?v=0.8.37.3-20260830-cad-geometry-registration";
 
 function nowIso(){return new Date().toISOString();}
 function normDeg(v){return ((v%360)+360)%360;}

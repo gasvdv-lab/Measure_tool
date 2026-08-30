@@ -1,4 +1,4 @@
-import {S,projectToWorld,worldToProject} from "./state.js?v=0.8.37.2-20260830-cad-placement-repair";
+import {S,projectToWorld,worldToProject} from "./state.js?v=0.8.37.3-20260830-cad-geometry-registration";
 
 const DB_NAME="measurear.cad.v1",STORE="files";
 let loaderPromise=null;
@@ -107,4 +107,37 @@ export async function restoreCadRuntime(){
   for(const m of ensureCadState().models){try{const blob=await getBlob(m.fileKey);if(blob)await instantiate(m,blob);else m.missingFile=true;}catch(err){console.warn("CAD restore failed",m.name,err);m.missingFile=true;}}
   document.dispatchEvent(new CustomEvent("measurear:cad-changed"));
 }
+
+function cadCornerLocal(m,index){
+  const hx=(Number(m?.dimensions?.x)||0)/2,hz=(Number(m?.dimensions?.z)||0)/2;
+  const corners=[[-hx,-hz],[hx,-hz],[hx,hz],[-hx,hz]];
+  const c=corners[((Number(index)||0)%4+4)%4];
+  return {x:c[0],y:0,z:c[1]};
+}
+export function registerCadToShape({cadCorner=0,shapeId,shapeCorner=0,shapeDirection="next"}={}){
+  const m=activeCad(),rt=runtime();
+  if(!m)throw new Error("Geen CAD-model geselecteerd.");
+  const o=rt.objects.get(m.id);if(!o)throw new Error("CAD-model is niet geladen.");
+  const shape=S.shapes.find(s=>s.id===shapeId);if(!shape||!Array.isArray(shape.pointIds)||shape.pointIds.length<2)throw new Error("Kies een geldige vorm.");
+  const n=shape.pointIds.length,si=((Number(shapeCorner)||0)%n+n)%n;
+  const sj=shapeDirection==="previous"?(si-1+n)%n:(si+1)%n;
+  const a=S.points.find(p=>p.id===shape.pointIds[si]),b=S.points.find(p=>p.id===shape.pointIds[sj]);
+  if(!a||!b)throw new Error("De gekozen vormhoek is niet beschikbaar.");
+  const ci=((Number(cadCorner)||0)%4+4)%4,cj=shapeDirection==="previous"?(ci-1+4)%4:(ci+1)%4;
+  const ca=cadCornerLocal(m,ci),cb=cadCornerLocal(m,cj);
+  const cadDx=cb.x-ca.x,cadDz=cb.z-ca.z,shapeDx=b.position.x-a.position.x,shapeDz=b.position.z-a.position.z;
+  if(Math.hypot(shapeDx,shapeDz)<1e-6)throw new Error("De gekozen vormrand heeft geen bruikbare lengte.");
+  const yaw=Math.atan2(cadDz,cadDx)-Math.atan2(shapeDz,shapeDx);
+  const cos=Math.cos(yaw),sin=Math.sin(yaw);
+  const rcx=ca.x*cos+ca.z*sin,rcz=-ca.x*sin+ca.z*cos;
+  m.yaw=yaw;
+  m.position={x:a.position.x-rcx,y:a.position.y,z:a.position.z-rcz};
+  m.placed=true;rt.placing=false;rt.targetLocked=false;rt.offsetY=0;
+  o.rotation.y=yaw;o.scale.set(1,1,1);o.position.copy(projectToWorld(new S.THREE.Vector3(m.position.x,m.position.y,m.position.z)));o.visible=true;
+  const cadEdge=Math.hypot(cadDx,cadDz),shapeEdge=Math.hypot(shapeDx,shapeDz);
+  const result={model:m,shape,cadCorner:ci,shapeCorner:si,cadEdgeM:cadEdge,shapeEdgeM:shapeEdge,differenceM:shapeEdge-cadEdge,scale:1};
+  m.registration={type:"shape-corner-edge",shapeId:shape.id,cadCorner:ci,shapeCorner:si,shapeDirection,scale:1,updatedAt:new Date().toISOString()};
+  document.dispatchEvent(new CustomEvent("measurear:cad-changed"));return result;
+}
+
 export function cadStatus(){const rt=runtime(),m=activeCad();return {count:ensureCadState().models.length,active:m,placing:rt.placing,targetLocked:rt.targetLocked,loaded:rt.objects.size};}

@@ -1,34 +1,34 @@
-import {S,$,fmt,fmtLine,fmtAreaUnit,fmtVolumeUnit,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.37.2-20260830-cad-placement-repair";
+import {S,$,fmt,fmtLine,fmtAreaUnit,fmtVolumeUnit,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.37.3-20260830-cad-geometry-registration";
 import {
   startTool,cancelTool,setPlacement,setDistance,setConstraint,setAxisDirection,setPerpendicularMode,setAngle,flipSide,setReferenceLine,setSnapMode,
   confirmCandidate,undoToolStep,finishTool,toolLabel,constraintLabel,getActivePoint,referenceRequired,resetDrawingCore
-} from "./drawing-core.js?v=0.8.37.2-20260830-cad-placement-repair";
+} from "./drawing-core.js?v=0.8.37.3-20260830-cad-geometry-registration";
 import {
   createShape,updateShape,deleteShapeOnly,deleteShapeWithContour,deleteLineRaw,deletePointRaw,renamePoint,updateLine,analyzeContour,analyzePolyline,updatePolyline,
   lineDependencies,pointDependencies,canDeleteLine,canDeletePoint,clearAllGeometry,validateGeometryState,dispose
-} from "./geometry.js?v=0.8.37.2-20260830-cad-placement-repair";
-import {startAR,resumeARFromGesture,suspendARForCadImport,applyZoom,resetTrackingSamples} from "./ar.js?v=0.8.37.2-20260830-cad-placement-repair";
-import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.37.2-20260830-cad-placement-repair";
-import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.37.2-20260830-cad-placement-repair";
+} from "./geometry.js?v=0.8.37.3-20260830-cad-geometry-registration";
+import {startAR,resumeARFromGesture,suspendARForCadImport,applyZoom,resetTrackingSamples} from "./ar.js?v=0.8.37.3-20260830-cad-geometry-registration";
+import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.37.3-20260830-cad-geometry-registration";
+import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.37.3-20260830-cad-geometry-registration";
 import {
   initProjectStorage,saveCurrentProject,listProjects,loadStoredProject,newProject,duplicateStoredProject,
   deleteStoredProject,renameStoredProject,projectStats,formatStats,getStoredProjectInfo,hasRecovery,recoveryInfo,restoreRecovery,clearRecovery,
   exportCurrentProject,importProjectFile,markDirtyAndRecover
-} from "./project-storage.js?v=0.8.37.2-20260830-cad-placement-repair";
+} from "./project-storage.js?v=0.8.37.3-20260830-cad-geometry-registration";
 import {
   captureCurrentGeo,addProjectReference,removeProjectReference,clearProjectReferences,beginRelocalization,cancelRelocalization,
   captureRelocalizationPoint,solveRelocalization,applyRelocalization,relocalizationSummary,beginSpatialRestore
-} from "./relocalization.js?v=0.8.37.2-20260830-cad-placement-repair";
+} from "./relocalization.js?v=0.8.37.3-20260830-cad-geometry-registration";
 
-import {captureHybridBaseline,assessHybridLocation,enableHeading} from "./hybrid-localization.js?v=0.8.37.2-20260830-cad-placement-repair";
+import {captureHybridBaseline,assessHybridLocation,enableHeading} from "./hybrid-localization.js?v=0.8.37.3-20260830-cad-geometry-registration";
 
-import {detachAllPointAnchors} from "./world-lock.js?v=0.8.37.2-20260830-cad-placement-repair";
-import {importCadFile,listCadModels,cadStatus,selectCad,beginCadPlacement,isCadTargeting,captureCadTarget,rotateCad,moveCadHeight,confirmCadPlacement,cancelCadPlacement,deleteCadModel,clearCadRuntime,restoreCadRuntime} from "./cad.js?v=0.8.37.2-20260830-cad-placement-repair";
-import {initProfessionalColorPickers,refreshProfessionalColorPickers} from "./color-picker.js?v=0.8.37.2-20260830-cad-placement-repair";
-import {initThemeSelector} from "./theme-selector.js?v=0.8.37.2-20260830-cad-placement-repair";
-import {executeAiPrototype,getAiObject,getAiObjectForShape,toggleAiObjectLock,deleteAiObject,clearAiBuilderObjects,aiObjectSummary} from "./ai-builder.js?v=0.8.37.2-20260830-cad-placement-repair";
-import {listClearanceTargets,analyzeClearance,clearanceStatus,getClearance,createClearance,updateClearance,deleteClearance,clearClearances} from "./clearance.js?v=0.8.37.2-20260830-cad-placement-repair";
-import {selectSpatialObject,listSpatialObjects} from "./spatial-objects.js?v=0.8.37.2-20260830-cad-placement-repair";
+import {detachAllPointAnchors} from "./world-lock.js?v=0.8.37.3-20260830-cad-geometry-registration";
+import {importCadFile,listCadModels,cadStatus,selectCad,beginCadPlacement,isCadTargeting,captureCadTarget,rotateCad,moveCadHeight,confirmCadPlacement,cancelCadPlacement,deleteCadModel,clearCadRuntime,restoreCadRuntime,registerCadToShape} from "./cad.js?v=0.8.37.3-20260830-cad-geometry-registration";
+import {initProfessionalColorPickers,refreshProfessionalColorPickers} from "./color-picker.js?v=0.8.37.3-20260830-cad-geometry-registration";
+import {initThemeSelector} from "./theme-selector.js?v=0.8.37.3-20260830-cad-geometry-registration";
+import {executeAiPrototype,getAiObject,getAiObjectForShape,toggleAiObjectLock,deleteAiObject,clearAiBuilderObjects,aiObjectSummary} from "./ai-builder.js?v=0.8.37.3-20260830-cad-geometry-registration";
+import {listClearanceTargets,analyzeClearance,clearanceStatus,getClearance,createClearance,updateClearance,deleteClearance,clearClearances} from "./clearance.js?v=0.8.37.3-20260830-cad-geometry-registration";
+import {selectSpatialObject,listSpatialObjects} from "./spatial-objects.js?v=0.8.37.3-20260830-cad-geometry-registration";
 
 
 const pages=["home","project","references","relocalize","projects","cad","objects","measurements","clearance","polyline","line","point","walltool","wallcreate","wall","openingcreate","opening","shapecreate","shape","aibuilder","settings","clear"];
@@ -337,6 +337,14 @@ function renderCadPage(){
   const placeHelp=el("cadPlacementHelp"),confirm=el("cadConfirmBtn");
   if(placeHelp)placeHelp.textContent=st.targetLocked?"Locatie gekozen. Controleer het model, pas rotatie/hoogte aan en bevestig definitief.":"Richt het vizier op de gewenste locatie en druk op de witte ronde knop. Het model blijft verborgen tot je de locatie kiest.";
   if(confirm)confirm.disabled=Boolean(st.placing&&!st.targetLocked);
+  const shapeSel=el("cadRegShape"),cornerSel=el("cadRegShapeCorner"),regBtn=el("cadRegisterShapeBtn");
+  if(shapeSel){
+    const keep=shapeSel.value;shapeSel.innerHTML=S.shapes.map(s=>`<option value="${s.id}">${s.name}</option>`).join("");
+    if(S.shapes.some(s=>s.id===keep))shapeSel.value=keep;
+    const sh=getShape(shapeSel.value)||S.shapes[0];
+    if(cornerSel){const ck=cornerSel.value;cornerSel.innerHTML=sh?(sh.pointIds||[]).map((pid,i)=>`<option value="${i}">Hoek ${i+1} · ${getPoint(pid)?.name||pid}</option>`).join(""):"";if([...cornerSel.options].some(o=>o.value===ck))cornerSel.value=ck;}
+  }
+  if(regBtn)regBtn.disabled=!(S.xrSession&&active&&S.shapes.length&&st.loaded);
 }
 function analyzeLineMeasurement(l){
   const a=getPoint(l?.startId),b=getPoint(l?.endId);
@@ -591,6 +599,13 @@ export function initUI(){
   bind("cadRotateRightBtn","click",()=>{rotateCad(5);markDirtyAndRecover();renderCadPage();});
   bind("cadDownBtn","click",()=>{moveCadHeight(-0.01);markDirtyAndRecover();renderCadPage();});
   bind("cadUpBtn","click",()=>{moveCadHeight(0.01);markDirtyAndRecover();renderCadPage();});
+  bind("cadRegShape","change",()=>renderCadPage());
+  bind("cadRegisterShapeBtn","click",()=>{
+    const r=registerCadToShape({cadCorner:Number(el("cadRegCadCorner").value),shapeId:el("cadRegShape").value,shapeCorner:Number(el("cadRegShapeCorner").value),shapeDirection:el("cadRegDirection").value});
+    markDirtyAndRecover();renderCadPage();
+    const d=r.differenceM,txt=`CAD 1:1 geregistreerd · rand CAD ${r.cadEdgeM.toFixed(3)} m · vorm ${r.shapeEdgeM.toFixed(3)} m · verschil ${(d*1000).toFixed(0)} mm · schaal 1.000`;
+    if(el("cadRegistrationInfo"))el("cadRegistrationInfo").textContent=txt;showStatus(txt);
+  });
   bind("cadConfirmBtn","click",()=>{const m=confirmCadPlacement();S.externalPicker=null;S.cadPickerLifecycle={active:false,returned:false};sessionStorage.removeItem("measurear.cadPickerActive");markDirtyAndRecover();renderCadPage();closeMenu();showStatus(`CAD ${m.name} geplaatst.`);});
   bind("cadCancelBtn","click",()=>{cancelCadPlacement();S.externalPicker=null;S.cadPickerLifecycle={active:false,returned:false};sessionStorage.removeItem("measurear.cadPickerActive");renderCadPage();showStatus("CAD-plaatsing geannuleerd.");});
   bind("restoreRecoveryBtn","click",()=>{restoreRecovery();afterProjectChange(`✓ Herstelproject ${S.project.name} geopend.`);renderProjectPage();closeMenu();});

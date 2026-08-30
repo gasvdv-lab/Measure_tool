@@ -1,8 +1,8 @@
-import {S,$,fmt,getPoint,getLine,worldToProject} from "./state.js?v=0.8.37.2-20260830-cad-placement-repair";
-import {createPoint,createLine,ensureLineRendered,deleteLineRaw,deletePointRaw,createContour,dispose,analyzeShapePoints} from "./geometry.js?v=0.8.37.2-20260830-cad-placement-repair";
-import {snapshotProject,commitSnapshot,undoHistory} from "./history.js?v=0.8.37.2-20260830-cad-placement-repair";
-import {queuePointHitAnchor} from "./world-lock.js?v=0.8.37.2-20260830-cad-placement-repair";
-import {createWall,nextWallName} from "./walls.js?v=0.8.37.2-20260830-cad-placement-repair";
+import {S,$,fmt,getPoint,getLine,worldToProject} from "./state.js?v=0.8.37.3-20260830-cad-geometry-registration";
+import {createPoint,createLine,ensureLineRendered,deleteLineRaw,deletePointRaw,createContour,dispose,analyzeShapePoints} from "./geometry.js?v=0.8.37.3-20260830-cad-geometry-registration";
+import {snapshotProject,commitSnapshot,undoHistory} from "./history.js?v=0.8.37.3-20260830-cad-geometry-registration";
+import {queuePointHitAnchor} from "./world-lock.js?v=0.8.37.3-20260830-cad-geometry-registration";
+import {createWall,nextWallName} from "./walls.js?v=0.8.37.3-20260830-cad-geometry-registration";
 
 const REF_MODES=new Set(["parallel","perpendicular","angle"]);
 const TOOL_NAMES={line:"LIJN",polyline:"POLYLIJN",shape:"VORM",stake:"UITZETTEN",wall:"MUUR"};

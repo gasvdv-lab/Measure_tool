@@ -1,6 +1,6 @@
 
-import {S,getPoint,getLine} from "./state.js?v=0.8.37.2-20260830-cad-placement-repair";
-import {dispose,renderPosition} from "./geometry.js?v=0.8.37.2-20260830-cad-placement-repair";
+import {S,getPoint,getLine} from "./state.js?v=0.8.37.3-20260830-cad-geometry-registration";
+import {dispose,renderPosition} from "./geometry.js?v=0.8.37.3-20260830-cad-geometry-registration";
 
 function cleanName(name){return String(name||"").trim().replace(/\s+/g," ");}
 export function wallNameExists(name,excludeId=null){

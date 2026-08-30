@@ -1,8 +1,8 @@
-import {S,getPoint} from "./state.js?v=0.8.37.2-20260830-cad-placement-repair";
-import {snapshotProject,restoreProject} from "./history.js?v=0.8.37.2-20260830-cad-placement-repair";
-import {validateGeometryState,syncWorldLockedGeometry} from "./geometry.js?v=0.8.37.2-20260830-cad-placement-repair";
-import {syncWorldLockedWalls} from "./walls.js?v=0.8.37.2-20260830-cad-placement-repair";
-import {detachAllPointAnchors,queuePointAnchor} from "./world-lock.js?v=0.8.37.2-20260830-cad-placement-repair";
+import {S,getPoint} from "./state.js?v=0.8.37.3-20260830-cad-geometry-registration";
+import {snapshotProject,restoreProject} from "./history.js?v=0.8.37.3-20260830-cad-geometry-registration";
+import {validateGeometryState,syncWorldLockedGeometry} from "./geometry.js?v=0.8.37.3-20260830-cad-geometry-registration";
+import {syncWorldLockedWalls} from "./walls.js?v=0.8.37.3-20260830-cad-geometry-registration";
+import {detachAllPointAnchors,queuePointAnchor} from "./world-lock.js?v=0.8.37.3-20260830-cad-geometry-registration";
 
 const EPS=1e-9;
 function v3(x=0,y=0,z=0){return new S.THREE.Vector3(x,y,z);}

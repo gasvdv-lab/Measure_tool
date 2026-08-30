@@ -1,12 +1,12 @@
-import {S} from "./state.js?v=0.8.37.2-20260830-cad-placement-repair";
-import {snapshotProject,restoreProject,clearHistory} from "./history.js?v=0.8.37.2-20260830-cad-placement-repair";
-import {clearAllGeometry,validateGeometryState} from "./geometry.js?v=0.8.37.2-20260830-cad-placement-repair";
-import {clearWalls} from "./walls.js?v=0.8.37.2-20260830-cad-placement-repair";
-import {resetDrawingCore} from "./drawing-core.js?v=0.8.37.2-20260830-cad-placement-repair";
-import {detachAllPointAnchors} from "./world-lock.js?v=0.8.37.2-20260830-cad-placement-repair";
-import {clearCadRuntime,restoreCadRuntime} from "./cad.js?v=0.8.37.2-20260830-cad-placement-repair";
-import {clearAiBuilderObjects} from "./ai-builder.js?v=0.8.37.2-20260830-cad-placement-repair";
-import {clearClearances} from "./clearance.js?v=0.8.37.2-20260830-cad-placement-repair";
+import {S} from "./state.js?v=0.8.37.3-20260830-cad-geometry-registration";
+import {snapshotProject,restoreProject,clearHistory} from "./history.js?v=0.8.37.3-20260830-cad-geometry-registration";
+import {clearAllGeometry,validateGeometryState} from "./geometry.js?v=0.8.37.3-20260830-cad-geometry-registration";
+import {clearWalls} from "./walls.js?v=0.8.37.3-20260830-cad-geometry-registration";
+import {resetDrawingCore} from "./drawing-core.js?v=0.8.37.3-20260830-cad-geometry-registration";
+import {detachAllPointAnchors} from "./world-lock.js?v=0.8.37.3-20260830-cad-geometry-registration";
+import {clearCadRuntime,restoreCadRuntime} from "./cad.js?v=0.8.37.3-20260830-cad-geometry-registration";
+import {clearAiBuilderObjects} from "./ai-builder.js?v=0.8.37.3-20260830-cad-geometry-registration";
+import {clearClearances} from "./clearance.js?v=0.8.37.3-20260830-cad-geometry-registration";
 
 export const PROJECT_SCHEMA_VERSION=1;
 const INDEX_KEY="measurear.projects.v1.index";

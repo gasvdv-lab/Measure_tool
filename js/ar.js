@@ -1,10 +1,10 @@
-import {S,$} from "./state.js?v=0.8.37.2-20260830-cad-placement-repair";
-import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.37.2-20260830-cad-placement-repair";
-import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.37.2-20260830-cad-placement-repair";
-import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.37.2-20260830-cad-placement-repair";
-import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.37.2-20260830-cad-placement-repair";
-import {updateCadFrame,clearCadRuntime,isCadTargeting} from "./cad.js?v=0.8.37.2-20260830-cad-placement-repair";
-import {clearAiBuilderObjects,syncWorldLockedAiObjects} from "./ai-builder.js?v=0.8.37.2-20260830-cad-placement-repair";
+import {S,$} from "./state.js?v=0.8.37.3-20260830-cad-geometry-registration";
+import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.37.3-20260830-cad-geometry-registration";
+import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.37.3-20260830-cad-geometry-registration";
+import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.37.3-20260830-cad-geometry-registration";
+import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.37.3-20260830-cad-geometry-registration";
+import {updateCadFrame,clearCadRuntime,isCadTargeting} from "./cad.js?v=0.8.37.3-20260830-cad-geometry-registration";
+import {clearAiBuilderObjects,syncWorldLockedAiObjects} from "./ai-builder.js?v=0.8.37.3-20260830-cad-geometry-registration";
 
 let samples=[],sampleSource=null,camPos,camQuat,forward;
 const xrDiag={viewer:"pending",hitSource:"pending",hits:0,pose:false,target:false,error:""};

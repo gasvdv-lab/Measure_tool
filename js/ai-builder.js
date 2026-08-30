@@ -1,5 +1,5 @@
-import {S,getShape,getPoint,projectToWorld} from "./state.js?v=0.8.37.2-20260830-cad-placement-repair";
-import {analyzeShapePoints,dispose} from "./geometry.js?v=0.8.37.2-20260830-cad-placement-repair";
+import {S,getShape,getPoint,projectToWorld} from "./state.js?v=0.8.37.3-20260830-cad-geometry-registration";
+import {analyzeShapePoints,dispose} from "./geometry.js?v=0.8.37.3-20260830-cad-geometry-registration";
 
 const DEFAULT_COLOR="#b98b5f";
 const MIN_HEIGHT=.01,MAX_HEIGHT=10;

@@ -1,4 +1,4 @@
-import {S,getPoint,getLine,getShape} from "./state.js?v=0.8.37.2-20260830-cad-placement-repair";
+import {S,getPoint,getLine,getShape} from "./state.js?v=0.8.37.3-20260830-cad-geometry-registration";
 
 // v0.8.37.2: one registry/selection contract for heterogeneous spatial project objects.
 export const SPATIAL_TYPES=Object.freeze(["point","line","shape","wall","opening","ai","cad"]);

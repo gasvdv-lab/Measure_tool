@@ -1,4 +1,4 @@
-import {S,getPoint,projectToWorld} from "./state.js?v=0.8.37.2-20260830-cad-placement-repair";
+import {S,getPoint,projectToWorld} from "./state.js?v=0.8.37.3-20260830-cad-geometry-registration";
 
 // Session-local WebXR anchor manager.
 // Project coordinates remain immutable in point.position/point.locked.
