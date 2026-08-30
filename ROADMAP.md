@@ -1,3 +1,19 @@
+# AR construct roadmap
+
+- [x] v0.8.37 Spatial Objects + Universal Select/Edit — gemeenschappelijk objectregister, selectiecontract en centrale CAD-selectie.
+- [ ] v0.8.38 Work Planes & Environment Context
+- [ ] v0.8.39 Object Placement 2.0
+- [ ] v0.8.40 Object Library
+- [ ] v0.8.41 Constraints & Relationships
+- [ ] v0.8.42 CAD Inspect 2.0
+- [ ] v0.8.43 AI Builder 2.0
+- [ ] v0.8.44 Project Explorer
+- [ ] v0.8.45 2D Plan View
+- [ ] v0.8.46 Variants / Scenes
+- [ ] v0.8.47 Experience Mode
+- [ ] v0.8.48 Reality ↔ Design Verify
+- [ ] v0.8.49 Spatial Restore 2.0
+
 # v0.8.36.4.2 — Full Stability Audit
 
 - [x] Volledige statische regressie-audit.

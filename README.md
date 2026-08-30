@@ -1,3 +1,13 @@
+# AR construct v0.8.37 — Spatial Objects + Universal Select/Edit
+
+Deze release introduceert één gemeenschappelijk Spatial Object-register voor punten, lijnen, vormen, muren, openingen, AI-concepten en CAD-modellen. Objecten worden vanuit Objecten via één selectiecontract gekozen en vervolgens naar hun bestaande, bewezen editor geleid. CAD is nu ook zichtbaar in de centrale objectlijst. De geometrische waarheid, World Lock-kalibratie en tekenketen uit v0.8.36.4.2 zijn niet herschreven.
+
+**Gate:** AUTO syntax/import/build-ID/registry/UI-binding/ZIP. AR: selecteer en bewerk minimaal punt, lijn, vorm en muur; controleer daarna dat getekende geometrie fysiek blijft staan.
+
+Vaste app-link: https://gasvdv-lab.github.io/Measure_tool/
+
+---
+
 # AR construct v0.8.36.4.2 — Full Stability Audit
 
 Maintenance release na volledige statische regressie-audit. Kritieke fix: WebXR-anchoracquisitie krijgt per punt een vaste kalibratie-offset, zodat een reeds bevestigd punt niet kan verspringen zodra de async anchor beschikbaar wordt. Projectgeometrie (`position`/`locked`) blijft immutable; alleen de renderpose (`worldPosition`) volgt tracking.
