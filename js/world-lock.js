@@ -1,4 +1,4 @@
-import {S,getPoint} from "./state.js?v=0.8.36.4.1-20260830-pwa-version-sync-fix";
+import {S,getPoint} from "./state.js?v=0.8.36.4.2-20260830-stability-audit";
 
 // Session-local WebXR anchor manager.
 // Project coordinates remain immutable in point.position/point.locked.
@@ -7,6 +7,11 @@ const anchors=new Map();
 const pending=new Set();
 const creating=new Set();
 const hitAnchors=new Map();
+// Per-point anchor calibration. An XR anchor may resolve a few millimetres away
+// from the exact committed geometry (especially a hit-test anchor). Keep that
+// initial difference as a fixed offset so acquiring the anchor can never make
+// an already confirmed point jump.
+const anchorOffsets=new Map();
 let support="unknown";
 let lastError="";
 let anchorEpoch=0;
@@ -18,7 +23,7 @@ function enabledFeatures(session){
 export function configureWorldLock(session){
   anchorEpoch++;
   for(const a of anchors.values()){try{a?.delete?.();}catch{}}
-  anchors.clear();pending.clear();creating.clear();hitAnchors.clear();lastError="";
+  anchors.clear();pending.clear();creating.clear();hitAnchors.clear();anchorOffsets.clear();lastError="";
   const enabled=enabledFeatures(session);
   support=enabled.includes("anchors")?"anchors":"fallback";
   S.worldLock={mode:support,active:support==="anchors",anchored:0,pending:0,lastError:""};
@@ -42,7 +47,7 @@ export function queuePointAnchor(pointId){
 }
 
 export function removePointAnchor(pointId){
-  pending.delete(pointId);creating.delete(pointId);hitAnchors.delete(pointId);
+  pending.delete(pointId);creating.delete(pointId);hitAnchors.delete(pointId);anchorOffsets.delete(pointId);
   const a=anchors.get(pointId);
   try{a?.delete?.();}catch{}
   anchors.delete(pointId);
@@ -55,7 +60,7 @@ export function detachAllPointAnchors(){
   // async anchor-creaties uit de vorige context.
   anchorEpoch++;
   for(const a of anchors.values()){try{a?.delete?.();}catch{}}
-  anchors.clear();pending.clear();creating.clear();hitAnchors.clear();
+  anchors.clear();pending.clear();creating.clear();hitAnchors.clear();anchorOffsets.clear();
   if(S.worldLock)Object.assign(S.worldLock,{anchored:0,pending:0});
   emitStatus();
 }
@@ -63,7 +68,7 @@ export function detachAllPointAnchors(){
 export function resetWorldLock(){
   anchorEpoch++;
   for(const a of anchors.values()){try{a?.delete?.();}catch{}}
-  anchors.clear();pending.clear();creating.clear();hitAnchors.clear();support="unknown";lastError="";
+  anchors.clear();pending.clear();creating.clear();hitAnchors.clear();anchorOffsets.clear();support="unknown";lastError="";
   if(S.worldLock)Object.assign(S.worldLock,{mode:"unknown",active:false,anchored:0,pending:0,lastError:""});
 }
 
@@ -145,9 +150,19 @@ export function updateWorldLock(frame,ref){
     if(!anchor)continue;
     const pose=frame.getPose(anchor.anchorSpace,ref);if(!pose)continue;
     const t=pose.transform.position;
-    const dx=p.worldPosition.x-t.x,dy=p.worldPosition.y-t.y,dz=p.worldPosition.z-t.z;
+    // First valid pose calibrates the anchor against the exact committed
+    // display coordinate. This is the critical no-jump invariant: anchor
+    // acquisition may stabilize a point, but may not relocate it.
+    let off=anchorOffsets.get(p.id);
+    if(!off){
+      const current=p.worldPosition||p.position;
+      off={x:current.x-t.x,y:current.y-t.y,z:current.z-t.z};
+      anchorOffsets.set(p.id,off);
+    }
+    const nx=t.x+off.x,ny=t.y+off.y,nz=t.z+off.z;
+    const dx=p.worldPosition.x-nx,dy=p.worldPosition.y-ny,dz=p.worldPosition.z-nz;
     if(dx*dx+dy*dy+dz*dz>1e-10)changed=true;
-    p.worldPosition.set(t.x,t.y,t.z);
+    p.worldPosition.set(nx,ny,nz);
   }
   return changed;
 }

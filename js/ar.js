@@ -1,10 +1,10 @@
-import {S,$} from "./state.js?v=0.8.36.4.1-20260830-pwa-version-sync-fix";
-import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.36.4.1-20260830-pwa-version-sync-fix";
-import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.36.4.1-20260830-pwa-version-sync-fix";
-import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.36.4.1-20260830-pwa-version-sync-fix";
-import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.36.4.1-20260830-pwa-version-sync-fix";
-import {updateCadFrame,clearCadRuntime} from "./cad.js?v=0.8.36.4.1-20260830-pwa-version-sync-fix";
-import {clearAiBuilderObjects} from "./ai-builder.js?v=0.8.36.4.1-20260830-pwa-version-sync-fix";
+import {S,$} from "./state.js?v=0.8.36.4.2-20260830-stability-audit";
+import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.36.4.2-20260830-stability-audit";
+import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.36.4.2-20260830-stability-audit";
+import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.36.4.2-20260830-stability-audit";
+import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.36.4.2-20260830-stability-audit";
+import {updateCadFrame,clearCadRuntime} from "./cad.js?v=0.8.36.4.2-20260830-stability-audit";
+import {clearAiBuilderObjects} from "./ai-builder.js?v=0.8.36.4.2-20260830-stability-audit";
 
 let samples=[],sampleSource=null,camPos,camQuat,forward;
 const xrDiag={viewer:"pending",hitSource:"pending",hits:0,pose:false,target:false,error:""};

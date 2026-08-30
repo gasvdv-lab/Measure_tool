@@ -1,4 +1,4 @@
-import {S,$,fmt,fmtLine,pointName,getPoint,getLine,getContour,getShape,projectToWorld} from "./state.js?v=0.8.36.4.1-20260830-pwa-version-sync-fix";
+import {S,$,fmt,fmtLine,pointName,getPoint,getLine,getContour,getShape,projectToWorld} from "./state.js?v=0.8.36.4.2-20260830-stability-audit";
 
 export function renderPosition(p){return p?.worldPosition||p?.position||null;}
 
