@@ -1,6 +1,6 @@
-import {startAR,resumeARFromGesture} from "./ar.js?v=0.8.36-20260830-clearance-collision-2";
-import {$} from "./state.js?v=0.8.36-20260830-clearance-collision-2";
-const VERSION="0.8.32",BUILD="20260830-polyline-angles";
+import {startAR,resumeARFromGesture} from "./ar.js?v=0.8.36.2-20260830-direction-angle-repair";
+import {$} from "./state.js?v=0.8.36.2-20260830-direction-angle-repair";
+const VERSION="0.8.36.2",BUILD="20260830-direction-angle-repair";
 const pendingCadId=sessionStorage.getItem("measurear.pendingCadPlacement");
 let uiReadyPromise;
 
@@ -11,13 +11,13 @@ function showFatal(message){
   if(btn){btn.disabled=false;btn.textContent="Opnieuw proberen";}
 }
 async function lazyInitUI(){
-  try{const mod=await import("./ui.js?v=0.8.36-20260830-clearance-collision-2");mod.initUI();if(document.documentElement.dataset.uiReady!=="1")throw new Error("UI-binding niet voltooid.");return true;}
+  try{const mod=await import("./ui.js?v=0.8.36.2-20260830-direction-angle-repair");mod.initUI();if(document.documentElement.dataset.uiReady!=="1")throw new Error("UI-binding niet voltooid.");return true;}
   catch(err){console.error("UI init failed",err);showFatal(`UI-fout · v${VERSION} build ${BUILD}\n${err.message||err}`);return false;}
 }
 async function finishPendingCad(id){
   const [{restoreRecovery},{restoreCadRuntime,selectCad,beginCadPlacement}]=await Promise.all([
-    import("./project-storage.js?v=0.8.36-20260830-clearance-collision-2"),
-    import("./cad.js?v=0.8.36-20260830-clearance-collision-2")
+    import("./project-storage.js?v=0.8.36.2-20260830-direction-angle-repair"),
+    import("./cad.js?v=0.8.36.2-20260830-direction-angle-repair")
   ]);
   restoreRecovery();
   await restoreCadRuntime();

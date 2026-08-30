@@ -1,6 +1,6 @@
 
-import {S,getPoint,getLine} from "./state.js?v=0.8.36-20260830-clearance-collision-2";
-import {dispose,renderPosition} from "./geometry.js?v=0.8.36-20260830-clearance-collision-2";
+import {S,getPoint,getLine} from "./state.js?v=0.8.36.2-20260830-direction-angle-repair";
+import {dispose,renderPosition} from "./geometry.js?v=0.8.36.2-20260830-direction-angle-repair";
 
 function cleanName(name){return String(name||"").trim().replace(/\s+/g," ");}
 export function wallNameExists(name,excludeId=null){

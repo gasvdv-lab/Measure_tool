@@ -1,12 +1,12 @@
-import {S} from "./state.js?v=0.8.36-20260830-clearance-collision-2";
-import {snapshotProject,restoreProject,clearHistory} from "./history.js?v=0.8.36-20260830-clearance-collision-2";
-import {clearAllGeometry,validateGeometryState} from "./geometry.js?v=0.8.36-20260830-clearance-collision-2";
-import {clearWalls} from "./walls.js?v=0.8.36-20260830-clearance-collision-2";
-import {resetDrawingCore} from "./drawing-core.js?v=0.8.36-20260830-clearance-collision-2";
-import {detachAllPointAnchors} from "./world-lock.js?v=0.8.36-20260830-clearance-collision-2";
-import {clearCadRuntime,restoreCadRuntime} from "./cad.js?v=0.8.36-20260830-clearance-collision-2";
-import {clearAiBuilderObjects} from "./ai-builder.js?v=0.8.36-20260830-clearance-collision-2";
-import {clearClearances} from "./clearance.js?v=0.8.36-20260830-clearance-collision-2";
+import {S} from "./state.js?v=0.8.36.2-20260830-direction-angle-repair";
+import {snapshotProject,restoreProject,clearHistory} from "./history.js?v=0.8.36.2-20260830-direction-angle-repair";
+import {clearAllGeometry,validateGeometryState} from "./geometry.js?v=0.8.36.2-20260830-direction-angle-repair";
+import {clearWalls} from "./walls.js?v=0.8.36.2-20260830-direction-angle-repair";
+import {resetDrawingCore} from "./drawing-core.js?v=0.8.36.2-20260830-direction-angle-repair";
+import {detachAllPointAnchors} from "./world-lock.js?v=0.8.36.2-20260830-direction-angle-repair";
+import {clearCadRuntime,restoreCadRuntime} from "./cad.js?v=0.8.36.2-20260830-direction-angle-repair";
+import {clearAiBuilderObjects} from "./ai-builder.js?v=0.8.36.2-20260830-direction-angle-repair";
+import {clearClearances} from "./clearance.js?v=0.8.36.2-20260830-direction-angle-repair";
 
 export const PROJECT_SCHEMA_VERSION=1;
 const INDEX_KEY="measurear.projects.v1.index";

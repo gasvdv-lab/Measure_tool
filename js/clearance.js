@@ -1,4 +1,4 @@
-import {S} from "./state.js?v=0.8.36-20260830-clearance-collision-2";
+import {S} from "./state.js?v=0.8.36.2-20260830-direction-angle-repair";
 
 function now(){return new Date().toISOString();}
 function cleanName(v){return String(v||"").trim().replace(/\s+/g," ");}

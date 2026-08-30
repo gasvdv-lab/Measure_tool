@@ -1,8 +1,8 @@
-import {S,$,fmt,getPoint,getLine,worldToProject} from "./state.js?v=0.8.36-20260830-clearance-collision-2";
-import {createPoint,createLine,ensureLineRendered,deleteLineRaw,deletePointRaw,createContour,dispose,analyzeShapePoints} from "./geometry.js?v=0.8.36-20260830-clearance-collision-2";
-import {snapshotProject,commitSnapshot,undoHistory} from "./history.js?v=0.8.36-20260830-clearance-collision-2";
-import {queuePointHitAnchor} from "./world-lock.js?v=0.8.36-20260830-clearance-collision-2";
-import {createWall,nextWallName} from "./walls.js?v=0.8.36-20260830-clearance-collision-2";
+import {S,$,fmt,getPoint,getLine,worldToProject} from "./state.js?v=0.8.36.2-20260830-direction-angle-repair";
+import {createPoint,createLine,ensureLineRendered,deleteLineRaw,deletePointRaw,createContour,dispose,analyzeShapePoints} from "./geometry.js?v=0.8.36.2-20260830-direction-angle-repair";
+import {snapshotProject,commitSnapshot,undoHistory} from "./history.js?v=0.8.36.2-20260830-direction-angle-repair";
+import {queuePointHitAnchor} from "./world-lock.js?v=0.8.36.2-20260830-direction-angle-repair";
+import {createWall,nextWallName} from "./walls.js?v=0.8.36.2-20260830-direction-angle-repair";
 
 const REF_MODES=new Set(["parallel","perpendicular","angle"]);
 const TOOL_NAMES={line:"LIJN",polyline:"POLYLIJN",shape:"VORM",stake:"UITZETTEN",wall:"MUUR"};
@@ -25,16 +25,26 @@ function makePlane(origin,normal,preferred=null){
 function worldHorizontalPlane(origin){
   return makePlane(origin,new S.THREE.Vector3(0,1,0),new S.THREE.Vector3(1,0,0));
 }
+function axisDirectionVector(){
+  const key=S.tool.axisDirection;
+  if(key==="x+")return new S.THREE.Vector3(1,0,0);
+  if(key==="x-")return new S.THREE.Vector3(-1,0,0);
+  if(key==="z+")return new S.THREE.Vector3(0,0,1);
+  if(key==="z-")return new S.THREE.Vector3(0,0,-1);
+  return null;
+}
 function horizontalAxisDirection(active,aim){
+  const locked=axisDirectionVector();
+  if(locked)return locked;
   if(!active||!aim)return null;
-  const d=aim.clone().sub(active.position);
-  d.y=0;
+  const d=aim.clone().sub(active.position);d.y=0;
   if(d.lengthSq()<1e-10)return null;
-  // Orthogonal/"kaarsrecht" mode: snap to the nearest horizontal project axis.
-  // X and Z remain the deterministic geometric axes; only the sign follows the reticle.
+  // Alleen vóór expliciete keuze gebruiken we het vizier als voorstel.
+  // Zodra de gebruiker een asrichting kiest, blijft die richting vergrendeld.
   if(Math.abs(d.x)>=Math.abs(d.z))return new S.THREE.Vector3(d.x>=0?1:-1,0,0);
   return new S.THREE.Vector3(0,0,d.z>=0?1:-1);
 }
+
 function planeFromPoint(p,rayDir=null){
   const n=p.surfaceNormal?.clone?.()||new S.THREE.Vector3(0,1,0);
   return makePlane(p.position,n,rayDir);
@@ -391,6 +401,12 @@ export function setDistance(value,unit="cm"){
 export function setConstraint(mode){
   const valid=new Set(["free","horizontal","axis","vertical","surface","parallel","perpendicular","angle"]);
   S.tool.constraint=valid.has(mode)?mode:"free";
+  if(S.tool.constraint!=="axis")S.tool.axisDirection=null;
+  document.dispatchEvent(new CustomEvent("measurear:tool-settings"));
+}
+export function setAxisDirection(direction){
+  const valid=new Set(["x+","x-","z+","z-"]);
+  S.tool.axisDirection=valid.has(direction)?direction:null;
   document.dispatchEvent(new CustomEvent("measurear:tool-settings"));
 }
 export function setAngle(deg){const n=Number(deg);if(!Number.isFinite(n))throw new Error("Ongeldige hoek.");S.tool.angleDeg=n;document.dispatchEvent(new CustomEvent("measurear:tool-settings"));}

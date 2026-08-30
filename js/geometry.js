@@ -1,4 +1,4 @@
-import {S,$,fmt,fmtLine,pointName,getPoint,getLine,getContour,getShape,projectToWorld} from "./state.js?v=0.8.36-20260830-clearance-collision-2";
+import {S,$,fmt,fmtLine,pointName,getPoint,getLine,getContour,getShape,projectToWorld} from "./state.js?v=0.8.36.2-20260830-direction-angle-repair";
 
 export function renderPosition(p){return p?.worldPosition||p?.position||null;}
 

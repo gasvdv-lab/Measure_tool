@@ -1,10 +1,10 @@
-import {S,getPoint,getLine,getContour} from "./state.js?v=0.8.36-20260830-clearance-collision-2";
+import {S,getPoint,getLine,getContour} from "./state.js?v=0.8.36.2-20260830-direction-angle-repair";
 import {
   createPoint,createLine,createShape,clearAllGeometry,validateGeometryState
-} from "./geometry.js?v=0.8.36-20260830-clearance-collision-2";
-import {createWall,createOpening,clearWalls} from "./walls.js?v=0.8.36-20260830-clearance-collision-2";
-import {snapshotAiObjects,restoreAiBuilderObjects,clearAiBuilderObjects} from "./ai-builder.js?v=0.8.36-20260830-clearance-collision-2";
-import {snapshotClearances,restoreClearances,clearClearances} from "./clearance.js?v=0.8.36-20260830-clearance-collision-2";
+} from "./geometry.js?v=0.8.36.2-20260830-direction-angle-repair";
+import {createWall,createOpening,clearWalls} from "./walls.js?v=0.8.36.2-20260830-direction-angle-repair";
+import {snapshotAiObjects,restoreAiBuilderObjects,clearAiBuilderObjects} from "./ai-builder.js?v=0.8.36.2-20260830-direction-angle-repair";
+import {snapshotClearances,restoreClearances,clearClearances} from "./clearance.js?v=0.8.36.2-20260830-direction-angle-repair";
 
 function vec(v){return v?{x:v.x,y:v.y,z:v.z}:null;}
 function vec3(v){return v?new S.THREE.Vector3(v.x,v.y,v.z):null;}

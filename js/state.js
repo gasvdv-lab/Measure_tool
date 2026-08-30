@@ -1,5 +1,5 @@
 export const S={
-  version:"0.8.36",build:"20260830-clearance-collision-2",
+  version:"0.8.36.2",build:"20260830-direction-angle-repair",
   THREE:null,renderer:null,scene:null,camera:null,reticle:null,xrSession:null,hitSource:null,hitRequested:false,
   currentTarget:null,currentRawTarget:null,currentHitResult:null,currentXRFrame:null,currentReferenceSpace:null,targetSource:"none",zoom:1,pointPlacementEpoch:0,referenceCaptureId:null,
   points:[],lines:[],contours:[],shapes:[],walls:[],openings:[],aiObjects:[],clearances:[],
@@ -12,7 +12,7 @@ export const S={
     activePointId:null,firstPointId:null,
     pointIds:[],lineIds:[],transactions:[],
     placement:"manual",distanceM:1,
-    constraint:"free",angleDeg:45,side:1,referenceLineId:null,
+    constraint:"free",angleDeg:45,side:1,axisDirection:null,referenceLineId:null,
     activePlane:null,hoverSurfaceNormal:null,
     candidate:null,snapMode:"smart",snapTolerance:.08,snapLineTolerance:.06,snapIntersectionTolerance:.08,snapOpeningTolerance:.07
   },

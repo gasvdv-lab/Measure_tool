@@ -1,8 +1,8 @@
-import {S,getPoint} from "./state.js?v=0.8.36-20260830-clearance-collision-2";
-import {snapshotProject,restoreProject} from "./history.js?v=0.8.36-20260830-clearance-collision-2";
-import {validateGeometryState,syncWorldLockedGeometry} from "./geometry.js?v=0.8.36-20260830-clearance-collision-2";
-import {syncWorldLockedWalls} from "./walls.js?v=0.8.36-20260830-clearance-collision-2";
-import {detachAllPointAnchors,queuePointAnchor} from "./world-lock.js?v=0.8.36-20260830-clearance-collision-2";
+import {S,getPoint} from "./state.js?v=0.8.36.2-20260830-direction-angle-repair";
+import {snapshotProject,restoreProject} from "./history.js?v=0.8.36.2-20260830-direction-angle-repair";
+import {validateGeometryState,syncWorldLockedGeometry} from "./geometry.js?v=0.8.36.2-20260830-direction-angle-repair";
+import {syncWorldLockedWalls} from "./walls.js?v=0.8.36.2-20260830-direction-angle-repair";
+import {detachAllPointAnchors,queuePointAnchor} from "./world-lock.js?v=0.8.36.2-20260830-direction-angle-repair";
 
 const EPS=1e-9;
 function v3(x=0,y=0,z=0){return new S.THREE.Vector3(x,y,z);}

@@ -1,4 +1,4 @@
-import {S,projectToWorld,worldToProject} from "./state.js?v=0.8.36-20260830-clearance-collision-2";
+import {S,projectToWorld,worldToProject} from "./state.js?v=0.8.36.2-20260830-direction-angle-repair";
 
 const DB_NAME="measurear.cad.v1",STORE="files";
 let loaderPromise=null;

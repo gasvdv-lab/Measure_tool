@@ -1,4 +1,4 @@
-import {S,getPoint} from "./state.js?v=0.8.36-20260830-clearance-collision-2";
+import {S,getPoint} from "./state.js?v=0.8.36.2-20260830-direction-angle-repair";
 
 // Session-local WebXR anchor manager.
 // Project coordinates remain immutable in point.position/point.locked.
@@ -76,20 +76,27 @@ export function worldLockStatus(){
 }
 
 async function createAnchorForPoint(frame,ref,pointId){
-  const p=getPoint(pointId);if(!p||!frame?.createAnchor)return;
+  const p=getPoint(pointId);if(!p)return;
   const epoch=anchorEpoch;
   creating.add(pointId);pending.delete(pointId);
   let anchor=null;
   try{
     const hitResult=hitAnchors.get(pointId);
     if(hitResult&&typeof hitResult.createAnchor==="function"){
+      // Surface points must use the XRHitTestResult itself. This keeps the
+      // point attached to the real detected surface instead of recreating a
+      // free-floating pose from the current viewer reference space.
       anchor=await hitResult.createAnchor();
       if(epoch===anchorEpoch&&getPoint(pointId))p.worldLock="hit-anchor";
-    }else{
+    }else if(typeof frame?.createAnchor==="function"){
+      // Computed points (exact distance / axis lock / constraints) have no
+      // matching hit result. For those points a frame anchor is appropriate.
       const q=p.worldPosition||p.position;
       const transform=new XRRigidTransform({x:q.x,y:q.y,z:q.z});
       anchor=await frame.createAnchor(transform,ref);
       if(epoch===anchorEpoch&&getPoint(pointId))p.worldLock="frame-anchor";
+    }else{
+      throw new Error("WebXR anchor API niet beschikbaar voor dit punt.");
     }
     if(epoch!==anchorEpoch||!getPoint(pointId)){
       try{anchor?.delete?.();}catch{}
@@ -100,7 +107,9 @@ async function createAnchorForPoint(frame,ref,pointId){
     // Een async resultaat uit een vorige project/restore-context mag de nieuwe
     // World Lock-status niet meer beïnvloeden.
     if(epoch!==anchorEpoch)return;
-    support="fallback";lastError=String(err?.message||err||"Anchor kon niet worden aangemaakt.");
+    // One failed point must never disable World Lock for the complete AR
+    // session. Keep anchor capability active for all other/new points.
+    lastError=String(err?.message||err||"Anchor kon niet worden aangemaakt.");
     const current=getPoint(pointId);if(current)current.worldLock="local";
   }finally{
     if(epoch===anchorEpoch){
@@ -119,14 +128,11 @@ export function updateWorldLock(frame,ref){
 
   // Runtime capability is the final authority. Some browser builds expose the
   // optional feature differently through enabledFeatures.
-  if(typeof frame.createAnchor==="function"&&support!=="anchors")support="anchors";
-  if(typeof frame.createAnchor!=="function"&&pending.size){
-    for(const id of pending){const p=getPoint(id);if(p)p.worldLock="local";}
-    pending.clear();support="fallback";
-    if(S.worldLock){S.worldLock.mode="fallback";S.worldLock.active=false;S.worldLock.pending=0;}
-    emitStatus();
-  }
-  if(support==="anchors"&&typeof frame.createAnchor==="function"&&pending.size){
+  // XRHitTestResult.createAnchor() and XRFrame.createAnchor() are separate
+  // capabilities. Do not require frame.createAnchor before attempting a
+  // surface hit anchor.
+  if((typeof frame.createAnchor==="function"||hitAnchors.size)&&support!=="anchors")support="anchors";
+  if(support==="anchors"&&pending.size){
     // Create one anchor per frame to avoid a burst of asynchronous ARCore work.
     const id=pending.values().next().value;
     if(id&&!creating.has(id))createAnchorForPoint(frame,ref,id);

@@ -1,33 +1,33 @@
-import {S,$,fmt,fmtLine,fmtAreaUnit,fmtVolumeUnit,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.36-20260830-clearance-collision-2";
+import {S,$,fmt,fmtLine,fmtAreaUnit,fmtVolumeUnit,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.36.2-20260830-direction-angle-repair";
 import {
-  startTool,cancelTool,setPlacement,setDistance,setConstraint,setAngle,flipSide,setReferenceLine,setSnapMode,
+  startTool,cancelTool,setPlacement,setDistance,setConstraint,setAxisDirection,setAngle,flipSide,setReferenceLine,setSnapMode,
   confirmCandidate,undoToolStep,finishTool,toolLabel,constraintLabel,getActivePoint,referenceRequired,resetDrawingCore
-} from "./drawing-core.js?v=0.8.36-20260830-clearance-collision-2";
+} from "./drawing-core.js?v=0.8.36.2-20260830-direction-angle-repair";
 import {
   createShape,updateShape,deleteShapeOnly,deleteShapeWithContour,deleteLineRaw,deletePointRaw,renamePoint,updateLine,analyzeContour,analyzePolyline,updatePolyline,
   lineDependencies,pointDependencies,canDeleteLine,canDeletePoint,clearAllGeometry,validateGeometryState,dispose
-} from "./geometry.js?v=0.8.36-20260830-clearance-collision-2";
-import {startAR,resumeARFromGesture,suspendARForCadImport,applyZoom,resetTrackingSamples} from "./ar.js?v=0.8.36-20260830-clearance-collision-2";
-import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.36-20260830-clearance-collision-2";
-import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.36-20260830-clearance-collision-2";
+} from "./geometry.js?v=0.8.36.2-20260830-direction-angle-repair";
+import {startAR,resumeARFromGesture,suspendARForCadImport,applyZoom,resetTrackingSamples} from "./ar.js?v=0.8.36.2-20260830-direction-angle-repair";
+import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.36.2-20260830-direction-angle-repair";
+import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.36.2-20260830-direction-angle-repair";
 import {
   initProjectStorage,saveCurrentProject,listProjects,loadStoredProject,newProject,duplicateStoredProject,
   deleteStoredProject,renameStoredProject,projectStats,formatStats,getStoredProjectInfo,hasRecovery,recoveryInfo,restoreRecovery,clearRecovery,
   exportCurrentProject,importProjectFile,markDirtyAndRecover
-} from "./project-storage.js?v=0.8.36-20260830-clearance-collision-2";
+} from "./project-storage.js?v=0.8.36.2-20260830-direction-angle-repair";
 import {
   captureCurrentGeo,addProjectReference,removeProjectReference,clearProjectReferences,beginRelocalization,cancelRelocalization,
   captureRelocalizationPoint,solveRelocalization,applyRelocalization,relocalizationSummary,beginSpatialRestore
-} from "./relocalization.js?v=0.8.36-20260830-clearance-collision-2";
+} from "./relocalization.js?v=0.8.36.2-20260830-direction-angle-repair";
 
-import {captureHybridBaseline,assessHybridLocation,enableHeading} from "./hybrid-localization.js?v=0.8.36-20260830-clearance-collision-2";
+import {captureHybridBaseline,assessHybridLocation,enableHeading} from "./hybrid-localization.js?v=0.8.36.2-20260830-direction-angle-repair";
 
-import {detachAllPointAnchors} from "./world-lock.js?v=0.8.36-20260830-clearance-collision-2";
-import {importCadFile,listCadModels,cadStatus,selectCad,beginCadPlacement,rotateCad,moveCadHeight,confirmCadPlacement,cancelCadPlacement,deleteCadModel,clearCadRuntime,restoreCadRuntime} from "./cad.js?v=0.8.36-20260830-clearance-collision-2";
-import {initProfessionalColorPickers,refreshProfessionalColorPickers} from "./color-picker.js?v=0.8.36-20260830-clearance-collision-2";
-import {initThemeSelector} from "./theme-selector.js?v=0.8.36-20260830-clearance-collision-2";
-import {executeAiPrototype,getAiObject,getAiObjectForShape,toggleAiObjectLock,deleteAiObject,clearAiBuilderObjects,aiObjectSummary} from "./ai-builder.js?v=0.8.36-20260830-clearance-collision-2";
-import {listClearanceTargets,analyzeClearance,clearanceStatus,getClearance,createClearance,updateClearance,deleteClearance,clearClearances} from "./clearance.js?v=0.8.36-20260830-clearance-collision-2";
+import {detachAllPointAnchors} from "./world-lock.js?v=0.8.36.2-20260830-direction-angle-repair";
+import {importCadFile,listCadModels,cadStatus,selectCad,beginCadPlacement,rotateCad,moveCadHeight,confirmCadPlacement,cancelCadPlacement,deleteCadModel,clearCadRuntime,restoreCadRuntime} from "./cad.js?v=0.8.36.2-20260830-direction-angle-repair";
+import {initProfessionalColorPickers,refreshProfessionalColorPickers} from "./color-picker.js?v=0.8.36.2-20260830-direction-angle-repair";
+import {initThemeSelector} from "./theme-selector.js?v=0.8.36.2-20260830-direction-angle-repair";
+import {executeAiPrototype,getAiObject,getAiObjectForShape,toggleAiObjectLock,deleteAiObject,clearAiBuilderObjects,aiObjectSummary} from "./ai-builder.js?v=0.8.36.2-20260830-direction-angle-repair";
+import {listClearanceTargets,analyzeClearance,clearanceStatus,getClearance,createClearance,updateClearance,deleteClearance,clearClearances} from "./clearance.js?v=0.8.36.2-20260830-direction-angle-repair";
 
 
 const pages=["home","project","references","relocalize","projects","cad","objects","measurements","clearance","polyline","line","point","walltool","wallcreate","wall","openingcreate","opening","shapecreate","shape","aibuilder","settings","clear"];
@@ -121,6 +121,9 @@ function syncHudStatus(){
   el("hudReferenceChip").textContent=`Ref: ${ref?.name||"—"}`;
 
   const sideRelevant=["vertical","parallel","perpendicular","angle"].includes(S.tool.constraint);
+  const axisLabels={"x+":"X+ →","x-":"X− ←","z+":"Z+ ↓","z-":"Z− ↑"};
+  if(el("hudAxisWrap"))el("hudAxisWrap").style.display=S.tool.constraint==="axis"?"grid":"none";
+  document.querySelectorAll("[data-axis-direction]").forEach(b=>b.classList.toggle("active",b.dataset.axisDirection===S.tool.axisDirection));
   el("hudSideChip").classList.toggle("optional",!sideRelevant);
   if(S.tool.constraint==="vertical")el("hudSideChip").textContent=`Richting: ${S.tool.side>0?"omhoog":"omlaag"}`;
   else if(S.tool.constraint==="parallel")el("hudSideChip").textContent=`Richting: ${S.tool.side>0?"voor":"tegen"}`;
@@ -586,6 +589,7 @@ export function initUI(){
     syncHud();
     if(!referenceRequired() && S.tool.constraint!=="angle") closePopovers();
   }));
+  document.querySelectorAll("[data-axis-direction]").forEach(b=>b.addEventListener("click",()=>{setAxisDirection(b.dataset.axisDirection);syncHud();showStatus(`Asrichting ${b.textContent.trim()} vergrendeld.`);}));
   bind("hudReference","change",()=>{
     setReferenceLine(el("hudReference").value||null);
     syncHud();
