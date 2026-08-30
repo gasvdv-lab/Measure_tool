@@ -1,11 +1,11 @@
-import {S} from "./state.js?v=0.8.31-20260830-measure-select-edit-mm";
-import {snapshotProject,restoreProject,clearHistory} from "./history.js?v=0.8.31-20260830-measure-select-edit-mm";
-import {clearAllGeometry,validateGeometryState} from "./geometry.js?v=0.8.31-20260830-measure-select-edit-mm";
-import {clearWalls} from "./walls.js?v=0.8.31-20260830-measure-select-edit-mm";
-import {resetDrawingCore} from "./drawing-core.js?v=0.8.31-20260830-measure-select-edit-mm";
-import {detachAllPointAnchors} from "./world-lock.js?v=0.8.31-20260830-measure-select-edit-mm";
-import {clearCadRuntime,restoreCadRuntime} from "./cad.js?v=0.8.31-20260830-measure-select-edit-mm";
-import {clearAiBuilderObjects} from "./ai-builder.js?v=0.8.31-20260830-measure-select-edit-mm";
+import {S} from "./state.js?v=0.8.32-20260830-polyline-angles";
+import {snapshotProject,restoreProject,clearHistory} from "./history.js?v=0.8.32-20260830-polyline-angles";
+import {clearAllGeometry,validateGeometryState} from "./geometry.js?v=0.8.32-20260830-polyline-angles";
+import {clearWalls} from "./walls.js?v=0.8.32-20260830-polyline-angles";
+import {resetDrawingCore} from "./drawing-core.js?v=0.8.32-20260830-polyline-angles";
+import {detachAllPointAnchors} from "./world-lock.js?v=0.8.32-20260830-polyline-angles";
+import {clearCadRuntime,restoreCadRuntime} from "./cad.js?v=0.8.32-20260830-polyline-angles";
+import {clearAiBuilderObjects} from "./ai-builder.js?v=0.8.32-20260830-polyline-angles";
 
 export const PROJECT_SCHEMA_VERSION=1;
 const INDEX_KEY="measurear.projects.v1.index";

@@ -1,10 +1,10 @@
-import {S,$} from "./state.js?v=0.8.31-20260830-measure-select-edit-mm";
-import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.31-20260830-measure-select-edit-mm";
-import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.31-20260830-measure-select-edit-mm";
-import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.31-20260830-measure-select-edit-mm";
-import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.31-20260830-measure-select-edit-mm";
-import {updateCadFrame,clearCadRuntime} from "./cad.js?v=0.8.31-20260830-measure-select-edit-mm";
-import {clearAiBuilderObjects} from "./ai-builder.js?v=0.8.31-20260830-measure-select-edit-mm";
+import {S,$} from "./state.js?v=0.8.32-20260830-polyline-angles";
+import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.32-20260830-polyline-angles";
+import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.32-20260830-polyline-angles";
+import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.32-20260830-polyline-angles";
+import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.32-20260830-polyline-angles";
+import {updateCadFrame,clearCadRuntime} from "./cad.js?v=0.8.32-20260830-polyline-angles";
+import {clearAiBuilderObjects} from "./ai-builder.js?v=0.8.32-20260830-polyline-angles";
 
 let samples=[],sampleSource=null,camPos,camQuat,forward;
 const xrDiag={viewer:"pending",hitSource:"pending",hits:0,pose:false,target:false,error:""};

@@ -1,4 +1,4 @@
-import {S} from "./state.js?v=0.8.31-20260830-measure-select-edit-mm";
+import {S} from "./state.js?v=0.8.32-20260830-polyline-angles";
 
 function nowIso(){return new Date().toISOString();}
 function normDeg(v){return ((v%360)+360)%360;}

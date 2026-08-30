@@ -1,9 +1,9 @@
-import {S,getPoint,getLine,getContour} from "./state.js?v=0.8.31-20260830-measure-select-edit-mm";
+import {S,getPoint,getLine,getContour} from "./state.js?v=0.8.32-20260830-polyline-angles";
 import {
   createPoint,createLine,createShape,clearAllGeometry,validateGeometryState
-} from "./geometry.js?v=0.8.31-20260830-measure-select-edit-mm";
-import {createWall,createOpening,clearWalls} from "./walls.js?v=0.8.31-20260830-measure-select-edit-mm";
-import {snapshotAiObjects,restoreAiBuilderObjects,clearAiBuilderObjects} from "./ai-builder.js?v=0.8.31-20260830-measure-select-edit-mm";
+} from "./geometry.js?v=0.8.32-20260830-polyline-angles";
+import {createWall,createOpening,clearWalls} from "./walls.js?v=0.8.32-20260830-polyline-angles";
+import {snapshotAiObjects,restoreAiBuilderObjects,clearAiBuilderObjects} from "./ai-builder.js?v=0.8.32-20260830-polyline-angles";
 
 function vec(v){return v?{x:v.x,y:v.y,z:v.z}:null;}
 function vec3(v){return v?new S.THREE.Vector3(v.x,v.y,v.z):null;}
@@ -14,7 +14,7 @@ function cloneTx(tx){return tx?JSON.parse(JSON.stringify(tx)):tx;}
 export function snapshotProject(){
   return {
     pointCounter:S.pointCounter,contourCounter:S.contourCounter,
-    selected:{line:S.selectedLineId,point:S.selectedPointId,shape:S.selectedShapeId,wall:S.selectedWallId,opening:S.selectedOpeningId,aiObject:S.selectedAiObjectId},
+    selected:{line:S.selectedLineId,contour:S.selectedContourId,point:S.selectedPointId,shape:S.selectedShapeId,wall:S.selectedWallId,opening:S.selectedOpeningId,aiObject:S.selectedAiObjectId},
     wallTool:{...S.wallTool},
     points:S.points.map(p=>({id:p.id,name:p.name,position:vec(p.position),surfaceNormal:vec(p.surfaceNormal)})),
     lines:S.lines.map(l=>({
@@ -22,7 +22,7 @@ export function snapshotProject(){
       thickness:l.thickness,color:l.color,labelsVisible:l.labelsVisible!==false,visible:l.visible!==false,unit:l.unit||"cm",kind:l.kind||"distance",
       createdAt:l.createdAt||null,updatedAt:l.updatedAt||null,ownerType:l.ownerType||null,ownerId:l.ownerId||null
     })),
-    contours:S.contours.map(c=>({id:c.id,name:c.name,pointIds:[...c.pointIds],lineIds:[...c.lineIds],closed:Boolean(c.closed),kind:c.kind})),
+    contours:S.contours.map(c=>({id:c.id,name:c.name,pointIds:[...c.pointIds],lineIds:[...c.lineIds],closed:Boolean(c.closed),kind:c.kind,measurement:c.measurement===true,unit:c.unit||"cm",createdAt:c.createdAt||null,updatedAt:c.updatedAt||null})),
     shapes:S.shapes.map(s=>({
       id:s.id,name:s.name,contourId:s.contourId,fill:s.fill,opacity:s.opacity,border:s.border,thickness:s.thickness,labels:s.labels!==false
     })),
@@ -84,7 +84,7 @@ export function restoreProject(snap){
     }
     S.contours.length=0;
     for(const c of snap.contours){
-      S.contours.push({id:c.id,name:c.name,pointIds:[...c.pointIds],lineIds:[...c.lineIds],closed:c.closed,kind:c.kind});
+      S.contours.push({id:c.id,name:c.name,pointIds:[...c.pointIds],lineIds:[...c.lineIds],closed:c.closed,kind:c.kind,measurement:c.measurement===true,unit:c.unit||"cm",createdAt:c.createdAt||null,updatedAt:c.updatedAt||null});
     }
     for(const s of snap.shapes){
       const c=getContour(s.contourId);if(!c)throw new Error(`Historie: contour van vorm ${s.name} ontbreekt.`);
@@ -102,6 +102,7 @@ export function restoreProject(snap){
 
     S.pointCounter=snap.pointCounter;S.contourCounter=snap.contourCounter;
     S.selectedLineId=getLine(snap.selected.line)?.id||null;
+    S.selectedContourId=getContour(snap.selected.contour)?.id||null;
     S.selectedPointId=getPoint(snap.selected.point)?.id||null;
     S.selectedShapeId=S.shapes.find(x=>x.id===snap.selected.shape)?.id||null;
     S.selectedWallId=S.walls.find(x=>x.id===snap.selected.wall)?.id||null;

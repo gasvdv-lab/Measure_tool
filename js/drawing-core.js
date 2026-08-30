@@ -1,8 +1,8 @@
-import {S,$,fmt,getPoint,getLine,worldToProject} from "./state.js?v=0.8.31-20260830-measure-select-edit-mm";
-import {createPoint,createLine,ensureLineRendered,deleteLineRaw,deletePointRaw,createContour,dispose,analyzeShapePoints} from "./geometry.js?v=0.8.31-20260830-measure-select-edit-mm";
-import {snapshotProject,commitSnapshot,undoHistory} from "./history.js?v=0.8.31-20260830-measure-select-edit-mm";
-import {queuePointHitAnchor} from "./world-lock.js?v=0.8.31-20260830-measure-select-edit-mm";
-import {createWall,nextWallName} from "./walls.js?v=0.8.31-20260830-measure-select-edit-mm";
+import {S,$,fmt,getPoint,getLine,worldToProject} from "./state.js?v=0.8.32-20260830-polyline-angles";
+import {createPoint,createLine,ensureLineRendered,deleteLineRaw,deletePointRaw,createContour,dispose,analyzeShapePoints} from "./geometry.js?v=0.8.32-20260830-polyline-angles";
+import {snapshotProject,commitSnapshot,undoHistory} from "./history.js?v=0.8.32-20260830-polyline-angles";
+import {queuePointHitAnchor} from "./world-lock.js?v=0.8.32-20260830-polyline-angles";
+import {createWall,nextWallName} from "./walls.js?v=0.8.32-20260830-polyline-angles";
 
 const REF_MODES=new Set(["parallel","perpendicular","angle"]);
 const TOOL_NAMES={line:"LIJN",polyline:"POLYLIJN",shape:"VORM",stake:"UITZETTEN",wall:"MUUR"};
@@ -349,7 +349,10 @@ export function startTool(kind,{startPointId=null}={}){
   return kind;
 }
 export function cancelTool(){
-  if(S.tool.kind==="polyline"&&S.tool.lineIds.length)createContour(S.tool.pointIds,S.tool.lineIds,{closed:false,kind:"polyline"});
+  if(S.tool.kind==="polyline"&&S.tool.lineIds.length){
+    const contour=createContour(S.tool.pointIds,S.tool.lineIds,{closed:false,kind:"polyline"});
+    for(const lid of contour.lineIds){const l=getLine(lid);if(l){l.ownerType="polyline";l.ownerId=contour.id;l.unit=contour.unit;}}
+  }
   const old=S.tool.kind;resetSession(true);S.tool.kind=null;document.dispatchEvent(new CustomEvent("measurear:tool-changed"));return old;
 }
 export function setPlacement(mode){S.tool.placement=mode==="metric"?"metric":"manual";document.dispatchEvent(new CustomEvent("measurear:tool-settings"));}
@@ -466,6 +469,7 @@ export function finishTool(){
   if(S.tool.kind==="polyline"){
     if(!S.tool.lineIds.length)throw new Error("Teken eerst minstens één segment.");
     const contour=createContour(S.tool.pointIds,S.tool.lineIds,{closed:false,kind:"polyline"});
+    for(const lid of contour.lineIds){const l=getLine(lid);if(l){l.ownerType="polyline";l.ownerId=contour.id;l.unit=contour.unit;}}
     S.tool.status="complete";S.tool.transactions=[];hidePreview();
     commitSnapshot("Doorlopende lijn voltooien",before);
     return {type:"polyline",contour};

@@ -1,4 +1,4 @@
-import {S,$,fmt,fmtLine,pointName,getPoint,getLine,getContour,getShape,projectToWorld} from "./state.js?v=0.8.31-20260830-measure-select-edit-mm";
+import {S,$,fmt,fmtLine,pointName,getPoint,getLine,getContour,getShape,projectToWorld} from "./state.js?v=0.8.32-20260830-polyline-angles";
 
 export function renderPosition(p){return p?.worldPosition||p?.position||null;}
 
@@ -232,10 +232,47 @@ export function canDeletePoint(id){
   const d=pointDependencies(id);return !d.walls.length&&!d.shapes.length&&!d.contours.length&&!d.references.length;
 }
 
-export function createContour(pointIds,lineIds,{closed=false,kind="polyline",id=null,name=null}={}){
+export function createContour(pointIds,lineIds,{closed=false,kind="polyline",id=null,name=null,unit=null,createdAt=null,updatedAt=null}={}){
   if(pointIds.length<2)throw new Error("Contour heeft te weinig punten.");
-  const c={id:id||"c"+crypto.randomUUID(),name:name||`Contour ${S.contourCounter++}`,pointIds:[...pointIds],lineIds:[...lineIds],closed,kind};
+  const nr=S.contourCounter++;
+  const isMeasure=kind==="polyline"&&!closed;
+  const c={
+    id:id||"c"+crypto.randomUUID(),
+    name:name||(isMeasure?`Doorlopende meting ${nr}`:`Contour ${nr}`),
+    pointIds:[...pointIds],lineIds:[...lineIds],closed,kind,
+    measurement:isMeasure,unit:unit||S.defaults.unit||"cm",
+    createdAt:createdAt||new Date().toISOString(),updatedAt:updatedAt||createdAt||new Date().toISOString()
+  };
   S.contours.push(c);return c;
+}
+
+export function analyzePolyline(contourOrId){
+  const c=typeof contourOrId==="string"?getContour(contourOrId):contourOrId;
+  if(!c||c.kind!=="polyline"||c.closed)throw new Error("Geen geldige open polyline.");
+  const pts=c.pointIds.map(getPoint);
+  if(pts.length<2||pts.some(p=>!p))throw new Error("Polylinepunten ontbreken.");
+  const segments=[];let totalLength=0;
+  for(let i=0;i<pts.length-1;i++){
+    const distance=pts[i].position.distanceTo(pts[i+1].position);
+    totalLength+=distance;segments.push({index:i,startId:pts[i].id,endId:pts[i+1].id,distance,lineId:c.lineIds[i]||null});
+  }
+  const angles=[];
+  for(let i=1;i<pts.length-1;i++){
+    const incoming=pts[i-1].position.clone().sub(pts[i].position);
+    const outgoing=pts[i+1].position.clone().sub(pts[i].position);
+    if(incoming.lengthSq()<1e-12||outgoing.lengthSq()<1e-12)continue;
+    angles.push({pointId:pts[i].id,pointName:pts[i].name,index:i,degrees:S.THREE.MathUtils.radToDeg(incoming.angleTo(outgoing))});
+  }
+  return {contourId:c.id,totalLength,segments,angles,pointCount:pts.length};
+}
+
+export function updatePolyline(contour,opts={}){
+  if(!contour||contour.kind!=="polyline"||contour.closed)throw new Error("Polyline ontbreekt.");
+  const name=cleanObjectName(opts.name??contour.name);if(!name)throw new Error("Naam is verplicht.");
+  const unit=["mm","cm","m"].includes(opts.unit)?opts.unit:(contour.unit||S.defaults.unit||"cm");
+  contour.name=name;contour.unit=unit;contour.measurement=true;contour.updatedAt=new Date().toISOString();
+  for(const lid of contour.lineIds){const l=getLine(lid);if(l){l.unit=unit;l.updatedAt=contour.updatedAt;refreshLineLabel(l);}}
+  return contour;
 }
 
 function contourPlane(pointIds){

@@ -1,4 +1,4 @@
-import {S,getPoint} from "./state.js?v=0.8.31-20260830-measure-select-edit-mm";
+import {S,getPoint} from "./state.js?v=0.8.32-20260830-polyline-angles";
 
 // Session-local WebXR anchor manager.
 // Project coordinates remain immutable in point.position/point.locked.

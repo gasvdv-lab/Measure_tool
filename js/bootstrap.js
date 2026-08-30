@@ -1,6 +1,6 @@
-import {startAR,resumeARFromGesture} from "./ar.js?v=0.8.31-20260830-measure-select-edit-mm";
-import {$} from "./state.js?v=0.8.31-20260830-measure-select-edit-mm";
-const VERSION="0.8.30",BUILD="20260830-measure-engine-foundation";
+import {startAR,resumeARFromGesture} from "./ar.js?v=0.8.32-20260830-polyline-angles";
+import {$} from "./state.js?v=0.8.32-20260830-polyline-angles";
+const VERSION="0.8.32",BUILD="20260830-polyline-angles";
 const pendingCadId=sessionStorage.getItem("measurear.pendingCadPlacement");
 let uiReadyPromise;
 
@@ -11,13 +11,13 @@ function showFatal(message){
   if(btn){btn.disabled=false;btn.textContent="Opnieuw proberen";}
 }
 async function lazyInitUI(){
-  try{const mod=await import("./ui.js?v=0.8.31-20260830-measure-select-edit-mm");mod.initUI();if(document.documentElement.dataset.uiReady!=="1")throw new Error("UI-binding niet voltooid.");return true;}
+  try{const mod=await import("./ui.js?v=0.8.32-20260830-polyline-angles");mod.initUI();if(document.documentElement.dataset.uiReady!=="1")throw new Error("UI-binding niet voltooid.");return true;}
   catch(err){console.error("UI init failed",err);showFatal(`UI-fout · v${VERSION} build ${BUILD}\n${err.message||err}`);return false;}
 }
 async function finishPendingCad(id){
   const [{restoreRecovery},{restoreCadRuntime,selectCad,beginCadPlacement}]=await Promise.all([
-    import("./project-storage.js?v=0.8.31-20260830-measure-select-edit-mm"),
-    import("./cad.js?v=0.8.31-20260830-measure-select-edit-mm")
+    import("./project-storage.js?v=0.8.32-20260830-polyline-angles"),
+    import("./cad.js?v=0.8.32-20260830-polyline-angles")
   ]);
   restoreRecovery();
   await restoreCadRuntime();

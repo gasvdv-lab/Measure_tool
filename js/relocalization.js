@@ -1,8 +1,8 @@
-import {S,getPoint} from "./state.js?v=0.8.31-20260830-measure-select-edit-mm";
-import {snapshotProject,restoreProject} from "./history.js?v=0.8.31-20260830-measure-select-edit-mm";
-import {validateGeometryState,syncWorldLockedGeometry} from "./geometry.js?v=0.8.31-20260830-measure-select-edit-mm";
-import {syncWorldLockedWalls} from "./walls.js?v=0.8.31-20260830-measure-select-edit-mm";
-import {detachAllPointAnchors,queuePointAnchor} from "./world-lock.js?v=0.8.31-20260830-measure-select-edit-mm";
+import {S,getPoint} from "./state.js?v=0.8.32-20260830-polyline-angles";
+import {snapshotProject,restoreProject} from "./history.js?v=0.8.32-20260830-polyline-angles";
+import {validateGeometryState,syncWorldLockedGeometry} from "./geometry.js?v=0.8.32-20260830-polyline-angles";
+import {syncWorldLockedWalls} from "./walls.js?v=0.8.32-20260830-polyline-angles";
+import {detachAllPointAnchors,queuePointAnchor} from "./world-lock.js?v=0.8.32-20260830-polyline-angles";
 
 const EPS=1e-9;
 function v3(x=0,y=0,z=0){return new S.THREE.Vector3(x,y,z);}

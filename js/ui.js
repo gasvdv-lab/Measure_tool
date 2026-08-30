@@ -1,35 +1,35 @@
-import {S,$,fmt,fmtLine,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.31-20260830-measure-select-edit-mm";
+import {S,$,fmt,fmtLine,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.32-20260830-polyline-angles";
 import {
   startTool,cancelTool,setPlacement,setDistance,setConstraint,setAngle,flipSide,setReferenceLine,setSnapMode,
   confirmCandidate,undoToolStep,finishTool,toolLabel,constraintLabel,getActivePoint,referenceRequired,resetDrawingCore
-} from "./drawing-core.js?v=0.8.31-20260830-measure-select-edit-mm";
+} from "./drawing-core.js?v=0.8.32-20260830-polyline-angles";
 import {
-  createShape,updateShape,deleteShapeOnly,deleteShapeWithContour,deleteLineRaw,deletePointRaw,renamePoint,updateLine,analyzeContour,
+  createShape,updateShape,deleteShapeOnly,deleteShapeWithContour,deleteLineRaw,deletePointRaw,renamePoint,updateLine,analyzeContour,analyzePolyline,updatePolyline,
   lineDependencies,pointDependencies,canDeleteLine,canDeletePoint,clearAllGeometry,validateGeometryState,dispose
-} from "./geometry.js?v=0.8.31-20260830-measure-select-edit-mm";
-import {startAR,resumeARFromGesture,suspendARForCadImport,applyZoom,resetTrackingSamples} from "./ar.js?v=0.8.31-20260830-measure-select-edit-mm";
-import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.31-20260830-measure-select-edit-mm";
-import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.31-20260830-measure-select-edit-mm";
+} from "./geometry.js?v=0.8.32-20260830-polyline-angles";
+import {startAR,resumeARFromGesture,suspendARForCadImport,applyZoom,resetTrackingSamples} from "./ar.js?v=0.8.32-20260830-polyline-angles";
+import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.32-20260830-polyline-angles";
+import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.32-20260830-polyline-angles";
 import {
   initProjectStorage,saveCurrentProject,listProjects,loadStoredProject,newProject,duplicateStoredProject,
   deleteStoredProject,renameStoredProject,projectStats,formatStats,getStoredProjectInfo,hasRecovery,recoveryInfo,restoreRecovery,clearRecovery,
   exportCurrentProject,importProjectFile,markDirtyAndRecover
-} from "./project-storage.js?v=0.8.31-20260830-measure-select-edit-mm";
+} from "./project-storage.js?v=0.8.32-20260830-polyline-angles";
 import {
   captureCurrentGeo,addProjectReference,removeProjectReference,clearProjectReferences,beginRelocalization,cancelRelocalization,
   captureRelocalizationPoint,solveRelocalization,applyRelocalization,relocalizationSummary,beginSpatialRestore
-} from "./relocalization.js?v=0.8.31-20260830-measure-select-edit-mm";
+} from "./relocalization.js?v=0.8.32-20260830-polyline-angles";
 
-import {captureHybridBaseline,assessHybridLocation,enableHeading} from "./hybrid-localization.js?v=0.8.31-20260830-measure-select-edit-mm";
+import {captureHybridBaseline,assessHybridLocation,enableHeading} from "./hybrid-localization.js?v=0.8.32-20260830-polyline-angles";
 
-import {detachAllPointAnchors} from "./world-lock.js?v=0.8.31-20260830-measure-select-edit-mm";
-import {importCadFile,listCadModels,cadStatus,selectCad,beginCadPlacement,rotateCad,moveCadHeight,confirmCadPlacement,cancelCadPlacement,deleteCadModel,clearCadRuntime,restoreCadRuntime} from "./cad.js?v=0.8.31-20260830-measure-select-edit-mm";
-import {initProfessionalColorPickers,refreshProfessionalColorPickers} from "./color-picker.js?v=0.8.31-20260830-measure-select-edit-mm";
-import {initThemeSelector} from "./theme-selector.js?v=0.8.31-20260830-measure-select-edit-mm";
-import {executeAiPrototype,getAiObject,getAiObjectForShape,toggleAiObjectLock,deleteAiObject,clearAiBuilderObjects,aiObjectSummary} from "./ai-builder.js?v=0.8.31-20260830-measure-select-edit-mm";
+import {detachAllPointAnchors} from "./world-lock.js?v=0.8.32-20260830-polyline-angles";
+import {importCadFile,listCadModels,cadStatus,selectCad,beginCadPlacement,rotateCad,moveCadHeight,confirmCadPlacement,cancelCadPlacement,deleteCadModel,clearCadRuntime,restoreCadRuntime} from "./cad.js?v=0.8.32-20260830-polyline-angles";
+import {initProfessionalColorPickers,refreshProfessionalColorPickers} from "./color-picker.js?v=0.8.32-20260830-polyline-angles";
+import {initThemeSelector} from "./theme-selector.js?v=0.8.32-20260830-polyline-angles";
+import {executeAiPrototype,getAiObject,getAiObjectForShape,toggleAiObjectLock,deleteAiObject,clearAiBuilderObjects,aiObjectSummary} from "./ai-builder.js?v=0.8.32-20260830-polyline-angles";
 
 
-const pages=["home","project","references","relocalize","projects","cad","objects","measurements","line","point","walltool","wallcreate","wall","openingcreate","opening","shapecreate","shape","aibuilder","settings","clear"];
+const pages=["home","project","references","relocalize","projects","cad","objects","measurements","polyline","line","point","walltool","wallcreate","wall","openingcreate","opening","shapecreate","shape","aibuilder","settings","clear"];
 let menuStack=["home"];
 let toastTimer=null;
 
@@ -61,7 +61,7 @@ function togglePopover(id){
 }
 function showPage(name,push=true){
   pages.forEach(p=>el("page-"+p)?.classList.remove("active"));const page=el("page-"+name);if(!page)throw new Error(`Menupagina ontbreekt: ${name}`);page.classList.add("active");
-  const titles={home:"Measure AR",project:"Project",references:"Projectreferenties",relocalize:"Projectpositie herstellen",projects:"Mijn projecten",cad:"CAD / 3D-model",objects:"Objecten",measurements:"Metingen",line:"Lijn",point:"Punt",walltool:"Muur tekenen",wallcreate:"Muur maken",wall:"Muur",openingcreate:"Opening toevoegen",opening:"Opening",shapecreate:"Vorm opslaan",shape:"Vorm",aibuilder:"AI Builder · Prototype",settings:"Instellingen",clear:"Alles wissen"};
+  const titles={home:"Measure AR",project:"Project",references:"Projectreferenties",relocalize:"Projectpositie herstellen",projects:"Mijn projecten",cad:"CAD / 3D-model",objects:"Objecten",measurements:"Metingen",polyline:"Doorlopende meting",line:"Lijn",point:"Punt",walltool:"Muur tekenen",wallcreate:"Muur maken",wall:"Muur",openingcreate:"Opening toevoegen",opening:"Opening",shapecreate:"Vorm opslaan",shape:"Vorm",aibuilder:"AI Builder · Prototype",settings:"Instellingen",clear:"Alles wissen"};
   el("menuTitle").textContent=titles[name]||name;if(push&&menuStack.at(-1)!==name)menuStack.push(name);el("menuBackBtn").style.visibility=name==="home"?"hidden":"visible";if(name==="objects")renderObjects();if(name==="measurements")renderMeasurements();if(name==="project")renderProjectPage();if(name==="references")renderReferenceManager();if(name==="relocalize")renderRelocalizePage();if(name==="projects")renderProjectsList();if(name==="cad")renderCadPage();requestAnimationFrame(refreshProfessionalColorPickers);
 }
 function cancelReferenceCapture(){
@@ -335,12 +335,34 @@ function openLineEditor(l){
   if(el("editLineUnit"))el("editLineUnit").value=l.unit||S.defaults.unit||"cm";
   showPage("line");
 }
+function fmtMeasureUnit(m,unit){
+  if(!Number.isFinite(m))return "—";
+  if(unit==="mm")return `${(m*1000).toFixed(0)} mm`;
+  if(unit==="cm")return `${(m*100).toFixed(1)} cm`;
+  return `${m.toFixed(m<10?3:2)} m`;
+}
+function openPolylineEditor(c){
+  const a=analyzePolyline(c);S.selectedContourId=c.id;
+  el("polylineInfo").textContent=`${c.name} · ${a.pointCount} punten · totaal ${fmtMeasureUnit(a.totalLength,c.unit||"cm")}`;
+  el("editPolylineName").value=c.name;el("editPolylineUnit").value=c.unit||S.defaults.unit||"cm";
+  el("polylineSegments").innerHTML=`<strong>Segmenten</strong><br>${a.segments.map((x,i)=>`${i+1}. ${getPoint(x.startId)?.name||"?"}→${getPoint(x.endId)?.name||"?"}: ${fmtMeasureUnit(x.distance,c.unit||"cm")}`).join("<br>")}`;
+  el("polylineAngles").innerHTML=a.angles.length?`<strong>Hoeken</strong><br>${a.angles.map(x=>`${x.pointName}: ${x.degrees.toFixed(1)}°`).join("<br>")}`:"<strong>Hoeken</strong><br>Minstens 3 punten nodig.";
+  showPage("polyline");
+}
 function renderMeasurements(){
   const box=el("measurementsList"),summary=el("measurementsSummary");if(!box)return;box.innerHTML="";
-  const lines=S.lines.filter(l=>l.ownerType!=="wallbase");
-  const total=lines.reduce((n,l)=>n+(Number.isFinite(l.distance)?l.distance:0),0);
-  if(summary)summary.textContent=lines.length?`${lines.length} meting(en) · totale lijnlengte ${fmt(total)}`:"Nog geen afstandsmetingen.";
-  if(!lines.length){box.innerHTML='<div class="help">Maak eerst een lijnmeting via Lijn.</div>';return;}
+  const lines=S.lines.filter(l=>l.ownerType!=="wallbase"&&l.ownerType!=="polyline");
+  const polylines=S.contours.filter(c=>c.kind==="polyline"&&!c.closed);
+  const polyAnalyses=polylines.map(c=>({c,a:analyzePolyline(c)}));
+  const total=lines.reduce((n,l)=>n+(Number.isFinite(l.distance)?l.distance:0),0)+polyAnalyses.reduce((n,x)=>n+x.a.totalLength,0);
+  const count=lines.length+polylines.length;
+  if(summary)summary.textContent=count?`${count} meetobject(en) · gecombineerde lengte ${fmt(total)}`:"Nog geen afstandsmetingen.";
+  if(!count){box.innerHTML='<div class="help">Maak eerst een lijn of doorlopende lijn.</div>';return;}
+  for(const {c,a} of polyAnalyses){
+    const row=document.createElement("div");row.className="objectRow measurementRow";
+    const open=document.createElement("button");open.className="secondary";open.textContent=`${c.name} · totaal ${fmtMeasureUnit(a.totalLength,c.unit||"cm")} · ${a.angles.length} hoek(en)`;open.onclick=()=>openPolylineEditor(c);
+    row.append(open);box.append(row);
+  }
   for(const l of lines){
     const a=getPoint(l.startId),b=getPoint(l.endId),row=document.createElement("div");row.className="objectRow measurementRow";
     const open=document.createElement("button");open.className="secondary";open.textContent=`${l.name} · ${fmtLine(l)} · ${a?.name||"?"}→${b?.name||"?"}`;
@@ -544,7 +566,7 @@ export function initUI(){
   bind("hudRedoBtn","click",()=>{const e=redoHistory();afterProjectChange(`Opnieuw: ${e.label}`);});
   bind("hudFinishBtn","click",()=>{
     const result=finishTool();syncHud();syncHistoryControls();
-    if(result.type==="polyline"){el("hint").textContent="Doorlopende lijn voltooid en open gebleven.";}if(result.type==="wall"){el("hint").textContent="Muurpad voltooid. Alle muursegmenten blijven gekoppeld aan hun basislijnen.";}
+    if(result.type==="polyline"){const a=analyzePolyline(result.contour);el("hint").textContent=`Doorlopende meting voltooid · totaal ${fmtMeasureUnit(a.totalLength,result.contour.unit||"cm")} · ${a.angles.length} hoek(en).`;}if(result.type==="wall"){el("hint").textContent="Muurpad voltooid. Alle muursegmenten blijven gekoppeld aan hun basislijnen.";}
     if(result.type==="shape"){
       const a=analyzeContour(result.contour);
       let nr=1,name=`Vorm ${nr}`;while(S.shapes.some(s=>s.name===name)){nr++;name=`Vorm ${nr}`;}
@@ -566,6 +588,12 @@ export function initUI(){
     if(r.type==="point"){el("distance").textContent="—";el("detail").textContent=`Punt ${r.point.name} vastgezet`;el("hint").textContent=`${r.point.name} is vertrekpunt. Stel zo nodig afstand/richting in en bevestig het volgende punt.`;}
     else{el("distance").textContent=fmt(r.line.distance);el("detail").textContent=r.wall?`${r.wall.name} · ${fmt(r.line.distance)}`:`${r.line.name} · ${fmt(r.line.distance)}`;el("hint").textContent=r.wall?`${r.wall.name} geplaatst. ${r.point.name} is nu vertrekpunt voor het volgende muursegment.`:(r.complete?`Lijn voltooid. Bekijk het resultaat en open ☰ voor de volgende functie.`:`${r.point.name} is nu het actieve vertrekpunt.`);}
     verifyState();syncHistoryControls();
+  });
+
+  bind("savePolylineBtn","click",()=>{
+    const c=getContour(S.selectedContourId);if(!c)throw new Error("Geen doorlopende meting geselecteerd.");
+    runHistoryAction(`Doorlopende meting ${c.name} bewerken`,()=>updatePolyline(c,{name:el("editPolylineName").value,unit:el("editPolylineUnit").value}));
+    afterProjectChange(`Doorlopende meting ${c.name} opgeslagen.`);openPolylineEditor(c);
   });
 
   bind("saveLineBtn","click",()=>{

@@ -1,6 +1,6 @@
 
-import {S,getPoint,getLine} from "./state.js?v=0.8.31-20260830-measure-select-edit-mm";
-import {dispose,renderPosition} from "./geometry.js?v=0.8.31-20260830-measure-select-edit-mm";
+import {S,getPoint,getLine} from "./state.js?v=0.8.32-20260830-polyline-angles";
+import {dispose,renderPosition} from "./geometry.js?v=0.8.32-20260830-polyline-angles";
 
 function cleanName(name){return String(name||"").trim().replace(/\s+/g," ");}
 export function wallNameExists(name,excludeId=null){
