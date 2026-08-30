@@ -1,10 +1,21 @@
-# Measure AR v0.8.34 — Height & Vertical Measurements
+
+## v0.8.35 — Volume / Clearance Foundation
+
+Deze release bouwt verder op de Measure Engine zonder de bewezen AR-placementketen te wijzigen.
+
+- Een gesloten vorm kan nu optioneel als **volume-meting** worden gebruikt: oppervlakte × ingevoerde hoogte/diepte.
+- Volume wordt deterministisch berekend uit de bestaande gemeten footprint; de geometrie wordt niet automatisch aangepast.
+- Een lijnmeting kan nu optioneel als **vrije-ruimtecontrole (clearance)** worden gemarkeerd.
+- Je geeft een minimale vereiste vrije maat op; Measure AR toont vervolgens **✓ marge** of **⚠ tekort**.
+- Volume- en clearancegegevens worden meegenomen in project snapshots, Undo/Redo en recovery.
+- De volgende stap blijft een uitgebreidere Clearance/Collision Engine met echte object-object/omgevingcontroles.
+# Measure AR v0.8.35 — Height & Vertical Measurements
 
 GitHub Pages: https://gasvdv-lab.github.io/Measure_tool/
 
 Deze release bouwt verder op v0.8.33 en breidt de Measure Engine uit met hoogte- en verticale meetinformatie.
 
-## Nieuw in v0.8.34
+## Nieuw in v0.8.35
 - Iedere gewone lijn toont naast de 3D-lengte ook het absolute hoogteverschil (ΔH).
 - Niet-verticale lijnen tonen daarnaast hun horizontale projectie.
 - Een lijn die binnen 25 mm horizontale afwijking verticaal staat, wordt in **Metingen** expliciet als **hoogte** weergegeven.
@@ -14,7 +25,7 @@ Deze release bouwt verder op v0.8.33 en breidt de Measure Engine uit met hoogte-
 - De ontbrekende `fmtAreaUnit`-export uit de v0.8.33-bron is hersteld, zodat de area-measurement UI correct kan laden.
 - Geen wijzigingen aan WebXR hit-test, World Lock, CAD-placement of de bewezen puntplaatsing.
 
-## Fysieke test v0.8.34
+## Fysieke test v0.8.35
 1. Maak een gewone schuine lijn en open **Metingen**: controleer 3D-lengte, ΔH en horizontale afstand.
 2. Maak met **Verticaal** een lijn omhoog: **Metingen** moet deze als hoogte tonen.
 3. Wissel mm/cm/m en controleer dat alleen de weergave wijzigt.

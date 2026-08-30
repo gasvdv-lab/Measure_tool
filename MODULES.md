@@ -1,4 +1,11 @@
-# Module-update v0.8.34
+# Module-update v0.8.35
+
+## Measure Engine — Volume / Clearance Foundation
+**Volume:** een bestaande gesloten vorm kan een hoogte/diepte krijgen. Volume = exacte footprint-oppervlakte × hoogte/diepte.
+
+**Clearance:** een bestaande lijnmeting kan als vrije-ruimtecontrole worden gebruikt met een minimale vereiste afstand. De app rapporteert marge of tekort. Dit is de fundering voor latere collision/fit-analyse tussen Spatial Objects en de omgeving.
+
+# Module-update v0.8.35
 
 ## Measure Engine — Height & Vertical
 **Status:** actief, fysieke AR-gate vereist.

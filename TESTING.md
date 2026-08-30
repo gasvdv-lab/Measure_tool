@@ -1,4 +1,17 @@
-# v0.8.34 — Height & Vertical Measurements
+# v0.8.35 gerichte tests
+
+## AUTO
+- JS-syntax en module-imports moeten slagen.
+- Project snapshot/restore bevat volume- en clearancevelden.
+
+## AR-IN/ROOM
+1. Maak een gesloten vorm met bekende oppervlakte. Open de vorm, activeer volume en geef 1.000 m hoogte in. Verwacht: volume numeriek gelijk aan de oppervlakte in m³.
+2. Wijzig de hoogte naar 0.500 m. Verwacht: volume halveert zonder de footprint te wijzigen.
+3. Maak een lijn van ongeveer 1 m. Open de lijn, activeer vrije-ruimtecontrole en stel 90 cm vereist in. Verwacht: ✓ met positieve marge wanneer de lijn > 0,90 m is.
+4. Stel daarna een vereiste in groter dan de gemeten lijn. Verwacht: ⚠ tekort.
+5. Undo/Redo en project opslaan/heropenen: volume- en clearance-instellingen blijven behouden.
+
+# v0.8.35 — Height & Vertical Measurements
 
 ## AR-IN/ROOM
 - [ ] Schuine lijn: 3D-lengte, ΔH en horizontale projectie zichtbaar en plausibel.

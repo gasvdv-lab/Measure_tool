@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#111111">
   <script>try{document.documentElement.dataset.appTheme=localStorage.getItem("measurear.ui.theme.v1")||"technical-green"}catch{document.documentElement.dataset.appTheme="technical-green"}</script>
   <title>Measure AR v0.8.30</title>
-  <link rel="stylesheet" href="./css/app.css?v=0.8.34-20260830-height-vertical-measurement">
+  <link rel="stylesheet" href="./css/app.css?v=0.8.35-20260830-volume-clearance-foundation">
 </head>
 <body>
 <div id="app">
@@ -188,6 +188,11 @@
             <label class="check"><input id="editLineVisible" type="checkbox" checked> Lijn tonen</label>
           </div>
           <label class="check"><input id="editLineLabels" type="checkbox" checked> Maatlabel tonen</label>
+          <div class="menuCard compactCard">
+            <label class="check"><input id="editLineClearance" type="checkbox"> Gebruik als vrije-ruimtecontrole</label>
+            <label>Minimaal vereist (cm)<input id="editLineClearanceRequired" type="number" min="0" step="0.1" placeholder="bv. 90"></label>
+            <div id="lineClearanceInfo" class="help">Optioneel: controleer of de gemeten vrije maat voldoende is.</div>
+          </div>
           <button id="saveLineBtn" class="primary">Meting opslaan</button>
           <button id="lineFromStartBtn" class="secondary">Nieuwe lijn vanaf start</button>
           <button id="lineFromEndBtn" class="secondary">Nieuwe lijn vanaf einde</button>
@@ -291,6 +296,11 @@
           <label>Transparantie<input id="editShapeOpacity" type="number" min="0" max=".9" step=".05"></label>
           <label>Randdikte<select id="editShapeThickness"><option value="1">1 · fijn</option><option value="2">2 · normaal</option><option value="3">3 · duidelijk</option><option value="4">4 · zwaar</option></select></label>
           <label class="check"><input id="editShapeLabels" type="checkbox"> Randlabels tonen</label>
+          <div class="menuCard compactCard">
+            <label class="check"><input id="editShapeVolume" type="checkbox"> Bereken volume uit deze footprint</label>
+            <label>Hoogte / diepte (m)<input id="editShapeVolumeHeight" type="number" min="0.001" step="0.001" placeholder="bv. 0.250"></label>
+            <div id="shapeVolumeInfo" class="help">Optioneel: oppervlakte × hoogte/diepte.</div>
+          </div>
           <button id="saveShapeBtn" class="primary">Wijzigingen opslaan</button>
           <button id="openAiBuilderBtn" class="primary aiBuilderEntry">✨ AI Builder · prototype</button>
           <div class="help">Gebruik deze vorm als footprint voor een eenvoudig parametrisch concept.</div>
@@ -437,6 +447,6 @@
   <div id="hint">Open ☰ en kies wat je wilt tekenen.</div>
 </div>
 
-<script type="module" src="./js/bootstrap.js?v=0.8.34-20260830-height-vertical-measurement"></script>
+<script type="module" src="./js/bootstrap.js?v=0.8.35-20260830-volume-clearance-foundation"></script>
 </body>
 </html>
