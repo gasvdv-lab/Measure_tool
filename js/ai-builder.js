@@ -1,5 +1,5 @@
-import {S,getShape,getPoint} from "./state.js?v=0.8.29.1-20260830-cad-preview";
-import {analyzeShapePoints,dispose} from "./geometry.js?v=0.8.29.1-20260830-cad-preview";
+import {S,getShape,getPoint} from "./state.js?v=0.8.29.2-20260830-navigation-core";
+import {analyzeShapePoints,dispose} from "./geometry.js?v=0.8.29.2-20260830-navigation-core";
 
 const DEFAULT_COLOR="#b98b5f";
 const MIN_HEIGHT=.01,MAX_HEIGHT=10;

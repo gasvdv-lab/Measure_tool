@@ -1,6 +1,6 @@
 
-import {S,getPoint,getLine} from "./state.js?v=0.8.29.1-20260830-cad-preview";
-import {dispose,renderPosition} from "./geometry.js?v=0.8.29.1-20260830-cad-preview";
+import {S,getPoint,getLine} from "./state.js?v=0.8.29.2-20260830-navigation-core";
+import {dispose,renderPosition} from "./geometry.js?v=0.8.29.2-20260830-navigation-core";
 
 function cleanName(name){return String(name||"").trim().replace(/\s+/g," ");}
 export function wallNameExists(name,excludeId=null){
