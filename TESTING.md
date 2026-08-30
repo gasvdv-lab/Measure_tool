@@ -1,3 +1,16 @@
+# v0.8.29.2 — Navigation Core testgate
+
+- **PC** — Startinterface: Meten, Plaatsen, Maken, Ervaren, Controleren en Projecten zichtbaar. Ervaren/Controleren zijn bewust uitgeschakeld.
+- **PC** — Plaatsen opent `cad-import.html`; CAD Preview uit v0.8.29.1 blijft werken.
+- **AR-IN** — Meten start AR en opent bestaande gereedschappen.
+- **AR-IN** — Maken start AR en opent bestaande gereedschappen.
+- **AR-IN** — Projecten start AR en opent Mijn projecten.
+- **AR-IN** — AR direct starten start de bestaande standaardflow.
+- **AR-IN** — korte regressie: punt/lijn tekenen en bevestigen; bestaande World Lock-werking behouden.
+- **OPEN** — reference capture / Project op locatie plaatsen blijft een bekende open bug.
+
+---
+
 # Measure AR TESTING
 
 ## v0.8.29.1 — CAD Preview
