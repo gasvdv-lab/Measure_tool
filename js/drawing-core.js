@@ -1,8 +1,8 @@
-import {S,$,fmt,getPoint,getLine,worldToProject} from "./state.js?v=0.8.36.4.2-20260830-stability-audit";
-import {createPoint,createLine,ensureLineRendered,deleteLineRaw,deletePointRaw,createContour,dispose,analyzeShapePoints} from "./geometry.js?v=0.8.36.4.2-20260830-stability-audit";
-import {snapshotProject,commitSnapshot,undoHistory} from "./history.js?v=0.8.36.4.2-20260830-stability-audit";
-import {queuePointHitAnchor} from "./world-lock.js?v=0.8.36.4.2-20260830-stability-audit";
-import {createWall,nextWallName} from "./walls.js?v=0.8.36.4.2-20260830-stability-audit";
+import {S,$,fmt,getPoint,getLine,worldToProject} from "./state.js?v=0.8.37-20260830-spatial-objects";
+import {createPoint,createLine,ensureLineRendered,deleteLineRaw,deletePointRaw,createContour,dispose,analyzeShapePoints} from "./geometry.js?v=0.8.37-20260830-spatial-objects";
+import {snapshotProject,commitSnapshot,undoHistory} from "./history.js?v=0.8.37-20260830-spatial-objects";
+import {queuePointHitAnchor} from "./world-lock.js?v=0.8.37-20260830-spatial-objects";
+import {createWall,nextWallName} from "./walls.js?v=0.8.37-20260830-spatial-objects";
 
 const REF_MODES=new Set(["parallel","perpendicular","angle"]);
 const TOOL_NAMES={line:"LIJN",polyline:"POLYLIJN",shape:"VORM",stake:"UITZETTEN",wall:"MUUR"};

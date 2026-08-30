@@ -4,7 +4,7 @@ export function initPwaInstall(){
   const btn=document.getElementById("installPwaBtn");
   if("serviceWorker" in navigator){
     window.addEventListener("load",()=>{
-      navigator.serviceWorker.register("./service-worker.js?v=0.8.36.4.2",{scope:"./"}).catch(err=>console.warn("Service worker registratie mislukt",err));
+      navigator.serviceWorker.register("./service-worker.js?v=0.8.37",{scope:"./"}).catch(err=>console.warn("Service worker registratie mislukt",err));
     },{once:true});
   }
   window.addEventListener("beforeinstallprompt",event=>{

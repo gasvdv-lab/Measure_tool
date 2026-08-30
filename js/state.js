@@ -1,11 +1,11 @@
 export const S={
-  version:"0.8.36.4.2",build:"20260830-pwa-version-sync-fix",
+  version:"0.8.37",build:"20260830-spatial-objects",
   THREE:null,renderer:null,scene:null,camera:null,reticle:null,xrSession:null,hitSource:null,hitRequested:false,
   currentTarget:null,currentRawTarget:null,currentHitResult:null,currentXRFrame:null,currentReferenceSpace:null,targetSource:"none",zoom:1,pointPlacementEpoch:0,referenceCaptureId:null,
   points:[],lines:[],contours:[],shapes:[],walls:[],openings:[],aiObjects:[],clearances:[],
   wallTool:{height:2.40,thickness:.14,side:"center",orientation:"vertical",angle:90,color:"#d7d2c8",opacity:.65,namePrefix:"Muur"},
   pointCounter:0,contourCounter:1,
-  selectedLineId:null,selectedContourId:null,selectedPointId:null,selectedShapeId:null,selectedWallId:null,selectedOpeningId:null,selectedAiObjectId:null,selectedClearanceId:null,objectPickMode:null,pendingContourId:null,
+  selectedLineId:null,selectedContourId:null,selectedPointId:null,selectedShapeId:null,selectedWallId:null,selectedOpeningId:null,selectedAiObjectId:null,selectedClearanceId:null,selectedSpatialObject:null,objectPickMode:null,pendingContourId:null,
   defaults:{unit:"cm",lineThickness:2,labels:true},
   tool:{
     kind:null,status:"idle",

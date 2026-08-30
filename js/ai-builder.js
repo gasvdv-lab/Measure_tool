@@ -1,5 +1,5 @@
-import {S,getShape,getPoint} from "./state.js?v=0.8.36.4.2-20260830-stability-audit";
-import {analyzeShapePoints,dispose} from "./geometry.js?v=0.8.36.4.2-20260830-stability-audit";
+import {S,getShape,getPoint} from "./state.js?v=0.8.37-20260830-spatial-objects";
+import {analyzeShapePoints,dispose} from "./geometry.js?v=0.8.37-20260830-spatial-objects";
 
 const DEFAULT_COLOR="#b98b5f";
 const MIN_HEIGHT=.01,MAX_HEIGHT=10;

@@ -1,10 +1,10 @@
-import {S,getPoint,getLine,getContour} from "./state.js?v=0.8.36.4.2-20260830-stability-audit";
+import {S,getPoint,getLine,getContour} from "./state.js?v=0.8.37-20260830-spatial-objects";
 import {
   createPoint,createLine,createShape,clearAllGeometry,validateGeometryState
-} from "./geometry.js?v=0.8.36.4.2-20260830-stability-audit";
-import {createWall,createOpening,clearWalls} from "./walls.js?v=0.8.36.4.2-20260830-stability-audit";
-import {snapshotAiObjects,restoreAiBuilderObjects,clearAiBuilderObjects} from "./ai-builder.js?v=0.8.36.4.2-20260830-stability-audit";
-import {snapshotClearances,restoreClearances,clearClearances} from "./clearance.js?v=0.8.36.4.2-20260830-stability-audit";
+} from "./geometry.js?v=0.8.37-20260830-spatial-objects";
+import {createWall,createOpening,clearWalls} from "./walls.js?v=0.8.37-20260830-spatial-objects";
+import {snapshotAiObjects,restoreAiBuilderObjects,clearAiBuilderObjects} from "./ai-builder.js?v=0.8.37-20260830-spatial-objects";
+import {snapshotClearances,restoreClearances,clearClearances} from "./clearance.js?v=0.8.37-20260830-spatial-objects";
 
 function vec(v){return v?{x:v.x,y:v.y,z:v.z}:null;}
 function vec3(v){return v?new S.THREE.Vector3(v.x,v.y,v.z):null;}

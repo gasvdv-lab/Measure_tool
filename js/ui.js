@@ -1,33 +1,34 @@
-import {S,$,fmt,fmtLine,fmtAreaUnit,fmtVolumeUnit,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.36.4.2-20260830-stability-audit";
+import {S,$,fmt,fmtLine,fmtAreaUnit,fmtVolumeUnit,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.37-20260830-spatial-objects";
 import {
   startTool,cancelTool,setPlacement,setDistance,setConstraint,setAxisDirection,setPerpendicularMode,setAngle,flipSide,setReferenceLine,setSnapMode,
   confirmCandidate,undoToolStep,finishTool,toolLabel,constraintLabel,getActivePoint,referenceRequired,resetDrawingCore
-} from "./drawing-core.js?v=0.8.36.4.2-20260830-stability-audit";
+} from "./drawing-core.js?v=0.8.37-20260830-spatial-objects";
 import {
   createShape,updateShape,deleteShapeOnly,deleteShapeWithContour,deleteLineRaw,deletePointRaw,renamePoint,updateLine,analyzeContour,analyzePolyline,updatePolyline,
   lineDependencies,pointDependencies,canDeleteLine,canDeletePoint,clearAllGeometry,validateGeometryState,dispose
-} from "./geometry.js?v=0.8.36.4.2-20260830-stability-audit";
-import {startAR,resumeARFromGesture,suspendARForCadImport,applyZoom,resetTrackingSamples} from "./ar.js?v=0.8.36.4.2-20260830-stability-audit";
-import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.36.4.2-20260830-stability-audit";
-import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.36.4.2-20260830-stability-audit";
+} from "./geometry.js?v=0.8.37-20260830-spatial-objects";
+import {startAR,resumeARFromGesture,suspendARForCadImport,applyZoom,resetTrackingSamples} from "./ar.js?v=0.8.37-20260830-spatial-objects";
+import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.37-20260830-spatial-objects";
+import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.37-20260830-spatial-objects";
 import {
   initProjectStorage,saveCurrentProject,listProjects,loadStoredProject,newProject,duplicateStoredProject,
   deleteStoredProject,renameStoredProject,projectStats,formatStats,getStoredProjectInfo,hasRecovery,recoveryInfo,restoreRecovery,clearRecovery,
   exportCurrentProject,importProjectFile,markDirtyAndRecover
-} from "./project-storage.js?v=0.8.36.4.2-20260830-stability-audit";
+} from "./project-storage.js?v=0.8.37-20260830-spatial-objects";
 import {
   captureCurrentGeo,addProjectReference,removeProjectReference,clearProjectReferences,beginRelocalization,cancelRelocalization,
   captureRelocalizationPoint,solveRelocalization,applyRelocalization,relocalizationSummary,beginSpatialRestore
-} from "./relocalization.js?v=0.8.36.4.2-20260830-stability-audit";
+} from "./relocalization.js?v=0.8.37-20260830-spatial-objects";
 
-import {captureHybridBaseline,assessHybridLocation,enableHeading} from "./hybrid-localization.js?v=0.8.36.4.2-20260830-stability-audit";
+import {captureHybridBaseline,assessHybridLocation,enableHeading} from "./hybrid-localization.js?v=0.8.37-20260830-spatial-objects";
 
-import {detachAllPointAnchors} from "./world-lock.js?v=0.8.36.4.2-20260830-stability-audit";
-import {importCadFile,listCadModels,cadStatus,selectCad,beginCadPlacement,rotateCad,moveCadHeight,confirmCadPlacement,cancelCadPlacement,deleteCadModel,clearCadRuntime,restoreCadRuntime} from "./cad.js?v=0.8.36.4.2-20260830-stability-audit";
-import {initProfessionalColorPickers,refreshProfessionalColorPickers} from "./color-picker.js?v=0.8.36.4.2-20260830-stability-audit";
-import {initThemeSelector} from "./theme-selector.js?v=0.8.36.4.2-20260830-stability-audit";
-import {executeAiPrototype,getAiObject,getAiObjectForShape,toggleAiObjectLock,deleteAiObject,clearAiBuilderObjects,aiObjectSummary} from "./ai-builder.js?v=0.8.36.4.2-20260830-stability-audit";
-import {listClearanceTargets,analyzeClearance,clearanceStatus,getClearance,createClearance,updateClearance,deleteClearance,clearClearances} from "./clearance.js?v=0.8.36.4.2-20260830-stability-audit";
+import {detachAllPointAnchors} from "./world-lock.js?v=0.8.37-20260830-spatial-objects";
+import {importCadFile,listCadModels,cadStatus,selectCad,beginCadPlacement,rotateCad,moveCadHeight,confirmCadPlacement,cancelCadPlacement,deleteCadModel,clearCadRuntime,restoreCadRuntime} from "./cad.js?v=0.8.37-20260830-spatial-objects";
+import {initProfessionalColorPickers,refreshProfessionalColorPickers} from "./color-picker.js?v=0.8.37-20260830-spatial-objects";
+import {initThemeSelector} from "./theme-selector.js?v=0.8.37-20260830-spatial-objects";
+import {executeAiPrototype,getAiObject,getAiObjectForShape,toggleAiObjectLock,deleteAiObject,clearAiBuilderObjects,aiObjectSummary} from "./ai-builder.js?v=0.8.37-20260830-spatial-objects";
+import {listClearanceTargets,analyzeClearance,clearanceStatus,getClearance,createClearance,updateClearance,deleteClearance,clearClearances} from "./clearance.js?v=0.8.37-20260830-spatial-objects";
+import {selectSpatialObject,listSpatialObjects} from "./spatial-objects.js?v=0.8.37-20260830-spatial-objects";
 
 
 const pages=["home","project","references","relocalize","projects","cad","objects","measurements","clearance","polyline","line","point","walltool","wallcreate","wall","openingcreate","opening","shapecreate","shape","aibuilder","settings","clear"];
@@ -429,40 +430,56 @@ function renderMeasurements(){
     const open=document.createElement("button");open.className="secondary";const m=analyzeLineMeasurement(l);
     const clearance=l.clearanceEnabled&&Number.isFinite(Number(l.clearanceRequiredM))?` · clearance ${l.distance>=Number(l.clearanceRequiredM)?"✓":"⚠"}`:"";
     open.textContent=(m.vertical?`${l.name} · hoogte ${fmtMeasureUnit(m.height,l.unit||"cm")} · ${a?.name||"?"}→${b?.name||"?"}`:`${l.name} · ${fmtLine(l)} · ΔH ${fmtMeasureUnit(m.height,l.unit||"cm")} · ${a?.name||"?"}→${b?.name||"?"}`)+clearance;
-    const del=document.createElement("button");del.className="danger";del.textContent="Wis";open.onclick=()=>openLineEditor(l);
+    const del=document.createElement("button");del.className="danger";del.textContent="Wis";open.onclick=()=>openSpatialEditor("line",l.id);
     del.onclick=()=>{const d=lineDependencies(l.id);if(d.walls.length||d.shapes.length||d.contours.length){showStatus("Deze meting is gekoppeld aan een muur, vorm of contour.",true);return;}runHistoryAction(`Meting ${l.name} verwijderen`,()=>deleteLineRaw(l.id));afterProjectChange(`Meting ${l.name} verwijderd.`);renderMeasurements();};
     row.append(open,del);box.append(row);
   }
 }
+function openSpatialEditor(type,id){
+  const obj=selectSpatialObject(type,id);
+  if(el("spatialSelectionInfo"))el("spatialSelectionInfo").textContent=`Geselecteerd: ${obj.name||obj.fileName||id}`;
+  if(type==="wall")return openWall(id);
+  if(type==="opening")return openOpening(id);
+  if(type==="shape")return openShape(id);
+  if(type==="line")return openLineEditor(obj);
+  if(type==="point"){S.selectedPointId=id;el("pointInfo").textContent=`Punt ${obj.name}`;el("editPointName").value=obj.name;return showPage("point");}
+  if(type==="ai"){S.selectedAiObjectId=id;S.selectedShapeId=obj.sourceShapeId;return openAiBuilder();}
+  if(type==="cad"){selectCad(id);showPage("cad");return renderCadPage();}
+}
 function renderObjects(){
   const box=el("objectsList");box.innerHTML="";
+  const registry=listSpatialObjects();if(el("spatialSelectionInfo"))el("spatialSelectionInfo").textContent=S.selectedSpatialObject?`Geselecteerd: ${S.selectedSpatialObject.type} · ${S.selectedSpatialObject.id}`:`${registry.length} ruimtelijke object(en) · geen selectie`;
   if(!S.walls.length&&!S.shapes.length&&!S.lines.length&&!S.points.length&&!S.aiObjects.length){box.innerHTML='<div class="help">Nog geen objecten.</div>';return;}
   if(S.walls.length){box.insertAdjacentHTML("beforeend","<h3>Muren</h3>");for(const w of S.walls){
     const row=document.createElement("div");row.className="objectRow";const open=document.createElement("button");open.className="secondary";open.textContent=`${w.name} · ${w.height.toFixed(2)} m`;
-    const del=document.createElement("button");del.className="danger";del.textContent="Wis";open.onclick=()=>openWall(w.id);del.onclick=()=>{runHistoryAction(`Muur ${w.name} verwijderen`,()=>deleteWall(w.id));afterProjectChange(`Muur ${w.name} verwijderd.`);};row.append(open,del);box.append(row);
+    const del=document.createElement("button");del.className="danger";del.textContent="Wis";open.onclick=()=>openSpatialEditor("wall",w.id);del.onclick=()=>{runHistoryAction(`Muur ${w.name} verwijderen`,()=>deleteWall(w.id));afterProjectChange(`Muur ${w.name} verwijderd.`);};row.append(open,del);box.append(row);
   }}
   if(S.openings.length){box.insertAdjacentHTML("beforeend","<h3>Openingen</h3>");for(const o of S.openings){
     const row=document.createElement("div");row.className="objectRow";const open=document.createElement("button");open.className="secondary";open.textContent=`${o.name} · ${o.width.toFixed(2)} × ${o.height.toFixed(2)} m`;
-    const del=document.createElement("button");del.className="danger";del.textContent="Wis";open.onclick=()=>openOpening(o.id);del.onclick=()=>{runHistoryAction(`${o.name} verwijderen`,()=>deleteOpening(o.id));afterProjectChange(`${o.name} verwijderd.`);};row.append(open,del);box.append(row);
+    const del=document.createElement("button");del.className="danger";del.textContent="Wis";open.onclick=()=>openSpatialEditor("opening",o.id);del.onclick=()=>{runHistoryAction(`${o.name} verwijderen`,()=>deleteOpening(o.id));afterProjectChange(`${o.name} verwijderd.`);};row.append(open,del);box.append(row);
   }}
   if(S.aiObjects.length){box.insertAdjacentHTML("beforeend","<h3>AI-concepten · prototype</h3>");for(const o of S.aiObjects){
     const row=document.createElement("div");row.className="objectRow";const open=document.createElement("button");open.className="secondary";open.textContent=`${o.name} · ${(o.height*100).toFixed(0)} cm${o.locked?" · 🔒":""}`;
-    const del=document.createElement("button");del.className="danger";del.textContent="Wis";open.onclick=()=>{S.selectedAiObjectId=o.id;S.selectedShapeId=o.sourceShapeId;openAiBuilder();};del.onclick=()=>{runHistoryAction(`AI-concept ${o.name} verwijderen`,()=>deleteAiObject(o.id));afterProjectChange(`${o.name} verwijderd.`);renderObjects();};row.append(open,del);box.append(row);
+    const del=document.createElement("button");del.className="danger";del.textContent="Wis";open.onclick=()=>openSpatialEditor("ai",o.id);del.onclick=()=>{runHistoryAction(`AI-concept ${o.name} verwijderen`,()=>deleteAiObject(o.id));afterProjectChange(`${o.name} verwijderd.`);renderObjects();};row.append(open,del);box.append(row);
   }}
   if(S.shapes.length){box.insertAdjacentHTML("beforeend","<h3>Vormen</h3>");for(const s of S.shapes){
     const row=document.createElement("div");row.className="objectRow";const open=document.createElement("button");open.className="secondary";open.textContent=`${s.name} · ${s.area.toFixed(2)} m²`;
-    const del=document.createElement("button");del.className="danger";del.textContent="Wis";open.onclick=()=>openShape(s.id);del.onclick=()=>{runHistoryAction(`Vorm ${s.name} verwijderen`,()=>{const ai=getAiObjectForShape(s.id);if(ai)deleteAiObject(ai.id);deleteShapeOnly(s.id);});afterProjectChange(`Vorm ${s.name} verwijderd; contour bewaard.`);};row.append(open,del);box.append(row);
+    const del=document.createElement("button");del.className="danger";del.textContent="Wis";open.onclick=()=>openSpatialEditor("shape",s.id);del.onclick=()=>{runHistoryAction(`Vorm ${s.name} verwijderen`,()=>{const ai=getAiObjectForShape(s.id);if(ai)deleteAiObject(ai.id);deleteShapeOnly(s.id);});afterProjectChange(`Vorm ${s.name} verwijderd; contour bewaard.`);};row.append(open,del);box.append(row);
   }}
   if(S.lines.length){box.insertAdjacentHTML("beforeend","<h3>Lijnen</h3>");for(const l of S.lines){
     const row=document.createElement("div");row.className="objectRow";const open=document.createElement("button");open.className="secondary";open.textContent=`${l.name} · ${fmtLine(l)}`;
-    const del=document.createElement("button");del.className="danger";del.textContent="Wis";open.onclick=()=>openLineEditor(l);
+    const del=document.createElement("button");del.className="danger";del.textContent="Wis";open.onclick=()=>openSpatialEditor("line",l.id);
     del.onclick=()=>{const d=lineDependencies(l.id);if(d.walls.length||d.shapes.length||d.contours.length){showStatus("Deze lijn is gekoppeld aan een muur, vorm of contour.",true);return;}runHistoryAction(`Lijn ${l.name} verwijderen`,()=>deleteLineRaw(l.id));afterProjectChange(`Lijn ${l.name} verwijderd.`);};row.append(open,del);box.append(row);
   }}
   if(S.points.length){box.insertAdjacentHTML("beforeend","<h3>Punten</h3>");for(const p of S.points){
     const row=document.createElement("div");row.className="objectRow";const open=document.createElement("button");open.className="secondary";open.textContent=`Punt ${p.name}`;const del=document.createElement("button");del.className="danger";del.textContent="Wis";
-    open.onclick=()=>{S.selectedPointId=p.id;el("pointInfo").textContent=`Punt ${p.name}`;el("editPointName").value=p.name;showPage("point");};
+    open.onclick=()=>openSpatialEditor("point",p.id);
     del.onclick=()=>{const d=pointDependencies(p.id);if(d.walls.length||d.shapes.length||d.contours.length||d.references?.length){showStatus(d.references?.length?"Dit punt is een projectreferentie. Verwijder eerst de referentie.":"Dit punt hoort bij een muur, vorm of contour.",true);return;}runHistoryAction(`Punt ${p.name} verwijderen`,()=>{for(const l of [...d.lines])deleteLineRaw(l.id);deletePointRaw(p.id);});afterProjectChange(`Punt ${p.name} verwijderd.`);};row.append(open,del);box.append(row);
   }}
+  if(S.project.cad?.models?.length){box.insertAdjacentHTML("beforeend","<h3>CAD / 3D</h3>");for(const m of S.project.cad.models){
+    const row=document.createElement("div");row.className="objectRow";const open=document.createElement("button");open.className="secondary";open.textContent=`${m.name} · ${m.placed?"geplaatst":"niet geplaatst"}`;open.onclick=()=>openSpatialEditor("cad",m.id);row.append(open);box.append(row);
+  }}
+
 }
 function openShape(id){
   const s=getShape(id);if(!s)return;S.selectedShapeId=id;

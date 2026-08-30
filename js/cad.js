@@ -1,4 +1,4 @@
-import {S,projectToWorld,worldToProject} from "./state.js?v=0.8.36.4.2-20260830-stability-audit";
+import {S,projectToWorld,worldToProject} from "./state.js?v=0.8.37-20260830-spatial-objects";
 
 const DB_NAME="measurear.cad.v1",STORE="files";
 let loaderPromise=null;

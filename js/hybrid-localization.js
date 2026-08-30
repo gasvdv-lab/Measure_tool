@@ -1,4 +1,4 @@
-import {S} from "./state.js?v=0.8.36.4.2-20260830-stability-audit";
+import {S} from "./state.js?v=0.8.37-20260830-spatial-objects";
 
 function nowIso(){return new Date().toISOString();}
 function normDeg(v){return ((v%360)+360)%360;}

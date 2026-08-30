@@ -1,4 +1,4 @@
-import {S} from "./state.js?v=0.8.36.4.2-20260830-stability-audit";
+import {S} from "./state.js?v=0.8.37-20260830-spatial-objects";
 
 function now(){return new Date().toISOString();}
 function cleanName(v){return String(v||"").trim().replace(/\s+/g," ");}

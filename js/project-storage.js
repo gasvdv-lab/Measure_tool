@@ -1,12 +1,12 @@
-import {S} from "./state.js?v=0.8.36.4.2-20260830-stability-audit";
-import {snapshotProject,restoreProject,clearHistory} from "./history.js?v=0.8.36.4.2-20260830-stability-audit";
-import {clearAllGeometry,validateGeometryState} from "./geometry.js?v=0.8.36.4.2-20260830-stability-audit";
-import {clearWalls} from "./walls.js?v=0.8.36.4.2-20260830-stability-audit";
-import {resetDrawingCore} from "./drawing-core.js?v=0.8.36.4.2-20260830-stability-audit";
-import {detachAllPointAnchors} from "./world-lock.js?v=0.8.36.4.2-20260830-stability-audit";
-import {clearCadRuntime,restoreCadRuntime} from "./cad.js?v=0.8.36.4.2-20260830-stability-audit";
-import {clearAiBuilderObjects} from "./ai-builder.js?v=0.8.36.4.2-20260830-stability-audit";
-import {clearClearances} from "./clearance.js?v=0.8.36.4.2-20260830-stability-audit";
+import {S} from "./state.js?v=0.8.37-20260830-spatial-objects";
+import {snapshotProject,restoreProject,clearHistory} from "./history.js?v=0.8.37-20260830-spatial-objects";
+import {clearAllGeometry,validateGeometryState} from "./geometry.js?v=0.8.37-20260830-spatial-objects";
+import {clearWalls} from "./walls.js?v=0.8.37-20260830-spatial-objects";
+import {resetDrawingCore} from "./drawing-core.js?v=0.8.37-20260830-spatial-objects";
+import {detachAllPointAnchors} from "./world-lock.js?v=0.8.37-20260830-spatial-objects";
+import {clearCadRuntime,restoreCadRuntime} from "./cad.js?v=0.8.37-20260830-spatial-objects";
+import {clearAiBuilderObjects} from "./ai-builder.js?v=0.8.37-20260830-spatial-objects";
+import {clearClearances} from "./clearance.js?v=0.8.37-20260830-spatial-objects";
 
 export const PROJECT_SCHEMA_VERSION=1;
 const INDEX_KEY="measurear.projects.v1.index";
