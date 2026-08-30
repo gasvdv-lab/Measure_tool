@@ -1,3 +1,36 @@
+# v0.8.30 — Measure Engine Foundation
+
+## Automatisch uitgevoerd
+- [x] JavaScript-syntaxcontrole op alle JS-bestanden.
+- [x] Alle interne ES-module imports gebruiken exact build-ID `0.8.30-20260830-measure-engine-foundation`.
+- [x] Nieuwe DOM-elementen voor Metingen en lijn-eigenschappen aanwezig.
+- [x] README.md, ROADMAP.md, TESTING.md en MODULES.md aanwezig.
+
+## Fysiek op Android/Chrome/WebXR — uitvoeren
+- [ ] AR start en surface-detectie blijft werken.
+- [ ] Lijn: punt A → punt B → lijn zonder fout.
+- [ ] Maatlabel verschijnt direct bij de lijn.
+- [ ] ☰ → Metingen toont de nieuwe lijn met correcte afstand.
+- [ ] Meting openen → naam wijzigen → opslaan.
+- [ ] Eenheid wijzigen cm ↔ m; label en meetlijst volgen de gekozen eenheid.
+- [ ] Lijn tonen uitzetten verbergt alleen de lijn; opnieuw aanzetten herstelt ze.
+- [ ] Maatlabel tonen uitzetten verbergt alleen het label.
+- [ ] Kleur en dikte wijzigen blijven werken.
+- [ ] Undo/Redo herstelt meeteigenschappen correct.
+- [ ] Project opslaan → heropenen: eenheid, zichtbaarheid, naam, kleur, dikte en labelstatus blijven behouden.
+- [ ] Bestaande polyline/vorm/muurfuncties vertonen geen regressie.
+
+## Bevestigd uit v0.8.29.1.3
+- [x] AR-ANDROID: surface hit → eerste punt → tweede punt → lijn werkt.
+- [x] `Cannot read properties of null (reading 'Group')` treedt niet meer op in deze basistest.
+
+## Nog open uit eerdere versies
+- [ ] `Project op locatie plaatsen` / reference-capture praktisch herstellen en valideren.
+- [ ] CAD-placementpraktijktests worden bewust uitgesteld zolang CAD geparkeerd is.
+- [ ] Definitieve lijnlabel-oriëntatie later opnieuw testen/ontwerpen.
+
+---
+
 # v0.8.29.1.3 — State Fix
 
 ## Nieuwe regressietest

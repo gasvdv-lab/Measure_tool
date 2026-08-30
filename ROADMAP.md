@@ -1,3 +1,36 @@
+# Measure AR — actuele roadmapstatus
+
+**Huidige versie:** v0.8.30 — Measure Engine Foundation  
+**Stabiele baseline:** v0.8.29.1.3 fysiek geslaagd: surface hit → punt A → punt B → lijn.  
+**Actieve ontwikkelfase:** Measure Engine.  
+**CAD:** voorlopig geparkeerd; bestaande CAD-code blijft behouden voor latere hervatting.
+
+## v0.8.30 — Measure Engine Foundation
+- [x] Lijn als expliciet persistent afstandsmeetobject.
+- [x] Meetobject bevat start/einde, lengte, naam, eenheid, stijl, zichtbaarheid en timestamps.
+- [x] Nieuwe pagina **Metingen** met overzicht en totale lijnlengte.
+- [x] Meting openen en eigenschappen bewerken vanuit de meetlijst.
+- [x] cm/m per meting.
+- [x] Lijn- en maatlabelzichtbaarheid per meting.
+- [x] Nieuwe meetvelden opgenomen in Undo/Redo en project snapshot/recovery.
+- [x] Alle interne ES-module imports gebruiken opnieuw één build-ID.
+- [ ] AR-ANDROID: volledige v0.8.30 praktijktest uitvoeren.
+
+## Eerstvolgende Measure Engine-stappen
+1. **Measure 2 — Select/Edit interaction:** universele selectie van ruimtelijke objecten vanuit AR, niet alleen via lijsten.
+2. **Measure 3 — Polyline & hoekmetingen:** segmentlengtes, totaallengte en hoeken als meetobjecten.
+3. **Measure 4 — Oppervlakte:** gesloten meetcontouren met oppervlakte en omtrek.
+4. **Measure 5 — Hoogte / verticaal / loodrecht:** betrouwbare hoogte- en offsetmetingen.
+5. **Measure 6 — Volume & clearance:** volumes, vrije ruimte en ruimtelijke relaties.
+6. Later: dezelfde Measure Engine opnieuw koppelen aan CAD voor CAD↔CAD en reality↔CAD.
+
+## Geparkeerde/open punten
+- CAD-2 Placement/Relocalization en CAD-3 Inspect: later hervatten.
+- `Project op locatie plaatsen` / reference-capture: bekende open bug; niet opgelost verklaard.
+- Definitieve oriëntatie/meedraaien van lijnlabels: later hernemen.
+
+---
+
 # Fixrelease v0.8.29.1.3 — State Fix ✅
 
 - [x] Dubbele `state.js` module-instanties door gemengde cache-busting querystrings verwijderd.
@@ -11,7 +44,7 @@ Surface-detection oorzaak isoleren vóór verdere featureontwikkeling.
 
 # Measure AR Roadmap
 
-## Huidige versie: v0.8.29.1 — CAD Preview
+## Historische status — v0.8.29.1 CAD Preview
 
 ## v0.8.29.1 — CAD Preview ✅
 - [x] GLB/glTF-preview buiten WebXR vóór importacceptatie.
@@ -56,7 +89,7 @@ Surface-detection oorzaak isoleren vóór verdere featureontwikkeling.
 - [ ] CAD-plaatsing verder valideren bij voldoende licht
 - [ ] `Project op locatie plaatsen` / reference-capture bug blijft open voor latere herneming
 
-# Huidige stap — v0.8.28.9 Professional Color Picker
+# Historische stap — v0.8.28.9 Professional Color Picker
 
 - [x] Eén professionele colorpicker voor alle huidige kleurvelden.
 - [x] Themakleuren + tintenmatrix.
@@ -73,7 +106,7 @@ Surface-detection oorzaak isoleren vóór verdere featureontwikkeling.
 
 ## v0.8.28.8 — AR HUD Refinement ✅
 
-## Huidige stap — v0.8.28.8
+## Historische stap — v0.8.28.8
 
 - [x] AR Visualization System basislaag
 - [x] Technische maatlabelstijl
@@ -146,7 +179,7 @@ Project Space blijft de geometrische waarheid. Bij het openen van een opgeslagen
 
 # Measure AR — Master Roadmap
 
-**Huidige versie:** v0.8.28.6 — Professional UI Pass  
+**Historische status:** v0.8.28.6 — Professional UI Pass  
 **Huidige gate:** Project Manager Stability praktisch valideren; World Lock voor eenvoudige en samengestelde geometrie is door de gebruiker positief getest.
 
 ## Testcodes

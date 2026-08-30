@@ -1,3 +1,19 @@
+# v0.8.30 — Measure Engine Foundation
+
+## Measure Engine
+**Status:** actief in opbouw.
+
+De eerste Measure Engine-laag maakt een gewone AR-lijn expliciet tot een persistent afstandsmeetobject. Elke meting kent zijn start- en eindpunt, metrische lengte, naam, voorkeureenheid (cm/m), kleur, dikte, lijnzichtbaarheid, maatlabelzichtbaarheid en aanmaak-/wijzigmoment.
+
+**Gebruik:** teken via **Lijn**, open daarna **☰ → Metingen**. Vanuit de meetlijst kan de lijn worden geopend en aangepast. De meetdata wordt meegenomen in Undo/Redo en de bestaande projectopslag/recovery.
+
+**Architectuur:** de broncoördinaten van punten blijven de geometrische waarheid. De lengte wordt uit de punten bepaald; presentatie-eenheid en visuele stijl zijn eigenschappen van het meetobject. Hierdoor kan dezelfde engine later worden uitgebreid naar polylines, hoeken, oppervlakten, hoogtes, volumes en uiteindelijk CAD-metingen.
+
+## CAD
+**Status:** functioneel aanwezig maar ontwikkeltraject voorlopig geparkeerd. De bestaande implementatie wordt niet verwijderd en kan later opnieuw op de Measure Engine worden aangesloten.
+
+---
+
 # v0.8.29.1.3 — State Fix
 
 De AR-, teken-, geometrie-, opslag-, CAD-, wall- en world-lockmodules delen opnieuw één canonieke `state.js`-module-instantie. Dit herstelt punt- en lijncreatie na succesvolle WebXR hit-test.
@@ -10,7 +26,7 @@ v0.8.29.1.2 voegt uitsluitend een live XR hit-test diagnose-HUD toe.
 
 Actuele cumulatieve modulehandleiding. Bij iedere release moet dit document worden bijgewerkt wanneer een module of werking verandert.
 
-**Huidige appversie:** v0.8.29.1
+**Huidige appversie:** v0.8.30
 
 ## 1. AR Core
 **Status:** actief / core.  
@@ -83,9 +99,9 @@ Selecties van punten/lijnen/vormen/vlakken/CAD als context; conversational editi
 **Status:** actief.  
 Projectmutaties worden als snapshots bijgehouden. Vanaf v0.8.29.0 vallen AI-concepten eveneens onder undo/redo.
 
-## 13. Toekomstige Measure Engine
-**Status:** gepland.  
-De meetfunctionaliteit wordt later aanzienlijk uitgebreid. Dezelfde meetengine moet uiteindelijk ook op CAD- en Buildergeometrie kunnen werken.
+## 13. Measure Engine
+**Status:** actief in opbouw vanaf v0.8.30.  
+De foundation voor persistente afstandsmeetobjecten is actief. Volgende lagen zijn universele Select/Edit, polyline/hoek, oppervlakte, hoogte/loodrecht en volume/clearance. Dezelfde engine moet later ook op CAD- en Buildergeometrie werken.
 
 
 ## CAD Preview

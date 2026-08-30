@@ -1,3 +1,31 @@
+# Measure AR v0.8.30 — Measure Engine Foundation
+
+GitHub Pages: https://gasvdv-lab.github.io/Measure_tool/
+
+Deze release start de actieve **Measure Engine**-ontwikkelfase op de fysiek bevestigde stabiele baseline v0.8.29.1.3. CAD blijft aanwezig in de app en roadmap, maar verdere CAD-ontwikkeling is voorlopig geparkeerd.
+
+## Nieuw in v0.8.30
+- Een lijn is nu expliciet een persistent afstandsmeetobject met `id`, startpunt, eindpunt, lengte, naam, eenheid, kleur, dikte, zichtbaarheid en timestamps.
+- Nieuwe pagina **Metingen** toont alle gewone afstandsmetingen en hun totale lijnlengte.
+- Een meting kan vanuit **Metingen** rechtstreeks worden geopend en bewerkt.
+- Per lijn kan nu **cm/m**, lijnzichtbaarheid en maatlabelzichtbaarheid worden ingesteld.
+- Maatlabels volgen de eenheid van de individuele meting.
+- Nieuwe meetvelden worden meegenomen in Undo/Redo en projectopslag/herstel.
+- De consistente module-state fix uit v0.8.29.1.3 blijft behouden.
+
+## Stabiele baseline
+De gebruiker heeft v0.8.29.1.3 fysiek gevalideerd: oppervlak → punt A → punt B → lijn werkt. De eerdere `null.Group`-crash geldt als opgelost.
+
+## Testdoel v0.8.30
+1. Start AR en teken één lijn.
+2. Controleer dat het maatlabel direct zichtbaar is.
+3. Open **☰ → Metingen** en open de gemaakte meting.
+4. Wijzig naam, eenheid, kleur/dikte en zichtbaarheid; sla op.
+5. Controleer Undo/Redo.
+6. Sla het project op, heropen het en controleer dat de meeteigenschappen behouden blijven.
+
+---
+
 # Measure AR v0.8.29.1.3 — State Fix
 
 Fixrelease voor de AR-tekencrash `Cannot read properties of null (reading 'Group')`. Alle ES-module imports gebruiken nu exact dezelfde build-ID, zodat `state.js` nog maar één gedeelde module-instantie oplevert. De werkende XR hit-test/surface-detectie uit v0.8.29.1.2 blijft behouden. Daarnaast is een expliciete rendering-state controle toegevoegd vóór punt/preview-geometrie wordt aangemaakt.
