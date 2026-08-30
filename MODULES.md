@@ -1,3 +1,14 @@
+# v0.8.32.1 module-update — Horizontal Axis Lock
+
+**Drawing Core / Constraints**
+- De bestaande horizontale constraint heet in de HUD nu **Horizontaal · vrij**.
+- Nieuwe constraint **Horizontaal · asvast** vergrendelt een segment op de dichtstbijzijnde horizontale X- of Z-hoofdas.
+- Bij vrije afstand wordt de vizierpositie orthogonaal op die as geprojecteerd.
+- Bij exacte afstand bepaalt het vizier alleen welke as/richting gekozen wordt; de ingevoerde metrische afstand blijft de geometrische lengte.
+- Dezelfde constraint-validatie wordt gebruikt door Smart Snap, zodat snapping de asvergrendeling niet mag breken.
+
+---
+
 # v0.8.32 module-update — Measure Engine: Polyline & Angles
 
 **Measure Engine / geometry.js**
@@ -48,7 +59,7 @@ v0.8.29.1.2 voegt uitsluitend een live XR hit-test diagnose-HUD toe.
 
 Actuele cumulatieve modulehandleiding. Bij iedere release moet dit document worden bijgewerkt wanneer een module of werking verandert.
 
-**Huidige appversie:** v0.8.31
+**Huidige appversie:** v0.8.32.1
 
 ## 1. AR Core
 **Status:** actief / core.  

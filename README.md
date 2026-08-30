@@ -1,3 +1,28 @@
+# Measure AR v0.8.32.1 — Horizontal Axis Lock
+
+GitHub Pages: https://gasvdv-lab.github.io/Measure_tool/
+
+Deze onderhoudsrelease bouwt rechtstreeks verder op v0.8.32. De bewezen punt-/lijnplaatsing en Measure Engine blijven intact; alleen de horizontale richtingsconstraint wordt uitgebreid.
+
+## Nieuw in v0.8.32.1
+- **Horizontaal · vrij** behoudt het bestaande gedrag: de lijn blijft horizontaal, maar de richting volgt het vizier.
+- Nieuwe keuze **Horizontaal · asvast** voor kaarsrechte orthogonale lijnen.
+- Asvast kiest automatisch de dichtstbijzijnde horizontale X- of Z-hoofdrichting en vergrendelt de kandidaat daarop.
+- Werkt zowel met vrije plaatsing als met een exact ingestelde afstand.
+- Smart Snap mag alleen een bestaand punt hergebruiken wanneer dat punt ook aan de asconstraint voldoet.
+- Geen wijzigingen aan World Lock, AR hit-test, CAD of bestaande meetberekeningen.
+
+## Testdoel v0.8.32.1
+1. Start **Lijn** en plaats punt A.
+2. Kies **Horizontaal · vrij** en bevestig dat het bestaande horizontale gedrag nog werkt.
+3. Start opnieuw en kies **Horizontaal · asvast**. Beweeg het vizier diagonaal: de preview moet exact langs één hoofdas blijven.
+4. Richt meer naar de andere hoofdas: de preview moet naar die as overschakelen.
+5. Stel bijvoorbeeld **1000 mm** exact in met Asvast en controleer dat de lijn exact 1000 mm blijft.
+6. Herhaal bij een polyline A→B→C om te controleren dat elk nieuw segment asvast kan worden gezet.
+7. Regressie: Vrij, Horizontaal vrij, Verticaal, Parallel, Loodrecht en Eigen hoek blijven beschikbaar.
+
+---
+
 # Measure AR v0.8.32 — Polyline & Angle Measurements
 
 GitHub Pages: https://gasvdv-lab.github.io/Measure_tool/

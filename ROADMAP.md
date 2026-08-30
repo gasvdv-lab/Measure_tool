@@ -1,6 +1,6 @@
 # Measure AR — actuele roadmapstatus
 
-**Huidige versie:** v0.8.32 — Polyline & Angle Measurements  
+**Huidige versie:** v0.8.32.1 — Horizontal Axis Lock  
 **Stabiele baseline:** v0.8.29.1.3 fysiek geslaagd: surface hit → punt A → punt B → lijn.  
 **Actieve ontwikkelfase:** Measure Engine.  
 **CAD:** voorlopig geparkeerd; bestaande CAD-code blijft behouden voor latere hervatting.
@@ -25,6 +25,14 @@
 - [x] Geometrische bronwaarde intern in meter behouden.
 - [ ] AR-ANDROID: fysieke v0.8.31 regressietest.
 
+
+## v0.8.32.1 — Horizontal Axis Lock
+- [x] Bestaande Horizontaal-mode expliciet als **Horizontaal · vrij** tonen.
+- [x] Nieuwe **Horizontaal · asvast** constraint toevoegen.
+- [x] Automatisch vergrendelen op dichtstbijzijnde horizontale X/Z-hoofdas.
+- [x] Asvast ondersteunen voor vrije én exacte afstand.
+- [x] Constraint-validatie en Smart Snap blijven geometrisch consistent.
+- [ ] AR-ANDROID: fysieke v0.8.32.1 praktijktest.
 
 ## v0.8.32 — Polyline & Angle Measurements
 - [x] Bestaande Doorlopende lijn als expliciet meetobject registreren.

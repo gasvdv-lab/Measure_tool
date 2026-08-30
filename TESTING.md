@@ -1,3 +1,23 @@
+# v0.8.32.1 — Horizontal Axis Lock
+
+## Automatisch uitgevoerd
+- [x] JavaScript-syntaxcontrole op alle JS-bestanden.
+- [x] Alle interne ES-module imports gebruiken één build-ID `0.8.32.1-20260830-horizontal-axis-lock`.
+- [x] Nieuwe constraint `axis` is opgenomen in richtingselectie, kandidaatberekening en constraint-validatie.
+- [x] ZIP-integriteit en vereiste documentatie gecontroleerd.
+
+## Fysiek op Android/Chrome/WebXR — uitvoeren
+- [ ] AR start en surface-detectie blijft normaal werken.
+- [ ] Lijn → punt A → **Horizontaal · vrij** werkt zoals in v0.8.32.
+- [ ] Lijn → punt A → **Horizontaal · asvast** houdt de preview exact langs één horizontale hoofdas.
+- [ ] Bij diagonaal bewegen schakelt de richting voorspelbaar tussen X- en Z-as.
+- [ ] Exacte afstand + Asvast behoudt exact de ingevoerde mm/cm/m-afstand.
+- [ ] Polyline kan meerdere asvaste segmenten maken.
+- [ ] Smart Snap trekt een asvaste kandidaat niet naar een punt dat buiten de as ligt.
+- [ ] Vrij / Verticaal / Op oppervlak / Parallel / Loodrecht / Eigen hoek vertonen geen regressie.
+
+---
+
 # v0.8.32 — aanvullende tests
 
 - **AUTO:** JavaScript-syntax, interne module-imports, één gedeelde build-ID en ZIP-integriteit.
