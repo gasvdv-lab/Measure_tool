@@ -1,3 +1,7 @@
+# v0.8.29.1.3 — State Fix
+
+De AR-, teken-, geometrie-, opslag-, CAD-, wall- en world-lockmodules delen opnieuw één canonieke `state.js`-module-instantie. Dit herstelt punt- en lijncreatie na succesvolle WebXR hit-test.
+
 # Tijdelijke diagnostiek
 
 v0.8.29.1.2 voegt uitsluitend een live XR hit-test diagnose-HUD toe.

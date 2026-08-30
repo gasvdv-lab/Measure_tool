@@ -1,3 +1,16 @@
+# v0.8.29.1.3 — State Fix
+
+## Nieuwe regressietest
+1. Open AR op Android/Chrome.
+2. Bevestig dat surface diagnostic een geldige target toont.
+3. Kies Lijn en plaats punt 1.
+   - Geslaagd: punt verschijnt; geen `Cannot read properties of null (reading 'Group')`.
+4. Plaats punt 2.
+   - Geslaagd: lijn verschijnt tussen beide punten.
+5. Verlaat AR en open opnieuw.
+   - Geslaagd: sessie start opnieuw zonder state-fout.
+6. Test bestaand project openen, nieuw project maken en CAD-import als regressie.
+
 # v0.8.29.1.2 — XR Surface Diagnostic
 
 - [ ] AR-IN: richt op goed verlichte vloer/tafel en noteer exact de regel `XR ...`.

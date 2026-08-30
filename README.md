@@ -1,3 +1,15 @@
+# Measure AR v0.8.29.1.3 — State Fix
+
+Fixrelease voor de AR-tekencrash `Cannot read properties of null (reading 'Group')`. Alle ES-module imports gebruiken nu exact dezelfde build-ID, zodat `state.js` nog maar één gedeelde module-instantie oplevert. De werkende XR hit-test/surface-detectie uit v0.8.29.1.2 blijft behouden. Daarnaast is een expliciete rendering-state controle toegevoegd vóór punt/preview-geometrie wordt aangemaakt.
+
+## Testdoel v0.8.29.1.3
+- Start AR en wacht tot HUD `Hits > 0`, `Pose ✓`, `Target ✓` toont.
+- Kies **Lijn** en druk op de blauwe bevestigingsknop om het eerste punt te plaatsen.
+- Verwacht: geen `.Group`-fout; eerste punt verschijnt en `Start` wordt ingevuld.
+- Richt op een tweede positie en bevestig opnieuw.
+- Verwacht: lijn wordt zichtbaar en afstand/label wordt aangemaakt.
+- Controleer daarna project openen/nieuw project en CAD-import regressie.
+
 # Measure AR v0.8.29.1.2 — XR Surface Diagnostic
 
 Diagnostische release op basis van v0.8.29.1. Geen surface-toleranties of geometrie gewijzigd. Live HUD toont Viewer, HitSource, Hits, Pose en Target.

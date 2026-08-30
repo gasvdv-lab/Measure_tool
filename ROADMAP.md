@@ -1,3 +1,10 @@
+# Fixrelease v0.8.29.1.3 — State Fix ✅
+
+- [x] Dubbele `state.js` module-instanties door gemengde cache-busting querystrings verwijderd.
+- [x] Alle interne module-imports op één build-ID gezet.
+- [x] Rendering-state guard toegevoegd voor punt- en previewgeometrie.
+- [ ] Praktijktest op Android/Chrome: eerste punt + tweede punt + lijn tekenen.
+
 # Diagnostische tussenrelease v0.8.29.1.2
 
 Surface-detection oorzaak isoleren vóór verdere featureontwikkeling.
