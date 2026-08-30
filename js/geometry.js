@@ -1,4 +1,4 @@
-import {S,$,fmt,fmtLine,pointName,getPoint,getLine,getContour,getShape,projectToWorld} from "./state.js?v=0.8.37-20260830-spatial-objects";
+import {S,$,fmt,fmtLine,pointName,getPoint,getLine,getContour,getShape,projectToWorld} from "./state.js?v=0.8.37.1-20260830-rigid-world-lock";
 
 export function renderPosition(p){return p?.worldPosition||p?.position||null;}
 

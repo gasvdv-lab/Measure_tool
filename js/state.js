@@ -1,5 +1,5 @@
 export const S={
-  version:"0.8.37",build:"20260830-spatial-objects",
+  version:"0.8.37.1",build:"20260830-rigid-world-lock",
   THREE:null,renderer:null,scene:null,camera:null,reticle:null,xrSession:null,hitSource:null,hitRequested:false,
   currentTarget:null,currentRawTarget:null,currentHitResult:null,currentXRFrame:null,currentReferenceSpace:null,targetSource:"none",zoom:1,pointPlacementEpoch:0,referenceCaptureId:null,
   points:[],lines:[],contours:[],shapes:[],walls:[],openings:[],aiObjects:[],clearances:[],
@@ -19,7 +19,7 @@ export const S={
   history:{undo:[],redo:[],limit:80,restoring:false},
   preview:{point:null,line:null,label:null},
   diagnostics:{lastError:"",lastCheck:null,confirmBusy:false},
-  worldLock:{mode:"unknown",active:false,anchored:0,pending:0,lastError:""},
+  worldLock:{mode:"unknown",active:false,anchored:0,pending:0,lastError:"",masterPointId:null,transform:null},
   hud:{compact:true,lastPopover:null},
   project:{
     schemaVersion:1,id:null,name:"Nieuw project",createdAt:null,updatedAt:null,lastSavedAt:null,
@@ -72,14 +72,28 @@ export function pointName(i){
   return n?c+n:c;
 }
 export function projectToWorld(pos){
-  const tr=S.project?.spatial?.sessionTransform;if(!tr||!S.THREE)return pos.clone();
-  const R=new S.THREE.Matrix3().fromArray(tr.R),t=new S.THREE.Vector3(tr.t.x,tr.t.y,tr.t.z);
-  return pos.clone().applyMatrix3(R).add(t);
+  let out=pos.clone();
+  const tr=S.project?.spatial?.sessionTransform;
+  if(tr&&S.THREE){
+    const R=new S.THREE.Matrix3().fromArray(tr.R),t=new S.THREE.Vector3(tr.t.x,tr.t.y,tr.t.z);
+    out.applyMatrix3(R).add(t);
+  }
+  // World Lock is one rigid project-frame correction. Never apply independent
+  // point corrections: that can stretch, rotate or shear committed geometry.
+  const wl=S.worldLock?.transform;
+  if(wl&&S.THREE)out.applyMatrix4(new S.THREE.Matrix4().fromArray(wl));
+  return out;
 }
 export function worldToProject(pos){
-  const tr=S.project?.spatial?.sessionTransform;if(!tr||!S.THREE)return pos.clone();
-  const R=new S.THREE.Matrix3().fromArray(tr.R),Rt=R.clone().transpose(),t=new S.THREE.Vector3(tr.t.x,tr.t.y,tr.t.z);
-  return pos.clone().sub(t).applyMatrix3(Rt);
+  let out=pos.clone();
+  const wl=S.worldLock?.transform;
+  if(wl&&S.THREE)out.applyMatrix4(new S.THREE.Matrix4().fromArray(wl).invert());
+  const tr=S.project?.spatial?.sessionTransform;
+  if(tr&&S.THREE){
+    const R=new S.THREE.Matrix3().fromArray(tr.R),Rt=R.clone().transpose(),t=new S.THREE.Vector3(tr.t.x,tr.t.y,tr.t.z);
+    out.sub(t).applyMatrix3(Rt);
+  }
+  return out;
 }
 export function getPoint(id){return S.points.find(p=>p.id===id)||null;}
 export function getLine(id){return S.lines.find(l=>l.id===id)||null;}

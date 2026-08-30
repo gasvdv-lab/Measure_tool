@@ -1,6 +1,6 @@
-import {S,getPoint,getLine,getShape} from "./state.js?v=0.8.37-20260830-spatial-objects";
+import {S,getPoint,getLine,getShape} from "./state.js?v=0.8.37.1-20260830-rigid-world-lock";
 
-// v0.8.37: one registry/selection contract for heterogeneous spatial project objects.
+// v0.8.37.1: one registry/selection contract for heterogeneous spatial project objects.
 export const SPATIAL_TYPES=Object.freeze(["point","line","shape","wall","opening","ai","cad"]);
 export function spatialKey(type,id){return `${type}:${id}`;}
 export function selectSpatialObject(type,id){

@@ -1,4 +1,4 @@
-import {S} from "./state.js?v=0.8.37-20260830-spatial-objects";
+import {S} from "./state.js?v=0.8.37.1-20260830-rigid-world-lock";
 
 function now(){return new Date().toISOString();}
 function cleanName(v){return String(v||"").trim().replace(/\s+/g," ");}

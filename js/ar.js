@@ -1,10 +1,10 @@
-import {S,$} from "./state.js?v=0.8.37-20260830-spatial-objects";
-import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.37-20260830-spatial-objects";
-import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.37-20260830-spatial-objects";
-import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.37-20260830-spatial-objects";
-import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.37-20260830-spatial-objects";
-import {updateCadFrame,clearCadRuntime} from "./cad.js?v=0.8.37-20260830-spatial-objects";
-import {clearAiBuilderObjects} from "./ai-builder.js?v=0.8.37-20260830-spatial-objects";
+import {S,$} from "./state.js?v=0.8.37.1-20260830-rigid-world-lock";
+import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.37.1-20260830-rigid-world-lock";
+import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.37.1-20260830-rigid-world-lock";
+import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.37.1-20260830-rigid-world-lock";
+import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.37.1-20260830-rigid-world-lock";
+import {updateCadFrame,clearCadRuntime} from "./cad.js?v=0.8.37.1-20260830-rigid-world-lock";
+import {clearAiBuilderObjects,syncWorldLockedAiObjects} from "./ai-builder.js?v=0.8.37.1-20260830-rigid-world-lock";
 
 let samples=[],sampleSource=null,camPos,camQuat,forward;
 const xrDiag={viewer:"pending",hitSource:"pending",hits:0,pose:false,target:false,error:""};
@@ -159,7 +159,7 @@ function render(_,frame){
 
   updateXrDiag();
   const worldLockChanged=updateWorldLock(frame,ref);
-  if(worldLockChanged)syncWorldLockedWalls();
+  if(worldLockChanged){syncWorldLockedWalls();syncWorldLockedAiObjects();}
 
   updateCandidate({hit,hitNormal:normal,ray:cameraRay()});
   const referenceCaptureAllowed=Boolean(S.referenceCaptureId&&S.currentRawTarget&&S.currentHitResult&&S.targetSource==="hit");

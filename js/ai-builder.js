@@ -1,5 +1,5 @@
-import {S,getShape,getPoint} from "./state.js?v=0.8.37-20260830-spatial-objects";
-import {analyzeShapePoints,dispose} from "./geometry.js?v=0.8.37-20260830-spatial-objects";
+import {S,getShape,getPoint,projectToWorld} from "./state.js?v=0.8.37.1-20260830-rigid-world-lock";
+import {analyzeShapePoints,dispose} from "./geometry.js?v=0.8.37.1-20260830-rigid-world-lock";
 
 const DEFAULT_COLOR="#b98b5f";
 const MIN_HEIGHT=.01,MAX_HEIGHT=10;
@@ -27,7 +27,9 @@ function normalizedDirection(shape){
 }
 function makeMesh(shape,height,color=DEFAULT_COLOR){
   requireHorizontal(shape);
-  const analysis=analyzeShapePoints(shape.pointIds),T=S.THREE,base=analysis.plane.pts.map(p=>p.clone()),dir=normalizedDirection(shape),top=base.map(p=>p.clone().add(dir.clone().multiplyScalar(height)));
+  const analysis=analyzeShapePoints(shape.pointIds),T=S.THREE;
+  const baseProject=analysis.plane.pts.map(p=>p.clone()),dirProject=normalizedDirection(shape),topProject=baseProject.map(p=>p.clone().add(dirProject.clone().multiplyScalar(height)));
+  const base=baseProject.map(projectToWorld),top=topProject.map(projectToWorld);
   const arr=[];
   const pushTri=(a,b,c)=>arr.push(a.x,a.y,a.z,b.x,b.y,b.z,c.x,c.y,c.z);
   for(const tri of analysis.triangles){
@@ -91,5 +93,15 @@ export function restoreAiBuilderObjects(items=[]){
     try{const parsed={raw:src.lastCommand||"Hersteld concept",kind:src.kind||"volume",height:Number(src.height)};const rec=createRecord(shape,parsed,src);rec.mode=src.mode||"concept";rec.updatedAt=src.updatedAt||rec.updatedAt;rec.lastCommand=src.lastCommand||"";S.aiObjects.push(rec);}catch(err){console.warn("AI Builder object kon niet worden hersteld",src?.id,err);}
   }
   document.dispatchEvent(new CustomEvent("measurear:ai-builder-changed"));
+}
+
+export function syncWorldLockedAiObjects(){
+  const key=(S.worldLock?.transform||[]).map(v=>Math.round(v*1000000)/1000000).join(",");
+  for(const rec of S.aiObjects){
+    if(rec._worldLockKey===key)continue;
+    const shape=getShape(rec.sourceShapeId);if(!shape)continue;
+    rec._worldLockKey=key;
+    try{dispose(rec.mesh);rec.mesh=makeMesh(shape,rec.height,rec.color);}catch(err){console.warn("AI-object World Lock sync mislukt",rec.id,err);}
+  }
 }
 export function aiObjectSummary(o){if(!o)return "Nog geen AI-concept op deze vorm.";return `${o.name} · hoogte ${(o.height*100).toFixed(1)} cm · ${o.locked?"vastgezet":"bewerkbaar"}`;}

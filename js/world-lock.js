@@ -1,4 +1,4 @@
-import {S,getPoint} from "./state.js?v=0.8.37-20260830-spatial-objects";
+import {S,getPoint,projectToWorld} from "./state.js?v=0.8.37.1-20260830-rigid-world-lock";
 
 // Session-local WebXR anchor manager.
 // Project coordinates remain immutable in point.position/point.locked.
@@ -11,7 +11,8 @@ const hitAnchors=new Map();
 // from the exact committed geometry (especially a hit-test anchor). Keep that
 // initial difference as a fixed offset so acquiring the anchor can never make
 // an already confirmed point jump.
-const anchorOffsets=new Map();
+let masterPointId=null;
+let masterInitialMatrix=null;
 let support="unknown";
 let lastError="";
 let anchorEpoch=0;
@@ -23,10 +24,10 @@ function enabledFeatures(session){
 export function configureWorldLock(session){
   anchorEpoch++;
   for(const a of anchors.values()){try{a?.delete?.();}catch{}}
-  anchors.clear();pending.clear();creating.clear();hitAnchors.clear();anchorOffsets.clear();lastError="";
+  anchors.clear();pending.clear();creating.clear();hitAnchors.clear();masterPointId=null;masterInitialMatrix=null;lastError="";
   const enabled=enabledFeatures(session);
   support=enabled.includes("anchors")?"anchors":"fallback";
-  S.worldLock={mode:support,active:support==="anchors",anchored:0,pending:0,lastError:""};
+  S.worldLock={mode:support,active:support==="anchors",anchored:0,pending:0,lastError:"",masterPointId:null,transform:null};
   for(const p of S.points)queuePointAnchor(p.id);
   emitStatus();
 }
@@ -47,7 +48,7 @@ export function queuePointAnchor(pointId){
 }
 
 export function removePointAnchor(pointId){
-  pending.delete(pointId);creating.delete(pointId);hitAnchors.delete(pointId);anchorOffsets.delete(pointId);
+  pending.delete(pointId);creating.delete(pointId);hitAnchors.delete(pointId);
   const a=anchors.get(pointId);
   try{a?.delete?.();}catch{}
   anchors.delete(pointId);
@@ -60,7 +61,7 @@ export function detachAllPointAnchors(){
   // async anchor-creaties uit de vorige context.
   anchorEpoch++;
   for(const a of anchors.values()){try{a?.delete?.();}catch{}}
-  anchors.clear();pending.clear();creating.clear();hitAnchors.clear();anchorOffsets.clear();
+  anchors.clear();pending.clear();creating.clear();hitAnchors.clear();masterPointId=null;masterInitialMatrix=null;if(S.worldLock){S.worldLock.masterPointId=null;S.worldLock.transform=null;}
   if(S.worldLock)Object.assign(S.worldLock,{anchored:0,pending:0});
   emitStatus();
 }
@@ -68,7 +69,7 @@ export function detachAllPointAnchors(){
 export function resetWorldLock(){
   anchorEpoch++;
   for(const a of anchors.values()){try{a?.delete?.();}catch{}}
-  anchors.clear();pending.clear();creating.clear();hitAnchors.clear();anchorOffsets.clear();support="unknown";lastError="";
+  anchors.clear();pending.clear();creating.clear();hitAnchors.clear();masterPointId=null;masterInitialMatrix=null;if(S.worldLock){S.worldLock.masterPointId=null;S.worldLock.transform=null;}support="unknown";lastError="";
   if(S.worldLock)Object.assign(S.worldLock,{mode:"unknown",active:false,anchored:0,pending:0,lastError:""});
 }
 
@@ -144,28 +145,50 @@ export function updateWorldLock(frame,ref){
   }
 
   let changed=false;
-  for(const p of S.points){
-    if(!p.worldPosition)p.worldPosition=p.position.clone();
-    const anchor=anchors.get(p.id);
-    if(!anchor)continue;
-    const pose=frame.getPose(anchor.anchorSpace,ref);if(!pose)continue;
-    const t=pose.transform.position;
-    // First valid pose calibrates the anchor against the exact committed
-    // display coordinate. This is the critical no-jump invariant: anchor
-    // acquisition may stabilize a point, but may not relocate it.
-    let off=anchorOffsets.get(p.id);
-    if(!off){
-      const current=p.worldPosition||p.position;
-      off={x:current.x-t.x,y:current.y-t.y,z:current.z-t.z};
-      anchorOffsets.set(p.id,off);
+  // A complete project is one rigid body. Pick the first healthy anchor as the
+  // session master and use only its rigid pose delta for the complete project.
+  // Extra point anchors remain useful as fallbacks/diagnostics, but may never
+  // independently move vertices and therefore can never deform a line/shape/wall.
+  if(!masterPointId||!anchors.has(masterPointId)){
+    masterPointId=anchors.keys().next().value||null;
+    masterInitialMatrix=null;
+    if(S.worldLock)S.worldLock.masterPointId=masterPointId;
+  }
+  if(masterPointId){
+    const anchor=anchors.get(masterPointId),pose=anchor?frame.getPose(anchor.anchorSpace,ref):null;
+    if(pose){
+      const current=new S.THREE.Matrix4().fromArray(pose.transform.matrix);
+      if(!masterInitialMatrix){
+        const prev=S.worldLock?.transform;
+        if(prev){
+          // Master failover: calibrate the replacement against the already
+          // active rigid transform so switching anchors cannot move the project.
+          const desired=new S.THREE.Matrix4().fromArray(prev);
+          masterInitialMatrix=desired.clone().invert().multiply(current.clone());
+        }else{
+          masterInitialMatrix=current.clone();
+          if(S.worldLock)S.worldLock.transform=null; // first acquisition: no jump
+        }
+      }else{
+        const delta=current.clone().multiply(masterInitialMatrix.clone().invert());
+        const prev=S.worldLock?.transform;
+        const arr=delta.toArray();
+        if(!prev||arr.some((v,i)=>Math.abs(v-prev[i])>1e-7))changed=true;
+        if(S.worldLock)S.worldLock.transform=arr;
+      }
     }
-    const nx=t.x+off.x,ny=t.y+off.y,nz=t.z+off.z;
-    const dx=p.worldPosition.x-nx,dy=p.worldPosition.y-ny,dz=p.worldPosition.z-nz;
-    if(dx*dx+dy*dy+dz*dz>1e-10)changed=true;
-    p.worldPosition.set(nx,ny,nz);
+  }
+  // Recompute every committed point from immutable project geometry through
+  // the same rigid transform. This is the invariant for every application.
+  for(const p of S.points){
+    const q=projectPositionForWorldLock(p);
+    if(!p.worldPosition)p.worldPosition=q.clone();
+    else p.worldPosition.copy(q);
   }
   return changed;
 }
+
+function projectPositionForWorldLock(point){return projectToWorld(point.position);}
 
 // Geometry modules can use this without knowing anything about WebXR anchors.
 export function displayPosition(point){

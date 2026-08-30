@@ -1,6 +1,6 @@
 
-import {S,getPoint,getLine} from "./state.js?v=0.8.37-20260830-spatial-objects";
-import {dispose,renderPosition} from "./geometry.js?v=0.8.37-20260830-spatial-objects";
+import {S,getPoint,getLine} from "./state.js?v=0.8.37.1-20260830-rigid-world-lock";
+import {dispose,renderPosition} from "./geometry.js?v=0.8.37.1-20260830-rigid-world-lock";
 
 function cleanName(name){return String(name||"").trim().replace(/\s+/g," ");}
 export function wallNameExists(name,excludeId=null){

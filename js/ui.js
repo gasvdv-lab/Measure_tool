@@ -1,34 +1,34 @@
-import {S,$,fmt,fmtLine,fmtAreaUnit,fmtVolumeUnit,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.37-20260830-spatial-objects";
+import {S,$,fmt,fmtLine,fmtAreaUnit,fmtVolumeUnit,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.37.1-20260830-rigid-world-lock";
 import {
   startTool,cancelTool,setPlacement,setDistance,setConstraint,setAxisDirection,setPerpendicularMode,setAngle,flipSide,setReferenceLine,setSnapMode,
   confirmCandidate,undoToolStep,finishTool,toolLabel,constraintLabel,getActivePoint,referenceRequired,resetDrawingCore
-} from "./drawing-core.js?v=0.8.37-20260830-spatial-objects";
+} from "./drawing-core.js?v=0.8.37.1-20260830-rigid-world-lock";
 import {
   createShape,updateShape,deleteShapeOnly,deleteShapeWithContour,deleteLineRaw,deletePointRaw,renamePoint,updateLine,analyzeContour,analyzePolyline,updatePolyline,
   lineDependencies,pointDependencies,canDeleteLine,canDeletePoint,clearAllGeometry,validateGeometryState,dispose
-} from "./geometry.js?v=0.8.37-20260830-spatial-objects";
-import {startAR,resumeARFromGesture,suspendARForCadImport,applyZoom,resetTrackingSamples} from "./ar.js?v=0.8.37-20260830-spatial-objects";
-import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.37-20260830-spatial-objects";
-import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.37-20260830-spatial-objects";
+} from "./geometry.js?v=0.8.37.1-20260830-rigid-world-lock";
+import {startAR,resumeARFromGesture,suspendARForCadImport,applyZoom,resetTrackingSamples} from "./ar.js?v=0.8.37.1-20260830-rigid-world-lock";
+import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.37.1-20260830-rigid-world-lock";
+import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.37.1-20260830-rigid-world-lock";
 import {
   initProjectStorage,saveCurrentProject,listProjects,loadStoredProject,newProject,duplicateStoredProject,
   deleteStoredProject,renameStoredProject,projectStats,formatStats,getStoredProjectInfo,hasRecovery,recoveryInfo,restoreRecovery,clearRecovery,
   exportCurrentProject,importProjectFile,markDirtyAndRecover
-} from "./project-storage.js?v=0.8.37-20260830-spatial-objects";
+} from "./project-storage.js?v=0.8.37.1-20260830-rigid-world-lock";
 import {
   captureCurrentGeo,addProjectReference,removeProjectReference,clearProjectReferences,beginRelocalization,cancelRelocalization,
   captureRelocalizationPoint,solveRelocalization,applyRelocalization,relocalizationSummary,beginSpatialRestore
-} from "./relocalization.js?v=0.8.37-20260830-spatial-objects";
+} from "./relocalization.js?v=0.8.37.1-20260830-rigid-world-lock";
 
-import {captureHybridBaseline,assessHybridLocation,enableHeading} from "./hybrid-localization.js?v=0.8.37-20260830-spatial-objects";
+import {captureHybridBaseline,assessHybridLocation,enableHeading} from "./hybrid-localization.js?v=0.8.37.1-20260830-rigid-world-lock";
 
-import {detachAllPointAnchors} from "./world-lock.js?v=0.8.37-20260830-spatial-objects";
-import {importCadFile,listCadModels,cadStatus,selectCad,beginCadPlacement,rotateCad,moveCadHeight,confirmCadPlacement,cancelCadPlacement,deleteCadModel,clearCadRuntime,restoreCadRuntime} from "./cad.js?v=0.8.37-20260830-spatial-objects";
-import {initProfessionalColorPickers,refreshProfessionalColorPickers} from "./color-picker.js?v=0.8.37-20260830-spatial-objects";
-import {initThemeSelector} from "./theme-selector.js?v=0.8.37-20260830-spatial-objects";
-import {executeAiPrototype,getAiObject,getAiObjectForShape,toggleAiObjectLock,deleteAiObject,clearAiBuilderObjects,aiObjectSummary} from "./ai-builder.js?v=0.8.37-20260830-spatial-objects";
-import {listClearanceTargets,analyzeClearance,clearanceStatus,getClearance,createClearance,updateClearance,deleteClearance,clearClearances} from "./clearance.js?v=0.8.37-20260830-spatial-objects";
-import {selectSpatialObject,listSpatialObjects} from "./spatial-objects.js?v=0.8.37-20260830-spatial-objects";
+import {detachAllPointAnchors} from "./world-lock.js?v=0.8.37.1-20260830-rigid-world-lock";
+import {importCadFile,listCadModels,cadStatus,selectCad,beginCadPlacement,rotateCad,moveCadHeight,confirmCadPlacement,cancelCadPlacement,deleteCadModel,clearCadRuntime,restoreCadRuntime} from "./cad.js?v=0.8.37.1-20260830-rigid-world-lock";
+import {initProfessionalColorPickers,refreshProfessionalColorPickers} from "./color-picker.js?v=0.8.37.1-20260830-rigid-world-lock";
+import {initThemeSelector} from "./theme-selector.js?v=0.8.37.1-20260830-rigid-world-lock";
+import {executeAiPrototype,getAiObject,getAiObjectForShape,toggleAiObjectLock,deleteAiObject,clearAiBuilderObjects,aiObjectSummary} from "./ai-builder.js?v=0.8.37.1-20260830-rigid-world-lock";
+import {listClearanceTargets,analyzeClearance,clearanceStatus,getClearance,createClearance,updateClearance,deleteClearance,clearClearances} from "./clearance.js?v=0.8.37.1-20260830-rigid-world-lock";
+import {selectSpatialObject,listSpatialObjects} from "./spatial-objects.js?v=0.8.37.1-20260830-rigid-world-lock";
 
 
 const pages=["home","project","references","relocalize","projects","cad","objects","measurements","clearance","polyline","line","point","walltool","wallcreate","wall","openingcreate","opening","shapecreate","shape","aibuilder","settings","clear"];
