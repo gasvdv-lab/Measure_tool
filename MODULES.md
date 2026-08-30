@@ -1,3 +1,10 @@
+# Module-update v0.8.36.2.1
+
+## Direction & Angle Constraint Engine
+Ondersteunt vrije/horizontale/asvaste/verticale/surface/parallel/loodrechte/eigen-hoek-richtingen. In v0.8.36.2.1 is loodrecht uitgebreid met een horizontale en verticale 3D-modus. Voor loodrecht kan het eerste punt rechtstreeks uit een willekeurige positie op de gekozen referentielijn worden afgeleid; de projectie blijft deterministische geometrie. Eigen hoek kan na configuratie expliciet naar de compacte tekenmodus worden gesloten.
+
+---
+
 # v0.8.36.1 modulewijziging
 
 **World Lock** — per-point WebXR anchor repair. Surface-confirmed points prefer `XRHitTestResult.createAnchor()` independently of `XRFrame.createAnchor()`. Een individuele anchorfout schakelt World Lock niet langer globaal uit. Project Space blijft geometrische waarheid.

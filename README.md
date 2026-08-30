@@ -1,3 +1,18 @@
+# Measure AR v0.8.36.2.1 — Angle Constraint UX & 3D Perpendicular Fix
+
+Deze correctierelease bouwt op v0.8.36.2 en laat World Lock/meetkern ongemoeid.
+
+Nieuw/gecorrigeerd:
+- **Eigen hoek** heeft nu een expliciete **Klaar · tekenen**-actie; daarna verdwijnt het grote constraintpaneel en blijft alleen de compacte teken-HUD zichtbaar.
+- **Loodrecht 90° · horizontaal** tekent exact haaks in het horizontale vlak, met links/rechts als expliciete zijde.
+- **Loodrecht 90° · verticaal** tekent exact haaks op de volledige 3D-referentielijn in de zo verticaal mogelijke richting, met omhoog/omlaag.
+- Een loodrechte lijn kan starten vanaf **eender welke plaats op de referentielijn**: richt nabij de referentielijn; het kandidaat-startpunt wordt exact op het lijnsegment geprojecteerd. Bestaande eindpunten worden hergebruikt wanneer je er dichtbij richt.
+- Exacte afstand blijft combineerbaar met loodrecht/eigen hoek.
+
+Vaste app-link: https://gasvdv-lab.github.io/Measure_tool/
+
+---
+
 # v0.8.36.1 — World Lock Position Repair
 
 Onderhoudsrelease op v0.8.36. Herstelt de WebXR-anchorroute zodat één mislukte anchor niet de volledige sessie naar lokale tracking terugzet en surface hit-anchors niet onterecht afhankelijk zijn van `XRFrame.createAnchor()`. Geen nieuwe meetfunctionaliteit.

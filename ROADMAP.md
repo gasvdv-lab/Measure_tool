@@ -1,3 +1,13 @@
+# Actuele status — v0.8.36.2.1
+
+- [x] Direction & Angle Constraint repair
+- [x] Eigen-hoek UX: configuratie afsluiten vóór tekenen
+- [x] Loodrecht 90° horizontaal/verticaal
+- [x] Loodrecht starten vanaf willekeurig punt op referentielijn
+- [ ] Fysieke AR-gate v0.8.36.2.1
+
+---
+
 # Update v0.8.36.1
 
 - [x] World Lock position repair: robuustere per-point anchorafhandeling.

@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#111111">
   <script>try{document.documentElement.dataset.appTheme=localStorage.getItem("measurear.ui.theme.v1")||"technical-green"}catch{document.documentElement.dataset.appTheme="technical-green"}</script>
   <title>Measure AR v0.8.30</title>
-  <link rel="stylesheet" href="./css/app.css?v=0.8.36.2-20260830-direction-angle-repair">
+  <link rel="stylesheet" href="./css/app.css?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular">
 </head>
 <body>
 <div id="app">
@@ -451,10 +451,19 @@
       <div class="hudReferenceActions"><button id="hudLastReferenceBtn" class="secondary" type="button">Gebruik laatste lijn</button></div>
       <div id="hudReferenceHelp" class="help">Kies de lijn waarop deze richting gebaseerd wordt.</div>
     </div>
+    <div id="hudPerpWrap" class="hudWide" style="display:none">
+      <div class="help"><strong>Loodrecht vlak</strong> · horizontaal voor een dwarslijn/muur, verticaal voor omhoog/omlaag.</div>
+      <div class="hudReferenceActions">
+        <button data-perpendicular-mode="horizontal" type="button">Horizontaal 90°</button>
+        <button data-perpendicular-mode="vertical" type="button">Verticaal 90°</button>
+      </div>
+      <div class="help">Zonder actief vertrekpunt: richt nabij eender welke plaats op de referentielijn. Het vertrekpunt wordt exact op die lijn geprojecteerd.</div>
+    </div>
     <div id="hudAngleWrap" class="hudWide hudInline">
       <label>Hoek t.o.v. referentielijn<input id="hudAngle" type="number" min="-180" max="180" step=".5" value="45"></label>
       <button id="hudSideBtn" class="secondary">Zijde ↔</button>
     </div>
+    <div id="hudConstraintDoneWrap" class="hudWide" style="display:none"><button id="hudConstraintDoneBtn" class="primary" type="button">Klaar · tekenen</button></div>
   </div>
 
   <div id="distancePopover" class="hudPopover distancePopover">
@@ -475,6 +484,6 @@
   <div id="hint">Open ☰ en kies wat je wilt tekenen.</div>
 </div>
 
-<script type="module" src="./js/bootstrap.js?v=0.8.36.2-20260830-direction-angle-repair"></script>
+<script type="module" src="./js/bootstrap.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular"></script>
 </body>
 </html>

@@ -1,3 +1,14 @@
+# v0.8.36.2.1 — gerichte fysieke test
+
+1. **AR-IN/ROOM**: Eigen hoek → referentielijn → hoek instellen → zijde → **Klaar · tekenen**. Verwacht: groot paneel sluit en camera blijft vrij.
+2. **AR-IN/ROOM**: Loodrecht 90° → horizontaal → referentielijn → richt midden op referentielijn → bevestig vertrekpunt → teken dwarslijn. Verwacht: vertrekpunt ligt exact op referentielijn en hoek = 90°.
+3. **AR-IN/ROOM**: herhaal vanaf begin- en eindpunt van referentielijn. Verwacht: bestaand punt wordt hergebruikt.
+4. **AR-IN/ROOM**: Loodrecht 90° → verticaal → omhoog en omlaag testen. Verwacht: exact 90° op referentielijn.
+5. **AR-IN/ROOM**: combineer horizontaal loodrecht met exacte afstand. Verwacht: zowel hoek als afstand exact.
+6. **AR-IN/ROOM**: beweeg rond de nieuwe geometrie. Verwacht: World Lock-regressie niet teruggekeerd.
+
+---
+
 # v0.8.36.1 fysieke AR-gate
 
 1. AR-IN/ROOM: teken een vrije lijn op een duidelijk oppervlak. Loop zijwaarts en rond de lijn; ze moet op dezelfde fysieke plek blijven.
