@@ -1,35 +1,36 @@
-import {S,$,fmt,fmtLine,fmtAreaUnit,fmtVolumeUnit,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.35-20260830-volume-clearance-foundation";
+import {S,$,fmt,fmtLine,fmtAreaUnit,fmtVolumeUnit,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.36-20260830-clearance-collision-2";
 import {
   startTool,cancelTool,setPlacement,setDistance,setConstraint,setAngle,flipSide,setReferenceLine,setSnapMode,
   confirmCandidate,undoToolStep,finishTool,toolLabel,constraintLabel,getActivePoint,referenceRequired,resetDrawingCore
-} from "./drawing-core.js?v=0.8.35-20260830-volume-clearance-foundation";
+} from "./drawing-core.js?v=0.8.36-20260830-clearance-collision-2";
 import {
   createShape,updateShape,deleteShapeOnly,deleteShapeWithContour,deleteLineRaw,deletePointRaw,renamePoint,updateLine,analyzeContour,analyzePolyline,updatePolyline,
   lineDependencies,pointDependencies,canDeleteLine,canDeletePoint,clearAllGeometry,validateGeometryState,dispose
-} from "./geometry.js?v=0.8.35-20260830-volume-clearance-foundation";
-import {startAR,resumeARFromGesture,suspendARForCadImport,applyZoom,resetTrackingSamples} from "./ar.js?v=0.8.35-20260830-volume-clearance-foundation";
-import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.35-20260830-volume-clearance-foundation";
-import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.35-20260830-volume-clearance-foundation";
+} from "./geometry.js?v=0.8.36-20260830-clearance-collision-2";
+import {startAR,resumeARFromGesture,suspendARForCadImport,applyZoom,resetTrackingSamples} from "./ar.js?v=0.8.36-20260830-clearance-collision-2";
+import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.36-20260830-clearance-collision-2";
+import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.36-20260830-clearance-collision-2";
 import {
   initProjectStorage,saveCurrentProject,listProjects,loadStoredProject,newProject,duplicateStoredProject,
   deleteStoredProject,renameStoredProject,projectStats,formatStats,getStoredProjectInfo,hasRecovery,recoveryInfo,restoreRecovery,clearRecovery,
   exportCurrentProject,importProjectFile,markDirtyAndRecover
-} from "./project-storage.js?v=0.8.35-20260830-volume-clearance-foundation";
+} from "./project-storage.js?v=0.8.36-20260830-clearance-collision-2";
 import {
   captureCurrentGeo,addProjectReference,removeProjectReference,clearProjectReferences,beginRelocalization,cancelRelocalization,
   captureRelocalizationPoint,solveRelocalization,applyRelocalization,relocalizationSummary,beginSpatialRestore
-} from "./relocalization.js?v=0.8.35-20260830-volume-clearance-foundation";
+} from "./relocalization.js?v=0.8.36-20260830-clearance-collision-2";
 
-import {captureHybridBaseline,assessHybridLocation,enableHeading} from "./hybrid-localization.js?v=0.8.35-20260830-volume-clearance-foundation";
+import {captureHybridBaseline,assessHybridLocation,enableHeading} from "./hybrid-localization.js?v=0.8.36-20260830-clearance-collision-2";
 
-import {detachAllPointAnchors} from "./world-lock.js?v=0.8.35-20260830-volume-clearance-foundation";
-import {importCadFile,listCadModels,cadStatus,selectCad,beginCadPlacement,rotateCad,moveCadHeight,confirmCadPlacement,cancelCadPlacement,deleteCadModel,clearCadRuntime,restoreCadRuntime} from "./cad.js?v=0.8.35-20260830-volume-clearance-foundation";
-import {initProfessionalColorPickers,refreshProfessionalColorPickers} from "./color-picker.js?v=0.8.35-20260830-volume-clearance-foundation";
-import {initThemeSelector} from "./theme-selector.js?v=0.8.35-20260830-volume-clearance-foundation";
-import {executeAiPrototype,getAiObject,getAiObjectForShape,toggleAiObjectLock,deleteAiObject,clearAiBuilderObjects,aiObjectSummary} from "./ai-builder.js?v=0.8.35-20260830-volume-clearance-foundation";
+import {detachAllPointAnchors} from "./world-lock.js?v=0.8.36-20260830-clearance-collision-2";
+import {importCadFile,listCadModels,cadStatus,selectCad,beginCadPlacement,rotateCad,moveCadHeight,confirmCadPlacement,cancelCadPlacement,deleteCadModel,clearCadRuntime,restoreCadRuntime} from "./cad.js?v=0.8.36-20260830-clearance-collision-2";
+import {initProfessionalColorPickers,refreshProfessionalColorPickers} from "./color-picker.js?v=0.8.36-20260830-clearance-collision-2";
+import {initThemeSelector} from "./theme-selector.js?v=0.8.36-20260830-clearance-collision-2";
+import {executeAiPrototype,getAiObject,getAiObjectForShape,toggleAiObjectLock,deleteAiObject,clearAiBuilderObjects,aiObjectSummary} from "./ai-builder.js?v=0.8.36-20260830-clearance-collision-2";
+import {listClearanceTargets,analyzeClearance,clearanceStatus,getClearance,createClearance,updateClearance,deleteClearance,clearClearances} from "./clearance.js?v=0.8.36-20260830-clearance-collision-2";
 
 
-const pages=["home","project","references","relocalize","projects","cad","objects","measurements","polyline","line","point","walltool","wallcreate","wall","openingcreate","opening","shapecreate","shape","aibuilder","settings","clear"];
+const pages=["home","project","references","relocalize","projects","cad","objects","measurements","clearance","polyline","line","point","walltool","wallcreate","wall","openingcreate","opening","shapecreate","shape","aibuilder","settings","clear"];
 let menuStack=["home"];
 let toastTimer=null;
 
@@ -61,8 +62,8 @@ function togglePopover(id){
 }
 function showPage(name,push=true){
   pages.forEach(p=>el("page-"+p)?.classList.remove("active"));const page=el("page-"+name);if(!page)throw new Error(`Menupagina ontbreekt: ${name}`);page.classList.add("active");
-  const titles={home:"Measure AR",project:"Project",references:"Projectreferenties",relocalize:"Projectpositie herstellen",projects:"Mijn projecten",cad:"CAD / 3D-model",objects:"Objecten",measurements:"Metingen",polyline:"Doorlopende meting",line:"Lijn",point:"Punt",walltool:"Muur tekenen",wallcreate:"Muur maken",wall:"Muur",openingcreate:"Opening toevoegen",opening:"Opening",shapecreate:"Vorm opslaan",shape:"Vorm",aibuilder:"AI Builder · Prototype",settings:"Instellingen",clear:"Alles wissen"};
-  el("menuTitle").textContent=titles[name]||name;if(push&&menuStack.at(-1)!==name)menuStack.push(name);el("menuBackBtn").style.visibility=name==="home"?"hidden":"visible";if(name==="objects")renderObjects();if(name==="measurements")renderMeasurements();if(name==="project")renderProjectPage();if(name==="references")renderReferenceManager();if(name==="relocalize")renderRelocalizePage();if(name==="projects")renderProjectsList();if(name==="cad")renderCadPage();requestAnimationFrame(refreshProfessionalColorPickers);
+  const titles={home:"Measure AR",project:"Project",references:"Projectreferenties",relocalize:"Projectpositie herstellen",projects:"Mijn projecten",cad:"CAD / 3D-model",objects:"Objecten",measurements:"Metingen",clearance:"Vrije ruimte / collision",polyline:"Doorlopende meting",line:"Lijn",point:"Punt",walltool:"Muur tekenen",wallcreate:"Muur maken",wall:"Muur",openingcreate:"Opening toevoegen",opening:"Opening",shapecreate:"Vorm opslaan",shape:"Vorm",aibuilder:"AI Builder · Prototype",settings:"Instellingen",clear:"Alles wissen"};
+  el("menuTitle").textContent=titles[name]||name;if(push&&menuStack.at(-1)!==name)menuStack.push(name);el("menuBackBtn").style.visibility=name==="home"?"hidden":"visible";if(name==="objects")renderObjects();if(name==="measurements")renderMeasurements();if(name==="clearance")renderClearancePage();if(name==="project")renderProjectPage();if(name==="references")renderReferenceManager();if(name==="relocalize")renderRelocalizePage();if(name==="projects")renderProjectsList();if(name==="cad")renderCadPage();requestAnimationFrame(refreshProfessionalColorPickers);
 }
 function cancelReferenceCapture(){
   S.referenceCaptureId=null;
@@ -364,16 +365,47 @@ function openPolylineEditor(c){
   el("polylineAngles").innerHTML=a.angles.length?`<strong>Hoeken</strong><br>${a.angles.map(x=>`${x.pointName}: ${x.degrees.toFixed(1)}°`).join("<br>")}`:"<strong>Hoeken</strong><br>Minstens 3 punten nodig.";
   showPage("polyline");
 }
+
+function fmtClearanceUnit(m,unit="cm"){return unit==="mm"?`${(m*1000).toFixed(0)} mm`:unit==="m"?`${m.toFixed(m<10?3:2)} m`:`${(m*100).toFixed(1)} cm`;}
+function fillClearanceSelect(select,targets,value){if(!select)return;select.innerHTML="";for(const t of targets){const o=document.createElement("option");o.value=t.ref;o.textContent=t.label;select.append(o);}if(value&&targets.some(t=>t.ref===value))select.value=value;}
+function renderClearanceResult(c=null){
+  const box=el("clearanceResult");if(!box)return;
+  const aRef=el("clearanceObjectA")?.value,bRef=el("clearanceObjectB")?.value,unit=el("clearanceUnit")?.value||c?.unit||"cm";
+  const rawReq=Number(el("clearanceRequired")?.value);const required=Number.isFinite(rawReq)?(unit==="mm"?rawReq/1000:unit==="m"?rawReq:rawReq/100):Number(c?.requiredM)||0;
+  try{const a=analyzeClearance(aRef,bRef);const margin=a.gap-required;
+    if(a.collision)box.textContent=`⚠ COLLISION · begrenzingen overlappen ca. ${fmtClearanceUnit(a.penetration,unit)} op de kleinste overlap-as.`;
+    else if(a.touching)box.textContent=`⚠ Objecten raken elkaar · vrije ruimte 0 ${unit}.`;
+    else box.textContent=`Vrije ruimte ${fmtClearanceUnit(a.gap,unit)} · vereist ${fmtClearanceUnit(required,unit)} · ${margin>=0?`✓ marge ${fmtClearanceUnit(margin,unit)}`:`⚠ tekort ${fmtClearanceUnit(Math.abs(margin),unit)}`} · ΔX ${fmtClearanceUnit(a.separation.x,unit)} · ΔY ${fmtClearanceUnit(a.separation.y,unit)} · ΔZ ${fmtClearanceUnit(a.separation.z,unit)}`;
+  }catch(err){box.textContent=err.message||String(err);}
+}
+function renderClearancePage(c=null){
+  const targets=listClearanceTargets(),selected=c||getClearance(S.selectedClearanceId),list=el("clearanceSavedList");
+  if(list){list.innerHTML="";for(const x of S.clearances){const row=document.createElement("div");row.className="objectRow measurementRow";const b=document.createElement("button");b.className="secondary";try{const st=clearanceStatus(x);b.textContent=`${x.name} · ${st.collision?"⚠ collision":st.passes?"✓ voldoende":"⚠ te klein"} · ${fmtClearanceUnit(st.gap,x.unit)}`;}catch{b.textContent=`${x.name} · object niet beschikbaar`;}b.onclick=()=>{S.selectedClearanceId=x.id;renderClearancePage(x);};const d=document.createElement("button");d.className="danger";d.textContent="Wis";d.onclick=()=>{runHistoryAction(`Vrije ruimte ${x.name} verwijderen`,()=>deleteClearance(x.id));afterProjectChange(`${x.name} verwijderd.`);renderClearancePage();renderMeasurements();};row.append(b,d);list.append(row);}}
+  fillClearanceSelect(el("clearanceObjectA"),targets,selected?.aRef);fillClearanceSelect(el("clearanceObjectB"),targets,selected?.bRef);
+  if(!selected&&targets.length>1){el("clearanceObjectA").selectedIndex=0;el("clearanceObjectB").selectedIndex=1;}
+  if(el("clearanceName"))el("clearanceName").value=selected?.name||`Vrije ruimte ${S.clearances.length+1}`;
+  if(el("clearanceUnit"))el("clearanceUnit").value=selected?.unit||S.defaults.unit||"cm";
+  if(el("clearanceRequired")){const u=el("clearanceUnit").value,m=Number(selected?.requiredM)||0;el("clearanceRequired").value=u==="mm"?(m*1000).toFixed(0):u==="m"?m.toFixed(3):(m*100).toFixed(1);}
+  const no=el("clearanceNoTargets");if(no){no.style.display=targets.length<2?"block":"none";no.textContent=targets.length<2?"Minstens twee ruimtelijke objecten nodig (muur, vorm, AI-object of geplaatst CAD-model).":"";}
+  ["clearanceAnalyzeBtn","clearanceSaveBtn"].forEach(id=>{if(el(id))el(id).disabled=targets.length<2;});renderClearanceResult(selected);
+}
+
 function renderMeasurements(){
   const box=el("measurementsList"),summary=el("measurementsSummary");if(!box)return;box.innerHTML="";
   const lines=S.lines.filter(l=>l.ownerType!=="wallbase"&&l.ownerType!=="polyline");
   const polylines=S.contours.filter(c=>c.kind==="polyline"&&!c.closed);
   const polyAnalyses=polylines.map(c=>({c,a:analyzePolyline(c)}));
   const areas=S.shapes.filter(s=>Number.isFinite(s.area));
+  const clearanceChecks=S.clearances||[];
   const total=lines.reduce((n,l)=>n+(Number.isFinite(l.distance)?l.distance:0),0)+polyAnalyses.reduce((n,x)=>n+x.a.totalLength,0);
-  const count=lines.length+polylines.length+areas.length;
-  if(summary)summary.textContent=count?`${count} meetobject(en) · lijnlengte ${fmt(total)}${areas.length?` · ${areas.length} oppervlakte(n)`:""}`:"Nog geen metingen.";
-  if(!count){box.innerHTML='<div class="help">Maak eerst een lijn, doorlopende lijn of gesloten vorm.</div>';return;}
+  const count=lines.length+polylines.length+areas.length+clearanceChecks.length;
+  if(summary)summary.textContent=count?`${count} meetobject(en) · lijnlengte ${fmt(total)}${areas.length?` · ${areas.length} oppervlakte(n)`:""}${clearanceChecks.length?` · ${clearanceChecks.length} vrije-ruimtecontrole(s)`:""}`:"Nog geen metingen.";
+  if(!count){box.innerHTML='<div class="help">Maak eerst een lijn, doorlopende lijn, gesloten vorm of vrije-ruimtecontrole.</div>';return;}
+  for(const c of clearanceChecks){
+    const row=document.createElement("div");row.className="objectRow measurementRow";const open=document.createElement("button");open.className="secondary";
+    try{const st=clearanceStatus(c);open.textContent=`${c.name} · ${st.collision?"⚠ collision":st.passes?"✓ voldoende":"⚠ te klein"} · ${fmtClearanceUnit(st.gap,c.unit)}`;}catch{open.textContent=`${c.name} · object niet beschikbaar`;}
+    open.onclick=()=>{S.selectedClearanceId=c.id;showPage("clearance");};row.append(open);box.append(row);
+  }
   for(const sh of areas){
     const row=document.createElement("div");row.className="objectRow measurementRow";
     const open=document.createElement("button");open.className="secondary";{const vol=sh.volumeEnabled&&Number.isFinite(Number(sh.volumeHeightM))?sh.area*Number(sh.volumeHeightM):null;open.textContent=`${sh.name} · ${fmtAreaUnit(sh.area,"m")} · omtrek ${fmtMeasureUnit(sh.perimeter,"m")}${Number.isFinite(vol)?` · volume ${fmtVolumeUnit(vol,"m")}`:""}`;}open.onclick=()=>openShape(sh.id);
@@ -625,7 +657,20 @@ export function initUI(){
     afterProjectChange(`Doorlopende meting ${c.name} opgeslagen.`);openPolylineEditor(c);
   });
 
-  bind("saveLineBtn","click",()=>{
+  
+  bind("clearanceAnalyzeBtn","click",()=>renderClearanceResult(getClearance(S.selectedClearanceId)));
+  ["clearanceObjectA","clearanceObjectB","clearanceRequired","clearanceUnit"].forEach(id=>bind(id,"change",()=>renderClearanceResult(getClearance(S.selectedClearanceId))));
+  bind("clearanceNewBtn","click",()=>{S.selectedClearanceId=null;renderClearancePage();});
+  bind("clearanceSaveBtn","click",()=>{
+    const unit=el("clearanceUnit").value,raw=Number(el("clearanceRequired").value),requiredM=unit==="mm"?raw/1000:unit==="m"?raw:raw/100;
+    if(!Number.isFinite(requiredM)||requiredM<0)throw new Error("Geef een geldige minimale vrije ruimte.");
+    let c=getClearance(S.selectedClearanceId);
+    if(c)runHistoryAction(`Vrije ruimte ${c.name} bewerken`,()=>updateClearance(c,{name:el("clearanceName").value,aRef:el("clearanceObjectA").value,bRef:el("clearanceObjectB").value,requiredM,unit}));
+    else c=runHistoryAction("Vrije-ruimtecontrole aanmaken",()=>createClearance({name:el("clearanceName").value,aRef:el("clearanceObjectA").value,bRef:el("clearanceObjectB").value,requiredM,unit}));
+    S.selectedClearanceId=c.id;afterProjectChange(`${c.name} opgeslagen.`);renderClearancePage(c);renderMeasurements();
+  });
+
+bind("saveLineBtn","click",()=>{
     const l=getLine(S.selectedLineId);if(!l)throw new Error("Geen lijn geselecteerd.");
     const clearanceEnabled=Boolean(el("editLineClearance")?.checked);const reqCm=Number(el("editLineClearanceRequired")?.value);
     if(clearanceEnabled&&(!Number.isFinite(reqCm)||reqCm<0))throw new Error("Geef een geldige vereiste vrije maat in cm.");
@@ -700,7 +745,7 @@ bind("saveWallBtn","click",()=>{
   bind("deleteShapeOnlyBtn","click",()=>{const s=getShape(S.selectedShapeId);if(!s)throw new Error("Geen vorm geselecteerd.");runHistoryAction(`Vorm ${s.name} verwijderen`,()=>{const ai=getAiObjectForShape(s.id);if(ai)deleteAiObject(ai.id);deleteShapeOnly(s.id);});showPage("objects");afterProjectChange(`Vorm ${s.name} verwijderd; gekoppeld AI-concept indien aanwezig ook verwijderd.`);});
   bind("deleteShapeContourBtn","click",()=>{const s=getShape(S.selectedShapeId);if(!s)throw new Error("Geen vorm geselecteerd.");runHistoryAction(`Vorm ${s.name} + contour verwijderen`,()=>{const ai=getAiObjectForShape(s.id);if(ai)deleteAiObject(ai.id);deleteShapeWithContour(s.id);});showPage("objects");afterProjectChange(`Vorm ${s.name}, contour en gekoppeld AI-concept verwijderd.`);});
 
-  bind("clearAllBtn","click",()=>showPage("clear"));bind("cancelClearBtn","click",()=>showPage("home",false));bind("confirmClearBtn","click",()=>{runHistoryAction("Alles wissen",()=>{clearCadRuntime();S.project.cad={models:[]};clearAiBuilderObjects();clearWalls();clearAllGeometry();clearProjectReferences();resetDrawingCore();});closeMenu();el("distance").textContent="—";el("hint").textContent="Alles gewist. Open ☰ om opnieuw te beginnen.";afterProjectChange("Alles gewist.");});
+  bind("clearAllBtn","click",()=>showPage("clear"));bind("cancelClearBtn","click",()=>showPage("home",false));bind("confirmClearBtn","click",()=>{runHistoryAction("Alles wissen",()=>{clearCadRuntime();S.project.cad={models:[]};clearAiBuilderObjects();clearClearances();clearWalls();clearAllGeometry();clearProjectReferences();resetDrawingCore();});closeMenu();el("distance").textContent="—";el("hint").textContent="Alles gewist. Open ☰ om opnieuw te beginnen.";afterProjectChange("Alles gewist.");});
 
   bind("menuSettingsBtn","click",()=>showPage("settings"));
   bind("defaultUnit","change",()=>{S.defaults.unit=el("defaultUnit").value;el("hudUnit").value=S.defaults.unit;syncHud();});

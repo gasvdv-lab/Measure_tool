@@ -1,10 +1,10 @@
-import {S,$} from "./state.js?v=0.8.35-20260830-volume-clearance-foundation";
-import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.35-20260830-volume-clearance-foundation";
-import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.35-20260830-volume-clearance-foundation";
-import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.35-20260830-volume-clearance-foundation";
-import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.35-20260830-volume-clearance-foundation";
-import {updateCadFrame,clearCadRuntime} from "./cad.js?v=0.8.35-20260830-volume-clearance-foundation";
-import {clearAiBuilderObjects} from "./ai-builder.js?v=0.8.35-20260830-volume-clearance-foundation";
+import {S,$} from "./state.js?v=0.8.36-20260830-clearance-collision-2";
+import {enforceLocked,updateLabels,updatePointLabels,updateMarkerScale,clearAllGeometry} from "./geometry.js?v=0.8.36-20260830-clearance-collision-2";
+import {updateCandidate,updatePreviewScreen,isCaptureAllowed,resetDrawingCore} from "./drawing-core.js?v=0.8.36-20260830-clearance-collision-2";
+import {clearWalls,syncWorldLockedWalls} from "./walls.js?v=0.8.36-20260830-clearance-collision-2";
+import {configureWorldLock,updateWorldLock,resetWorldLock} from "./world-lock.js?v=0.8.36-20260830-clearance-collision-2";
+import {updateCadFrame,clearCadRuntime} from "./cad.js?v=0.8.36-20260830-clearance-collision-2";
+import {clearAiBuilderObjects} from "./ai-builder.js?v=0.8.36-20260830-clearance-collision-2";
 
 let samples=[],sampleSource=null,camPos,camQuat,forward;
 const xrDiag={viewer:"pending",hitSource:"pending",hits:0,pose:false,target:false,error:""};

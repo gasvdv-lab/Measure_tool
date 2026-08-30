@@ -1,4 +1,4 @@
-import {S,$,fmt,fmtLine,pointName,getPoint,getLine,getContour,getShape,projectToWorld} from "./state.js?v=0.8.35-20260830-volume-clearance-foundation";
+import {S,$,fmt,fmtLine,pointName,getPoint,getLine,getContour,getShape,projectToWorld} from "./state.js?v=0.8.36-20260830-clearance-collision-2";
 
 export function renderPosition(p){return p?.worldPosition||p?.position||null;}
 

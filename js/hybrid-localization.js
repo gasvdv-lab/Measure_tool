@@ -1,4 +1,4 @@
-import {S} from "./state.js?v=0.8.35-20260830-volume-clearance-foundation";
+import {S} from "./state.js?v=0.8.36-20260830-clearance-collision-2";
 
 function nowIso(){return new Date().toISOString();}
 function normDeg(v){return ((v%360)+360)%360;}

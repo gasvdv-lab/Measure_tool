@@ -1,6 +1,6 @@
 
-import {S,getPoint,getLine} from "./state.js?v=0.8.35-20260830-volume-clearance-foundation";
-import {dispose,renderPosition} from "./geometry.js?v=0.8.35-20260830-volume-clearance-foundation";
+import {S,getPoint,getLine} from "./state.js?v=0.8.36-20260830-clearance-collision-2";
+import {dispose,renderPosition} from "./geometry.js?v=0.8.36-20260830-clearance-collision-2";
 
 function cleanName(name){return String(name||"").trim().replace(/\s+/g," ");}
 export function wallNameExists(name,excludeId=null){

@@ -1,4 +1,4 @@
-import {S,getPoint} from "./state.js?v=0.8.35-20260830-volume-clearance-foundation";
+import {S,getPoint} from "./state.js?v=0.8.36-20260830-clearance-collision-2";
 
 // Session-local WebXR anchor manager.
 // Project coordinates remain immutable in point.position/point.locked.

@@ -1,4 +1,4 @@
-import {S,projectToWorld,worldToProject} from "./state.js?v=0.8.35-20260830-volume-clearance-foundation";
+import {S,projectToWorld,worldToProject} from "./state.js?v=0.8.36-20260830-clearance-collision-2";
 
 const DB_NAME="measurear.cad.v1",STORE="files";
 let loaderPromise=null;

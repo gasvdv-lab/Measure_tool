@@ -1,9 +1,10 @@
-import {S,getPoint,getLine,getContour} from "./state.js?v=0.8.35-20260830-volume-clearance-foundation";
+import {S,getPoint,getLine,getContour} from "./state.js?v=0.8.36-20260830-clearance-collision-2";
 import {
   createPoint,createLine,createShape,clearAllGeometry,validateGeometryState
-} from "./geometry.js?v=0.8.35-20260830-volume-clearance-foundation";
-import {createWall,createOpening,clearWalls} from "./walls.js?v=0.8.35-20260830-volume-clearance-foundation";
-import {snapshotAiObjects,restoreAiBuilderObjects,clearAiBuilderObjects} from "./ai-builder.js?v=0.8.35-20260830-volume-clearance-foundation";
+} from "./geometry.js?v=0.8.36-20260830-clearance-collision-2";
+import {createWall,createOpening,clearWalls} from "./walls.js?v=0.8.36-20260830-clearance-collision-2";
+import {snapshotAiObjects,restoreAiBuilderObjects,clearAiBuilderObjects} from "./ai-builder.js?v=0.8.36-20260830-clearance-collision-2";
+import {snapshotClearances,restoreClearances,clearClearances} from "./clearance.js?v=0.8.36-20260830-clearance-collision-2";
 
 function vec(v){return v?{x:v.x,y:v.y,z:v.z}:null;}
 function vec3(v){return v?new S.THREE.Vector3(v.x,v.y,v.z):null;}
@@ -14,7 +15,7 @@ function cloneTx(tx){return tx?JSON.parse(JSON.stringify(tx)):tx;}
 export function snapshotProject(){
   return {
     pointCounter:S.pointCounter,contourCounter:S.contourCounter,
-    selected:{line:S.selectedLineId,contour:S.selectedContourId,point:S.selectedPointId,shape:S.selectedShapeId,wall:S.selectedWallId,opening:S.selectedOpeningId,aiObject:S.selectedAiObjectId},
+    selected:{line:S.selectedLineId,contour:S.selectedContourId,point:S.selectedPointId,shape:S.selectedShapeId,wall:S.selectedWallId,opening:S.selectedOpeningId,aiObject:S.selectedAiObjectId,clearance:S.selectedClearanceId},
     wallTool:{...S.wallTool},
     points:S.points.map(p=>({id:p.id,name:p.name,position:vec(p.position),surfaceNormal:vec(p.surfaceNormal)})),
     lines:S.lines.map(l=>({
@@ -34,6 +35,7 @@ export function snapshotProject(){
     })),
     openings:S.openings.map(o=>({id:o.id,name:o.name,wallId:o.wallId,type:o.type,x:o.x,bottom:o.bottom,width:o.width,height:o.height})),
     aiObjects:snapshotAiObjects(),
+    clearances:snapshotClearances(),
     tool:{
       kind:S.tool.kind,status:S.tool.status,activePointId:S.tool.activePointId,firstPointId:S.tool.firstPointId,
       pointIds:[...S.tool.pointIds],lineIds:[...S.tool.lineIds],transactions:S.tool.transactions.map(cloneTx),
@@ -71,7 +73,7 @@ export function restoreProject(snap){
   if(!snap)throw new Error("Historie-snapshot ontbreekt.");
   S.history.restoring=true;
   try{
-    clearAiBuilderObjects();clearWalls();clearAllGeometry();
+    clearAiBuilderObjects();clearClearances();clearWalls();clearAllGeometry();
 
     for(const p of snap.points){
       createPoint(vec3(p.position),{id:p.id,name:p.name,surfaceNormal:vec3(p.surfaceNormal)});
@@ -94,6 +96,7 @@ export function restoreProject(snap){
       createShape(c,{id:s.id,name:s.name,fill:s.fill,opacity:s.opacity,border:s.border,thickness:s.thickness,labels:s.labels,volumeEnabled:s.volumeEnabled,volumeHeightM:s.volumeHeightM});
     }
     restoreAiBuilderObjects(snap.aiObjects||[]);
+    restoreClearances(snap.clearances||[]);
     for(const w of snap.walls){
       const l=getLine(w.lineId);if(!l)throw new Error(`Historie: basislijn van muur ${w.name} ontbreekt.`);
       createWall(l,{...w,id:w.id});
@@ -111,6 +114,7 @@ export function restoreProject(snap){
     S.selectedWallId=S.walls.find(x=>x.id===snap.selected.wall)?.id||null;
     S.selectedOpeningId=S.openings.find(x=>x.id===snap.selected.opening)?.id||null;
     S.selectedAiObjectId=S.aiObjects.find(x=>x.id===snap.selected.aiObject)?.id||null;
+    S.selectedClearanceId=S.clearances.find(x=>x.id===snap.selected?.clearance)?.id||null;
 
     if(snap.wallTool)Object.assign(S.wallTool,snap.wallTool);
     const t=snap.tool;

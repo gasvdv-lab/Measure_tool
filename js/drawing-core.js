@@ -1,8 +1,8 @@
-import {S,$,fmt,getPoint,getLine,worldToProject} from "./state.js?v=0.8.35-20260830-volume-clearance-foundation";
-import {createPoint,createLine,ensureLineRendered,deleteLineRaw,deletePointRaw,createContour,dispose,analyzeShapePoints} from "./geometry.js?v=0.8.35-20260830-volume-clearance-foundation";
-import {snapshotProject,commitSnapshot,undoHistory} from "./history.js?v=0.8.35-20260830-volume-clearance-foundation";
-import {queuePointHitAnchor} from "./world-lock.js?v=0.8.35-20260830-volume-clearance-foundation";
-import {createWall,nextWallName} from "./walls.js?v=0.8.35-20260830-volume-clearance-foundation";
+import {S,$,fmt,getPoint,getLine,worldToProject} from "./state.js?v=0.8.36-20260830-clearance-collision-2";
+import {createPoint,createLine,ensureLineRendered,deleteLineRaw,deletePointRaw,createContour,dispose,analyzeShapePoints} from "./geometry.js?v=0.8.36-20260830-clearance-collision-2";
+import {snapshotProject,commitSnapshot,undoHistory} from "./history.js?v=0.8.36-20260830-clearance-collision-2";
+import {queuePointHitAnchor} from "./world-lock.js?v=0.8.36-20260830-clearance-collision-2";
+import {createWall,nextWallName} from "./walls.js?v=0.8.36-20260830-clearance-collision-2";
 
 const REF_MODES=new Set(["parallel","perpendicular","angle"]);
 const TOOL_NAMES={line:"LIJN",polyline:"POLYLIJN",shape:"VORM",stake:"UITZETTEN",wall:"MUUR"};

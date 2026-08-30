@@ -1,11 +1,12 @@
-import {S} from "./state.js?v=0.8.35-20260830-volume-clearance-foundation";
-import {snapshotProject,restoreProject,clearHistory} from "./history.js?v=0.8.35-20260830-volume-clearance-foundation";
-import {clearAllGeometry,validateGeometryState} from "./geometry.js?v=0.8.35-20260830-volume-clearance-foundation";
-import {clearWalls} from "./walls.js?v=0.8.35-20260830-volume-clearance-foundation";
-import {resetDrawingCore} from "./drawing-core.js?v=0.8.35-20260830-volume-clearance-foundation";
-import {detachAllPointAnchors} from "./world-lock.js?v=0.8.35-20260830-volume-clearance-foundation";
-import {clearCadRuntime,restoreCadRuntime} from "./cad.js?v=0.8.35-20260830-volume-clearance-foundation";
-import {clearAiBuilderObjects} from "./ai-builder.js?v=0.8.35-20260830-volume-clearance-foundation";
+import {S} from "./state.js?v=0.8.36-20260830-clearance-collision-2";
+import {snapshotProject,restoreProject,clearHistory} from "./history.js?v=0.8.36-20260830-clearance-collision-2";
+import {clearAllGeometry,validateGeometryState} from "./geometry.js?v=0.8.36-20260830-clearance-collision-2";
+import {clearWalls} from "./walls.js?v=0.8.36-20260830-clearance-collision-2";
+import {resetDrawingCore} from "./drawing-core.js?v=0.8.36-20260830-clearance-collision-2";
+import {detachAllPointAnchors} from "./world-lock.js?v=0.8.36-20260830-clearance-collision-2";
+import {clearCadRuntime,restoreCadRuntime} from "./cad.js?v=0.8.36-20260830-clearance-collision-2";
+import {clearAiBuilderObjects} from "./ai-builder.js?v=0.8.36-20260830-clearance-collision-2";
+import {clearClearances} from "./clearance.js?v=0.8.36-20260830-clearance-collision-2";
 
 export const PROJECT_SCHEMA_VERSION=1;
 const INDEX_KEY="measurear.projects.v1.index";
@@ -232,7 +233,7 @@ export function loadEnvelope(e,source="import"){
 export function newProject(name="Nieuw project"){
   lifecycleBusy=true;
   try{
-    detachAllPointAnchors();clearCadRuntime();clearAiBuilderObjects();S.referenceCaptureId=null;
+    detachAllPointAnchors();clearCadRuntime();clearAiBuilderObjects();clearClearances();S.referenceCaptureId=null;
     clearWalls();clearAllGeometry();resetDrawingCore();clearHistory();
     const ts=nowIso();Object.assign(S.project,{schemaVersion:1,id:newId(),name:cleanName(name)||"Nieuw project",createdAt:ts,updatedAt:ts,lastSavedAt:null,dirty:true,recoveryAvailable:false,loadedFrom:"new",geo:null,hybrid:{savedHeading:null,currentHeading:null,lastAssessment:null,headingSource:null},spatial:{projectOrigin:{x:0,y:0,z:0},savedWorldPose:null,savedAt:null,sessionTransform:null},cad:{models:[]},relocalization:{references:[],active:false,captured:[],lastResult:null,mode:"auto"}});
     writeRecovery();document.dispatchEvent(new CustomEvent("measurear:project-loaded"));document.dispatchEvent(new CustomEvent("measurear:project-meta-changed"));return S.project;
