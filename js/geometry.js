@@ -1,4 +1,4 @@
-import {S,$,fmt,fmtLine,pointName,getPoint,getLine,getContour,getShape,projectToWorld} from "./state.js?v=0.8.36.2-20260830-direction-angle-repair";
+import {S,$,fmt,fmtLine,pointName,getPoint,getLine,getContour,getShape,projectToWorld} from "./state.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
 
 export function renderPosition(p){return p?.worldPosition||p?.position||null;}
 

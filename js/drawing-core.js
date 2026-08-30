@@ -1,8 +1,8 @@
-import {S,$,fmt,getPoint,getLine,worldToProject} from "./state.js?v=0.8.36.2-20260830-direction-angle-repair";
-import {createPoint,createLine,ensureLineRendered,deleteLineRaw,deletePointRaw,createContour,dispose,analyzeShapePoints} from "./geometry.js?v=0.8.36.2-20260830-direction-angle-repair";
-import {snapshotProject,commitSnapshot,undoHistory} from "./history.js?v=0.8.36.2-20260830-direction-angle-repair";
-import {queuePointHitAnchor} from "./world-lock.js?v=0.8.36.2-20260830-direction-angle-repair";
-import {createWall,nextWallName} from "./walls.js?v=0.8.36.2-20260830-direction-angle-repair";
+import {S,$,fmt,getPoint,getLine,worldToProject} from "./state.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
+import {createPoint,createLine,ensureLineRendered,deleteLineRaw,deletePointRaw,createContour,dispose,analyzeShapePoints} from "./geometry.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
+import {snapshotProject,commitSnapshot,undoHistory} from "./history.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
+import {queuePointHitAnchor} from "./world-lock.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
+import {createWall,nextWallName} from "./walls.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
 
 const REF_MODES=new Set(["parallel","perpendicular","angle"]);
 const TOOL_NAMES={line:"LIJN",polyline:"POLYLIJN",shape:"VORM",stake:"UITZETTEN",wall:"MUUR"};
@@ -82,6 +82,53 @@ function requireReference(plane){
   if(!dir)throw new Error("Referentielijn ligt niet bruikbaar in het actieve tekenvlak.");
   return dir;
 }
+function referenceLineAndPoints(){
+  const line=getLine(S.tool.referenceLineId);
+  if(!line)throw new Error("Kies eerst een referentielijn.");
+  const a=getPoint(line.startId),b=getPoint(line.endId);
+  if(!a||!b)throw new Error("Referentielijn is geometrisch onvolledig.");
+  return {line,a,b};
+}
+function perpendicularDirection(){
+  const {a,b}=referenceLineAndPoints();
+  const T=S.THREE,ref=b.position.clone().sub(a.position);
+  if(ref.lengthSq()<1e-10)throw new Error("Referentielijn is te kort.");
+  ref.normalize();
+  if(S.tool.perpendicularMode==="vertical"){
+    // Exact 90° op de volledige 3D-referentielijn, met de richting zo verticaal mogelijk.
+    const up=new T.Vector3(0,1,0);
+    const dir=up.clone().sub(ref.clone().multiplyScalar(up.dot(ref)));
+    if(dir.lengthSq()<1e-8)throw new Error("Deze referentielijn is (bijna) verticaal; een unieke verticale loodrechte richting bestaat hier niet.");
+    dir.normalize();
+    if(dir.y<0)dir.multiplyScalar(-1);
+    return dir.multiplyScalar(S.tool.side>=0?1:-1);
+  }
+  // Horizontaal loodrecht: exact 90° op de horizontale projectie van de referentielijn.
+  const h=new T.Vector3(ref.x,0,ref.z);
+  if(h.lengthSq()<1e-8)throw new Error("Referentielijn is (bijna) verticaal; horizontaal loodrecht kan niet uit deze lijn worden afgeleid.");
+  h.normalize();
+  return new T.Vector3(-h.z,0,h.x).normalize().multiplyScalar(S.tool.side>=0?1:-1);
+}
+function closestPointOnAxis(ray,origin,axis){
+  if(!ray||!origin||!axis)return null;
+  const v=axis.clone().normalize(),w0=ray.origin.clone().sub(origin);
+  const a=ray.dir.dot(ray.dir),b=ray.dir.dot(v),c=1,d=ray.dir.dot(w0),e=v.dot(w0);
+  const den=a*c-b*b;if(Math.abs(den)<1e-8)return null;
+  const t=(b*e-c*d)/den,s=(a*e-b*d)/den;
+  if(t<=0)return null;
+  return origin.clone().add(v.multiplyScalar(s));
+}
+function referenceStartCandidate(hit){
+  if(!hit)return null;
+  const {line,a,b}=referenceLineAndPoints();
+  const q=closestPointOnSegment(hit,a.position,b.position);
+  const distance=q.distanceTo(hit);
+  if(distance>.40)throw new Error("Richt het vizier dichter bij de gekozen referentielijn om het startpunt te bepalen.");
+  const endpointTolerance=S.tool.snapTolerance||.08;
+  if(q.distanceTo(a.position)<=endpointTolerance)return {position:a.position.clone(),snappedPointId:a.id,snappedLineId:line.id,snapType:"point",snapLabel:`Punt ${a.name}`};
+  if(q.distanceTo(b.position)<=endpointTolerance)return {position:b.position.clone(),snappedPointId:b.id,snappedLineId:line.id,snapType:"point",snapLabel:`Punt ${b.name}`};
+  return {position:q,snappedPointId:null,snappedLineId:line.id,snapType:"line",snapLabel:`Op ${line.name}`};
+}
 function directionForExact(ray,hit=null){
   const active=getActivePoint();if(!active)throw new Error("Geen actief vertrekpunt.");
   const kind=S.tool.constraint;
@@ -124,8 +171,7 @@ function directionForExact(ray,hit=null){
   }else if(kind==="parallel"){
     dir=requireReference(activePlane).multiplyScalar(S.tool.side);
   }else if(kind==="perpendicular"){
-    const ref=requireReference(activePlane);
-    dir=activePlane.normal.clone().cross(ref).normalize().multiplyScalar(S.tool.side);
+    dir=perpendicularDirection();
   }else if(kind==="angle"){
     const ref=requireReference(activePlane);
     dir=rotateInPlane(ref,activePlane,S.tool.angleDeg*S.tool.side);
@@ -160,13 +206,15 @@ function manualCandidate(active,hit,ray){
   if(kind==="surface"){
     return intersectRayPlane(ray,activePlane);
   }
+  if(kind==="perpendicular"){
+    const dir=perpendicularDirection();
+    return closestPointOnAxis(ray,active.position,dir);
+  }
   let raw=intersectRayPlane(ray,activePlane)||hit?.clone?.();
   if(!raw)return null;
   let dir;
   if(kind==="parallel")dir=requireReference(activePlane).multiplyScalar(S.tool.side);
-  else if(kind==="perpendicular"){
-    const ref=requireReference(activePlane);dir=activePlane.normal.clone().cross(ref).normalize().multiplyScalar(S.tool.side);
-  }else if(kind==="angle"){
+  else if(kind==="angle"){
     const ref=requireReference(activePlane);dir=rotateInPlane(ref,activePlane,S.tool.angleDeg*S.tool.side);
   }
   const delta=raw.clone().sub(active.position);
@@ -193,10 +241,7 @@ function constraintExpectedDirection(active,rawPos){
     return d.lengthSq()>1e-10?d.normalize():null;
   }
   if(kind==="parallel")return requireReference(plane).multiplyScalar(S.tool.side).normalize();
-  if(kind==="perpendicular"){
-    const ref=requireReference(plane);
-    return plane.normal.clone().cross(ref).normalize().multiplyScalar(S.tool.side);
-  }
+  if(kind==="perpendicular")return perpendicularDirection().normalize();
   if(kind==="angle"){
     const ref=requireReference(plane);
     return rotateInPlane(ref,plane,S.tool.angleDeg*S.tool.side).normalize();
@@ -367,7 +412,7 @@ function hidePreview(){
 function resetSession(keepSettings=true){
   S.tool.status="idle";S.tool.activePointId=null;S.tool.firstPointId=null;S.tool.pointIds=[];S.tool.lineIds=[];S.tool.transactions=[];S.tool.activePlane=null;S.tool.candidate=null;
   if(!keepSettings){
-    S.tool.placement="manual";S.tool.distanceM=1;S.tool.constraint="free";S.tool.referenceLineId=null;S.tool.angleDeg=45;S.tool.side=1;
+    S.tool.placement="manual";S.tool.distanceM=1;S.tool.constraint="free";S.tool.referenceLineId=null;S.tool.angleDeg=45;S.tool.side=1;S.tool.perpendicularMode="horizontal";
   }
   hidePreview();
 }
@@ -409,6 +454,10 @@ export function setAxisDirection(direction){
   S.tool.axisDirection=valid.has(direction)?direction:null;
   document.dispatchEvent(new CustomEvent("measurear:tool-settings"));
 }
+export function setPerpendicularMode(mode){
+  S.tool.perpendicularMode=mode==="vertical"?"vertical":"horizontal";
+  document.dispatchEvent(new CustomEvent("measurear:tool-settings"));
+}
 export function setAngle(deg){const n=Number(deg);if(!Number.isFinite(n))throw new Error("Ongeldige hoek.");S.tool.angleDeg=n;document.dispatchEvent(new CustomEvent("measurear:tool-settings"));}
 export function flipSide(){S.tool.side*=-1;document.dispatchEvent(new CustomEvent("measurear:tool-settings"));}
 export function setReferenceLine(id){S.tool.referenceLineId=id||null;document.dispatchEvent(new CustomEvent("measurear:tool-settings"));}
@@ -424,6 +473,14 @@ export function updateCandidate({hit=null,hitNormal=null,ray=null}={}){
     let pos=null,planeNormal=hitNormal?.clone?.()||null;
     if(!active){
       if(!hit)throw new Error("Zoek eerst een herkenbaar oppervlak voor punt A.");
+      if(S.tool.constraint==="perpendicular"&&S.tool.referenceLineId){
+        const start=referenceStartCandidate(hit);
+        pos=start.position;
+        S.tool.candidate={valid:true,position:start.position,snappedPointId:start.snappedPointId,snappedLineId:start.snappedLineId,snapType:start.snapType,snapLabel:start.snapLabel,surfaceNormal:hitNormal?.clone?.()||S.tool.hoverSurfaceNormal||null,reason:""};
+        updatePreviewVisual();
+        document.dispatchEvent(new CustomEvent("measurear:candidate-changed"));
+        return;
+      }
       pos=hit.clone();
     }else if(S.tool.placement==="metric"){
       const dir=directionForExact(ray,hit);pos=active.position.clone().add(dir.multiplyScalar(S.tool.distanceM));

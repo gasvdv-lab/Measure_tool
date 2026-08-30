@@ -1,8 +1,8 @@
-import {S,getPoint} from "./state.js?v=0.8.36.2-20260830-direction-angle-repair";
-import {snapshotProject,restoreProject} from "./history.js?v=0.8.36.2-20260830-direction-angle-repair";
-import {validateGeometryState,syncWorldLockedGeometry} from "./geometry.js?v=0.8.36.2-20260830-direction-angle-repair";
-import {syncWorldLockedWalls} from "./walls.js?v=0.8.36.2-20260830-direction-angle-repair";
-import {detachAllPointAnchors,queuePointAnchor} from "./world-lock.js?v=0.8.36.2-20260830-direction-angle-repair";
+import {S,getPoint} from "./state.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
+import {snapshotProject,restoreProject} from "./history.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
+import {validateGeometryState,syncWorldLockedGeometry} from "./geometry.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
+import {syncWorldLockedWalls} from "./walls.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
+import {detachAllPointAnchors,queuePointAnchor} from "./world-lock.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
 
 const EPS=1e-9;
 function v3(x=0,y=0,z=0){return new S.THREE.Vector3(x,y,z);}

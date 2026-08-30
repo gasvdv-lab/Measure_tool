@@ -1,4 +1,4 @@
-import {S,projectToWorld,worldToProject} from "./state.js?v=0.8.36.2-20260830-direction-angle-repair";
+import {S,projectToWorld,worldToProject} from "./state.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
 
 const DB_NAME="measurear.cad.v1",STORE="files";
 let loaderPromise=null;

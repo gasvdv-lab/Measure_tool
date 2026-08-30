@@ -1,33 +1,33 @@
-import {S,$,fmt,fmtLine,fmtAreaUnit,fmtVolumeUnit,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.36.2-20260830-direction-angle-repair";
+import {S,$,fmt,fmtLine,fmtAreaUnit,fmtVolumeUnit,getPoint,getLine,getContour,getShape} from "./state.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
 import {
-  startTool,cancelTool,setPlacement,setDistance,setConstraint,setAxisDirection,setAngle,flipSide,setReferenceLine,setSnapMode,
+  startTool,cancelTool,setPlacement,setDistance,setConstraint,setAxisDirection,setPerpendicularMode,setAngle,flipSide,setReferenceLine,setSnapMode,
   confirmCandidate,undoToolStep,finishTool,toolLabel,constraintLabel,getActivePoint,referenceRequired,resetDrawingCore
-} from "./drawing-core.js?v=0.8.36.2-20260830-direction-angle-repair";
+} from "./drawing-core.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
 import {
   createShape,updateShape,deleteShapeOnly,deleteShapeWithContour,deleteLineRaw,deletePointRaw,renamePoint,updateLine,analyzeContour,analyzePolyline,updatePolyline,
   lineDependencies,pointDependencies,canDeleteLine,canDeletePoint,clearAllGeometry,validateGeometryState,dispose
-} from "./geometry.js?v=0.8.36.2-20260830-direction-angle-repair";
-import {startAR,resumeARFromGesture,suspendARForCadImport,applyZoom,resetTrackingSamples} from "./ar.js?v=0.8.36.2-20260830-direction-angle-repair";
-import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.36.2-20260830-direction-angle-repair";
-import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.36.2-20260830-direction-angle-repair";
+} from "./geometry.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
+import {startAR,resumeARFromGesture,suspendARForCadImport,applyZoom,resetTrackingSamples} from "./ar.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
+import {createWall,updateWall,deleteWall,toggleWall,wallsUsingLine,clearWalls,createOpening,updateOpening,deleteOpening,getOpening,openingsForWall,nextOpeningName} from "./walls.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
+import {runHistoryAction,undoHistory,redoHistory,historyStatus,clearHistory} from "./history.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
 import {
   initProjectStorage,saveCurrentProject,listProjects,loadStoredProject,newProject,duplicateStoredProject,
   deleteStoredProject,renameStoredProject,projectStats,formatStats,getStoredProjectInfo,hasRecovery,recoveryInfo,restoreRecovery,clearRecovery,
   exportCurrentProject,importProjectFile,markDirtyAndRecover
-} from "./project-storage.js?v=0.8.36.2-20260830-direction-angle-repair";
+} from "./project-storage.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
 import {
   captureCurrentGeo,addProjectReference,removeProjectReference,clearProjectReferences,beginRelocalization,cancelRelocalization,
   captureRelocalizationPoint,solveRelocalization,applyRelocalization,relocalizationSummary,beginSpatialRestore
-} from "./relocalization.js?v=0.8.36.2-20260830-direction-angle-repair";
+} from "./relocalization.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
 
-import {captureHybridBaseline,assessHybridLocation,enableHeading} from "./hybrid-localization.js?v=0.8.36.2-20260830-direction-angle-repair";
+import {captureHybridBaseline,assessHybridLocation,enableHeading} from "./hybrid-localization.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
 
-import {detachAllPointAnchors} from "./world-lock.js?v=0.8.36.2-20260830-direction-angle-repair";
-import {importCadFile,listCadModels,cadStatus,selectCad,beginCadPlacement,rotateCad,moveCadHeight,confirmCadPlacement,cancelCadPlacement,deleteCadModel,clearCadRuntime,restoreCadRuntime} from "./cad.js?v=0.8.36.2-20260830-direction-angle-repair";
-import {initProfessionalColorPickers,refreshProfessionalColorPickers} from "./color-picker.js?v=0.8.36.2-20260830-direction-angle-repair";
-import {initThemeSelector} from "./theme-selector.js?v=0.8.36.2-20260830-direction-angle-repair";
-import {executeAiPrototype,getAiObject,getAiObjectForShape,toggleAiObjectLock,deleteAiObject,clearAiBuilderObjects,aiObjectSummary} from "./ai-builder.js?v=0.8.36.2-20260830-direction-angle-repair";
-import {listClearanceTargets,analyzeClearance,clearanceStatus,getClearance,createClearance,updateClearance,deleteClearance,clearClearances} from "./clearance.js?v=0.8.36.2-20260830-direction-angle-repair";
+import {detachAllPointAnchors} from "./world-lock.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
+import {importCadFile,listCadModels,cadStatus,selectCad,beginCadPlacement,rotateCad,moveCadHeight,confirmCadPlacement,cancelCadPlacement,deleteCadModel,clearCadRuntime,restoreCadRuntime} from "./cad.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
+import {initProfessionalColorPickers,refreshProfessionalColorPickers} from "./color-picker.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
+import {initThemeSelector} from "./theme-selector.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
+import {executeAiPrototype,getAiObject,getAiObjectForShape,toggleAiObjectLock,deleteAiObject,clearAiBuilderObjects,aiObjectSummary} from "./ai-builder.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
+import {listClearanceTargets,analyzeClearance,clearanceStatus,getClearance,createClearance,updateClearance,deleteClearance,clearClearances} from "./clearance.js?v=0.8.36.2.1-20260830-angle-ux-3d-perpendicular";
 
 
 const pages=["home","project","references","relocalize","projects","cad","objects","measurements","clearance","polyline","line","point","walltool","wallcreate","wall","openingcreate","opening","shapecreate","shape","aibuilder","settings","clear"];
@@ -126,6 +126,8 @@ function syncHudStatus(){
   document.querySelectorAll("[data-axis-direction]").forEach(b=>b.classList.toggle("active",b.dataset.axisDirection===S.tool.axisDirection));
   el("hudSideChip").classList.toggle("optional",!sideRelevant);
   if(S.tool.constraint==="vertical")el("hudSideChip").textContent=`Richting: ${S.tool.side>0?"omhoog":"omlaag"}`;
+  else if(S.tool.constraint==="perpendicular"&&S.tool.perpendicularMode==="vertical")el("hudSideChip").textContent=`Richting: ${S.tool.side>0?"omhoog":"omlaag"}`;
+  else if(S.tool.constraint==="perpendicular")el("hudSideChip").textContent=`Zijde: ${S.tool.side>0?"links":"rechts"}`;
   else if(S.tool.constraint==="parallel")el("hudSideChip").textContent=`Richting: ${S.tool.side>0?"voor":"tegen"}`;
   else el("hudSideChip").textContent=`Zijde: ${S.tool.side>0?"links":"rechts"}`;
 
@@ -152,6 +154,9 @@ function syncHud(){
   el("distanceHudBtn").textContent=unitDistanceText();
   document.querySelectorAll("[data-hud-direction]").forEach(b=>b.classList.toggle("active",b.dataset.hudDirection===S.tool.constraint));
   const refNeeded=referenceRequired();el("hudReferenceWrap").style.display=refNeeded?"block":"none";el("hudAngleWrap").style.display=S.tool.constraint==="angle"?"grid":"none";
+  if(el("hudPerpWrap"))el("hudPerpWrap").style.display=S.tool.constraint==="perpendicular"?"block":"none";
+  if(el("hudConstraintDoneWrap"))el("hudConstraintDoneWrap").style.display=["perpendicular","angle"].includes(S.tool.constraint)?"block":"none";
+  document.querySelectorAll("[data-perpendicular-mode]").forEach(b=>b.classList.toggle("active",b.dataset.perpendicularMode===S.tool.perpendicularMode));
   el("hudAngle").value=String(S.tool.angleDeg);populateReference();
   if(refNeeded&&S.tool.referenceLineId)el("hudReference").value=S.tool.referenceLineId;
   syncCandidateContext();
@@ -590,6 +595,15 @@ export function initUI(){
     if(!referenceRequired() && S.tool.constraint!=="angle") closePopovers();
   }));
   document.querySelectorAll("[data-axis-direction]").forEach(b=>b.addEventListener("click",()=>{setAxisDirection(b.dataset.axisDirection);syncHud();showStatus(`Asrichting ${b.textContent.trim()} vergrendeld.`);}));
+  document.querySelectorAll("[data-perpendicular-mode]").forEach(b=>b.addEventListener("click",()=>{
+    setPerpendicularMode(b.dataset.perpendicularMode);syncHud();
+    showStatus(S.tool.perpendicularMode==="vertical"?"Loodrecht 90° · verticaal actief. Kies omhoog/omlaag.":"Loodrecht 90° · horizontaal actief. Kies links/rechts.");
+  }));
+  bind("hudConstraintDoneBtn","click",()=>{
+    if(referenceRequired()&&!S.tool.referenceLineId)throw new Error("Kies eerst een referentielijn.");
+    closePopovers();syncHud();
+    showStatus(S.tool.constraint==="perpendicular"?"Richt nabij de referentielijn om het vertrekpunt te kiezen, of teken verder vanaf het actieve punt.":`Eigen hoek ${S.tool.angleDeg}° actief. Richt en bevestig het volgende punt.`);
+  });
   bind("hudReference","change",()=>{
     setReferenceLine(el("hudReference").value||null);
     syncHud();
@@ -597,7 +611,7 @@ export function initUI(){
   });
   bind("hudAngle","input",()=>{setAngle(el("hudAngle").value);syncHud();});
   bind("hudSideBtn","click",()=>{flipSide();showStatus(`Zijde omgekeerd (${S.tool.side>0?"links/positief":"rechts/negatief"}).`);syncHud();});
-  bind("hudSideChip","click",()=>{flipSide();syncHud();showStatus(S.tool.constraint==="vertical"?`Verticale richting: ${S.tool.side>0?"omhoog":"omlaag"}.`:S.tool.constraint==="parallel"?`Parallelrichting ${S.tool.side>0?"voor":"tegen"} referentie.`:`Zijde ${S.tool.side>0?"links":"rechts"}.`);});
+  bind("hudSideChip","click",()=>{flipSide();syncHud();showStatus((S.tool.constraint==="vertical"||(S.tool.constraint==="perpendicular"&&S.tool.perpendicularMode==="vertical"))?`Verticale richting: ${S.tool.side>0?"omhoog":"omlaag"}.`:S.tool.constraint==="parallel"?`Parallelrichting ${S.tool.side>0?"voor":"tegen"} referentie.`:`Zijde ${S.tool.side>0?"links":"rechts"}.`);});
   bind("hudLastReferenceBtn","click",()=>{
     const l=S.lines.at(-1);if(!l)throw new Error("Er bestaat nog geen lijn om als referentie te gebruiken.");
     setReferenceLine(l.id);syncHud();
