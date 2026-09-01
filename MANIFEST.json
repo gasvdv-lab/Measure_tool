@@ -1,0 +1,23 @@
+{
+  "release": "v0.0.1",
+  "phase": "Fase 0 \u2014 Constitution & Research Specification",
+  "validation": "AURA Phase 0 validation: PASS\nValidated 15 required documents and 11 core rules.",
+  "files_sha256": {
+    "AURA_CONSTITUTION.md": "722b0e561ddb242e46dd1be0fa919055a55dfbd034ab284f8a3f7745ee6dd2dd",
+    "EXPERIMENTS.md": "b600d2be8172bf8e3f6d337f33f1931227387d71751a19a4a8880576c3cf1184",
+    "MODULES.md": "13373b8bce878832f5f5be431a12a52cb7e811967c48e3494372910177bfa4fa",
+    "README.md": "5f49148083034bd3ed98708ccd3ddc16f5e1fa9021171967a8b0ccf0668a6000",
+    "ROADMAP.md": "fa11092c7082cd6816bfee3a0b8b9346983d14a5b059187e12f330b2eec4c39f",
+    "TESTING.md": "cb207cd4d02276ca367e0d4b2b6fa1e2cb3dab862426eff699f98a7e0dbfb6a3",
+    "docs/BIOSTRUCTURE.md": "c17cc3977e6c4544e850f2e15e00f5bff2dd84a6a62c7ac1f5ca7be3f6110e1a",
+    "docs/COGNITION.md": "f8d67538b4323ac18f66f5a6c56df69f260d0285c3a84b71373904625e78a633",
+    "docs/GENESIS.md": "ea94519ec8d495e6121665b4659a61cfb4047833066500e756c864b308c5f17a",
+    "docs/INTERNET_BOUNDARY.md": "a8274e297d227c9c7c0802f1ca94e94901d71549a6beae4548207c33fbd5314f",
+    "docs/OBSERVATORY.md": "cacbacb7432ddbd8fc9286b9b65975e750ec7ae230e1f15e8d94b06d10d02dca",
+    "docs/REALITIES.md": "db3090eb83b5020803100a9d942691b0efa8f77fdc209283f8caed8a2a53c9f5",
+    "docs/RESEARCH_QUESTIONS.md": "ea6653d7a27c3b90d1fc19d0abc47702311dee68d563f072f21a737028be3d33",
+    "docs/SAFETY_BOUNDARY.md": "d35a384b473441999c7c45979860a321728b3d3b6156a86cbff803f7e94a385d",
+    "docs/WORLD_LAWS.md": "a7cec832115cf8e94c9b6490bd86baf1f47722700071bb510ad62a1416c2354d",
+    "scripts/validate_phase0.py": "54fc52e72bc2a0c9c4d368e7033340d5b25712d188522c989de2b628dc051336"
+  }
+}
